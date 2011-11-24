@@ -20,18 +20,14 @@ public class Main {
     NetworkStatusReader nsr = new NetworkStatusReader();
     Set<NetworkStatusData> loadedConsensuses = nsr.loadConsensuses();
 
-    /* TODO Downloading is not implemented yet.
     printStatus("Downloading current network status consensus from "
         + "directory authorities.");
     NetworkStatusDownloader nsd = new NetworkStatusDownloader();
     NetworkStatusData downloadedConsensus = nsd.downloadConsensus();
-    */
 
     printStatus("Updating search data.");
     sd.updateAll(loadedConsensuses);
-    /* TODO Downloading is not implemented yet.
     sd.update(downloadedConsensus);
-    */
 
     printStatus("(Over-)writing search data file on disk.");
     sedw.writeRelaySearchDataFile(sd);
