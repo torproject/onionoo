@@ -26,10 +26,10 @@ for the mobile applications.
 Onionoo is designed to be easily extensible to other mobile and non-mobile
 platforms.  Possible non-mobile platforms include: command-line interfaces
 (e.g., arm) that can be extended to display bridge status information;
-desktop tray applications that allow monitoring a remote relay without
-requiring opening a control port; plugins in social networking platforms
-that may encourage friends to run relays or bridges.  These extensions are
-out of scope for the initial Onionoo version.
+desktop tray applications or widget that allow monitoring a remote relay
+without requiring opening a control port; plugins in social networking
+platforms that may encourage friends to run relays or bridges.  These
+extensions are out of scope for the initial Onionoo version.
 
 This document describes the initial scope of a mobile application for iOS
 and Android and the required Java-based server application.
