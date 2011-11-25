@@ -11,7 +11,8 @@ public class SearchDataWriter {
 
   private File internalRelaySearchDataFile =
       new File("relay-search-data.csv");
-  private File relaySearchDataFile = new File("relay-search-data.json");
+  private File relaySearchDataFile = new File(
+      "www/status/relay-search-data.json");
   private File relaySearchDataBackupFile =
       new File("relay-search-data.json.bak");
 
@@ -156,6 +157,7 @@ public class SearchDataWriter {
           sd.getValidAfterMillis());
       String freshUntilString = dateTimeFormat.format(
           sd.getFreshUntilMillis());
+      this.relaySearchDataFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.relaySearchDataFile));
       bw.write("{\"version\":1,\n"
