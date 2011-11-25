@@ -9,16 +9,13 @@ import java.util.*;
 /* Read and write the relay search data file from/to disk. */
 public class SearchDataWriter {
 
+  private File internalRelaySearchDataFile =
+      new File("relay-search-data.csv");
   private File relaySearchDataFile = new File("relay-search-data.json");
   private File relaySearchDataBackupFile =
       new File("relay-search-data.json.bak");
 
-  /* Read the relay search data file from disk. */
-  /* TODO Reading and updating the search data file has a fundamental
-   * flaw: there's no way to detect when a relay hasn't been running for
-   * more than a week.  We need some way to store last valid-after times
-   * of relays in a separate file or database.  This is fine for testing,
-   * but not for production. */
+  /* Read the internal relay search data file from disk. */
   public SearchData readRelaySearchDataFile() {
     SearchData result = new SearchData();
     if (this.relaySearchDataBackupFile.exists()) {
@@ -29,70 +26,48 @@ public class SearchDataWriter {
           + "and try again.  Exiting.");
       System.exit(1);
     }
-    if (this.relaySearchDataFile.exists() &&
-        !this.relaySearchDataFile.isDirectory()) {
+    if (this.internalRelaySearchDataFile.exists() &&
+        !this.internalRelaySearchDataFile.isDirectory()) {
       try {
         BufferedReader br = new BufferedReader(new FileReader(
-            this.relaySearchDataFile));
-        BufferedWriter bw = new BufferedWriter(new FileWriter(
-            this.relaySearchDataBackupFile));
+            this.internalRelaySearchDataFile));
         String line;
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        long validAfterMillis = -1L;
         while ((line = br.readLine()) != null) {
-          bw.write(line + "\n");
-          if (line.startsWith("\"valid_after\":\"")) {
-            String validAfterString = line.substring(
-                "\"valid_after\":\"".length()).substring(0,
-                "yyyy-MM-dd HH:mm:ss".length());
-            validAfterMillis = dateTimeFormat.parse(validAfterString).
-                getTime();
-            result.addValidAfterMillis(validAfterMillis);
-          } else if (line.startsWith("{\"n\"")) {
-            if (validAfterMillis < 0L) {
-              System.err.println(
-                  this.relaySearchDataFile.getAbsolutePath() + " does "
-                  + "not contain a valid_after timestamp.  Exiting.");
+          if (line.startsWith("version") && !line.equals("version 1")) {
+            System.err.println("Internal relay search data file is newer "
+                + "than version 1.  We don't understand that.  Exiting.");
+            System.exit(1);
+          } else if (line.startsWith("r ")) {
+            String[] parts = line.split(" ");
+            if (parts.length < 5) {
+              System.err.println("Line '" + line + "' in '"
+                  + this.internalRelaySearchDataFile.getAbsolutePath()
+                  + " is invalid.  Exiting.");
               System.exit(1);
             }
-            String nickname = "Unnamed", fingerprint = null,
-                address = null;
-            long lastSeen = validAfterMillis;
-            for (String part : line.replaceAll("\\{", "").
-                replaceAll("\\}", "").replaceAll("\\[", "").
-                replaceAll("\\]", "").replaceAll("\"", "").split(",")) {
-              if (part.length() < 1) {
-                continue;
-              }
-              String key = part.substring(0, part.indexOf(":"));
-              String value = part.substring(part.indexOf(":") + 1);
-              if (key.equals("n")) {
-                nickname = value;
-              } else if (key.equals("f")) {
-                fingerprint = value;
-              } else if (key.equals("a")) {
-                address = value;
-              } else if (key.equals("r")) {
-                if (!value.equals("1")) {
-                  lastSeen -= 60L * 60L * 1000L; /* TODO Hack! */
-                }
-              }
-            }
-            result.addRelay(nickname, fingerprint, address, lastSeen);
+            String nickname = parts[1];
+            String fingerprint = parts[2];
+            String address = parts[3];
+            long validAfterMillis = dateTimeFormat.parse(parts[4] + " "
+               + parts[5]).getTime();
+            result.addRelay(nickname, fingerprint, address,
+                validAfterMillis);
           }
         }
         br.close();
-        bw.close();
       } catch (IOException e) {
         System.err.println("Could not read "
-            + this.relaySearchDataFile.getAbsolutePath() + ".  Exiting.");
+            + this.internalRelaySearchDataFile.getAbsolutePath()
+            + ".  Exiting.");
         e.printStackTrace();
         System.exit(1);
       } catch (ParseException e) {
         System.err.println("Could not read "
-            + this.relaySearchDataFile.getAbsolutePath() + ".  Exiting.");
+            + this.internalRelaySearchDataFile.getAbsolutePath()
+            + ".  Exiting.");
         e.printStackTrace();
         System.exit(1);
       }
@@ -102,6 +77,8 @@ public class SearchDataWriter {
 
   /* Write the relay search data file to disk. */
   public void writeRelaySearchDataFile(SearchData sd) {
+
+    /* Check valid-after times of known network status consensuses. */
     SortedSet<Long> allValidAfterMillis = sd.getAllValidAfterMillis();
     switch (allValidAfterMillis.size()) {
       case 0:
@@ -120,6 +97,57 @@ public class SearchDataWriter {
     /* TODO Check valid-after times and warn if we're missing one or more
      * network status consensuses.  The user should know, so that she can
      * download and import missing network status consensuses. */
+
+    /* Write internal relay search data file to disk. */
+    try {
+      BufferedWriter bw = new BufferedWriter(new FileWriter(
+          this.internalRelaySearchDataFile));
+      bw.write("version 1\n");
+      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+          "yyyy-MM-dd HH:mm:ss");
+      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      for (SearchEntryData entry : sd.getRelays().values()) {
+        String nickname = entry.getNickname();
+        String fingerprint = entry.getFingerprint();
+        String address = entry.getAddress();
+        String validAfter = dateTimeFormat.format(
+            entry.getValidAfterMillis());
+        bw.write("r " + nickname + " " + fingerprint + " " + address + " "
+            + validAfter + "\n");
+      }
+      bw.close();
+    } catch (IOException e) {
+      System.err.println("Could not write '"
+          + this.internalRelaySearchDataFile.getAbsolutePath()
+          + "' to disk.  Exiting.");
+      e.printStackTrace();
+      System.exit(1);
+    }
+
+    /* Make a backup before overwriting the relay search data file. */
+    if (this.relaySearchDataFile.exists() &&
+        !this.relaySearchDataFile.isDirectory()) {
+      try {
+        BufferedReader br = new BufferedReader(new FileReader(
+            this.relaySearchDataFile));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(
+            this.relaySearchDataBackupFile));
+        String line;
+        while ((line = br.readLine()) != null) {
+          bw.write(line + "\n");
+        }
+        bw.close();
+        br.close();
+      } catch (IOException e) {
+        System.err.println("Could not create backup of '"
+            + this.relaySearchDataFile.getAbsolutePath() + "'.  "
+            + "Exiting.");
+        e.printStackTrace();
+        System.exit(1);
+      }
+    }
+
+    /* (Over-)write relay search data file. */
     try {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");

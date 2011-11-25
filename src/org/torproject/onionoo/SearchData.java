@@ -21,20 +21,20 @@ public class SearchData {
   private SortedSet<Long> containedValidAfterMillis = new TreeSet<Long>();
   private SortedMap<String, SearchEntryData> containedRelays =
       new TreeMap<String, SearchEntryData>();
-  public void addValidAfterMillis(long validAfterMillis) {
-    this.containedValidAfterMillis.add(validAfterMillis);
-  }
   /* Add a search entry for a relay if this relay wasn't seen before or if
    * its current valid-after time is newer than the currently known
    * valid-after time. */
+  private long now = System.currentTimeMillis();
   public void addRelay(String nickname, String fingerprint,
       String address, long validAfterMillis) {
-    if (!this.containedRelays.containsKey(fingerprint) ||
+    if (validAfterMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
+        (!this.containedRelays.containsKey(fingerprint) ||
         this.containedRelays.get(fingerprint).getValidAfterMillis() <
-        validAfterMillis) {
+        validAfterMillis)) {
       SearchEntryData entry = new SearchEntryData(nickname, fingerprint,
           address, validAfterMillis);
       this.containedRelays.put(fingerprint, entry);
+      this.containedValidAfterMillis.add(validAfterMillis);
     }
   }
   public SortedMap<String, SearchEntryData> getRelays() {
@@ -49,7 +49,6 @@ public class SearchData {
   }
   public void update(NetworkStatusData consensus) {
     long validAfterMillis = consensus.getValidAfterMillis();
-    this.addValidAfterMillis(validAfterMillis);
     for (NetworkStatusEntryData entry :
         consensus.getStatusEntries().values()) {
       String nickname = entry.getNickname();
