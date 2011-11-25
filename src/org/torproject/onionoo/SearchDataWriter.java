@@ -50,15 +50,16 @@ public class SearchDataWriter {
             validAfterMillis = dateTimeFormat.parse(validAfterString).
                 getTime();
             result.addValidAfterMillis(validAfterMillis);
-          } else if (line.startsWith("{\"nickname\"")) {
+          } else if (line.startsWith("{\"n\"")) {
             if (validAfterMillis < 0L) {
               System.err.println(
                   this.relaySearchDataFile.getAbsolutePath() + " does "
                   + "not contain a valid_after timestamp.  Exiting.");
               System.exit(1);
             }
-            String nickname = null, fingerprint = null, address = null;
-            long lastRestartMillis = 0L;
+            String nickname = "Unnamed", fingerprint = null,
+                address = null;
+            long lastSeen = validAfterMillis;
             for (String part : line.replaceAll("\\{", "").
                 replaceAll("\\}", "").replaceAll("\\[", "").
                 replaceAll("\\]", "").replaceAll("\"", "").split(",")) {
@@ -67,18 +68,19 @@ public class SearchDataWriter {
               }
               String key = part.substring(0, part.indexOf(":"));
               String value = part.substring(part.indexOf(":") + 1);
-              if (key.equals("nickname")) {
+              if (key.equals("n")) {
                 nickname = value;
-              } else if (key.equals("fingerprint")) {
+              } else if (key.equals("f")) {
                 fingerprint = value;
-              } else if (key.equals("lastRestart")) {
-                lastRestartMillis = dateTimeFormat.parse(value).getTime();
-              } else if (key.equals("address")) {
+              } else if (key.equals("a")) {
                 address = value;
+              } else if (key.equals("r")) {
+                if (!value.equals("1")) {
+                  lastSeen -= 60L * 60L * 1000L; /* TODO Hack! */
+                }
               }
             }
-            result.addRelay(nickname, fingerprint, lastRestartMillis,
-                address, validAfterMillis);
+            result.addRelay(nickname, fingerprint, address, lastSeen);
           }
         }
         br.close();
@@ -135,20 +137,20 @@ public class SearchDataWriter {
       int written = 0;
       long lastValidAfterMillis = sd.getValidAfterMillis();
       for (SearchEntryData entry : sd.getRelays().values()) {
-        String nickname = entry.getNickname();
+        String nickname = !entry.getNickname().equals("Unnamed") ?
+            entry.getNickname() : null;
         String fingerprint = entry.getFingerprint();
-        String lastRestart = entry.getLastRestartMillis() > 0 &&
-            entry.getValidAfterMillis() == lastValidAfterMillis
-            ? dateTimeFormat.format(entry.getLastRestartMillis()) : null;
+        String running = entry.getValidAfterMillis()
+            == lastValidAfterMillis ? "1" : "0";
         String address = entry.getAddress();
         if (written++ > 0) {
           bw.write(",");
         }
-        bw.write("\n{\"nickname\":\"" + nickname + "\","
-            + "\"fingerprint\":\"" + fingerprint + "\","
-            + (lastRestart == null ? ""
-              : "\"lastRestart\":\"" + lastRestart + "\",")
-            + "\"address\":[\"" + address + "\"]}");
+        bw.write("\n{"
+            + (nickname == null ? "" : "\"n\":\"" + nickname + "\",")
+            + "\"f\":\"" + fingerprint + "\","
+            + "\"a\":[\"" + address + "\"],"
+            + "\"r\":" + running + "}");
       }
       bw.write("\n]}\n");
       bw.close();

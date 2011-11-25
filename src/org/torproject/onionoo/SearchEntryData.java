@@ -7,14 +7,12 @@ package org.torproject.onionoo;
 public class SearchEntryData implements Comparable<SearchEntryData> {
   private String fingerprint;
   private String nickname;
-  private long lastRestartMillis;
   private String address;
   private long validAfterMillis;
   public SearchEntryData(String nickname, String fingerprint,
-      long lastRestartMillis, String address, long validAfterMillis) {
+      String address, long validAfterMillis) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
-    this.lastRestartMillis = lastRestartMillis;
     this.address = address;
     this.validAfterMillis = validAfterMillis;
   }
@@ -23,9 +21,6 @@ public class SearchEntryData implements Comparable<SearchEntryData> {
   }
   public String getNickname() {
     return this.nickname;
-  }
-  public long getLastRestartMillis() {
-    return this.lastRestartMillis;
   }
   public String getAddress() {
     return this.address;

@@ -28,12 +28,12 @@ public class SearchData {
    * its current valid-after time is newer than the currently known
    * valid-after time. */
   public void addRelay(String nickname, String fingerprint,
-      long lastRestartMillis, String address, long validAfterMillis) {
+      String address, long validAfterMillis) {
     if (!this.containedRelays.containsKey(fingerprint) ||
         this.containedRelays.get(fingerprint).getValidAfterMillis() <
         validAfterMillis) {
       SearchEntryData entry = new SearchEntryData(nickname, fingerprint,
-          lastRestartMillis, address, validAfterMillis);
+          address, validAfterMillis);
       this.containedRelays.put(fingerprint, entry);
     }
   }
@@ -56,8 +56,7 @@ public class SearchData {
       String fingerprint = entry.getFingerprint();
       long lastRestartMillis = entry.getLastPublishedDescriptorMillis();
       String address = entry.getAddress();
-      this.addRelay(nickname, fingerprint, lastRestartMillis, address,
-          validAfterMillis);
+      this.addRelay(nickname, fingerprint, address, validAfterMillis);
     }
   }
 }
