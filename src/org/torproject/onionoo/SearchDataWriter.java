@@ -169,7 +169,7 @@ public class SearchDataWriter {
             entry.getNickname() : null;
         String fingerprint = entry.getFingerprint();
         String running = entry.getValidAfterMillis()
-            == lastValidAfterMillis ? "1" : "0";
+            == lastValidAfterMillis ? "true" : "false";
         String address = entry.getAddress();
         if (written++ > 0) {
           bw.write(",");
