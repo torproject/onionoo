@@ -7,13 +7,11 @@ public class NetworkStatusEntryData
     implements Comparable<NetworkStatusEntryData> {
   private String fingerprint;
   private String nickname;
-  private long lastPublishedDescriptorMillis;
   private String address;
   public NetworkStatusEntryData(String nickname, String fingerprint,
-      long lastPublishedDescriptorMillis, String address) {
+      String address) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
-    this.lastPublishedDescriptorMillis = lastPublishedDescriptorMillis;
     this.address = address;
   }
   public String getFingerprint() {
@@ -27,9 +25,6 @@ public class NetworkStatusEntryData
   }
   public void setNickname(String nickname) {
     this.nickname = nickname;
-  }
-  public long getLastPublishedDescriptorMillis() {
-    return this.lastPublishedDescriptorMillis;
   }
   public String getAddress() {
     return this.address;

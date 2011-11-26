@@ -9,9 +9,9 @@ public class NetworkStatusData {
   private SortedMap<String, NetworkStatusEntryData> relays =
       new TreeMap<String, NetworkStatusEntryData>();
   public void addStatusEntry(String nickname, String fingerprint,
-      long lastPublishedDescriptor, String address) {
+      String address) {
     relays.put(fingerprint, new NetworkStatusEntryData(nickname,
-        fingerprint, lastPublishedDescriptor, address));
+        fingerprint, address));
   }
   public SortedMap<String, NetworkStatusEntryData> getStatusEntries() {
     return new TreeMap<String, NetworkStatusEntryData>(this.relays);

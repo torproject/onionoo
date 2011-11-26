@@ -43,7 +43,7 @@ public class SearchDataWriter {
             System.exit(1);
           } else if (line.startsWith("r ")) {
             String[] parts = line.split(" ");
-            if (parts.length < 5) {
+            if (parts.length < 6) {
               System.err.println("Line '" + line + "' in '"
                   + this.internalRelaySearchDataFile.getAbsolutePath()
                   + " is invalid.  Exiting.");
@@ -56,6 +56,18 @@ public class SearchDataWriter {
                + parts[5]).getTime();
             result.addRelay(nickname, fingerprint, address,
                 validAfterMillis);
+          } else if (line.startsWith("b ")) {
+            String[] parts = line.split(" ");
+            if (parts.length < 4) {
+              System.err.println("Line '" + line + "' in '"
+                  + this.internalRelaySearchDataFile.getAbsolutePath()
+                  + " is invalid.  Exiting.");
+              System.exit(1);
+            }
+            String hashedFingerprint = parts[1];
+            long publishedMillis = dateTimeFormat.parse(parts[2] + " "
+               + parts[3]).getTime();
+            result.addBridge(hashedFingerprint, publishedMillis);
           }
         }
         br.close();
@@ -116,6 +128,12 @@ public class SearchDataWriter {
         bw.write("r " + nickname + " " + fingerprint + " " + address + " "
             + validAfter + "\n");
       }
+      for (Map.Entry<String, Long> e : sd.getBridges().entrySet()) {
+        String hashedFingerprint = e.getKey();
+        long publishedMillis = e.getValue();
+        String published = dateTimeFormat.format(publishedMillis);
+        bw.write("b " + hashedFingerprint + " " + published + "\n");
+      }
       bw.close();
     } catch (IOException e) {
       System.err.println("Could not write '"
@@ -154,9 +172,9 @@ public class SearchDataWriter {
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       String validAfterString = dateTimeFormat.format(
-          sd.getValidAfterMillis());
+          sd.getLastValidAfterMillis());
       String freshUntilString = dateTimeFormat.format(
-          sd.getFreshUntilMillis());
+          sd.getLastFreshUntilMillis());
       this.relaySearchDataFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.relaySearchDataFile));
@@ -165,7 +183,7 @@ public class SearchDataWriter {
           + "\"fresh_until\":\"" + freshUntilString + "\",\n"
           + "\"relays\":[");
       int written = 0;
-      long lastValidAfterMillis = sd.getValidAfterMillis();
+      long lastValidAfterMillis = sd.getLastValidAfterMillis();
       for (SearchEntryData entry : sd.getRelays().values()) {
         String nickname = !entry.getNickname().equals("Unnamed") ?
             entry.getNickname() : null;
@@ -180,6 +198,21 @@ public class SearchDataWriter {
             + (nickname == null ? "" : "\"n\":\"" + nickname + "\",")
             + "\"f\":\"" + fingerprint + "\","
             + "\"a\":[\"" + address + "\"],"
+            + "\"r\":" + running + "}");
+      }
+      bw.write("\n]},\n\"bridges\":[");
+      written = 0;
+      long lastPublishedMillis = sd.getLastPublishedMillis();
+      for (Map.Entry<String, Long> e : sd.getBridges().entrySet()) {
+        String hashedFingerprint = e.getKey();
+        long publishedMillis = e.getValue();
+        String running = publishedMillis == lastPublishedMillis ?
+            "true" : "false";
+        if (written++ > 0) {
+          bw.write(",");
+        }
+        bw.write("\n{"
+            + "\"h\":\"" + hashedFingerprint + "\","
             + "\"r\":" + running + "}");
       }
       bw.write("\n]}\n");

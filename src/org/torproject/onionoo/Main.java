@@ -10,15 +10,16 @@ import java.util.*;
 public class Main {
   public static void main(String[] args) {
 
-    printStatus("Reading the last written relay search data file (if "
-        + "present) that we're going to update.");
+    printStatus("Reading the internal search data file from disk (if "
+        + "present).");
     SearchDataWriter sedw = new SearchDataWriter();
     SearchData sd = sedw.readRelaySearchDataFile();
 
-    printStatus("Reading network status consensuses from disk (if "
-        + "present).");
+    printStatus("Reading network statuses from disk (if present).");
     NetworkStatusReader nsr = new NetworkStatusReader();
     Set<NetworkStatusData> loadedConsensuses = nsr.loadConsensuses();
+    Set<BridgeNetworkStatusData> loadedBridgeNetworkStatuses =
+        nsr.loadBridgeNetworkStatuses();
 
     printStatus("Downloading current network status consensus from "
         + "directory authorities.");
@@ -27,6 +28,7 @@ public class Main {
 
     printStatus("Updating search data.");
     sd.updateAll(loadedConsensuses);
+    sd.updateBridgeNetworkStatuses(loadedBridgeNetworkStatuses);
     sd.update(downloadedConsensus);
 
     printStatus("(Over-)writing search data file on disk.");

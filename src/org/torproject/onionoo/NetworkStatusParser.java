@@ -6,6 +6,7 @@ import java.io.*;
 import java.text.*;
 import java.util.*;
 import org.apache.commons.codec.binary.*;
+import org.apache.commons.codec.digest.*;
 
 /* Parse a network status. */
 public class NetworkStatusParser {
@@ -41,11 +42,8 @@ public class NetworkStatusParser {
             String nickname = rLineParts[1];
             String fingerprint = Hex.encodeHexString(
                 Base64.decodeBase64(rLineParts[2] + "=")).toUpperCase();
-            long lastPublishedDescriptor = dateTimeFormat.parse(
-                rLineParts[4] + " " + rLineParts[5]).getTime();
             String address = rLineParts[6];
-            result.addStatusEntry(nickname, fingerprint,
-                lastPublishedDescriptor, address);
+            result.addStatusEntry(nickname, fingerprint, address);
           }
         }
       }
@@ -53,10 +51,42 @@ public class NetworkStatusParser {
       System.err.println("Ran into an IOException while parsing a String "
           + "in memory.  Something's really wrong.  Exiting.");
       System.exit(1);
-    } catch (ParseException e) {
-      System.err.println("Could not parse network status consensus.  "
-          + "Skipping.");
-      return null;
+    }
+    return result;
+  }
+  public BridgeNetworkStatusData parseBridgeNetworkStatus(
+      String statusString, long publishedMillis) {
+    BridgeNetworkStatusData result = new BridgeNetworkStatusData();
+    result.setPublishedMillis(publishedMillis);
+    try {
+      BufferedReader br = new BufferedReader(new StringReader(
+          statusString));
+      String line, rLine = null;
+      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+          "yyyy-MM-dd HH:mm:ss");
+      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      while ((line = br.readLine()) != null) {
+        if (line.startsWith("r ")) {
+          rLine = line;
+        } else if (line.startsWith("s ") || line.equals("s")) {
+          if (rLine == null) {
+            System.err.println("s line without r line in consensus.  "
+                + "Skipping");
+            continue;
+          }
+          if (line.contains(" Running")) {
+            String[] rLineParts = rLine.split(" ");
+            String hashedFingerprint = Hex.encodeHexString(
+                DigestUtils.sha(Base64.decodeBase64(
+                rLineParts[2] + "="))).toUpperCase();
+            result.addStatusEntry(hashedFingerprint);
+          }
+        }
+      }
+    } catch (IOException e) {
+      System.err.println("Ran into an IOException while parsing a String "
+          + "in memory.  Something's really wrong.  Exiting.");
+      System.exit(1);
     }
     return result;
   }

@@ -10,11 +10,11 @@ public class SearchData {
   public SortedSet<Long> getAllValidAfterMillis() {
     return new TreeSet<Long>(this.containedValidAfterMillis);
   }
-  public long getValidAfterMillis() {
+  public long getLastValidAfterMillis() {
     return this.containedValidAfterMillis.isEmpty() ? -1L :
         this.containedValidAfterMillis.last();
   }
-  public long getFreshUntilMillis() {
+  public long getLastFreshUntilMillis() {
     return this.containedValidAfterMillis.isEmpty() ? -1L :
         this.containedValidAfterMillis.last() + 60L * 60L * 1000L;
   }
@@ -53,10 +53,38 @@ public class SearchData {
         consensus.getStatusEntries().values()) {
       String nickname = entry.getNickname();
       String fingerprint = entry.getFingerprint();
-      long lastRestartMillis = entry.getLastPublishedDescriptorMillis();
       String address = entry.getAddress();
       this.addRelay(nickname, fingerprint, address, validAfterMillis);
     }
+  }
+  private SortedSet<Long> containedPublishedMillis = new TreeSet<Long>();
+  public void updateBridgeNetworkStatuses(
+      Collection<BridgeNetworkStatusData> statuses) {
+    if (statuses != null) {
+      for (BridgeNetworkStatusData status : statuses) {
+        long publishedMillis = status.getPublishedMillis();
+        for (String hashedFingerprint : status.getStatusEntries()) {
+          this.addBridge(hashedFingerprint, publishedMillis);
+          this.containedPublishedMillis.add(publishedMillis);
+        }
+      }
+    }
+  }
+  private SortedMap<String, Long> containedBridges =
+      new TreeMap<String, Long>();
+  public void addBridge(String hashedFingerprint, long publishedMillis) {
+    if (publishedMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
+        (!this.containedBridges.containsKey(hashedFingerprint) ||
+        this.containedBridges.get(hashedFingerprint) < publishedMillis)) {
+      this.containedBridges.put(hashedFingerprint, publishedMillis);
+    }
+  }
+  public SortedMap<String, Long> getBridges() {
+    return new TreeMap<String, Long>(this.containedBridges);
+  }
+  public long getLastPublishedMillis() {
+    return this.containedPublishedMillis.isEmpty() ? -1L :
+        this.containedPublishedMillis.last();
   }
 }
 
