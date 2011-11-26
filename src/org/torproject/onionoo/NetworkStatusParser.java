@@ -6,7 +6,6 @@ import java.io.*;
 import java.text.*;
 import java.util.*;
 import org.apache.commons.codec.binary.*;
-import org.apache.commons.codec.digest.*;
 
 /* Parse a network status. */
 public class NetworkStatusParser {
@@ -77,8 +76,7 @@ public class NetworkStatusParser {
           if (line.contains(" Running")) {
             String[] rLineParts = rLine.split(" ");
             String hashedFingerprint = Hex.encodeHexString(
-                DigestUtils.sha(Base64.decodeBase64(
-                rLineParts[2] + "="))).toUpperCase();
+                Base64.decodeBase64(rLineParts[2] + "=")).toUpperCase();
             result.addStatusEntry(hashedFingerprint);
           }
         }
