@@ -200,7 +200,7 @@ public class SearchDataWriter {
             + "\"a\":[\"" + address + "\"],"
             + "\"r\":" + running + "}");
       }
-      bw.write("\n]},\n\"bridges\":[");
+      bw.write("\n],\n\"bridges\":[");
       written = 0;
       long lastPublishedMillis = sd.getLastPublishedMillis();
       for (Map.Entry<String, Long> e : sd.getBridges().entrySet()) {
