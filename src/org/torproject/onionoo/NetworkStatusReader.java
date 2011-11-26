@@ -12,7 +12,7 @@ public class NetworkStatusReader {
   public Set<NetworkStatusData> loadConsensuses() {
     Set<NetworkStatusData> results = new HashSet<NetworkStatusData>();
     SortedSet<File> consensusFiles = this.listFilesRecursively(
-        networkStatusDirectory);
+        this.networkStatusDirectory);
     if (!consensusFiles.isEmpty()) {
       NetworkStatusParser nsp = new NetworkStatusParser();
       for (File consensusFile : consensusFiles) {
@@ -24,6 +24,33 @@ public class NetworkStatusReader {
         }
         NetworkStatusData nsd = nsp.parseConsensus(consensusString);
         results.add(nsd);
+      }
+    }
+    return results;
+  }
+  private File relayServerDescriptorsDirectory = new File("descriptors");
+  public Map<String, ServerDescriptorData> loadRelayServerDescriptors() {
+    Map<String, ServerDescriptorData> results =
+        new HashMap<String, ServerDescriptorData>();
+    SortedSet<File> descriptorFiles = this.listFilesRecursively(
+        relayServerDescriptorsDirectory);
+    if (!descriptorFiles.isEmpty()) {
+      NetworkStatusParser nsp = new NetworkStatusParser();
+      for (File descriptorFile : descriptorFiles) {
+        String descriptorString = this.readFileToString(descriptorFile);
+        if (descriptorString == null) {
+          System.err.println("Could not read relay server descriptor "
+              + "from '" + descriptorFile.getAbsolutePath() + "'.  "
+              + "Skipping.");
+          continue;
+        }
+        ServerDescriptorData sd = nsp.parseServerDescriptor(
+            descriptorString);
+        if (!results.containsKey(sd.getFingerprint()) ||
+            results.get(sd.getFingerprint()).getPublishedMillis() <
+            sd.getPublishedMillis()) {
+          results.put(sd.getFingerprint(), sd);
+        }
       }
     }
     return results;

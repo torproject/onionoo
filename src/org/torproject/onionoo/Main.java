@@ -10,9 +10,11 @@ import java.util.*;
 public class Main {
   public static void main(String[] args) {
 
-    printStatus("Reading network statuses from disk.");
+    printStatus("Reading descriptors from disk.");
     NetworkStatusReader nsr = new NetworkStatusReader();
     Set<NetworkStatusData> loadedConsensuses = nsr.loadConsensuses();
+    Map<String, ServerDescriptorData> loadedRelayServerDescriptors =
+        nsr.loadRelayServerDescriptors();
     Set<BridgeNetworkStatusData> loadedBridgeNetworkStatuses =
         nsr.loadBridgeNetworkStatuses();
 
@@ -28,13 +30,14 @@ public class Main {
     sd.update(downloadedConsensus);
     sedw.writeRelaySearchDataFile(sd);
 
-    /* TODO Status files are not implemented yet.
     printStatus("Updating status data.");
     StatusDataWriter stdw = new StatusDataWriter();
-    stdw.writeAll(loadedConsensuses);
-    stdw.write(downloadedConsensus);
-    stdw.deleteOldStatusDataFiles();    
-    */
+    stdw.setValidAfterMillis(sd.getLastValidAfterMillis());
+    stdw.setFreshUntilMillis(sd.getLastFreshUntilMillis());
+    stdw.setRelays(sd.getRelays());
+    stdw.setBridges(sd.getBridges());
+    stdw.updateRelayServerDescriptors(loadedRelayServerDescriptors);
+    stdw.writeStatusDataFiles();
 
     printStatus("Terminating.");
     System.exit(0);

@@ -37,13 +37,9 @@ public class SearchDataWriter {
             "yyyy-MM-dd HH:mm:ss");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         while ((line = br.readLine()) != null) {
-          if (line.startsWith("version") && !line.equals("version 1")) {
-            System.err.println("Internal relay search data file is newer "
-                + "than version 1.  We don't understand that.  Exiting.");
-            System.exit(1);
-          } else if (line.startsWith("r ")) {
+          if (line.startsWith("r ")) {
             String[] parts = line.split(" ");
-            if (parts.length < 6) {
+            if (parts.length < 9) {
               System.err.println("Line '" + line + "' in '"
                   + this.internalRelaySearchDataFile.getAbsolutePath()
                   + " is invalid.  Exiting.");
@@ -54,8 +50,12 @@ public class SearchDataWriter {
             String address = parts[3];
             long validAfterMillis = dateTimeFormat.parse(parts[4] + " "
                + parts[5]).getTime();
+            int orPort = Integer.parseInt(parts[6]);
+            int dirPort = Integer.parseInt(parts[7]);
+            SortedSet<String> relayFlags = new TreeSet<String>(
+                Arrays.asList(parts[8].split(",")));
             result.addRelay(nickname, fingerprint, address,
-                validAfterMillis);
+                validAfterMillis, orPort, dirPort, relayFlags);
           } else if (line.startsWith("b ")) {
             String[] parts = line.split(" ");
             if (parts.length < 4) {
@@ -115,7 +115,6 @@ public class SearchDataWriter {
     try {
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.internalRelaySearchDataFile));
-      bw.write("version 1\n");
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -125,8 +124,16 @@ public class SearchDataWriter {
         String address = entry.getAddress();
         String validAfter = dateTimeFormat.format(
             entry.getValidAfterMillis());
+        String orPort = String.valueOf(entry.getOrPort());
+        String dirPort = String.valueOf(entry.getDirPort());
+        StringBuilder sb = new StringBuilder();
+        for (String relayFlag : entry.getRelayFlags()) {
+          sb.append("," + relayFlag);
+        }
+        String relayFlags = sb.toString().substring(1);
         bw.write("r " + nickname + " " + fingerprint + " " + address + " "
-            + validAfter + "\n");
+            + validAfter + " " + orPort + " " + dirPort + " " + relayFlags
+            + "\n");
       }
       for (Map.Entry<String, Long> e : sd.getBridges().entrySet()) {
         String hashedFingerprint = e.getKey();

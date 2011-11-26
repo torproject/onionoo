@@ -26,13 +26,14 @@ public class SearchData {
    * valid-after time. */
   private long now = System.currentTimeMillis();
   public void addRelay(String nickname, String fingerprint,
-      String address, long validAfterMillis) {
+      String address, long validAfterMillis, int orPort, int dirPort,
+      SortedSet<String> relayFlags) {
     if (validAfterMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
         (!this.containedRelays.containsKey(fingerprint) ||
         this.containedRelays.get(fingerprint).getValidAfterMillis() <
         validAfterMillis)) {
       SearchEntryData entry = new SearchEntryData(nickname, fingerprint,
-          address, validAfterMillis);
+          address, validAfterMillis, orPort, dirPort, relayFlags);
       this.containedRelays.put(fingerprint, entry);
       this.containedValidAfterMillis.add(validAfterMillis);
     }
@@ -54,7 +55,11 @@ public class SearchData {
       String nickname = entry.getNickname();
       String fingerprint = entry.getFingerprint();
       String address = entry.getAddress();
-      this.addRelay(nickname, fingerprint, address, validAfterMillis);
+      int orPort = entry.getOrPort();
+      int dirPort = entry.getDirPort();
+      SortedSet<String> relayFlags = entry.getRelayFlags();
+      this.addRelay(nickname, fingerprint, address, validAfterMillis,
+          orPort, dirPort, relayFlags);
     }
   }
   private SortedSet<Long> containedPublishedMillis = new TreeSet<Long>();
