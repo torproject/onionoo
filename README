@@ -1,27 +1,8 @@
-Onionoo -- A Mobile Tor Relay and Bridge Monitoring Application
-===============================================================
+Onionoo -- A Tor Status Protocol
+================================
 
-0 Teaser
---------
-
-Are you running a Tor relay or bridge to support online privacy and fight
-Internet censorship?  Want to check whether your Tor relay or bridge is
-running and relaying traffic while you're underway?  Want to show your
-friends that you're actively helping people worldwide to defend against
-network surveillance and traffic analysis?
-
-Onionoo enables you to watch any Tor relay or (known) Tor bridge from your
-mobile phone.  Onionoo was written with privacy in mind and only uses
-publicly available Tor directory data.  Onionoo does not require access to
-your relay or bridge.
-
-
-1  Scope
---------
-
-The scope of Onionoo are mobile platforms like iOS and Android, plus a
-Java-based server application to preprocess relay and bridge status data
-for the mobile applications.
+1  Onionoo overview
+-------------------
 
 Onionoo is designed to be easily extensible to other mobile and non-mobile
 platforms.  Possible non-mobile platforms include: command-line interfaces
@@ -35,8 +16,26 @@ This document describes the initial scope of a mobile application for iOS
 and Android and the required Java-based server application.
 
 
-2  Mobile User interface
-------------------------
+2  Sample application: Android
+------------------------------
+
+2.1  Teaser
+-----------
+
+Are you running a Tor relay or bridge to support online privacy and fight
+Internet censorship?  Want to check whether your Tor relay or bridge is
+running and relaying traffic while you're underway?  Want to show your
+friends that you're actively helping people worldwide to defend against
+network surveillance and traffic analysis?
+
+The Onionoo Android app enables you to watch any Tor relay or (known) Tor
+bridge from your mobile phone.  Onionoo was written with privacy in mind
+and only uses publicly available Tor directory data.  Onionoo does not
+require access to your relay or bridge.
+
+
+2.2  User interface
+-------------------
 
 The user interface of Onionoo is kept as simple as possible while
 providing the relevant information to the user.  The interface consists of
@@ -44,8 +43,8 @@ a main screen (see 2.1), two dialogs to add relays (see 2.2) and bridges
 (see 2.3), and a yet unspecified relay/bridge details page (see 2.4).
 
 
-2.1  Main screen
-----------------
+2.2.1  Main screen
+------------------
 
 The main screen of Onionoo consists of a list of relays and bridges that
 the user selected to monitor.  Each list entry shows the nickname,
@@ -94,8 +93,8 @@ Example:
 +------------------------------------------+
 
 
-2.2  Add relay dialog
----------------------
+2.2.2  Add relay dialog
+-----------------------
 
 The add relay dialog is used to add a relay to the main screen.  Relays
 can be searched by nickname, fingerprint, or IP address.  Partial input is
@@ -130,8 +129,8 @@ this list would be roughly 200K in size as of October 2011.
 +------------------------------------------+
 
 
-2.3  Add bridge dialog
-----------------------
+2.2.3  Add bridge dialog
+------------------------
 
 The add bridge dialog is used to add a bridge to the main screen.  Bridges
 can only be searched by providing the full fingerprint.  The reason for
@@ -163,8 +162,8 @@ the last 7 days.
 +------------------------------------------+
 
 
-2.4  Relay/bridge details page
-------------------------------
+2.2.4  Relay/bridge details page
+--------------------------------
 
 The relay or bridge details page lists properties of the relay or bridge
 in more detail than the main screen can provide.
@@ -187,7 +186,11 @@ country on the last day may be visualized in a pie plot.
 The exact look of the relay or bridge details page is yet unspecified.
 
 
-3  Server and protocol
+3  Sample application: TorStatus
+--------------------------------
+
+
+4  Server and protocol
 ----------------------
 
 Onionoo consists of a server application that downloads status information
@@ -200,7 +203,7 @@ search data (see 3.2), relay status data (see 3.3), and bridge status data
 (see 3.4).
 
 
-3.1  Relay search data
+4.1  Relay search data
 ----------------------
 
 The relay search data format comprises all information about relays that
@@ -248,7 +251,7 @@ of higher latency for single searches and higher server load.  However,
 this extension is out of scope of this initial version.
 
 
-3.2  Bridge search data
+4.2  Bridge search data
 -----------------------
 
 The bridge search data format comprises information about bridges that
@@ -280,7 +283,7 @@ formatted as YYYY-MM-DD HH:MM:SS.  Omitted when the bridge is currently
 not running due to the bridge authority.
 
 
-3.3  Relay status data
+4.3  Relay status data
 ----------------------
 
 The relay status data contains status information about a single relay
@@ -290,7 +293,7 @@ downloaded from the server for one or more relays in a single request.
 The relay status data format is yet unspecified.
 
 
-3.4  Bridge status data
+4.4  Bridge status data
 -----------------------
 
 The bridge status data contains status information about a single bridge
