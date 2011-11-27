@@ -299,27 +299,3 @@ downloaded from the server for one or more bridges in a single request.
 
 The bridge status data format is yet unspecified.
 
-
-4. Development phases
----------------------
-
-Development may take place in a few development phases.
-
- C1: The first client version only consists of the main screen and add
-     relay dialog and displays basic relay status information from a local
-     example data file.  This version does not do any network requests,
-     does not display any bridge data, and does not display relay details.
-
- S1: The first server version, that can be developed in parallel to the
-     first client version, processes network status consensuses and serves
-     relay search data.
-
- C2: The second client version downloads relay search data from the server
-     instead of the static example data file.  This version also
-     implements the update logic that makes sure that new data is 
-     downloaded on the user's request and only if it's expected to be
-     updated on the server.
-
-Future development phases add relay details, bridge statuses and details,
-and generally go crazy with visualizations.
-
