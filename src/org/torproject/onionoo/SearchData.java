@@ -3,6 +3,7 @@
 package org.torproject.onionoo;
 
 import java.util.*;
+import org.torproject.descriptor.*;
 
 /* Store search data containing those relays that have been running in the
  * past seven days. */
@@ -41,37 +42,39 @@ public class SearchData {
   public SortedMap<String, SearchEntryData> getRelays() {
     return new TreeMap<String, SearchEntryData>(this.containedRelays);
   }
-  public void updateAll(Collection<NetworkStatusData> consensuses) {
+  public void updateAll(Collection<RelayNetworkStatusConsensus>
+      consensuses) {
     if (consensuses != null) {
-      for (NetworkStatusData consensus : consensuses) {
+      for (RelayNetworkStatusConsensus consensus : consensuses) {
         this.update(consensus);
       }
     }
   }
-  public void update(NetworkStatusData consensus) {
+  public void update(RelayNetworkStatusConsensus consensus) {
     long validAfterMillis = consensus.getValidAfterMillis();
-    for (NetworkStatusEntryData entry :
+    for (NetworkStatusEntry entry :
         consensus.getStatusEntries().values()) {
       String nickname = entry.getNickname();
       String fingerprint = entry.getFingerprint();
       String address = entry.getAddress();
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
-      SortedSet<String> relayFlags = entry.getRelayFlags();
+      SortedSet<String> relayFlags = entry.getFlags();
       this.addRelay(nickname, fingerprint, address, validAfterMillis,
           orPort, dirPort, relayFlags);
     }
   }
   private SortedSet<Long> containedPublishedMillis = new TreeSet<Long>();
   public void updateBridgeNetworkStatuses(
-      Collection<BridgeNetworkStatusData> statuses) {
+      Collection<BridgeNetworkStatus> statuses) {
     if (statuses != null) {
-      for (BridgeNetworkStatusData status : statuses) {
+      for (BridgeNetworkStatus status : statuses) {
         long publishedMillis = status.getPublishedMillis();
-        for (String hashedFingerprint : status.getStatusEntries()) {
+        for (String hashedFingerprint :
+            status.getStatusEntries().keySet()) {
           this.addBridge(hashedFingerprint, publishedMillis);
-          this.containedPublishedMillis.add(publishedMillis);
         }
+        this.containedPublishedMillis.add(publishedMillis);
       }
     }
   }

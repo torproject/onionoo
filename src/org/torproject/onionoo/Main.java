@@ -3,6 +3,7 @@
 package org.torproject.onionoo;
 
 import java.util.*;
+import org.torproject.descriptor.*;
 
 /* Update search data and status data files by reading local network
  * status consensuses and downloading descriptors from the directory
@@ -12,11 +13,12 @@ public class Main {
 
     printStatus("Reading descriptors from disk.");
     NetworkStatusReader nsr = new NetworkStatusReader();
-    Set<NetworkStatusData> loadedConsensuses = nsr.loadConsensuses();
-    Map<String, ServerDescriptorData> loadedRelayServerDescriptors =
-        nsr.loadRelayServerDescriptors();
-    Set<BridgeNetworkStatusData> loadedBridgeNetworkStatuses =
-        nsr.loadBridgeNetworkStatuses();
+    Set<RelayNetworkStatusConsensus> loadedConsensuses =
+        nsr.getLoadedRelayNetworkStatusConsensuses();
+    Map<String, RelayServerDescriptor> loadedRelayServerDescriptors =
+        nsr.getLoadedRelayServerDescriptors();
+    Set<BridgeNetworkStatus> loadedBridgeNetworkStatuses =
+        nsr.getLoadedBridgeNetworkStatuses();
 
     printStatus("Updating search data.");
     SearchDataWriter sedw = new SearchDataWriter();

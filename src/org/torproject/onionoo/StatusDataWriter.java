@@ -5,6 +5,7 @@ package org.torproject.onionoo;
 import java.io.*;
 import java.text.*;
 import java.util.*;
+import org.torproject.descriptor.*;
 
 /* Write status data files to disk and delete status files of relays or
  * bridges that fell out the search data list. */
@@ -25,9 +26,9 @@ public class StatusDataWriter {
   public void setBridges(SortedMap<String, Long> bridges) {
     this.bridges = bridges;
   }
-  private Map<String, ServerDescriptorData> serverDescriptors;
+  private Map<String, RelayServerDescriptor> serverDescriptors;
   public void updateRelayServerDescriptors(
-      Map<String, ServerDescriptorData> serverDescriptors) {
+      Map<String, RelayServerDescriptor> serverDescriptors) {
     this.serverDescriptors = serverDescriptors;
   }
   public void writeStatusDataFiles() {
@@ -112,7 +113,7 @@ public class StatusDataWriter {
       if (this.serverDescriptors.containsKey(fingerprint) &&
           this.serverDescriptors.get(fingerprint).getPublishedMillis() >
           publishedMillis) {
-        ServerDescriptorData descriptor = this.serverDescriptors.get(
+        RelayServerDescriptor descriptor = this.serverDescriptors.get(
             fingerprint);
         StringBuilder sb = new StringBuilder();
         sb.append("\"desc_published\":\""
@@ -123,13 +124,13 @@ public class StatusDataWriter {
           sb.append((written++ > 0 ? "," : "") + "\n  \"" + exitPolicyLine
               + "\"");
         }
-        sb.append("\n],\n\"contact\":\"" + descriptor.getContactLine()
-            + "\",\n\"platform\":\"" + descriptor.getPlatformLine()
+        sb.append("\n],\n\"contact\":\"" + descriptor.getContact()
+            + "\",\n\"platform\":\"" + descriptor.getPlatform()
             + "\"");
-        if (descriptor.getFamily() != null) {
+        if (descriptor.getFamilyEntries() != null) {
           sb.append(",\n\"family\":[");
           written = 0;
-          for (String familyEntry : descriptor.getFamily()) {
+          for (String familyEntry : descriptor.getFamilyEntries()) {
             sb.append((written++ > 0 ? "," : "") + "\n  \"" + familyEntry
                 + "\"");
           }
@@ -192,7 +193,7 @@ public class StatusDataWriter {
 
   private SortedMap<String, File> updateBridgeStatusFiles(
       SortedMap<String, File> remainingStatusFiles) {
-    System.err.println("Updating bridge status files is implemented "
+    System.err.println("Updating bridge status files is not implemented "
         + "yet.  Skipping.");
     return remainingStatusFiles;
   }
