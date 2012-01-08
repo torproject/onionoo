@@ -18,16 +18,11 @@ public class Main {
     Set<BridgeNetworkStatusData> loadedBridgeNetworkStatuses =
         nsr.loadBridgeNetworkStatuses();
 
-    printStatus("Downloading descriptors from directory authorities.");
-    NetworkStatusDownloader nsd = new NetworkStatusDownloader();
-    NetworkStatusData downloadedConsensus = nsd.downloadConsensus();
-
     printStatus("Updating search data.");
     SearchDataWriter sedw = new SearchDataWriter();
     SearchData sd = sedw.readRelaySearchDataFile();
     sd.updateAll(loadedConsensuses);
     sd.updateBridgeNetworkStatuses(loadedBridgeNetworkStatuses);
-    sd.update(downloadedConsensus);
     sedw.writeRelaySearchDataFile(sd);
 
     printStatus("Updating status data.");
