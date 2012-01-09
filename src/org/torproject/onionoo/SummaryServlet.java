@@ -78,25 +78,25 @@ public class SummaryServlet extends HttpServlet {
 
     PrintWriter out = response.getWriter();
     String uri = request.getRequestURI();
-    if (uri.equals("/onionoo/summary/all")) {
+    if (uri.equals("/summary/all")) {
       this.writeHeader(out);
       this.writeAllRelays(out);
       this.writeAllBridges(out);
-    } else if (uri.equals("/onionoo/summary/running")) {
+    } else if (uri.equals("/summary/running")) {
       this.writeHeader(out);
       this.writeRunningRelays(out);
       this.writeRunningBridges(out);
-    } else if (uri.equals("/onionoo/summary/relays")) {
+    } else if (uri.equals("/summary/relays")) {
       this.writeHeader(out);
       this.writeAllRelays(out);
       this.writeNoBridges(out);
-    } else if (uri.equals("/onionoo/summary/bridges")) {
+    } else if (uri.equals("/summary/bridges")) {
       this.writeHeader(out);
       this.writeNoRelays(out);
       this.writeAllBridges(out);
-    } else if (uri.startsWith("/onionoo/summary/search/")) {
+    } else if (uri.startsWith("/summary/search/")) {
       String searchParameter = this.parseSearchParameter(uri.substring(
-          "/onionoo/summary/search/".length()));
+          "/summary/search/".length()));
       if (searchParameter == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
@@ -104,9 +104,9 @@ public class SummaryServlet extends HttpServlet {
       this.writeHeader(out);
       this.writeMatchingRelays(out, searchParameter);
       this.writeNoBridges(out);
-    } else if (uri.startsWith("/onionoo/summary/lookup/")) {
+    } else if (uri.startsWith("/summary/lookup/")) {
       Set<String> fingerprintParameters = this.parseFingerprintParameters(
-          uri.substring("/onionoo/summary/lookup/".length()));
+          uri.substring("/summary/lookup/".length()));
       if (fingerprintParameters == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
