@@ -9,7 +9,8 @@ import org.torproject.descriptor.*;
 
 /* Read network statuses from disk. */
 public class NetworkStatusReader {
-  private File relayDescriptorsDirectory = new File("cached-files");
+  private File relayDescriptorsDirectory = new File(
+      "in/relay-descriptors");
   public NetworkStatusReader() {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
@@ -29,7 +30,8 @@ public class NetworkStatusReader {
         }
       }
     }
-    /* TODO Read bridge network statuses from disk, too. */
+    /* TODO Read bridge network statuses and bridge pool assignments from
+     * disk, too. */
   }
   private Set<RelayNetworkStatusConsensus>
       loadedRelayNetworkStatusConsensuses =

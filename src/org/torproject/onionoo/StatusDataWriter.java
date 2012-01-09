@@ -40,7 +40,7 @@ public class StatusDataWriter {
         remainingStatusFiles);
     this.deleteStatusFiles(remainingStatusFiles);
   }
-  private File statusFileDirectory = new File("www/status");
+  private File statusFileDirectory = new File("out/details");
   private SortedMap<String, File> listAllStatusFiles() {
     SortedMap<String, File> result = new TreeMap<String, File>();
     if (statusFileDirectory.exists() &&

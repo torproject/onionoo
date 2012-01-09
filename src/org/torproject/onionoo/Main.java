@@ -5,9 +5,7 @@ package org.torproject.onionoo;
 import java.util.*;
 import org.torproject.descriptor.*;
 
-/* Update search data and status data files by reading local network
- * status consensuses and downloading descriptors from the directory
- * authorities. */
+/* Update search data and status data files. */
 public class Main {
   public static void main(String[] args) {
 
@@ -37,7 +35,6 @@ public class Main {
     stdw.writeStatusDataFiles();
 
     printStatus("Terminating.");
-    System.exit(0);
   }
 
   private static void printStatus(String message) {

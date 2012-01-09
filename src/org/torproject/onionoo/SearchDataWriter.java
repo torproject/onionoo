@@ -10,11 +10,10 @@ import java.util.*;
 public class SearchDataWriter {
 
   private File internalRelaySearchDataFile =
-      new File("relay-search-data.csv");
-  private File relaySearchDataFile = new File(
-      "www/status/relay-search-data.json");
+      new File("status/summary.csv");
+  private File relaySearchDataFile = new File("out/summary.json");
   private File relaySearchDataBackupFile =
-      new File("relay-search-data.json.bak");
+      new File("out/summary.json.bak");
 
   /* Read the internal relay search data file from disk. */
   public SearchData readRelaySearchDataFile() {
