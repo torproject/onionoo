@@ -38,6 +38,7 @@
           depends="compile">
     <war destfile="${warfile}"
          webxml="${webxmlfile}">
+      <fileset dir="web"/>
       <lib dir="${libs}"
            excludes="servlet-api.jar"/>
       <classes dir="${classes}"/>

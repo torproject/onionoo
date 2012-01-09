@@ -1,0 +1,90 @@
+<html>
+<title>Onionoo/TorStatusProtocol REST API
+</title>
+<body>
+
+<h1>Onionoo/TorStatusProtocol REST API</h1>
+
+<h2>Summary documents</h2>
+<p>
+Summary list of relays with nicknames, fingerprints, IP addresses, and
+running information and/or bridges with hashed fingerprints and running
+information.
+</p>
+<table>
+<tr>
+<td><a href="/summary/all">GET summary/all</a></td>
+<td>Return the list of all relays and bridges that are currently running
+or that have been running in the past week.</td>
+</tr>
+<tr>
+<td><a href="/summary/running">GET summary/running</a></td>
+<td>Return the list of running relays and bridges.</td>
+</tr>
+<tr>
+<td><a href="/summary/relays">GET summary/relays</a></td>
+<td>Return only the list of relays.</td>
+</tr>
+<tr>
+<td><a href="/summary/bridges">GET summary/bridges</a></td>
+<td>Return only the list of bridges.</td>
+</tr>
+<tr>
+<td><a href="/summary/search/gabelmoo">GET summary/search/:searchtext</a></td>
+<td>Return the list of relays and bridges with searchtext matching
+nickname, fingerprint, IP address, or hashed fingerprint.</td>
+</tr>
+<tr>
+<td><a href="/summary/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET summary/lookup/:fingerprint</a></td>
+<td>Return the relay or bridge with the given fingerprint or hashed
+fingerprint.</td>
+</tr>
+</table>
+
+<h2>Detail documents</h2>
+<p>
+Detail information for one or more relays or bridges.
+</p>
+<table>
+<tr>
+<td><a href="/details/all">GET details/all</a></td>
+<td>Return detail documents for all relays and bridges.</td>
+</tr>
+<tr>
+<td><a href="/details/running">GET details/running</a></td>
+<td>Return detail documents for running relays and bridges.</td>
+</tr>
+<tr>
+<td><a href="/details/relays">GET details/relays</a></td>
+<td>Return detail documents for all relays.</td>
+</tr>
+<tr>
+<td><a href="/details/bridges">GET details/bridges</a></td>
+<td>Return detail documents for all bridges.</td>
+</tr>
+<tr>
+<td><a href="/details/search/gabelmoo">GET details/search/:searchtext</a></td>
+<td>Return detail documents for relays and bridges with searchtext matching
+nickname, fingerprint, IP address, or hashed fingerprint.</td>
+</tr>
+<tr>
+<td><a href="/details/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET details/lookup/:fingerprint</a></td>
+<td>Return the detail document for the given relay or bridge only.</td>
+</tr>
+<tr>
+</table>
+
+<h2>Bandwidth documents</h2>
+<p>
+Bandwidth information for one or more relays or bridges.
+</p>
+<table>
+<tr>
+<td><a href="/bandwidth/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET bandwidth/lookup/:fingerprint</a></td>
+<td>Return the bandwidth document for the given relay only.</td>
+</tr>
+</table>
+
+</body>
+</html>
+
