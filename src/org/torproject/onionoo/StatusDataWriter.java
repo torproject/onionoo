@@ -116,9 +116,15 @@ public class StatusDataWriter {
         RelayServerDescriptor descriptor = this.serverDescriptors.get(
             fingerprint);
         StringBuilder sb = new StringBuilder();
-        sb.append("\"desc_published\":\""
-            + dateTimeFormat.format(descriptor.getPublishedMillis())
-            + "\",\n\"exit_policy\":[");
+        String publishedDateTime = dateTimeFormat.format(
+            descriptor.getPublishedMillis());
+        int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
+            Math.min(descriptor.getBandwidthBurst(),
+            descriptor.getBandwidthObserved()));
+        sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
+            + "\"uptime\":" + descriptor.getUptime() + "\n"
+            + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
+            + "\"exit_policy\":[");
         int written = 0;
         for (String exitPolicyLine : descriptor.getExitPolicyLines()) {
           sb.append((written++ > 0 ? "," : "") + "\n  \"" + exitPolicyLine
@@ -153,7 +159,7 @@ public class StatusDataWriter {
           + "\"fresh_until\":\"" + freshUntilString + "\",\n"
           + "\"nickname\":\"" + nickname + "\",\n"
           + "\"fingerprint\":\"" + fingerprint + "\",\n"
-          + "\"address\":[\"" + address + "\"],\n"
+          + "\"or_address\":[\"" + address + "\"],\n"
           + "\"or_port\":" + orPort + ",\n"
           + "\"dir_port\":" + dirPort + ",\n"
           + "\"running\":" + (running ? "true" : "false") + ",\n");
