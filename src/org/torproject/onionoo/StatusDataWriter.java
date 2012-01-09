@@ -177,6 +177,7 @@ public class StatusDataWriter {
       /* Write status file to disk. */
       File statusFile = new File(statusFileDirectory, fingerprint);
       try {
+        statusFile.getParentFile().mkdirs();
         BufferedWriter bw = new BufferedWriter(new FileWriter(
             statusFile));
         bw.write(statusParts);

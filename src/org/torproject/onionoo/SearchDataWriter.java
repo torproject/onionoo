@@ -112,6 +112,7 @@ public class SearchDataWriter {
 
     /* Write internal relay search data file to disk. */
     try {
+      this.internalRelaySearchDataFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.internalRelaySearchDataFile));
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
