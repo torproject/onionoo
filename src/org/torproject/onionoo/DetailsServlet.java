@@ -269,17 +269,24 @@ public class DetailsServlet extends HttpServlet {
         BufferedReader br = new BufferedReader(new FileReader(
             detailsFile));
         String line;
-        boolean correctValidAfterLine = false;
+        boolean correctValidAfterLine = false, copyLines = false;
         while ((line = br.readLine()) != null) {
           if (line.startsWith("\"valid_after\"") &&
               line.equals(this.validAfterLine)) {
             correctValidAfterLine = true;
+          } else if (line.startsWith("\"nickname\":")) {
+            sb.append("{");
+            copyLines = true;
           }
-          sb.append(line + "\n");
+          if (copyLines) {
+            sb.append(line + "\n");
+          }
         }
         br.close();
         if (correctValidAfterLine) {
           detailsLines = sb.toString();
+          detailsLines = detailsLines.substring(0,
+              detailsLines.length() - 1);
         }
       } catch (IOException e) {
       }
