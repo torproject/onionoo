@@ -42,6 +42,10 @@ Onionoo/TorStatusProtocol REST API
   Return the list of relays and bridges with searchtext matching nickname,
   fingerprint, IP address, or hashed fingerprint.
 
+1.6  GET summary/lookup/:fingerprint+fingerprint
+
+  Return the list of relays and bridges with the given fingerprints or
+  hashed fingerprints.
 
 2  Detail documents
 
