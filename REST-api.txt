@@ -25,13 +25,13 @@ Onionoo/TorStatusProtocol REST API
   Return the list of all relays and bridges that are currently running or
   that have been running in the past week.
 
-1.2  GET summary/relays
+1.2  GET summary/running
+
+  Return the list of running relays and bridges.
+
+1.3  GET summary/relays
 
   Return only the list of relays.
-
-1.3  GET summary/exits
-
-  Return only the list of exit relays.
 
 1.4  GET summary/bridges
 
@@ -42,10 +42,10 @@ Onionoo/TorStatusProtocol REST API
   Return the list of relays and bridges with searchtext matching nickname,
   fingerprint, IP address, or hashed fingerprint.
 
-1.6  GET summary/lookup/:fingerprint+fingerprint
+1.6  GET summary/lookup/:fingerprint
 
-  Return the list of relays and bridges with the given fingerprints or
-  hashed fingerprints.
+  Return the relay or bridge with the given fingerprint or hashed
+  fingerprint.
 
 2  Detail documents
 
@@ -76,33 +76,30 @@ Onionoo/TorStatusProtocol REST API
     "Tor 0.2.3.8-alpha-dev (git-f634228a07396519) on Linux x86_64"
   }
 
-2.1  GET detail/relay/:fingerprint
-
-  Return the detail document for the given relay only.
-
-2.2  GET detail/bridge/:hashed-fingerprint
-
-  Return the detail document for the given bridge only.
-
-2.3  GET detail/all
+2.1  GET detail/all
 
   Return detail documents for all relays and bridges.
 
-2.4  GET detail/relays
+2.2  GET detail/running
+
+  Return detail documents for running relays and bridges.
+
+2.3  GET detail/relays
 
   Return detail documents for all relays.
 
-2.5  GET detail/bridges
+2.4  GET detail/bridges
 
   Return detail documents for all bridges.
 
-2.6  GET detail/search/:searchtext
+2.5  GET detail/search/:searchtext
 
   Return detail documents for relays and bridges with searchtext matching
   nickname, fingerprint, IP address, or hashed fingerprint.
 
-# TODO Should there be a specific search for relays and for bridges?
-# TODO Add URLs for only the currently running relays and/or brides.
+2.6  GET detail/lookup/:fingerprint
+
+  Return the detail document for the given relay or bridge only.
 
 
 3  Bandwidth documents

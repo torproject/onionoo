@@ -2,12 +2,20 @@
   <property name="sources" value="src"/>
   <property name="classes" value="classes"/>
   <property name="libs" value="lib"/>
+  <property name="config" value="etc"/>
+  <property name="webxmlfile" value="${config}/web.xml"/>
+  <property name="contextxmltemplate"
+            value="${config}/context.xml.template"/>
+  <property name="contextxml" value="${config}/context.xml"/>
+  <property name="warfile" value="onionoo.war"/>
   <path id="classpath">
     <pathelement path="${classes}"/>
     <pathelement location="lib/commons-codec-1.4.jar"/>
+    <pathelement location="lib/servlet-api.jar"/>
     <pathelement location="lib/descriptor.jar"/>
   </path>
   <target name="init">
+    <copy file="${contextxmltemplate}" tofile="${contextxml}"/>
     <mkdir dir="${classes}"/>
   </target>
   <target name="compile"
@@ -25,6 +33,20 @@
         <fileset dir="${libs}"/>
       </classpath>
     </javac>
+  </target>
+  <target name="war"
+          depends="compile">
+    <war destfile="${warfile}"
+         webxml="${webxmlfile}">
+      <lib dir="${libs}"
+           excludes="servlet-api.jar"/>
+      <classes dir="${classes}"/>
+      <zipfileset dir="${config}"
+                  prefix="WEB-INF/classes"
+                  includes="logging.properties"/>
+      <metainf dir="${config}"
+               includes="context.xml"/>
+    </war>
   </target>
   <target name="run" depends="compile">
     <java fork="true"
