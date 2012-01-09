@@ -122,7 +122,7 @@ public class StatusDataWriter {
             Math.min(descriptor.getBandwidthBurst(),
             descriptor.getBandwidthObserved()));
         sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
-            + "\"uptime\":" + descriptor.getUptime() + "\n"
+            + "\"uptime\":" + descriptor.getUptime() + ",\n"
             + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
             + "\"exit_policy\":[");
         int written = 0;
@@ -142,6 +142,7 @@ public class StatusDataWriter {
           }
           sb.append("\n]");
         }
+        sb.append("\n}\n");
         descriptorParts = sb.toString();
       }
 
@@ -183,8 +184,9 @@ public class StatusDataWriter {
         bw.write(statusParts);
         if (descriptorParts != null) {
           bw.write(",\n" + descriptorParts);
+        } else {
+          bw.write("\n}\n");
         }
-        bw.write("\n}\n");
         bw.close();
       } catch (IOException e) {
         System.err.println("Could not write status file '"
