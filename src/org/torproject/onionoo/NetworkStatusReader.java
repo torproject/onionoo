@@ -27,6 +27,11 @@ public class NetworkStatusReader {
               (RelayServerDescriptor) descriptor;
           this.loadedRelayServerDescriptors.put(
               serverDescriptor.getFingerprint(), serverDescriptor);
+        } else if (descriptor instanceof RelayExtraInfoDescriptor) {
+          RelayExtraInfoDescriptor extraInfoDescriptor =
+              (RelayExtraInfoDescriptor) descriptor;
+          this.loadedRelayExtraInfoDescriptors.put(
+              extraInfoDescriptor.getFingerprint(), extraInfoDescriptor);
         }
       }
     }
@@ -46,6 +51,13 @@ public class NetworkStatusReader {
   public Map<String, RelayServerDescriptor>
       getLoadedRelayServerDescriptors() {
     return this.loadedRelayServerDescriptors;
+  }
+  private Map<String, RelayExtraInfoDescriptor>
+      loadedRelayExtraInfoDescriptors =
+      new HashMap<String, RelayExtraInfoDescriptor>();
+  public Map<String, RelayExtraInfoDescriptor>
+      getLoadedRelayExtraInfoDescriptors() {
+    return this.loadedRelayExtraInfoDescriptors;
   }
   private Set<BridgeNetworkStatus> loadedBridgeNetworkStatuses =
       new HashSet<BridgeNetworkStatus>();

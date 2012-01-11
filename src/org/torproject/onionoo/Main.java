@@ -15,6 +15,9 @@ public class Main {
         nsr.getLoadedRelayNetworkStatusConsensuses();
     Map<String, RelayServerDescriptor> loadedRelayServerDescriptors =
         nsr.getLoadedRelayServerDescriptors();
+    Map<String, RelayExtraInfoDescriptor>
+        loadedRelayExtraInfoDescriptors =
+        nsr.getLoadedRelayExtraInfoDescriptors();
     Set<BridgeNetworkStatus> loadedBridgeNetworkStatuses =
         nsr.getLoadedBridgeNetworkStatuses();
 
@@ -33,6 +36,15 @@ public class Main {
     stdw.setBridges(sd.getBridges());
     stdw.updateRelayServerDescriptors(loadedRelayServerDescriptors);
     stdw.writeStatusDataFiles();
+
+    printStatus("Updating bandwidth data.");
+    BandwidthDataWriter bdw = new BandwidthDataWriter();
+    bdw.setValidAfterMillis(sd.getLastValidAfterMillis());
+    bdw.setFreshUntilMillis(sd.getLastFreshUntilMillis());
+    bdw.setRelays(sd.getRelays());
+    bdw.setBridges(sd.getBridges());
+    bdw.updateRelayExtraInfoDescriptors(loadedRelayExtraInfoDescriptors);
+    bdw.deleteObsoleteBandwidthFiles();
 
     printStatus("Terminating.");
   }
