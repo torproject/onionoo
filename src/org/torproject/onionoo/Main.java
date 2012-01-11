@@ -15,8 +15,7 @@ public class Main {
         nsr.getLoadedRelayNetworkStatusConsensuses();
     Map<String, RelayServerDescriptor> loadedRelayServerDescriptors =
         nsr.getLoadedRelayServerDescriptors();
-    Map<String, RelayExtraInfoDescriptor>
-        loadedRelayExtraInfoDescriptors =
+    Set<RelayExtraInfoDescriptor> loadedRelayExtraInfoDescriptors =
         nsr.getLoadedRelayExtraInfoDescriptors();
     Set<BridgeNetworkStatus> loadedBridgeNetworkStatuses =
         nsr.getLoadedBridgeNetworkStatuses();

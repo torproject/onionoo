@@ -25,13 +25,15 @@ public class NetworkStatusReader {
         } else if (descriptor instanceof RelayServerDescriptor) {
           RelayServerDescriptor serverDescriptor =
               (RelayServerDescriptor) descriptor;
+          /* TODO When there are multiple server descriptors per relay, we
+           * should find out which of them was published most recently or
+           * was referenced in the consensus. */
           this.loadedRelayServerDescriptors.put(
               serverDescriptor.getFingerprint(), serverDescriptor);
         } else if (descriptor instanceof RelayExtraInfoDescriptor) {
           RelayExtraInfoDescriptor extraInfoDescriptor =
               (RelayExtraInfoDescriptor) descriptor;
-          this.loadedRelayExtraInfoDescriptors.put(
-              extraInfoDescriptor.getFingerprint(), extraInfoDescriptor);
+          this.loadedRelayExtraInfoDescriptors.add(extraInfoDescriptor);
         }
       }
     }
@@ -52,10 +54,9 @@ public class NetworkStatusReader {
       getLoadedRelayServerDescriptors() {
     return this.loadedRelayServerDescriptors;
   }
-  private Map<String, RelayExtraInfoDescriptor>
-      loadedRelayExtraInfoDescriptors =
-      new HashMap<String, RelayExtraInfoDescriptor>();
-  public Map<String, RelayExtraInfoDescriptor>
+  private Set<RelayExtraInfoDescriptor> loadedRelayExtraInfoDescriptors =
+      new HashSet<RelayExtraInfoDescriptor>();
+  public Set<RelayExtraInfoDescriptor>
       getLoadedRelayExtraInfoDescriptors() {
     return this.loadedRelayExtraInfoDescriptors;
   }
