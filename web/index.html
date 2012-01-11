@@ -71,7 +71,6 @@ nickname, fingerprint, IP address, or hashed fingerprint.</td>
 <td><a href="/details/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET details/lookup/:fingerprint</a></td>
 <td>Return the detail document for the given relay or bridge only.</td>
 </tr>
-<tr>
 </table>
 
 <h2>Bandwidth documents</h2>
@@ -80,8 +79,29 @@ Bandwidth information for one or more relays or bridges.
 </p>
 <table>
 <tr>
+<td><a href="/bandwidth/all">GET bandwidth/all</a></td>
+<td>Return bandwidth documents for all relays and bridges.</td>
+</tr>
+<tr>
+<td><a href="/bandwidth/running">GET bandwidth/running</a></td>
+<td>Return bandwidth documents for running relays and bridges.</td>
+</tr>
+<tr>
+<td><a href="/bandwidth/relays">GET bandwidth/relays</a></td>
+<td>Return bandwidth documents for all relays.</td>
+</tr>
+<tr>
+<td><a href="/bandwidth/bridges">GET bandwidth/bridges</a></td>
+<td>Return bandwidth documents for all bridges.</td>
+</tr>
+<tr>
+<td><a href="/bandwidth/search/gabelmoo">GET bandwidth/search/:searchtext</a></td>
+<td>Return bandwidth documents for relays and bridges with searchtext
+matching nickname, fingerprint, IP address, or hashed fingerprint.</td>
+</tr>
+<tr>
 <td><a href="/bandwidth/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET bandwidth/lookup/:fingerprint</a></td>
-<td>Return the bandwidth document for the given relay only.</td>
+<td>Return the bandwidth document for the given relay or bridge only.</td>
 </tr>
 </table>
 
