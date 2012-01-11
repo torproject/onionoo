@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class DetailsServlet extends HttpServlet {
+public class ResourceServlet extends HttpServlet {
 
   public void init() {
     this.readSummaryFile();
@@ -37,6 +37,9 @@ public class DetailsServlet extends HttpServlet {
       return;
     }
     if (summaryFile.lastModified() > this.summaryFileLastModified) {
+      this.versionLine = this.validAfterLine = this.freshUntilLine = null;
+      this.relayLines.clear();
+      this.bridgeLines.clear();
       try {
         BufferedReader br = new BufferedReader(new FileReader(
             summaryFile));
@@ -78,44 +81,57 @@ public class DetailsServlet extends HttpServlet {
 
     PrintWriter out = response.getWriter();
     String uri = request.getRequestURI();
-    if (uri.equals("/details/all")) {
+    String resourceType = null;
+    if (uri.startsWith("/summary/")) {
+      resourceType = "summary";
+    } else if (uri.startsWith("/details/")) {
+      resourceType = "details";
+    } else if (uri.startsWith("/bandwidth/")) {
+      resourceType = "bandwidth";
+    } else {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
+    }
+
+    if (uri.equals("/" + resourceType + "/all")) {
       this.writeHeader(out);
-      this.writeAllRelays(out);
-      this.writeAllBridges(out);
-    } else if (uri.equals("/details/running")) {
+      this.writeAllRelays(out, resourceType);
+      this.writeAllBridges(out, resourceType);
+    } else if (uri.equals("/" + resourceType + "/running")) {
       this.writeHeader(out);
-      this.writeRunningRelays(out);
-      this.writeRunningBridges(out);
-    } else if (uri.equals("/details/relays")) {
+      this.writeRunningRelays(out, resourceType);
+      this.writeRunningBridges(out, resourceType);
+    } else if (uri.equals("/" + resourceType + "/relays")) {
       this.writeHeader(out);
-      this.writeAllRelays(out);
+      this.writeAllRelays(out, resourceType);
       this.writeNoBridges(out);
-    } else if (uri.equals("/details/bridges")) {
+    } else if (uri.equals("/" + resourceType + "/bridges")) {
       this.writeHeader(out);
       this.writeNoRelays(out);
-      this.writeAllBridges(out);
-    } else if (uri.startsWith("/details/search/")) {
+      this.writeAllBridges(out, resourceType);
+    } else if (uri.startsWith("/" + resourceType + "/search/")) {
       String searchParameter = this.parseSearchParameter(uri.substring(
-          "/details/search/".length()));
+          ("/" + resourceType + "/search/").length()));
       if (searchParameter == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
       this.writeHeader(out);
-      this.writeMatchingRelays(out, searchParameter);
+      this.writeMatchingRelays(out, searchParameter, resourceType);
       this.writeNoBridges(out);
-    } else if (uri.startsWith("/details/lookup/")) {
+    } else if (uri.startsWith("/" + resourceType + "/lookup/")) {
       Set<String> fingerprintParameters = this.parseFingerprintParameters(
-          uri.substring("/details/lookup/".length()));
+          uri.substring(("/" + resourceType + "/lookup/").length()));
       if (fingerprintParameters == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
       this.writeHeader(out);
-      this.writeRelaysWithFingerprints(out, fingerprintParameters);
-      this.writeBridgesWithFingerprints(out, fingerprintParameters);
+      this.writeRelaysWithFingerprints(out, fingerprintParameters, resourceType);
+      this.writeBridgesWithFingerprints(out, fingerprintParameters, resourceType);
     } else {
-      out.println("not supported");
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
     out.close();
   }
@@ -149,23 +165,23 @@ public class DetailsServlet extends HttpServlet {
     out.println(this.freshUntilLine);
   }
 
-  private void writeAllRelays(PrintWriter out) {
+  private void writeAllRelays(PrintWriter out, String resourceType) {
     out.print("\"relays\":[");
     int written = 0;
     for (String line : this.relayLines) {
       out.print((written++ > 0 ? ",\n" : "\n"));
-      this.writeRelayFromSummaryLine(out, line);
+      this.writeRelayFromSummaryLine(out, line, resourceType);
     }
     out.println("],");
   }
 
-  private void writeRunningRelays(PrintWriter out) {
+  private void writeRunningRelays(PrintWriter out, String resourceType) {
     out.print("\"relays\":[");
     int written = 0;
     for (String line : this.relayLines) {
       if (line.contains("\"r\":true")) {
         out.print((written++ > 0 ? ",\n" : "\n"));
-        this.writeRelayFromSummaryLine(out, line);
+        this.writeRelayFromSummaryLine(out, line, resourceType);
       }
     }
     out.println("\n],");
@@ -176,7 +192,8 @@ public class DetailsServlet extends HttpServlet {
     out.println("],");
   }
 
-  private void writeMatchingRelays(PrintWriter out, String searchTerm) {
+  private void writeMatchingRelays(PrintWriter out, String searchTerm,
+      String resourceType) {
     out.print("\"relays\":[");
     int written = 0;
     for (String line : this.relayLines) {
@@ -188,14 +205,14 @@ public class DetailsServlet extends HttpServlet {
           line.substring(line.indexOf("\"a\":[")).contains("\""
           + searchTerm)) {
         out.print((written++ > 0 ? ",\n" : "\n"));
-        this.writeRelayFromSummaryLine(out, line);
+        this.writeRelayFromSummaryLine(out, line, resourceType);
       }
     }
     out.println("\n],");
   }
 
   private void writeRelaysWithFingerprints(PrintWriter out,
-      Set<String> fingerprints) {
+      Set<String> fingerprints, String resourceType) {
     out.print("\"relays\":[");
     int written = 0;
     for (String line : this.relayLines) {
@@ -203,7 +220,7 @@ public class DetailsServlet extends HttpServlet {
         if (line.contains("\"f\":\"" + fingerprint.toUpperCase()
             + "\",")) {
           out.print((written++ > 0 ? ",\n" : "\n"));
-          this.writeRelayFromSummaryLine(out, line);
+          this.writeRelayFromSummaryLine(out, line, resourceType);
           break;
         }
       }
@@ -211,23 +228,23 @@ public class DetailsServlet extends HttpServlet {
     out.println("\n],");
   }
 
-  private void writeAllBridges(PrintWriter out) {
+  private void writeAllBridges(PrintWriter out, String resourceType) {
     out.println("\"bridges\":[");
     int written = 0;
     for (String line : this.bridgeLines) {
       out.print((written++ > 0 ? ",\n" : "\n"));
-      this.writeBridgeFromSummaryLine(out, line);
+      this.writeBridgeFromSummaryLine(out, line, resourceType);
     }
     out.println("]}");
   }
 
-  private void writeRunningBridges(PrintWriter out) {
+  private void writeRunningBridges(PrintWriter out, String resourceType) {
     out.print("\"bridges\":[");
     int written = 0;
     for (String line : this.bridgeLines) {
       if (line.contains("\"r\":true")) {
         out.print((written++ > 0 ? ",\n" : "\n"));
-        this.writeBridgeFromSummaryLine(out, line);
+        this.writeBridgeFromSummaryLine(out, line, resourceType);
       }
     }
     out.println("\n]}");
@@ -239,7 +256,7 @@ public class DetailsServlet extends HttpServlet {
   }
 
   private void writeBridgesWithFingerprints(PrintWriter out,
-      Set<String> fingerprints) {
+      Set<String> fingerprints, String resourceType) {
     out.println("\"bridges\":[");
     int written = 0;
     for (String line : this.bridgeLines) {
@@ -247,7 +264,7 @@ public class DetailsServlet extends HttpServlet {
         if (line.contains("\"h\":\"" + fingerprint.toUpperCase()
             + "\",")) {
           out.print((written++ > 0 ? ",\n" : "\n"));
-          this.writeBridgeFromSummaryLine(out, line);
+          this.writeBridgeFromSummaryLine(out, line, resourceType);
           break;
         }
       }
@@ -256,7 +273,22 @@ public class DetailsServlet extends HttpServlet {
   }
 
   private void writeRelayFromSummaryLine(PrintWriter out,
-      String summaryLine) {
+      String summaryLine, String resourceType) {
+    if (resourceType.equals("summary")) {
+      this.writeSummaryLine(out, summaryLine);
+    } else if (resourceType.equals("details")) {
+      this.writeDetailsLines(out, summaryLine);
+    } else if (resourceType.equals("bandwidth")) {
+      this.writeBandwidthLines(out, summaryLine);
+    }
+  }
+
+  private void writeSummaryLine(PrintWriter out, String summaryLine) {
+    out.print(summaryLine.endsWith(",") ? summaryLine.substring(0,
+        summaryLine.length() - 1) : summaryLine);
+  }
+
+  private void writeDetailsLines(PrintWriter out, String summaryLine) {
     String fingerprint = summaryLine.substring(summaryLine.indexOf(
        "\"f\":\"") + "\"f\":\"".length());
     fingerprint = fingerprint.substring(0, 40);
@@ -296,7 +328,36 @@ public class DetailsServlet extends HttpServlet {
     }
   }
 
-  private void writeBridgeFromSummaryLine(PrintWriter out, String line) {
+  private void writeBandwidthLines(PrintWriter out, String summaryLine) {
+    String fingerprint = summaryLine.substring(summaryLine.indexOf(
+       "\"f\":\"") + "\"f\":\"".length());
+    fingerprint = fingerprint.substring(0, 40);
+    File detailsFile = new File("/srv/onionoo/out/bandwidth/"
+        + fingerprint);
+    StringBuilder sb = new StringBuilder();
+    String bandwidthLines = null;
+    if (detailsFile.exists()) {
+      try {
+        BufferedReader br = new BufferedReader(new FileReader(
+            detailsFile));
+        String line;
+        while ((line = br.readLine()) != null) {
+          sb.append(line + "\n");
+        }
+        br.close();
+        bandwidthLines = sb.toString();
+      } catch (IOException e) {
+      }
+    }
+    if (bandwidthLines != null) {
+      bandwidthLines = bandwidthLines.substring(0,
+          bandwidthLines.length() - 1);
+      out.print(bandwidthLines);
+    }
+  }
+
+  private void writeBridgeFromSummaryLine(PrintWriter out, String line,
+      String resourceType) {
     /* TODO Implement me. */
   }
 }

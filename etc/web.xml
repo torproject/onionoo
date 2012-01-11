@@ -7,25 +7,22 @@
   http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
 
   <servlet>
-    <servlet-name>Summary</servlet-name>
+    <servlet-name>Resource</servlet-name>
     <servlet-class>
-      org.torproject.onionoo.SummaryServlet
+      org.torproject.onionoo.ResourceServlet
     </servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>Summary</servlet-name>
+    <servlet-name>Resource</servlet-name>
     <url-pattern>/summary/*</url-pattern>
   </servlet-mapping>
-
-  <servlet>
-    <servlet-name>Details</servlet-name>
-    <servlet-class>
-      org.torproject.onionoo.DetailsServlet
-    </servlet-class>
-  </servlet>
   <servlet-mapping>
-    <servlet-name>Details</servlet-name>
+    <servlet-name>Resource</servlet-name>
     <url-pattern>/details/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Resource</servlet-name>
+    <url-pattern>/bandwidth/*</url-pattern>
   </servlet-mapping>
 
 </web-app>
