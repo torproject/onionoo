@@ -304,20 +304,31 @@ public class BandwidthDataWriter {
           + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
       double factor = ((double) maxValue) / 999.0;
       int count = lastNonNullIndex - firstNonNullIndex + 1;
-      sb.append("\"" + graphName + "\":{"
+      StringBuilder sb2 = new StringBuilder();
+      sb2.append("\"" + graphName + "\":{"
           + "\"first\":\"" + dateTimeFormat.format(firstDataPointMillis)
           + "\",\"last\":\"" + dateTimeFormat.format(lastDataPointMillis)
           + "\",\"interval\":" + String.valueOf(dataPointInterval / 1000L)
           + ",\"factor\":" + String.format("%.3f", factor) + ","
           + "\"count\":" + String.valueOf(count) + ","
           + "\"values\":[");
-      int written = 0;
+      int written = 0, previousNonNullIndex = -2;
+      boolean foundTwoAdjacentDataPoints = false;
       for (int j = firstNonNullIndex; j <= lastNonNullIndex; j++) {
         long dataPoint = dataPoints.get(j);
-        sb.append((written++ > 0 ? "," : "") + (dataPoint < 0L ? "null" :
+        if (dataPoint >= 0L) {
+          if (j - previousNonNullIndex == 1) {
+            foundTwoAdjacentDataPoints = true;
+          }
+          previousNonNullIndex = j;
+        }
+        sb2.append((written++ > 0 ? "," : "") + (dataPoint < 0L ? "null" :
             String.valueOf((dataPoint * 999L) / maxValue)));
       }
-      sb.append("]},\n");
+      sb2.append("]},\n");
+      if (foundTwoAdjacentDataPoints) {
+        sb.append(sb2.toString());
+      }
     }
     String result = sb.toString();
     if (result.length() >= 2) {
