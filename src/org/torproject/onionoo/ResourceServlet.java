@@ -169,8 +169,10 @@ public class ResourceServlet extends HttpServlet {
     out.print("\"relays\":[");
     int written = 0;
     for (String line : this.relayLines) {
-      out.print((written++ > 0 ? ",\n" : "\n"));
-      this.writeRelayFromSummaryLine(out, line, resourceType);
+      String lines = this.getRelayFromSummaryLine(line, resourceType);
+      if (lines.length() > 0) {
+        out.print((written++ > 0 ? ",\n" : "\n") + lines);
+      }
     }
     out.println("],");
   }
@@ -180,8 +182,10 @@ public class ResourceServlet extends HttpServlet {
     int written = 0;
     for (String line : this.relayLines) {
       if (line.contains("\"r\":true")) {
-        out.print((written++ > 0 ? ",\n" : "\n"));
-        this.writeRelayFromSummaryLine(out, line, resourceType);
+        String lines = this.getRelayFromSummaryLine(line, resourceType);
+        if (lines.length() > 0) {
+          out.print((written++ > 0 ? ",\n" : "\n") + lines);
+        }
       }
     }
     out.println("\n],");
@@ -204,8 +208,10 @@ public class ResourceServlet extends HttpServlet {
           line.contains("\"f\":\"" + searchTerm.toUpperCase()) ||
           line.substring(line.indexOf("\"a\":[")).contains("\""
           + searchTerm)) {
-        out.print((written++ > 0 ? ",\n" : "\n"));
-        this.writeRelayFromSummaryLine(out, line, resourceType);
+        String lines = this.getRelayFromSummaryLine(line, resourceType);
+        if (lines.length() > 0) {
+          out.print((written++ > 0 ? ",\n" : "\n") + lines);
+        }
       }
     }
     out.println("\n],");
@@ -219,8 +225,10 @@ public class ResourceServlet extends HttpServlet {
       for (String fingerprint : fingerprints) {
         if (line.contains("\"f\":\"" + fingerprint.toUpperCase()
             + "\",")) {
-          out.print((written++ > 0 ? ",\n" : "\n"));
-          this.writeRelayFromSummaryLine(out, line, resourceType);
+          String lines = this.getRelayFromSummaryLine(line, resourceType);
+          if (lines.length() > 0) {
+            out.print((written++ > 0 ? ",\n" : "\n") + lines);
+          }
           break;
         }
       }
@@ -272,23 +280,25 @@ public class ResourceServlet extends HttpServlet {
     out.println("]}");
   }
 
-  private void writeRelayFromSummaryLine(PrintWriter out,
-      String summaryLine, String resourceType) {
+  private String getRelayFromSummaryLine(String summaryLine,
+      String resourceType) {
     if (resourceType.equals("summary")) {
-      this.writeSummaryLine(out, summaryLine);
+      return this.writeSummaryLine(summaryLine);
     } else if (resourceType.equals("details")) {
-      this.writeDetailsLines(out, summaryLine);
+      return this.writeDetailsLines(summaryLine);
     } else if (resourceType.equals("bandwidth")) {
-      this.writeBandwidthLines(out, summaryLine);
+      return this.writeBandwidthLines(summaryLine);
+    } else {
+      return "";
     }
   }
 
-  private void writeSummaryLine(PrintWriter out, String summaryLine) {
-    out.print(summaryLine.endsWith(",") ? summaryLine.substring(0,
+  private String writeSummaryLine(String summaryLine) {
+    return (summaryLine.endsWith(",") ? summaryLine.substring(0,
         summaryLine.length() - 1) : summaryLine);
   }
 
-  private void writeDetailsLines(PrintWriter out, String summaryLine) {
+  private String writeDetailsLines(String summaryLine) {
     String fingerprint = summaryLine.substring(summaryLine.indexOf(
        "\"f\":\"") + "\"f\":\"".length());
     fingerprint = fingerprint.substring(0, 40);
@@ -324,11 +334,13 @@ public class ResourceServlet extends HttpServlet {
       }
     }
     if (detailsLines != null) {
-      out.print(detailsLines);
+      return detailsLines;
+    } else {
+      return "";
     }
   }
 
-  private void writeBandwidthLines(PrintWriter out, String summaryLine) {
+  private String writeBandwidthLines(String summaryLine) {
     String fingerprint = summaryLine.substring(summaryLine.indexOf(
        "\"f\":\"") + "\"f\":\"".length());
     fingerprint = fingerprint.substring(0, 40);
@@ -352,7 +364,9 @@ public class ResourceServlet extends HttpServlet {
     if (bandwidthLines != null) {
       bandwidthLines = bandwidthLines.substring(0,
           bandwidthLines.length() - 1);
-      out.print(bandwidthLines);
+      return bandwidthLines;
+    } else {
+      return "";
     }
   }
 
