@@ -20,14 +20,6 @@ import org.torproject.descriptor.*;
  * the past day, past week, past month, past three months, past year, and
  * past five years. */
 public class BandwidthDataWriter {
-  private long validAfterMillis;
-  public void setValidAfterMillis(long validAfterMillis) {
-    this.validAfterMillis = validAfterMillis;
-  }
-  private long freshUntilMillis;
-  public void setFreshUntilMillis(long freshUntilMillis) {
-    this.freshUntilMillis = freshUntilMillis;
-  }
   private SortedMap<String, SearchEntryData> relays;
   public void setRelays(SortedMap<String, SearchEntryData> relays) {
     this.relays = relays;

@@ -38,8 +38,6 @@ public class Main {
 
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter();
-    bdw.setValidAfterMillis(sd.getLastValidAfterMillis());
-    bdw.setFreshUntilMillis(sd.getLastFreshUntilMillis());
     bdw.setRelays(sd.getRelays());
     bdw.setBridges(sd.getBridges());
     bdw.updateRelayExtraInfoDescriptors(loadedRelayExtraInfoDescriptors);
