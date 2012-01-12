@@ -26,9 +26,9 @@ public class StatusDataWriter {
   public void setBridges(SortedMap<String, Long> bridges) {
     this.bridges = bridges;
   }
-  private Map<String, RelayServerDescriptor> serverDescriptors;
+  private Map<String, ServerDescriptor> serverDescriptors;
   public void updateRelayServerDescriptors(
-      Map<String, RelayServerDescriptor> serverDescriptors) {
+      Map<String, ServerDescriptor> serverDescriptors) {
     this.serverDescriptors = serverDescriptors;
   }
   public void writeStatusDataFiles() {
@@ -113,7 +113,7 @@ public class StatusDataWriter {
       if (this.serverDescriptors.containsKey(fingerprint) &&
           this.serverDescriptors.get(fingerprint).getPublishedMillis() >
           publishedMillis) {
-        RelayServerDescriptor descriptor = this.serverDescriptors.get(
+        ServerDescriptor descriptor = this.serverDescriptors.get(
             fingerprint);
         StringBuilder sb = new StringBuilder();
         String publishedDateTime = dateTimeFormat.format(

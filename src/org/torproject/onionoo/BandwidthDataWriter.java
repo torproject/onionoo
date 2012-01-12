@@ -37,13 +37,12 @@ public class BandwidthDataWriter {
     this.bridges = bridges;
   }
   public void updateRelayExtraInfoDescriptors(
-      Set<RelayExtraInfoDescriptor> extraInfoDescriptors) {
-    for (RelayExtraInfoDescriptor descriptor : extraInfoDescriptors) {
+      Set<ExtraInfoDescriptor> extraInfoDescriptors) {
+    for (ExtraInfoDescriptor descriptor : extraInfoDescriptors) {
       parseDescriptor(descriptor);
     }
   }
-  private static void parseDescriptor(
-      RelayExtraInfoDescriptor descriptor) {
+  private static void parseDescriptor(ExtraInfoDescriptor descriptor) {
     String fingerprint = descriptor.getFingerprint();
     boolean readNewHistory = false;
     SortedMap<Long, long[]> writeHistory = new TreeMap<Long, long[]>(),
