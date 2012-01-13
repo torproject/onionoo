@@ -2,6 +2,7 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
+import java.io.*;
 import java.util.*;
 import org.torproject.descriptor.*;
 
@@ -42,15 +43,23 @@ public class SearchData {
   public SortedMap<String, SearchEntryData> getRelays() {
     return new TreeMap<String, SearchEntryData>(this.containedRelays);
   }
-  public void updateAll(Collection<RelayNetworkStatusConsensus>
-      consensuses) {
-    if (consensuses != null) {
-      for (RelayNetworkStatusConsensus consensus : consensuses) {
-        this.update(consensus);
+  public void updateRelayNetworkConsensuses() {
+    RelayDescriptorReader reader =
+        DescriptorSourceFactory.createRelayDescriptorReader();
+    reader.addDirectory(new File("in/relay-descriptors/consensuses"));
+    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
+    while (descriptorFiles.hasNext()) {
+      DescriptorFile descriptorFile = descriptorFiles.next();
+      if (descriptorFile.getDescriptors() != null) {
+        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
+          updateRelayNetworkStatusConsensus((RelayNetworkStatusConsensus)
+              descriptor);
+        }
       }
     }
   }
-  public void update(RelayNetworkStatusConsensus consensus) {
+  private void updateRelayNetworkStatusConsensus(
+      RelayNetworkStatusConsensus consensus) {
     long validAfterMillis = consensus.getValidAfterMillis();
     for (NetworkStatusEntry entry :
         consensus.getStatusEntries().values()) {
@@ -65,18 +74,27 @@ public class SearchData {
     }
   }
   private SortedSet<Long> containedPublishedMillis = new TreeSet<Long>();
-  public void updateBridgeNetworkStatuses(
-      Collection<BridgeNetworkStatus> statuses) {
-    if (statuses != null) {
-      for (BridgeNetworkStatus status : statuses) {
-        long publishedMillis = status.getPublishedMillis();
-        for (String hashedFingerprint :
-            status.getStatusEntries().keySet()) {
-          this.addBridge(hashedFingerprint, publishedMillis);
+  public void updateBridgeNetworkStatuses() {
+    BridgeDescriptorReader reader =
+        DescriptorSourceFactory.createBridgeDescriptorReader();
+    reader.addDirectory(new File("in/bridge-descriptors/statuses"));
+    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
+    while (descriptorFiles.hasNext()) {
+      DescriptorFile descriptorFile = descriptorFiles.next();
+      if (descriptorFile.getDescriptors() != null) {
+        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
+          updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
         }
-        this.containedPublishedMillis.add(publishedMillis);
       }
     }
+  }
+  private void updateBridgeNetworkStatus(BridgeNetworkStatus status) {
+    long publishedMillis = status.getPublishedMillis();
+    for (String hashedFingerprint :
+        status.getStatusEntries().keySet()) {
+      this.addBridge(hashedFingerprint, publishedMillis);
+    }
+    this.containedPublishedMillis.add(publishedMillis);
   }
   private SortedMap<String, Long> containedBridges =
       new TreeMap<String, Long>();

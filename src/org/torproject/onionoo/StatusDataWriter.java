@@ -26,10 +26,32 @@ public class StatusDataWriter {
   public void setBridges(SortedMap<String, Long> bridges) {
     this.bridges = bridges;
   }
-  private Map<String, ServerDescriptor> serverDescriptors;
-  public void updateRelayServerDescriptors(
-      Map<String, ServerDescriptor> serverDescriptors) {
-    this.serverDescriptors = serverDescriptors;
+  private Map<String, ServerDescriptor> serverDescriptors =
+      new HashMap<String, ServerDescriptor>();
+  public void updateRelayServerDescriptors() {
+    RelayDescriptorReader reader =
+        DescriptorSourceFactory.createRelayDescriptorReader();
+    reader.addDirectory(new File(
+        "in/relay-descriptors/server-descriptors"));
+    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
+    while (descriptorFiles.hasNext()) {
+      DescriptorFile descriptorFile = descriptorFiles.next();
+      if (descriptorFile.getDescriptors() != null) {
+        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
+          ServerDescriptor serverDescriptor =
+              (ServerDescriptor) descriptor;
+          String fingerprint = serverDescriptor.getFingerprint();
+          if (!this.serverDescriptors.containsKey(fingerprint) ||
+              this.serverDescriptors.get(fingerprint).getPublishedMillis()
+              < serverDescriptor.getPublishedMillis()) {
+            /* TODO This makes us pick the last published server
+             * descriptor per relay, not the one that is referenced in the
+             * consensus.  This may not be what we want. */
+            this.serverDescriptors.put(fingerprint, serverDescriptor);
+          }
+        }
+      }
+    }
   }
   public void writeStatusDataFiles() {
     SortedMap<String, File> remainingStatusFiles =

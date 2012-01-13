@@ -28,10 +28,20 @@ public class BandwidthDataWriter {
   public void setBridges(SortedMap<String, Long> bridges) {
     this.bridges = bridges;
   }
-  public void updateRelayExtraInfoDescriptors(
-      Set<ExtraInfoDescriptor> extraInfoDescriptors) {
-    for (ExtraInfoDescriptor descriptor : extraInfoDescriptors) {
-      parseDescriptor(descriptor);
+  public void updateRelayExtraInfoDescriptors() {
+    RelayDescriptorReader reader =
+        DescriptorSourceFactory.createRelayDescriptorReader();
+    reader.addDirectory(new File("in/relay-descriptors/extra-infos"));
+    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
+    while (descriptorFiles.hasNext()) {
+      DescriptorFile descriptorFile = descriptorFiles.next();
+      if (descriptorFile.getDescriptors() != null) {
+        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
+          ExtraInfoDescriptor extraInfoDescriptor =
+              (ExtraInfoDescriptor) descriptor;
+          parseDescriptor(extraInfoDescriptor);
+        }
+      }
     }
   }
   private static void parseDescriptor(ExtraInfoDescriptor descriptor) {

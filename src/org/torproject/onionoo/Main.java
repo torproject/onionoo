@@ -9,22 +9,11 @@ import org.torproject.descriptor.*;
 public class Main {
   public static void main(String[] args) {
 
-    printStatus("Reading descriptors from disk.");
-    NetworkStatusReader nsr = new NetworkStatusReader();
-    Set<RelayNetworkStatusConsensus> loadedConsensuses =
-        nsr.getLoadedRelayNetworkStatusConsensuses();
-    Map<String, ServerDescriptor> loadedRelayServerDescriptors =
-        nsr.getLoadedRelayServerDescriptors();
-    Set<ExtraInfoDescriptor> loadedRelayExtraInfoDescriptors =
-        nsr.getLoadedRelayExtraInfoDescriptors();
-    Set<BridgeNetworkStatus> loadedBridgeNetworkStatuses =
-        nsr.getLoadedBridgeNetworkStatuses();
-
     printStatus("Updating search data.");
     SearchDataWriter sedw = new SearchDataWriter();
     SearchData sd = sedw.readRelaySearchDataFile();
-    sd.updateAll(loadedConsensuses);
-    sd.updateBridgeNetworkStatuses(loadedBridgeNetworkStatuses);
+    sd.updateRelayNetworkConsensuses();
+    sd.updateBridgeNetworkStatuses();
     sedw.writeRelaySearchDataFile(sd);
 
     printStatus("Updating status data.");
@@ -33,14 +22,13 @@ public class Main {
     stdw.setFreshUntilMillis(sd.getLastFreshUntilMillis());
     stdw.setRelays(sd.getRelays());
     stdw.setBridges(sd.getBridges());
-    stdw.updateRelayServerDescriptors(loadedRelayServerDescriptors);
-    stdw.writeStatusDataFiles();
+    stdw.updateRelayServerDescriptors();
 
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter();
     bdw.setRelays(sd.getRelays());
     bdw.setBridges(sd.getBridges());
-    bdw.updateRelayExtraInfoDescriptors(loadedRelayExtraInfoDescriptors);
+    bdw.updateRelayExtraInfoDescriptors();
     bdw.deleteObsoleteBandwidthFiles();
 
     printStatus("Terminating.");
