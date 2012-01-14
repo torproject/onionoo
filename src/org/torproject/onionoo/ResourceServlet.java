@@ -127,8 +127,10 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       this.writeHeader(out);
-      this.writeRelaysWithFingerprints(out, fingerprintParameters, resourceType);
-      this.writeBridgesWithFingerprints(out, fingerprintParameters, resourceType);
+      this.writeRelaysWithFingerprints(out, fingerprintParameters,
+          resourceType);
+      this.writeBridgesWithFingerprints(out, fingerprintParameters,
+          resourceType);
     } else {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       return;
@@ -237,13 +239,15 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private void writeAllBridges(PrintWriter out, String resourceType) {
-    out.println("\"bridges\":[");
+    out.print("\"bridges\":[");
     int written = 0;
     for (String line : this.bridgeLines) {
-      out.print((written++ > 0 ? ",\n" : "\n"));
-      this.writeBridgeFromSummaryLine(out, line, resourceType);
+      String lines = this.getBridgeFromSummaryLine(line, resourceType);
+      if (lines.length() > 0) {
+        out.print((written++ > 0 ? ",\n" : "\n") + lines);
+      }
     }
-    out.println("]}");
+    out.println("\n]}");
   }
 
   private void writeRunningBridges(PrintWriter out, String resourceType) {
@@ -251,8 +255,10 @@ public class ResourceServlet extends HttpServlet {
     int written = 0;
     for (String line : this.bridgeLines) {
       if (line.contains("\"r\":true")) {
-        out.print((written++ > 0 ? ",\n" : "\n"));
-        this.writeBridgeFromSummaryLine(out, line, resourceType);
+        String lines = this.getBridgeFromSummaryLine(line, resourceType);
+        if (lines.length() > 0) {
+          out.print((written++ > 0 ? ",\n" : "\n") + lines);
+        }
       }
     }
     out.println("\n]}");
@@ -265,19 +271,22 @@ public class ResourceServlet extends HttpServlet {
 
   private void writeBridgesWithFingerprints(PrintWriter out,
       Set<String> fingerprints, String resourceType) {
-    out.println("\"bridges\":[");
+    out.print("\"bridges\":[");
     int written = 0;
     for (String line : this.bridgeLines) {
       for (String fingerprint : fingerprints) {
         if (line.contains("\"h\":\"" + fingerprint.toUpperCase()
             + "\",")) {
-          out.print((written++ > 0 ? ",\n" : "\n"));
-          this.writeBridgeFromSummaryLine(out, line, resourceType);
+          String lines = this.getBridgeFromSummaryLine(line,
+              resourceType);
+          if (lines.length() > 0) {
+            out.print((written++ > 0 ? ",\n" : "\n") + lines);
+          }
           break;
         }
       }
     }
-    out.println("]}");
+    out.println("\n]}");
   }
 
   private String getRelayFromSummaryLine(String summaryLine,
@@ -285,9 +294,9 @@ public class ResourceServlet extends HttpServlet {
     if (resourceType.equals("summary")) {
       return this.writeSummaryLine(summaryLine);
     } else if (resourceType.equals("details")) {
-      return this.writeDetailsLines(summaryLine);
+      return this.writeRelayDetailsLines(summaryLine);
     } else if (resourceType.equals("bandwidth")) {
-      return this.writeBandwidthLines(summaryLine);
+      return this.writeRelayBandwidthLines(summaryLine);
     } else {
       return "";
     }
@@ -298,7 +307,7 @@ public class ResourceServlet extends HttpServlet {
         summaryLine.length() - 1) : summaryLine);
   }
 
-  private String writeDetailsLines(String summaryLine) {
+  private String writeRelayDetailsLines(String summaryLine) {
     String fingerprint = summaryLine.substring(summaryLine.indexOf(
        "\"f\":\"") + "\"f\":\"".length());
     fingerprint = fingerprint.substring(0, 40);
@@ -311,12 +320,9 @@ public class ResourceServlet extends HttpServlet {
         BufferedReader br = new BufferedReader(new FileReader(
             detailsFile));
         String line;
-        boolean correctValidAfterLine = false, copyLines = false;
+        boolean copyLines = false;
         while ((line = br.readLine()) != null) {
-          if (line.startsWith("\"valid_after\"") &&
-              line.equals(this.validAfterLine)) {
-            correctValidAfterLine = true;
-          } else if (line.startsWith("\"nickname\":")) {
+          if (line.startsWith("\"nickname\":")) {
             sb.append("{");
             copyLines = true;
           }
@@ -325,11 +331,9 @@ public class ResourceServlet extends HttpServlet {
           }
         }
         br.close();
-        if (correctValidAfterLine) {
-          detailsLines = sb.toString();
-          detailsLines = detailsLines.substring(0,
-              detailsLines.length() - 1);
-        }
+        detailsLines = sb.toString();
+        detailsLines = detailsLines.substring(0,
+            detailsLines.length() - 1);
       } catch (IOException e) {
       }
     }
@@ -340,7 +344,7 @@ public class ResourceServlet extends HttpServlet {
     }
   }
 
-  private String writeBandwidthLines(String summaryLine) {
+  private String writeRelayBandwidthLines(String summaryLine) {
     String fingerprint = summaryLine.substring(summaryLine.indexOf(
        "\"f\":\"") + "\"f\":\"".length());
     fingerprint = fingerprint.substring(0, 40);
@@ -370,9 +374,25 @@ public class ResourceServlet extends HttpServlet {
     }
   }
 
-  private void writeBridgeFromSummaryLine(PrintWriter out, String line,
+  private String getBridgeFromSummaryLine(String summaryLine,
       String resourceType) {
-    /* TODO Implement me. */
+    if (resourceType.equals("summary")) {
+      return this.writeSummaryLine(summaryLine);
+    } else if (resourceType.equals("details")) {
+      return this.writeBridgeDetailsLines(summaryLine);
+    } else if (resourceType.equals("bandwidth")) {
+      return this.writeBridgeBandwidthLines(summaryLine);
+    } else {
+      return "";
+    }
+  }
+
+  private String writeBridgeDetailsLines(String summaryLine) {
+    return "";
+  }
+
+  private String writeBridgeBandwidthLines(String summaryLine) {
+    return "";
   }
 }
 
