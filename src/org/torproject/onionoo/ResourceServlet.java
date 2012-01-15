@@ -180,7 +180,7 @@ public class ResourceServlet extends HttpServlet {
     sb.append("\"relays\":[");
     int written = 0;
     for (String line : this.relayLines) {
-      String lines = this.getRelayFromSummaryLine(line, resourceType);
+      String lines = this.getFromSummaryLine(line, resourceType);
       if (lines.length() > 0) {
         sb.append((written++ > 0 ? ",\n" : "\n") + lines);
       }
@@ -193,7 +193,7 @@ public class ResourceServlet extends HttpServlet {
     int written = 0;
     for (String line : this.relayLines) {
       if (line.contains("\"r\":true")) {
-        String lines = this.getRelayFromSummaryLine(line, resourceType);
+        String lines = this.getFromSummaryLine(line, resourceType);
         if (lines.length() > 0) {
           sb.append((written++ > 0 ? ",\n" : "\n") + lines);
         }
@@ -219,7 +219,7 @@ public class ResourceServlet extends HttpServlet {
           line.contains("\"f\":\"" + searchTerm.toUpperCase()) ||
           line.substring(line.indexOf("\"a\":[")).contains("\""
           + searchTerm)) {
-        String lines = this.getRelayFromSummaryLine(line, resourceType);
+        String lines = this.getFromSummaryLine(line, resourceType);
         if (lines.length() > 0) {
           sb.append((written++ > 0 ? ",\n" : "\n") + lines);
         }
@@ -236,7 +236,7 @@ public class ResourceServlet extends HttpServlet {
       for (String fingerprint : fingerprints) {
         if (line.contains("\"f\":\"" + fingerprint.toUpperCase()
             + "\",")) {
-          String lines = this.getRelayFromSummaryLine(line, resourceType);
+          String lines = this.getFromSummaryLine(line, resourceType);
           if (lines.length() > 0) {
             sb.append((written++ > 0 ? ",\n" : "\n") + lines);
           }
@@ -251,7 +251,7 @@ public class ResourceServlet extends HttpServlet {
     sb.append("\"bridges\":[");
     int written = 0;
     for (String line : this.bridgeLines) {
-      String lines = this.getBridgeFromSummaryLine(line, resourceType);
+      String lines = this.getFromSummaryLine(line, resourceType);
       if (lines.length() > 0) {
         sb.append((written++ > 0 ? ",\n" : "\n") + lines);
       }
@@ -264,7 +264,7 @@ public class ResourceServlet extends HttpServlet {
     int written = 0;
     for (String line : this.bridgeLines) {
       if (line.contains("\"r\":true")) {
-        String lines = this.getBridgeFromSummaryLine(line, resourceType);
+        String lines = this.getFromSummaryLine(line, resourceType);
         if (lines.length() > 0) {
           sb.append((written++ > 0 ? ",\n" : "\n") + lines);
         }
@@ -286,7 +286,7 @@ public class ResourceServlet extends HttpServlet {
       for (String fingerprint : fingerprints) {
         if (line.contains("\"h\":\"" + fingerprint.toUpperCase()
             + "\",")) {
-          String lines = this.getBridgeFromSummaryLine(line,
+          String lines = this.getFromSummaryLine(line,
               resourceType);
           if (lines.length() > 0) {
             sb.append((written++ > 0 ? ",\n" : "\n") + lines);
@@ -298,14 +298,14 @@ public class ResourceServlet extends HttpServlet {
     sb.append("\n]}\n");
   }
 
-  private String getRelayFromSummaryLine(String summaryLine,
+  private String getFromSummaryLine(String summaryLine,
       String resourceType) {
     if (resourceType.equals("summary")) {
       return this.writeSummaryLine(summaryLine);
     } else if (resourceType.equals("details")) {
-      return this.writeRelayDetailsLines(summaryLine);
+      return this.writeDetailsLines(summaryLine);
     } else if (resourceType.equals("bandwidth")) {
-      return this.writeRelayBandwidthLines(summaryLine);
+      return this.writeBandwidthLines(summaryLine);
     } else {
       return "";
     }
@@ -316,9 +316,17 @@ public class ResourceServlet extends HttpServlet {
         summaryLine.length() - 1) : summaryLine);
   }
 
-  private String writeRelayDetailsLines(String summaryLine) {
-    String fingerprint = summaryLine.substring(summaryLine.indexOf(
-       "\"f\":\"") + "\"f\":\"".length());
+  private String writeDetailsLines(String summaryLine) {
+    String fingerprint = null;
+    if (summaryLine.contains("\"f\":\"")) {
+      fingerprint = summaryLine.substring(summaryLine.indexOf(
+         "\"f\":\"") + "\"f\":\"".length());
+    } else if (summaryLine.contains("\"h\":\"")) {
+      fingerprint = summaryLine.substring(summaryLine.indexOf(
+         "\"h\":\"") + "\"h\":\"".length());
+    } else {
+      return "";
+    }
     fingerprint = fingerprint.substring(0, 40);
     File detailsFile = new File("/srv/onionoo/out/details/"
         + fingerprint);
@@ -353,9 +361,17 @@ public class ResourceServlet extends HttpServlet {
     }
   }
 
-  private String writeRelayBandwidthLines(String summaryLine) {
-    String fingerprint = summaryLine.substring(summaryLine.indexOf(
-       "\"f\":\"") + "\"f\":\"".length());
+  private String writeBandwidthLines(String summaryLine) {
+    String fingerprint = null;
+    if (summaryLine.contains("\"f\":\"")) {
+      fingerprint = summaryLine.substring(summaryLine.indexOf(
+         "\"f\":\"") + "\"f\":\"".length());
+    } else if (summaryLine.contains("\"h\":\"")) {
+      fingerprint = summaryLine.substring(summaryLine.indexOf(
+         "\"h\":\"") + "\"h\":\"".length());
+    } else {
+      return "";
+    }
     fingerprint = fingerprint.substring(0, 40);
     File detailsFile = new File("/srv/onionoo/out/bandwidth/"
         + fingerprint);
@@ -381,27 +397,6 @@ public class ResourceServlet extends HttpServlet {
     } else {
       return "";
     }
-  }
-
-  private String getBridgeFromSummaryLine(String summaryLine,
-      String resourceType) {
-    if (resourceType.equals("summary")) {
-      return this.writeSummaryLine(summaryLine);
-    } else if (resourceType.equals("details")) {
-      return this.writeBridgeDetailsLines(summaryLine);
-    } else if (resourceType.equals("bandwidth")) {
-      return this.writeBridgeBandwidthLines(summaryLine);
-    } else {
-      return "";
-    }
-  }
-
-  private String writeBridgeDetailsLines(String summaryLine) {
-    return "";
-  }
-
-  private String writeBridgeBandwidthLines(String summaryLine) {
-    return "";
   }
 }
 
