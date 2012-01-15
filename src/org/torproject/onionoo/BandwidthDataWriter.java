@@ -20,7 +20,7 @@ import org.torproject.descriptor.*;
  * the past day, past week, past month, past three months, past year, and
  * past five years. */
 public class BandwidthDataWriter {
-  private SortedSet<String> currentFingerprints;
+  private SortedSet<String> currentFingerprints = new TreeSet<String>();
   public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
     this.currentFingerprints.addAll(currentRelays.keySet());
   }
