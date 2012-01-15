@@ -18,8 +18,6 @@ public class Main {
 
     printStatus("Updating status data.");
     StatusDataWriter stdw = new StatusDataWriter();
-    stdw.setValidAfterMillis(sd.getLastValidAfterMillis());
-    stdw.setFreshUntilMillis(sd.getLastFreshUntilMillis());
     stdw.setRelays(sd.getRelays());
     stdw.setBridges(sd.getBridges());
     stdw.updateRelayServerDescriptors();
