@@ -114,5 +114,11 @@ public class SearchData {
     return this.containedPublishedMillis.isEmpty() ? -1L :
         this.containedPublishedMillis.last();
   }
+  public SortedSet<String> getCurrentFingerprints() {
+    SortedSet<String> result = new TreeSet<String>();
+    result.addAll(this.containedBridges.keySet());
+    result.addAll(this.containedRelays.keySet());
+    return result;
+  }
 }
 

@@ -20,19 +20,17 @@ import org.torproject.descriptor.*;
  * the past day, past week, past month, past three months, past year, and
  * past five years. */
 public class BandwidthDataWriter {
-  private SortedMap<String, SearchEntryData> relays;
-  public void setRelays(SortedMap<String, SearchEntryData> relays) {
-    this.relays = relays;
-  }
-  private SortedMap<String, Long> bridges;
-  public void setBridges(SortedMap<String, Long> bridges) {
-    this.bridges = bridges;
+  private SortedSet<String> currentFingerprints;
+  public void setCurrentFingerprints(
+      SortedSet<String> currentFingerprints) {
+    this.currentFingerprints = currentFingerprints;
   }
   public void updateRelayExtraInfoDescriptors() {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File("in/relay-descriptors/extra-infos"));
-    reader.setExcludeFiles(new File("status/relay-extrainfo-history"));
+    reader.addDirectory(new File("in/bridge-descriptors/extra-infos"));
+    reader.setExcludeFiles(new File("status/extrainfo-history"));
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();
@@ -348,9 +346,7 @@ public class BandwidthDataWriter {
         }
       }
     }
-    for (Map.Entry<String, SearchEntryData> relay :
-        this.relays.entrySet()) {
-      String fingerprint = relay.getKey();
+    for (String fingerprint : this.currentFingerprints) {
       if (obsoleteBandwidthFiles.containsKey(fingerprint)) {
         obsoleteBandwidthFiles.remove(fingerprint);
       }
