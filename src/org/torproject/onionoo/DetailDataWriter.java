@@ -7,9 +7,9 @@ import java.text.*;
 import java.util.*;
 import org.torproject.descriptor.*;
 
-/* Write status data files to disk and delete status files of relays or
+/* Write detail data files to disk and delete status files of relays or
  * bridges that fell out the search data list. */
-public class StatusDataWriter {
+public class DetailDataWriter {
 
   private SortedMap<String, Node> relays;
   public void setRelays(SortedMap<String, Node> relays) {

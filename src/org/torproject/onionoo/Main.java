@@ -10,20 +10,20 @@ public class Main {
   public static void main(String[] args) {
 
     printStatus("Updating summary data.");
-    SummaryDataWriter sedw = new SummaryDataWriter();
-    CurrentNodes cn = sedw.readRelaySearchDataFile();
+    SummaryDataWriter sdw = new SummaryDataWriter();
+    CurrentNodes cn = sdw.readRelaySearchDataFile();
     cn.updateRelayNetworkConsensuses();
     cn.updateBridgeNetworkStatuses();
-    sedw.writeRelaySearchDataFile(cn);
+    sdw.writeRelaySearchDataFile(cn);
 
     printStatus("Updating status data.");
-    StatusDataWriter stdw = new StatusDataWriter();
-    stdw.setRelays(cn.getRelays());
-    stdw.setBridges(cn.getBridges());
-    stdw.updateRelayServerDescriptors();
-    stdw.updateBridgeServerDescriptors();
-    stdw.updateBridgePoolAssignments();
-    stdw.writeStatusDataFiles();
+    DetailDataWriter ddw = new DetailDataWriter();
+    ddw.setRelays(cn.getRelays());
+    ddw.setBridges(cn.getBridges());
+    ddw.updateRelayServerDescriptors();
+    ddw.updateBridgeServerDescriptors();
+    ddw.updateBridgePoolAssignments();
+    ddw.writeStatusDataFiles();
 
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter();
