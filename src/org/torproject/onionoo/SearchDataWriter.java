@@ -16,8 +16,8 @@ public class SearchDataWriter {
       new File("out/summary.json.bak");
 
   /* Read the internal relay search data file from disk. */
-  public SearchData readRelaySearchDataFile() {
-    SearchData result = new SearchData();
+  public CurrentNodes readRelaySearchDataFile() {
+    CurrentNodes result = new CurrentNodes();
     if (this.relaySearchDataBackupFile.exists()) {
       System.err.println("Found '"
           + relaySearchDataBackupFile.getAbsolutePath() + "' which "
@@ -93,7 +93,7 @@ public class SearchDataWriter {
   }
 
   /* Write the relay search data file to disk. */
-  public void writeRelaySearchDataFile(SearchData sd) {
+  public void writeRelaySearchDataFile(CurrentNodes sd) {
 
     /* Check valid-after times of known network status consensuses. */
     SortedSet<Long> allValidAfterMillis = sd.getAllValidAfterMillis();

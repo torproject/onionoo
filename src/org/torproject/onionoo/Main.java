@@ -11,15 +11,15 @@ public class Main {
 
     printStatus("Updating search data.");
     SearchDataWriter sedw = new SearchDataWriter();
-    SearchData sd = sedw.readRelaySearchDataFile();
-    sd.updateRelayNetworkConsensuses();
-    sd.updateBridgeNetworkStatuses();
-    sedw.writeRelaySearchDataFile(sd);
+    CurrentNodes cn = sedw.readRelaySearchDataFile();
+    cn.updateRelayNetworkConsensuses();
+    cn.updateBridgeNetworkStatuses();
+    sedw.writeRelaySearchDataFile(cn);
 
     printStatus("Updating status data.");
     StatusDataWriter stdw = new StatusDataWriter();
-    stdw.setRelays(sd.getRelays());
-    stdw.setBridges(sd.getBridges());
+    stdw.setRelays(cn.getRelays());
+    stdw.setBridges(cn.getBridges());
     stdw.updateRelayServerDescriptors();
     stdw.updateBridgeServerDescriptors();
     stdw.updateBridgePoolAssignments();
@@ -27,7 +27,7 @@ public class Main {
 
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter();
-    bdw.setCurrentFingerprints(sd.getCurrentFingerprints());
+    bdw.setCurrentFingerprints(cn.getCurrentFingerprints());
     bdw.updateExtraInfoDescriptors();
     bdw.deleteObsoleteBandwidthFiles();
 

@@ -6,9 +6,9 @@ import java.io.*;
 import java.util.*;
 import org.torproject.descriptor.*;
 
-/* Store search data containing those relays that have been running in the
- * past seven days. */
-public class SearchData {
+/* Store relays and bridges that have been running in the past seven
+ * days. */
+public class CurrentNodes {
   public SortedSet<Long> getAllValidAfterMillis() {
     return new TreeSet<Long>(this.containedValidAfterMillis);
   }
