@@ -14,6 +14,7 @@ public class SearchEntryData implements Comparable<SearchEntryData> {
   private int orPort;
   private int dirPort;
   private SortedSet<String> relayFlags;
+  private boolean running;
   public SearchEntryData(String nickname, String fingerprint,
       String address, long validAfterMillis, int orPort, int dirPort,
       SortedSet<String> relayFlags) {
@@ -45,6 +46,12 @@ public class SearchEntryData implements Comparable<SearchEntryData> {
   }
   public SortedSet<String> getRelayFlags() {
     return this.relayFlags;
+  }
+  public void setRunning(boolean running) {
+    this.running = running;
+  }
+  public boolean getRunning() {
+    return this.running;
   }
   public int compareTo(SearchEntryData o) {
     return this.fingerprint.compareTo(o.fingerprint);

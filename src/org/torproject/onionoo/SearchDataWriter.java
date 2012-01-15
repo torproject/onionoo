@@ -195,8 +195,9 @@ public class SearchDataWriter {
         String nickname = !entry.getNickname().equals("Unnamed") ?
             entry.getNickname() : null;
         String fingerprint = entry.getFingerprint();
-        String running = entry.getValidAfterMillis()
-            == lastValidAfterMillis ? "true" : "false";
+        entry.setRunning(entry.getValidAfterMillis() ==
+            lastValidAfterMillis);
+        String running = entry.getRunning() ? "true" : "false";
         String address = entry.getAddress();
         if (written++ > 0) {
           bw.write(",");

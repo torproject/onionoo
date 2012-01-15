@@ -10,14 +10,6 @@ import org.torproject.descriptor.*;
 /* Write status data files to disk and delete status files of relays or
  * bridges that fell out the search data list. */
 public class StatusDataWriter {
-  private long validAfterMillis;
-  public void setValidAfterMillis(long validAfterMillis) {
-    this.validAfterMillis = validAfterMillis;
-  }
-  private long freshUntilMillis;
-  public void setFreshUntilMillis(long freshUntilMillis) {
-    this.freshUntilMillis = freshUntilMillis;
-  }
   private SortedMap<String, SearchEntryData> relays;
   public void setRelays(SortedMap<String, SearchEntryData> relays) {
     this.relays = relays;
@@ -82,10 +74,6 @@ public class StatusDataWriter {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    String validAfterString = dateTimeFormat.format(
-        this.validAfterMillis);
-    String freshUntilString = dateTimeFormat.format(
-        this.freshUntilMillis);
     for (Map.Entry<String, SearchEntryData> relay :
         this.relays.entrySet()) {
       String fingerprint = relay.getKey();
@@ -172,20 +160,17 @@ public class StatusDataWriter {
       SearchEntryData entry = relay.getValue();
       String nickname = entry.getNickname();
       String address = entry.getAddress();
-      boolean running = entry.getValidAfterMillis() ==
-          this.validAfterMillis;
+      String running = entry.getRunning() ? "true" : "false";
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
-          + "\"valid_after\":\"" + validAfterString + "\",\n"
-          + "\"fresh_until\":\"" + freshUntilString + "\",\n"
           + "\"nickname\":\"" + nickname + "\",\n"
           + "\"fingerprint\":\"" + fingerprint + "\",\n"
           + "\"or_address\":[\"" + address + "\"],\n"
           + "\"or_port\":" + orPort + ",\n"
           + "\"dir_port\":" + dirPort + ",\n"
-          + "\"running\":" + (running ? "true" : "false") + ",\n");
+          + "\"running\":" + running + ",\n");
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {
         sb.append("\"flags\":[");
