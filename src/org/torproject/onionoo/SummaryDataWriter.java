@@ -177,7 +177,8 @@ public class SummaryDataWriter {
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       long now = System.currentTimeMillis();
       String validAfterString = dateTimeFormat.format(now);
-      String freshUntilString = dateTimeFormat.format(now + 86400L);
+      String freshUntilString = dateTimeFormat.format(now
+          + 75L * 60L * 1000L);
       this.relaySearchDataFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.relaySearchDataFile));
