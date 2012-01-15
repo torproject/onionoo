@@ -9,8 +9,8 @@ import org.torproject.descriptor.*;
 public class Main {
   public static void main(String[] args) {
 
-    printStatus("Updating search data.");
-    SearchDataWriter sedw = new SearchDataWriter();
+    printStatus("Updating summary data.");
+    SummaryDataWriter sedw = new SummaryDataWriter();
     CurrentNodes cn = sedw.readRelaySearchDataFile();
     cn.updateRelayNetworkConsensuses();
     cn.updateBridgeNetworkStatuses();

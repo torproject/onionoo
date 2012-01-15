@@ -6,8 +6,8 @@ import java.io.*;
 import java.text.*;
 import java.util.*;
 
-/* Read and write the relay search data file from/to disk. */
-public class SearchDataWriter {
+/* Read and write relay and bridge summary data from/to disk. */
+public class SummaryDataWriter {
 
   private File internalRelaySearchDataFile =
       new File("status/summary.csv");
