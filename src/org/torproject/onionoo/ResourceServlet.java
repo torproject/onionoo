@@ -349,8 +349,10 @@ public class ResourceServlet extends HttpServlet {
         }
         br.close();
         detailsLines = sb.toString();
-        detailsLines = detailsLines.substring(0,
-            detailsLines.length() - 1);
+        if (detailsLines.length() > 1) {
+          detailsLines = detailsLines.substring(0,
+              detailsLines.length() - 1);
+        }
       } catch (IOException e) {
       }
     }
