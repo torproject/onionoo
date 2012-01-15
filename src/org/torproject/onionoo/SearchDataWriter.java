@@ -57,7 +57,7 @@ public class SearchDataWriter {
                 validAfterMillis, orPort, dirPort, relayFlags);
           } else if (line.startsWith("b ")) {
             String[] parts = line.split(" ");
-            if (parts.length < 4) {
+            if (parts.length < 7) {
               System.err.println("Line '" + line + "' in '"
                   + this.internalRelaySearchDataFile.getAbsolutePath()
                   + " is invalid.  Exiting.");
@@ -66,7 +66,12 @@ public class SearchDataWriter {
             String hashedFingerprint = parts[1];
             long publishedMillis = dateTimeFormat.parse(parts[2] + " "
                + parts[3]).getTime();
-            result.addBridge(hashedFingerprint, publishedMillis);
+            int orPort = Integer.parseInt(parts[4]);
+            int dirPort = Integer.parseInt(parts[5]);
+            SortedSet<String> relayFlags = new TreeSet<String>(
+                Arrays.asList(parts[6].split(",")));
+            result.addBridge(hashedFingerprint, publishedMillis, orPort,
+                dirPort, relayFlags);
           }
         }
         br.close();
@@ -135,11 +140,19 @@ public class SearchDataWriter {
             + validAfter + " " + orPort + " " + dirPort + " " + relayFlags
             + "\n");
       }
-      for (Map.Entry<String, Long> e : sd.getBridges().entrySet()) {
-        String hashedFingerprint = e.getKey();
-        long publishedMillis = e.getValue();
-        String published = dateTimeFormat.format(publishedMillis);
-        bw.write("b " + hashedFingerprint + " " + published + "\n");
+      for (SearchEntryData entry : sd.getBridges().values()) {
+        String fingerprint = entry.getFingerprint();
+        String published = dateTimeFormat.format(
+            entry.getValidAfterMillis());
+        String orPort = String.valueOf(entry.getOrPort());
+        String dirPort = String.valueOf(entry.getDirPort());
+        StringBuilder sb = new StringBuilder();
+        for (String relayFlag : entry.getRelayFlags()) {
+          sb.append("," + relayFlag);
+        }
+        String relayFlags = sb.toString().substring(1);
+        bw.write("b " + fingerprint + " " + published + " "
+            + orPort + " " + dirPort + " " + relayFlags + "\n");
       }
       bw.close();
     } catch (IOException e) {
@@ -211,11 +224,11 @@ public class SearchDataWriter {
       bw.write("\n],\n\"bridges\":[");
       written = 0;
       long lastPublishedMillis = sd.getLastPublishedMillis();
-      for (Map.Entry<String, Long> e : sd.getBridges().entrySet()) {
-        String hashedFingerprint = e.getKey();
-        long publishedMillis = e.getValue();
-        String running = publishedMillis == lastPublishedMillis ?
-            "true" : "false";
+      for (SearchEntryData entry : sd.getBridges().values()) {
+        String hashedFingerprint = entry.getFingerprint();
+        entry.setRunning(entry.getValidAfterMillis() ==
+            lastPublishedMillis);
+        String running = entry.getRunning() ? "true" : "false";
         if (written++ > 0) {
           bw.write(",");
         }

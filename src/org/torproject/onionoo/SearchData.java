@@ -92,23 +92,31 @@ public class SearchData {
   }
   private void updateBridgeNetworkStatus(BridgeNetworkStatus status) {
     long publishedMillis = status.getPublishedMillis();
-    for (String hashedFingerprint :
-        status.getStatusEntries().keySet()) {
-      this.addBridge(hashedFingerprint, publishedMillis);
+    for (NetworkStatusEntry entry : status.getStatusEntries().values()) {
+      String fingerprint = entry.getFingerprint();
+      int orPort = entry.getOrPort();
+      int dirPort = entry.getDirPort();
+      SortedSet<String> relayFlags = entry.getFlags();
+      this.addBridge(fingerprint, publishedMillis, orPort, dirPort,
+         relayFlags);
     }
     this.containedPublishedMillis.add(publishedMillis);
   }
-  private SortedMap<String, Long> containedBridges =
-      new TreeMap<String, Long>();
-  public void addBridge(String hashedFingerprint, long publishedMillis) {
+  private SortedMap<String, SearchEntryData> containedBridges =
+      new TreeMap<String, SearchEntryData>();
+  public void addBridge(String fingerprint, long publishedMillis,
+      int orPort, int dirPort, SortedSet<String> relayFlags) {
     if (publishedMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
-        (!this.containedBridges.containsKey(hashedFingerprint) ||
-        this.containedBridges.get(hashedFingerprint) < publishedMillis)) {
-      this.containedBridges.put(hashedFingerprint, publishedMillis);
+        (!this.containedBridges.containsKey(fingerprint) ||
+        this.containedBridges.get(fingerprint).
+        getValidAfterMillis() < publishedMillis)) {
+      SearchEntryData entry = new SearchEntryData(fingerprint,
+          publishedMillis, orPort, dirPort, relayFlags);
+      this.containedBridges.put(fingerprint, entry);
     }
   }
-  public SortedMap<String, Long> getBridges() {
-    return new TreeMap<String, Long>(this.containedBridges);
+  public SortedMap<String, SearchEntryData> getBridges() {
+    return new TreeMap<String, SearchEntryData>(this.containedBridges);
   }
   public long getLastPublishedMillis() {
     return this.containedPublishedMillis.isEmpty() ? -1L :

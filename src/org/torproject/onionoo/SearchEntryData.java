@@ -10,6 +10,8 @@ public class SearchEntryData implements Comparable<SearchEntryData> {
   private String fingerprint;
   private String nickname;
   private String address;
+  /* TODO Should we rename this attribute, now that we're using the class
+   * for both relays and bridges? */
   private long validAfterMillis;
   private int orPort;
   private int dirPort;
@@ -25,6 +27,11 @@ public class SearchEntryData implements Comparable<SearchEntryData> {
     this.orPort = orPort;
     this.dirPort = dirPort;
     this.relayFlags = relayFlags;
+  }
+  public SearchEntryData(String fingerprint, long validAfterMillis,
+      int orPort, int dirPort, SortedSet<String> relayFlags) {
+    this(null, fingerprint, null, validAfterMillis, orPort, dirPort,
+        relayFlags);
   }
   public String getFingerprint() {
     return this.fingerprint;

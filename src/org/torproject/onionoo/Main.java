@@ -21,6 +21,8 @@ public class Main {
     stdw.setRelays(sd.getRelays());
     stdw.setBridges(sd.getBridges());
     stdw.updateRelayServerDescriptors();
+    stdw.updateBridgeServerDescriptors();
+    stdw.updateBridgePoolAssignments();
     stdw.writeStatusDataFiles();
 
     printStatus("Updating bandwidth data.");
