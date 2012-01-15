@@ -25,7 +25,7 @@ public class BandwidthDataWriter {
       SortedSet<String> currentFingerprints) {
     this.currentFingerprints = currentFingerprints;
   }
-  public void updateRelayExtraInfoDescriptors() {
+  public void updateExtraInfoDescriptors() {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File("in/relay-descriptors/extra-infos"));

@@ -25,7 +25,7 @@ public class Main {
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter();
     bdw.setCurrentFingerprints(sd.getCurrentFingerprints());
-    bdw.updateRelayExtraInfoDescriptors();
+    bdw.updateExtraInfoDescriptors();
     bdw.deleteObsoleteBandwidthFiles();
 
     printStatus("Terminating.");
