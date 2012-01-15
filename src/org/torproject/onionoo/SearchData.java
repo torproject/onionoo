@@ -47,6 +47,7 @@ public class SearchData {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File("in/relay-descriptors/consensuses"));
+    reader.setExcludeFiles(new File("status/relay-consensus-history"));
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();
@@ -78,6 +79,7 @@ public class SearchData {
     BridgeDescriptorReader reader =
         DescriptorSourceFactory.createBridgeDescriptorReader();
     reader.addDirectory(new File("in/bridge-descriptors/statuses"));
+    reader.setExcludeFiles(new File("status/bridge-status-history"));
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();

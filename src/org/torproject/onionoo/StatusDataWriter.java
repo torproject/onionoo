@@ -25,6 +25,7 @@ public class StatusDataWriter {
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File(
         "in/relay-descriptors/server-descriptors"));
+    reader.setExcludeFiles(new File("status/relay-serverdesc-history"));
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();

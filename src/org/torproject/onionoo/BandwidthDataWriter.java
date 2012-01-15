@@ -32,6 +32,7 @@ public class BandwidthDataWriter {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File("in/relay-descriptors/extra-infos"));
+    reader.setExcludeFiles(new File("status/relay-extrainfo-history"));
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();
