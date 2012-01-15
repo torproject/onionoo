@@ -6,31 +6,29 @@ import java.util.*;
 
 /* Store search data of a single relay that was running in the past seven
  * days. */
-public class Node implements Comparable<Node> {
+public class Node {
   private String fingerprint;
   private String nickname;
   private String address;
-  /* TODO Should we rename this attribute, now that we're using the class
-   * for both relays and bridges? */
-  private long validAfterMillis;
+  private long lastSeenMillis;
   private int orPort;
   private int dirPort;
   private SortedSet<String> relayFlags;
   private boolean running;
   public Node(String nickname, String fingerprint, String address,
-      long validAfterMillis, int orPort, int dirPort,
+      long lastSeenMillis, int orPort, int dirPort,
       SortedSet<String> relayFlags) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     this.address = address;
-    this.validAfterMillis = validAfterMillis;
+    this.lastSeenMillis = lastSeenMillis;
     this.orPort = orPort;
     this.dirPort = dirPort;
     this.relayFlags = relayFlags;
   }
-  public Node(String fingerprint, long validAfterMillis, int orPort,
+  public Node(String fingerprint, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags) {
-    this(null, fingerprint, null, validAfterMillis, orPort, dirPort,
+    this(null, fingerprint, null, lastSeenMillis, orPort, dirPort,
         relayFlags);
   }
   public String getFingerprint() {
@@ -42,8 +40,8 @@ public class Node implements Comparable<Node> {
   public String getAddress() {
     return this.address;
   }
-  public long getValidAfterMillis() {
-    return this.validAfterMillis;
+  public long getLastSeenMillis() {
+    return this.lastSeenMillis;
   }
   public int getOrPort() {
     return this.orPort;
@@ -59,13 +57,6 @@ public class Node implements Comparable<Node> {
   }
   public boolean getRunning() {
     return this.running;
-  }
-  public int compareTo(Node o) {
-    return this.fingerprint.compareTo(o.fingerprint);
-  }
-  public boolean equals(Object o) {
-    return (o instanceof Node &&
-        this.fingerprint.equals(((Node) o).fingerprint));
   }
 }
 

@@ -12,17 +12,17 @@ import org.torproject.descriptor.*;
 public class DetailDataWriter {
 
   private SortedMap<String, Node> relays;
-  public void setRelays(SortedMap<String, Node> relays) {
+  public void setCurrentRelays(SortedMap<String, Node> relays) {
     this.relays = relays;
   }
   private SortedMap<String, Node> bridges;
-  public void setBridges(SortedMap<String, Node> bridges) {
+  public void setCurrentBridges(SortedMap<String, Node> bridges) {
     this.bridges = bridges;
   }
 
   private Map<String, ServerDescriptor> relayServerDescriptors =
       new HashMap<String, ServerDescriptor>();
-  public void updateRelayServerDescriptors() {
+  public void readRelayServerDescriptors() {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File(
@@ -53,7 +53,7 @@ public class DetailDataWriter {
 
   private Map<String, ServerDescriptor> bridgeServerDescriptors =
       new HashMap<String, ServerDescriptor>();
-  public void updateBridgeServerDescriptors() {
+  public void readBridgeServerDescriptors() {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File(
@@ -84,7 +84,7 @@ public class DetailDataWriter {
 
   private Map<String, String> bridgePoolAssignments =
       new HashMap<String, String>();
-  public void updateBridgePoolAssignments() {
+  public void readBridgePoolAssignments() {
     BridgePoolAssignmentReader reader =
         DescriptorSourceFactory.createBridgePoolAssignmentReader();
     reader.addDirectory(new File("in/bridge-pool-assignments"));
@@ -109,7 +109,7 @@ public class DetailDataWriter {
     }
   }
 
-  public void writeStatusDataFiles() {
+  public void writeDetailDataFiles() {
     SortedMap<String, File> remainingStatusFiles =
         this.listAllStatusFiles();
     remainingStatusFiles = this.updateRelayStatusFiles(

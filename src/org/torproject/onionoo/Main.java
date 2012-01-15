@@ -12,23 +12,24 @@ public class Main {
     printStatus("Updating summary data.");
     SummaryDataWriter sdw = new SummaryDataWriter();
     CurrentNodes cn = sdw.readRelaySearchDataFile();
-    cn.updateRelayNetworkConsensuses();
-    cn.updateBridgeNetworkStatuses();
+    cn.readRelayNetworkConsensuses();
+    cn.readBridgeNetworkStatuses();
     sdw.writeRelaySearchDataFile(cn);
 
-    printStatus("Updating status data.");
+    printStatus("Updating detail data.");
     DetailDataWriter ddw = new DetailDataWriter();
-    ddw.setRelays(cn.getRelays());
-    ddw.setBridges(cn.getBridges());
-    ddw.updateRelayServerDescriptors();
-    ddw.updateBridgeServerDescriptors();
-    ddw.updateBridgePoolAssignments();
-    ddw.writeStatusDataFiles();
+    ddw.setCurrentRelays(cn.getCurrentRelays());
+    ddw.setCurrentBridges(cn.getCurrentBridges());
+    ddw.readRelayServerDescriptors();
+    ddw.readBridgeServerDescriptors();
+    ddw.readBridgePoolAssignments();
+    ddw.writeDetailDataFiles();
 
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter();
-    bdw.setCurrentFingerprints(cn.getCurrentFingerprints());
-    bdw.updateExtraInfoDescriptors();
+    bdw.setCurrentRelays(cn.getCurrentRelays());
+    bdw.setCurrentBridges(cn.getCurrentBridges());
+    bdw.readExtraInfoDescriptors();
     bdw.deleteObsoleteBandwidthFiles();
 
     printStatus("Terminating.");

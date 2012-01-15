@@ -9,41 +9,13 @@ import org.torproject.descriptor.*;
 /* Store relays and bridges that have been running in the past seven
  * days. */
 public class CurrentNodes {
-  public SortedSet<Long> getAllValidAfterMillis() {
-    return new TreeSet<Long>(this.containedValidAfterMillis);
-  }
-  public long getLastValidAfterMillis() {
-    return this.containedValidAfterMillis.isEmpty() ? -1L :
-        this.containedValidAfterMillis.last();
-  }
-  public long getLastFreshUntilMillis() {
-    return this.containedValidAfterMillis.isEmpty() ? -1L :
-        this.containedValidAfterMillis.last() + 60L * 60L * 1000L;
-  }
+
   private SortedSet<Long> containedValidAfterMillis = new TreeSet<Long>();
-  private SortedMap<String, Node> containedRelays =
-      new TreeMap<String, Node>();
-  /* Add a search entry for a relay if this relay wasn't seen before or if
-   * its current valid-after time is newer than the currently known
-   * valid-after time. */
+  private SortedSet<Long> containedPublishedMillis = new TreeSet<Long>();
+
   private long now = System.currentTimeMillis();
-  public void addRelay(String nickname, String fingerprint,
-      String address, long validAfterMillis, int orPort, int dirPort,
-      SortedSet<String> relayFlags) {
-    if (validAfterMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
-        (!this.containedRelays.containsKey(fingerprint) ||
-        this.containedRelays.get(fingerprint).getValidAfterMillis() <
-        validAfterMillis)) {
-      Node entry = new Node(nickname, fingerprint, address,
-          validAfterMillis, orPort, dirPort, relayFlags);
-      this.containedRelays.put(fingerprint, entry);
-      this.containedValidAfterMillis.add(validAfterMillis);
-    }
-  }
-  public SortedMap<String, Node> getRelays() {
-    return new TreeMap<String, Node>(this.containedRelays);
-  }
-  public void updateRelayNetworkConsensuses() {
+
+  public void readRelayNetworkConsensuses() {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File("in/relay-descriptors/consensuses"));
@@ -58,7 +30,15 @@ public class CurrentNodes {
         }
       }
     }
+    if (!this.containedValidAfterMillis.isEmpty()) {
+      long lastValidAfterMillis = this.containedValidAfterMillis.last();
+      for (Node entry : this.currentRelays.values()) {
+        entry.setRunning(entry.getLastSeenMillis() ==
+            lastValidAfterMillis);
+      }
+    }
   }
+
   private void updateRelayNetworkStatusConsensus(
       RelayNetworkStatusConsensus consensus) {
     long validAfterMillis = consensus.getValidAfterMillis();
@@ -74,8 +54,22 @@ public class CurrentNodes {
           orPort, dirPort, relayFlags);
     }
   }
-  private SortedSet<Long> containedPublishedMillis = new TreeSet<Long>();
-  public void updateBridgeNetworkStatuses() {
+
+  public void addRelay(String nickname, String fingerprint,
+      String address, long validAfterMillis, int orPort, int dirPort,
+      SortedSet<String> relayFlags) {
+    if (validAfterMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
+        (!this.currentRelays.containsKey(fingerprint) ||
+        this.currentRelays.get(fingerprint).getLastSeenMillis() <
+        validAfterMillis)) {
+      Node entry = new Node(nickname, fingerprint, address,
+          validAfterMillis, orPort, dirPort, relayFlags);
+      this.currentRelays.put(fingerprint, entry);
+      this.containedValidAfterMillis.add(validAfterMillis);
+    }
+  }
+
+  public void readBridgeNetworkStatuses() {
     BridgeDescriptorReader reader =
         DescriptorSourceFactory.createBridgeDescriptorReader();
     reader.addDirectory(new File("in/bridge-descriptors/statuses"));
@@ -89,7 +83,15 @@ public class CurrentNodes {
         }
       }
     }
+    if (!this.containedPublishedMillis.isEmpty()) {
+      long lastPublishedMillis = this.containedPublishedMillis.last();
+      for (Node entry : this.currentBridges.values()) {
+        entry.setRunning(entry.getLastSeenMillis() ==
+            lastPublishedMillis);
+      }
+    }
   }
+
   private void updateBridgeNetworkStatus(BridgeNetworkStatus status) {
     long publishedMillis = status.getPublishedMillis();
     for (NetworkStatusEntry entry : status.getStatusEntries().values()) {
@@ -100,33 +102,31 @@ public class CurrentNodes {
       this.addBridge(fingerprint, publishedMillis, orPort, dirPort,
          relayFlags);
     }
-    this.containedPublishedMillis.add(publishedMillis);
   }
-  private SortedMap<String, Node> containedBridges =
-      new TreeMap<String, Node>();
+
   public void addBridge(String fingerprint, long publishedMillis,
       int orPort, int dirPort, SortedSet<String> relayFlags) {
     if (publishedMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
-        (!this.containedBridges.containsKey(fingerprint) ||
-        this.containedBridges.get(fingerprint).
-        getValidAfterMillis() < publishedMillis)) {
+        (!this.currentBridges.containsKey(fingerprint) ||
+        this.currentBridges.get(fingerprint).getLastSeenMillis() <
+        publishedMillis)) {
       Node entry = new Node(fingerprint, publishedMillis, orPort, dirPort,
           relayFlags);
-      this.containedBridges.put(fingerprint, entry);
+      this.currentBridges.put(fingerprint, entry);
+      this.containedPublishedMillis.add(publishedMillis);
     }
   }
-  public SortedMap<String, Node> getBridges() {
-    return new TreeMap<String, Node>(this.containedBridges);
+
+  private SortedMap<String, Node> currentRelays =
+      new TreeMap<String, Node>();
+  public SortedMap<String, Node> getCurrentRelays() {
+    return new TreeMap<String, Node>(this.currentRelays);
   }
-  public long getLastPublishedMillis() {
-    return this.containedPublishedMillis.isEmpty() ? -1L :
-        this.containedPublishedMillis.last();
-  }
-  public SortedSet<String> getCurrentFingerprints() {
-    SortedSet<String> result = new TreeSet<String>();
-    result.addAll(this.containedBridges.keySet());
-    result.addAll(this.containedRelays.keySet());
-    return result;
+
+  private SortedMap<String, Node> currentBridges =
+      new TreeMap<String, Node>();
+  public SortedMap<String, Node> getCurrentBridges() {
+    return new TreeMap<String, Node>(this.currentBridges);
   }
 }
 

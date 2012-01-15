@@ -21,11 +21,13 @@ import org.torproject.descriptor.*;
  * past five years. */
 public class BandwidthDataWriter {
   private SortedSet<String> currentFingerprints;
-  public void setCurrentFingerprints(
-      SortedSet<String> currentFingerprints) {
-    this.currentFingerprints = currentFingerprints;
+  public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
+    this.currentFingerprints.addAll(currentRelays.keySet());
   }
-  public void updateExtraInfoDescriptors() {
+  public void setCurrentBridges(SortedMap<String, Node> currentBridges) {
+    this.currentFingerprints.addAll(currentBridges.keySet());
+  }
+  public void readExtraInfoDescriptors() {
     RelayDescriptorReader reader =
         DescriptorSourceFactory.createRelayDescriptorReader();
     reader.addDirectory(new File("in/relay-descriptors/extra-infos"));

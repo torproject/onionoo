@@ -95,22 +95,6 @@ public class SummaryDataWriter {
   /* Write the relay search data file to disk. */
   public void writeRelaySearchDataFile(CurrentNodes sd) {
 
-    /* Check valid-after times of known network status consensuses. */
-    SortedSet<Long> allValidAfterMillis = sd.getAllValidAfterMillis();
-    switch (allValidAfterMillis.size()) {
-      case 0:
-        System.err.println("No relay search data known that we could "
-            + "write to disk.  Exiting.");
-        System.exit(1);
-        break;
-      case 1:
-        /* TODO warn if only a single consensus was added.  This could
-         * mean that the download didn't work, or that the user forgot to
-         * import past network status consensuses.  We might even say more
-         * accurately by remembering whether we loaded search data from
-         * disk or not. */
-        break;
-    }
     /* TODO Check valid-after times and warn if we're missing one or more
      * network status consensuses.  The user should know, so that she can
      * download and import missing network status consensuses. */
@@ -123,12 +107,12 @@ public class SummaryDataWriter {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      for (Node entry : sd.getRelays().values()) {
+      for (Node entry : sd.getCurrentRelays().values()) {
         String nickname = entry.getNickname();
         String fingerprint = entry.getFingerprint();
         String address = entry.getAddress();
         String validAfter = dateTimeFormat.format(
-            entry.getValidAfterMillis());
+            entry.getLastSeenMillis());
         String orPort = String.valueOf(entry.getOrPort());
         String dirPort = String.valueOf(entry.getDirPort());
         StringBuilder sb = new StringBuilder();
@@ -140,10 +124,10 @@ public class SummaryDataWriter {
             + validAfter + " " + orPort + " " + dirPort + " " + relayFlags
             + "\n");
       }
-      for (Node entry : sd.getBridges().values()) {
+      for (Node entry : sd.getCurrentBridges().values()) {
         String fingerprint = entry.getFingerprint();
         String published = dateTimeFormat.format(
-            entry.getValidAfterMillis());
+            entry.getLastSeenMillis());
         String orPort = String.valueOf(entry.getOrPort());
         String dirPort = String.valueOf(entry.getDirPort());
         StringBuilder sb = new StringBuilder();
@@ -191,10 +175,9 @@ public class SummaryDataWriter {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      String validAfterString = dateTimeFormat.format(
-          sd.getLastValidAfterMillis());
-      String freshUntilString = dateTimeFormat.format(
-          sd.getLastFreshUntilMillis());
+      long now = System.currentTimeMillis();
+      String validAfterString = dateTimeFormat.format(now);
+      String freshUntilString = dateTimeFormat.format(now + 86400L);
       this.relaySearchDataFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.relaySearchDataFile));
@@ -203,13 +186,10 @@ public class SummaryDataWriter {
           + "\"fresh_until\":\"" + freshUntilString + "\",\n"
           + "\"relays\":[");
       int written = 0;
-      long lastValidAfterMillis = sd.getLastValidAfterMillis();
-      for (Node entry : sd.getRelays().values()) {
+      for (Node entry : sd.getCurrentRelays().values()) {
         String nickname = !entry.getNickname().equals("Unnamed") ?
             entry.getNickname() : null;
         String fingerprint = entry.getFingerprint();
-        entry.setRunning(entry.getValidAfterMillis() ==
-            lastValidAfterMillis);
         String running = entry.getRunning() ? "true" : "false";
         String address = entry.getAddress();
         if (written++ > 0) {
@@ -223,11 +203,8 @@ public class SummaryDataWriter {
       }
       bw.write("\n],\n\"bridges\":[");
       written = 0;
-      long lastPublishedMillis = sd.getLastPublishedMillis();
-      for (Node entry : sd.getBridges().values()) {
+      for (Node entry : sd.getCurrentBridges().values()) {
         String hashedFingerprint = entry.getFingerprint();
-        entry.setRunning(entry.getValidAfterMillis() ==
-            lastPublishedMillis);
         String running = entry.getRunning() ? "true" : "false";
         if (written++ > 0) {
           bw.write(",");
