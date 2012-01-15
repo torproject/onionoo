@@ -11,12 +11,12 @@ import org.torproject.descriptor.*;
  * bridges that fell out the search data list. */
 public class StatusDataWriter {
 
-  private SortedMap<String, SearchEntryData> relays;
-  public void setRelays(SortedMap<String, SearchEntryData> relays) {
+  private SortedMap<String, Node> relays;
+  public void setRelays(SortedMap<String, Node> relays) {
     this.relays = relays;
   }
-  private SortedMap<String, SearchEntryData> bridges;
-  public void setBridges(SortedMap<String, SearchEntryData> bridges) {
+  private SortedMap<String, Node> bridges;
+  public void setBridges(SortedMap<String, Node> bridges) {
     this.bridges = bridges;
   }
 
@@ -140,8 +140,7 @@ public class StatusDataWriter {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    for (Map.Entry<String, SearchEntryData> relay :
-        this.relays.entrySet()) {
+    for (Map.Entry<String, Node> relay : this.relays.entrySet()) {
       String fingerprint = relay.getKey();
 
       /* Read status file for this relay if it exists. */
@@ -223,7 +222,7 @@ public class StatusDataWriter {
       }
 
       /* Generate network-status-specific part. */
-      SearchEntryData entry = relay.getValue();
+      Node entry = relay.getValue();
       String nickname = entry.getNickname();
       String address = entry.getAddress();
       String running = entry.getRunning() ? "true" : "false";
@@ -280,8 +279,7 @@ public class StatusDataWriter {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    for (Map.Entry<String, SearchEntryData> bridge :
-        this.bridges.entrySet()) {
+    for (Map.Entry<String, Node> bridge : this.bridges.entrySet()) {
       String fingerprint = bridge.getKey();
 
       /* Read details file for this bridge if it exists. */
@@ -381,7 +379,7 @@ public class StatusDataWriter {
       }
 
       /* Generate network-status-specific part. */
-      SearchEntryData entry = bridge.getValue();
+      Node entry = bridge.getValue();
       String running = entry.getRunning() ? "true" : "false";
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();

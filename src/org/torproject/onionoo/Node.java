@@ -6,7 +6,7 @@ import java.util.*;
 
 /* Store search data of a single relay that was running in the past seven
  * days. */
-public class SearchEntryData implements Comparable<SearchEntryData> {
+public class Node implements Comparable<Node> {
   private String fingerprint;
   private String nickname;
   private String address;
@@ -17,8 +17,8 @@ public class SearchEntryData implements Comparable<SearchEntryData> {
   private int dirPort;
   private SortedSet<String> relayFlags;
   private boolean running;
-  public SearchEntryData(String nickname, String fingerprint,
-      String address, long validAfterMillis, int orPort, int dirPort,
+  public Node(String nickname, String fingerprint, String address,
+      long validAfterMillis, int orPort, int dirPort,
       SortedSet<String> relayFlags) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
@@ -28,8 +28,8 @@ public class SearchEntryData implements Comparable<SearchEntryData> {
     this.dirPort = dirPort;
     this.relayFlags = relayFlags;
   }
-  public SearchEntryData(String fingerprint, long validAfterMillis,
-      int orPort, int dirPort, SortedSet<String> relayFlags) {
+  public Node(String fingerprint, long validAfterMillis, int orPort,
+      int dirPort, SortedSet<String> relayFlags) {
     this(null, fingerprint, null, validAfterMillis, orPort, dirPort,
         relayFlags);
   }
@@ -60,12 +60,12 @@ public class SearchEntryData implements Comparable<SearchEntryData> {
   public boolean getRunning() {
     return this.running;
   }
-  public int compareTo(SearchEntryData o) {
+  public int compareTo(Node o) {
     return this.fingerprint.compareTo(o.fingerprint);
   }
   public boolean equals(Object o) {
-    return (o instanceof SearchEntryData &&
-        this.fingerprint.equals(((SearchEntryData) o).fingerprint));
+    return (o instanceof Node &&
+        this.fingerprint.equals(((Node) o).fingerprint));
   }
 }
 

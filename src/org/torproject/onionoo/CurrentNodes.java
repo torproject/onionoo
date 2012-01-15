@@ -21,8 +21,8 @@ public class CurrentNodes {
         this.containedValidAfterMillis.last() + 60L * 60L * 1000L;
   }
   private SortedSet<Long> containedValidAfterMillis = new TreeSet<Long>();
-  private SortedMap<String, SearchEntryData> containedRelays =
-      new TreeMap<String, SearchEntryData>();
+  private SortedMap<String, Node> containedRelays =
+      new TreeMap<String, Node>();
   /* Add a search entry for a relay if this relay wasn't seen before or if
    * its current valid-after time is newer than the currently known
    * valid-after time. */
@@ -34,14 +34,14 @@ public class CurrentNodes {
         (!this.containedRelays.containsKey(fingerprint) ||
         this.containedRelays.get(fingerprint).getValidAfterMillis() <
         validAfterMillis)) {
-      SearchEntryData entry = new SearchEntryData(nickname, fingerprint,
-          address, validAfterMillis, orPort, dirPort, relayFlags);
+      Node entry = new Node(nickname, fingerprint, address,
+          validAfterMillis, orPort, dirPort, relayFlags);
       this.containedRelays.put(fingerprint, entry);
       this.containedValidAfterMillis.add(validAfterMillis);
     }
   }
-  public SortedMap<String, SearchEntryData> getRelays() {
-    return new TreeMap<String, SearchEntryData>(this.containedRelays);
+  public SortedMap<String, Node> getRelays() {
+    return new TreeMap<String, Node>(this.containedRelays);
   }
   public void updateRelayNetworkConsensuses() {
     RelayDescriptorReader reader =
@@ -102,21 +102,21 @@ public class CurrentNodes {
     }
     this.containedPublishedMillis.add(publishedMillis);
   }
-  private SortedMap<String, SearchEntryData> containedBridges =
-      new TreeMap<String, SearchEntryData>();
+  private SortedMap<String, Node> containedBridges =
+      new TreeMap<String, Node>();
   public void addBridge(String fingerprint, long publishedMillis,
       int orPort, int dirPort, SortedSet<String> relayFlags) {
     if (publishedMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
         (!this.containedBridges.containsKey(fingerprint) ||
         this.containedBridges.get(fingerprint).
         getValidAfterMillis() < publishedMillis)) {
-      SearchEntryData entry = new SearchEntryData(fingerprint,
-          publishedMillis, orPort, dirPort, relayFlags);
+      Node entry = new Node(fingerprint, publishedMillis, orPort, dirPort,
+          relayFlags);
       this.containedBridges.put(fingerprint, entry);
     }
   }
-  public SortedMap<String, SearchEntryData> getBridges() {
-    return new TreeMap<String, SearchEntryData>(this.containedBridges);
+  public SortedMap<String, Node> getBridges() {
+    return new TreeMap<String, Node>(this.containedBridges);
   }
   public long getLastPublishedMillis() {
     return this.containedPublishedMillis.isEmpty() ? -1L :

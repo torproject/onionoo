@@ -123,7 +123,7 @@ public class SearchDataWriter {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      for (SearchEntryData entry : sd.getRelays().values()) {
+      for (Node entry : sd.getRelays().values()) {
         String nickname = entry.getNickname();
         String fingerprint = entry.getFingerprint();
         String address = entry.getAddress();
@@ -140,7 +140,7 @@ public class SearchDataWriter {
             + validAfter + " " + orPort + " " + dirPort + " " + relayFlags
             + "\n");
       }
-      for (SearchEntryData entry : sd.getBridges().values()) {
+      for (Node entry : sd.getBridges().values()) {
         String fingerprint = entry.getFingerprint();
         String published = dateTimeFormat.format(
             entry.getValidAfterMillis());
@@ -204,7 +204,7 @@ public class SearchDataWriter {
           + "\"relays\":[");
       int written = 0;
       long lastValidAfterMillis = sd.getLastValidAfterMillis();
-      for (SearchEntryData entry : sd.getRelays().values()) {
+      for (Node entry : sd.getRelays().values()) {
         String nickname = !entry.getNickname().equals("Unnamed") ?
             entry.getNickname() : null;
         String fingerprint = entry.getFingerprint();
@@ -224,7 +224,7 @@ public class SearchDataWriter {
       bw.write("\n],\n\"bridges\":[");
       written = 0;
       long lastPublishedMillis = sd.getLastPublishedMillis();
-      for (SearchEntryData entry : sd.getBridges().values()) {
+      for (Node entry : sd.getBridges().values()) {
         String hashedFingerprint = entry.getFingerprint();
         entry.setRunning(entry.getValidAfterMillis() ==
             lastPublishedMillis);
