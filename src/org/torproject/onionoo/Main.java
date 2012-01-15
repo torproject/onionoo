@@ -21,6 +21,7 @@ public class Main {
     stdw.setRelays(sd.getRelays());
     stdw.setBridges(sd.getBridges());
     stdw.updateRelayServerDescriptors();
+    stdw.writeStatusDataFiles();
 
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter();
