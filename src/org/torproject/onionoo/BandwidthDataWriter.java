@@ -309,9 +309,8 @@ public class BandwidthDataWriter {
           + "\"first\":\"" + dateTimeFormat.format(firstDataPointMillis)
           + "\",\"last\":\"" + dateTimeFormat.format(lastDataPointMillis)
           + "\",\"interval\":" + String.valueOf(dataPointInterval / 1000L)
-          + ",\"factor\":" + String.format("%.3f", factor) + ","
-          + "\"count\":" + String.valueOf(count) + ","
-          + "\"values\":[");
+          + ",\"factor\":" + String.format(Locale.US, "%.3f", factor)
+          + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
       int written = 0, previousNonNullIndex = -2;
       boolean foundTwoAdjacentDataPoints = false;
       for (int j = firstNonNullIndex; j <= lastNonNullIndex; j++) {
