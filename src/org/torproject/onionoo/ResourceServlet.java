@@ -118,7 +118,7 @@ public class ResourceServlet extends HttpServlet {
       }
       this.writeHeader(sb);
       this.writeMatchingRelays(sb, searchParameter, resourceType);
-      this.writeNoBridges(sb);
+      this.writeMatchingBridges(sb, searchParameter, resourceType);
     } else if (uri.startsWith("/" + resourceType + "/lookup/")) {
       Set<String> fingerprintParameters = this.parseFingerprintParameters(
           uri.substring(("/" + resourceType + "/lookup/").length()));
@@ -259,7 +259,8 @@ public class ResourceServlet extends HttpServlet {
     sb.append("\n]}\n");
   }
 
-  private void writeRunningBridges(StringBuilder sb, String resourceType) {
+  private void writeRunningBridges(StringBuilder sb,
+      String resourceType) {
     sb.append("\"bridges\":[");
     int written = 0;
     for (String line : this.bridgeLines) {
@@ -276,6 +277,21 @@ public class ResourceServlet extends HttpServlet {
   private void writeNoBridges(StringBuilder sb) {
     sb.append("\"bridges\":[\n");
     sb.append("]}\n");
+  }
+
+  private void writeMatchingBridges(StringBuilder sb, String searchTerm,
+      String resourceType) {
+    sb.append("\"bridges\":[");
+    int written = 0;
+    for (String line : this.bridgeLines) {
+      if (line.contains("\"h\":\"" + searchTerm.toUpperCase())) {
+        String lines = this.getFromSummaryLine(line, resourceType);
+        if (lines.length() > 0) {
+          sb.append((written++ > 0 ? ",\n" : "\n") + lines);
+        }
+      }
+    }
+    sb.append("\n]}\n");
   }
 
   private void writeBridgesWithFingerprints(StringBuilder sb,
