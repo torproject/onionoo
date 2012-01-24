@@ -205,9 +205,14 @@ public class DetailDataWriter {
           sb.append((written++ > 0 ? "," : "") + "\n  \"" + exitPolicyLine
               + "\"");
         }
-        sb.append("\n],\n\"contact\":\"" + descriptor.getContact()
-            + "\",\n\"platform\":\"" + descriptor.getPlatform()
-            + "\"");
+        sb.append("\n]");
+        if (descriptor.getContact() != null) {
+          sb.append(",\n\"contact\":\"" + descriptor.getContact() + "\"");
+        }
+        if (descriptor.getPlatform() != null) {
+          sb.append(",\n\"platform\":\"" + descriptor.getPlatform()
+              + "\"");
+        }
         if (descriptor.getFamilyEntries() != null) {
           sb.append(",\n\"family\":[");
           written = 0;
