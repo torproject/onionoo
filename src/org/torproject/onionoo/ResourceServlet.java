@@ -352,14 +352,10 @@ public class ResourceServlet extends HttpServlet {
       try {
         BufferedReader br = new BufferedReader(new FileReader(
             detailsFile));
-        String line;
-        boolean copyLines = false;
-        while ((line = br.readLine()) != null) {
-          if (line.startsWith("\"nickname\":")) {
-            sb.append("{");
-            copyLines = true;
-          }
-          if (copyLines) {
+        String line = br.readLine();
+        if (line != null) {
+          sb.append("{");
+          while ((line = br.readLine()) != null) {
             sb.append(line + "\n");
           }
         }
