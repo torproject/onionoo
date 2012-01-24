@@ -10,6 +10,7 @@ public class Node {
   private String fingerprint;
   private String nickname;
   private String address;
+  private String country;
   private long lastSeenMillis;
   private int orPort;
   private int dirPort;
@@ -39,6 +40,12 @@ public class Node {
   }
   public String getAddress() {
     return this.address;
+  }
+  public void setCountry(String country) {
+    this.country = country;
+  }
+  public String getCountry() {
+    return this.country;
   }
   public long getLastSeenMillis() {
     return this.lastSeenMillis;

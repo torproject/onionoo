@@ -228,6 +228,7 @@ public class DetailDataWriter {
       String running = entry.getRunning() ? "true" : "false";
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
+      String country = entry.getCountry();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -244,6 +245,9 @@ public class DetailDataWriter {
           sb.append((written++ > 0 ? "," : "") + "\"" + relayFlag + "\"");
         }
         sb.append("]");
+      }
+      if (country != null) {
+        sb.append(",\n\"country\":\"" + country + "\"");
       }
       String statusParts = sb.toString();
 

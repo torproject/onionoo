@@ -13,6 +13,7 @@ public class Main {
     SummaryDataWriter sdw = new SummaryDataWriter();
     CurrentNodes cn = sdw.readRelaySearchDataFile();
     cn.readRelayNetworkConsensuses();
+    cn.lookUpCountries();
     cn.readBridgeNetworkStatuses();
     sdw.writeRelaySearchDataFile(cn);
 

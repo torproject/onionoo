@@ -13,6 +13,7 @@
     <pathelement location="lib/commons-codec-1.4.jar"/>
     <pathelement location="lib/servlet-api.jar"/>
     <pathelement location="lib/descriptor.jar"/>
+    <pathelement location="lib/maxmindgeoip.jar"/>
   </path>
   <target name="init">
     <copy file="${contextxmltemplate}" tofile="${contextxml}"/>
@@ -51,7 +52,7 @@
   </target>
   <target name="run" depends="compile">
     <java fork="true"
-          maxmemory="1024m"
+          maxmemory="4096m"
           classname="org.torproject.onionoo.Main">
       <classpath refid="classpath"/>
     </java>

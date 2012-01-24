@@ -4,6 +4,7 @@ package org.torproject.onionoo;
 
 import java.io.*;
 import java.util.*;
+import com.maxmind.geoip.*;
 import org.torproject.descriptor.*;
 
 /* Store relays and bridges that have been running in the past seven
@@ -66,6 +67,27 @@ public class CurrentNodes {
           validAfterMillis, orPort, dirPort, relayFlags);
       this.currentRelays.put(fingerprint, entry);
       this.containedValidAfterMillis.add(validAfterMillis);
+    }
+  }
+
+  public void lookUpCountries() {
+    File geoipDatFile = new File("GeoIP.dat");
+    if (!geoipDatFile.exists()) {
+      System.err.println("No GeoIP.dat file in /.");
+      return;
+    }
+    try {
+      LookupService cl = new LookupService(geoipDatFile,
+          LookupService.GEOIP_MEMORY_CACHE);
+      for (Node relay : currentRelays.values()) {
+        String country = cl.getCountry(relay.getAddress()).getCode();
+        if (country != null) {
+          relay.setCountry(country.toLowerCase());
+        }
+      }
+      cl.close();
+    } catch (IOException e) {
+      System.err.println("Could not look up countries for relays.");
     }
   }
 
