@@ -27,7 +27,8 @@ public class ResourceServlet extends HttpServlet {
   long summaryFileLastModified = 0L;
   boolean readSummaryFile = false;
   private String versionLine = null, validAfterLine = null,
-      freshUntilLine = null;
+      freshUntilLine = null, relaysPublishedLine = null,
+      bridgesPublishedLine = null;
   private List<String> relayLines = new ArrayList<String>(),
       bridgeLines = new ArrayList<String>();
   private void readSummaryFile() {
@@ -51,6 +52,10 @@ public class ResourceServlet extends HttpServlet {
             this.validAfterLine = line;
           } else if (line.startsWith("\"fresh_until\":")) {
             this.freshUntilLine = line;
+          } else if (line.startsWith("\"relays_published\":")) {
+            this.relaysPublishedLine = line;
+          } else if (line.startsWith("\"bridges_published\":")) {
+            this.bridgesPublishedLine = line;
           } else if (line.startsWith("\"relays\":")) {
             while ((line = br.readLine()) != null && !line.equals("],")) {
               this.relayLines.add(line);
@@ -95,19 +100,27 @@ public class ResourceServlet extends HttpServlet {
     StringBuilder sb = new StringBuilder();
     if (uri.equals("/" + resourceType + "/all")) {
       this.writeHeader(sb);
+      sb.append(this.relaysPublishedLine + "\n");
       this.writeAllRelays(sb, resourceType);
+      sb.append(this.bridgesPublishedLine + "\n");
       this.writeAllBridges(sb, resourceType);
     } else if (uri.equals("/" + resourceType + "/running")) {
       this.writeHeader(sb);
+      sb.append(this.relaysPublishedLine + "\n");
       this.writeRunningRelays(sb, resourceType);
+      sb.append(this.bridgesPublishedLine + "\n");
       this.writeRunningBridges(sb, resourceType);
     } else if (uri.equals("/" + resourceType + "/relays")) {
       this.writeHeader(sb);
+      sb.append(this.relaysPublishedLine + "\n");
       this.writeAllRelays(sb, resourceType);
+      sb.append(this.bridgesPublishedLine + "\n");
       this.writeNoBridges(sb);
     } else if (uri.equals("/" + resourceType + "/bridges")) {
       this.writeHeader(sb);
+      sb.append(this.relaysPublishedLine + "\n");
       this.writeNoRelays(sb);
+      sb.append(this.bridgesPublishedLine + "\n");
       this.writeAllBridges(sb, resourceType);
     } else if (uri.startsWith("/" + resourceType + "/search/")) {
       String searchParameter = this.parseSearchParameter(uri.substring(
@@ -117,7 +130,9 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       this.writeHeader(sb);
+      sb.append(this.relaysPublishedLine + "\n");
       this.writeMatchingRelays(sb, searchParameter, resourceType);
+      sb.append(this.bridgesPublishedLine + "\n");
       this.writeMatchingBridges(sb, searchParameter, resourceType);
     } else if (uri.startsWith("/" + resourceType + "/lookup/")) {
       Set<String> fingerprintParameters = this.parseFingerprintParameters(
@@ -127,8 +142,10 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       this.writeHeader(sb);
+      sb.append(this.relaysPublishedLine + "\n");
       this.writeRelaysWithFingerprints(sb, fingerprintParameters,
           resourceType);
+      sb.append(this.bridgesPublishedLine + "\n");
       this.writeBridgesWithFingerprints(sb, fingerprintParameters,
           resourceType);
     } else {
