@@ -238,8 +238,7 @@ public class DetailDataWriter {
       /* Generate network-status-specific part. */
       Node entry = relay.getValue();
       String nickname = entry.getNickname();
-      String address = entry.getAddress().equals("0.0.0.0") ? "10.0.0.0" :
-          entry.getAddress();
+      String address = entry.getAddress();
       String running = entry.getRunning() ? "true" : "false";
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
@@ -406,7 +405,8 @@ public class DetailDataWriter {
       /* Generate network-status-specific part. */
       Node entry = bridge.getValue();
       String running = entry.getRunning() ? "true" : "false";
-      String address = entry.getAddress();
+      String address = entry.getAddress().equals("0.0.0.0") ? "10.0.0.0" :
+          entry.getAddress();
       /* TODO Add addresses from a lines once Tonga includes them. */
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
