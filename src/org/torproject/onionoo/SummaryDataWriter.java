@@ -63,15 +63,17 @@ public class SummaryDataWriter {
                   + " is invalid.  Exiting.");
               System.exit(1);
             }
+            int skip = parts.length == 8 ? 1 : 0;
             String hashedFingerprint = parts[1];
-            long publishedMillis = dateTimeFormat.parse(parts[2] + " "
-               + parts[3]).getTime();
-            int orPort = Integer.parseInt(parts[4]);
-            int dirPort = Integer.parseInt(parts[5]);
+            String address = parts.length == 8 ? parts[2] : "0.0.0.0";
+            long publishedMillis = dateTimeFormat.parse(parts[2 + skip]
+               + " " + parts[3 + skip]).getTime();
+            int orPort = Integer.parseInt(parts[4 + skip]);
+            int dirPort = Integer.parseInt(parts[5 + skip]);
             SortedSet<String> relayFlags = new TreeSet<String>(
-                Arrays.asList(parts[6].split(",")));
-            result.addBridge(hashedFingerprint, publishedMillis, orPort,
-                dirPort, relayFlags);
+                Arrays.asList(parts[6 + skip].split(",")));
+            result.addBridge(hashedFingerprint, address, publishedMillis,
+                orPort, dirPort, relayFlags);
           }
         }
         br.close();
@@ -128,6 +130,8 @@ public class SummaryDataWriter {
         String fingerprint = entry.getFingerprint();
         String published = dateTimeFormat.format(
             entry.getLastSeenMillis());
+        String address = entry.getAddress().equals("0.0.0.0") ? "" :
+            " " + String.valueOf(entry.getAddress());
         String orPort = String.valueOf(entry.getOrPort());
         String dirPort = String.valueOf(entry.getDirPort());
         StringBuilder sb = new StringBuilder();
@@ -135,8 +139,8 @@ public class SummaryDataWriter {
           sb.append("," + relayFlag);
         }
         String relayFlags = sb.toString().substring(1);
-        bw.write("b " + fingerprint + " " + published + " "
-            + orPort + " " + dirPort + " " + relayFlags + "\n");
+        bw.write("b " + fingerprint + address + " " + published
+            + " " + orPort + " " + dirPort + " " + relayFlags + "\n");
       }
       bw.close();
     } catch (IOException e) {
@@ -179,12 +183,17 @@ public class SummaryDataWriter {
       String validAfterString = dateTimeFormat.format(now);
       String freshUntilString = dateTimeFormat.format(now
           + 75L * 60L * 1000L);
+      String relaysPublishedString = dateTimeFormat.format(
+          sd.getLastValidAfterMillis());
+      String bridgesPublishedString = dateTimeFormat.format(
+          sd.getLastPublishedMillis());
       this.relaySearchDataFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.relaySearchDataFile));
       bw.write("{\"version\":1,\n"
           + "\"valid_after\":\"" + validAfterString + "\",\n"
           + "\"fresh_until\":\"" + freshUntilString + "\",\n"
+          + "\"relays_published\":\"" + relaysPublishedString + "\",\n"
           + "\"relays\":[");
       int written = 0;
       for (Node entry : sd.getCurrentRelays().values()) {
@@ -202,7 +211,8 @@ public class SummaryDataWriter {
             + "\"a\":[\"" + address + "\"],"
             + "\"r\":" + running + "}");
       }
-      bw.write("\n],\n\"bridges\":[");
+      bw.write("\n],\n\"bridges_published\":\"" + bridgesPublishedString
+          + "\",\n\"bridges\":[");
       written = 0;
       for (Node entry : sd.getCurrentBridges().values()) {
         String hashedFingerprint = entry.getFingerprint();

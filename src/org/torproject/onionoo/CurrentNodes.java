@@ -118,22 +118,24 @@ public class CurrentNodes {
     long publishedMillis = status.getPublishedMillis();
     for (NetworkStatusEntry entry : status.getStatusEntries().values()) {
       String fingerprint = entry.getFingerprint();
+      String address = entry.getAddress();
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
       SortedSet<String> relayFlags = entry.getFlags();
-      this.addBridge(fingerprint, publishedMillis, orPort, dirPort,
-         relayFlags);
+      this.addBridge(fingerprint, address, publishedMillis, orPort,
+         dirPort, relayFlags);
     }
   }
 
-  public void addBridge(String fingerprint, long publishedMillis,
-      int orPort, int dirPort, SortedSet<String> relayFlags) {
+  public void addBridge(String fingerprint, String address,
+      long publishedMillis, int orPort, int dirPort,
+      SortedSet<String> relayFlags) {
     if (publishedMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
         (!this.currentBridges.containsKey(fingerprint) ||
         this.currentBridges.get(fingerprint).getLastSeenMillis() <
         publishedMillis)) {
-      Node entry = new Node(fingerprint, publishedMillis, orPort, dirPort,
-          relayFlags);
+      Node entry = new Node("Unnamed", fingerprint, address,
+          publishedMillis, orPort, dirPort, relayFlags);
       this.currentBridges.put(fingerprint, entry);
       this.containedPublishedMillis.add(publishedMillis);
     }
@@ -149,6 +151,16 @@ public class CurrentNodes {
       new TreeMap<String, Node>();
   public SortedMap<String, Node> getCurrentBridges() {
     return new TreeMap<String, Node>(this.currentBridges);
+  }
+
+  public long getLastValidAfterMillis() {
+    return this.containedValidAfterMillis.isEmpty() ? 0L :
+        this.containedValidAfterMillis.last();
+  }
+
+  public long getLastPublishedMillis() {
+    return this.containedPublishedMillis.isEmpty() ? 0L :
+        this.containedPublishedMillis.last();
   }
 }
 

@@ -27,11 +27,6 @@ public class Node {
     this.dirPort = dirPort;
     this.relayFlags = relayFlags;
   }
-  public Node(String fingerprint, long lastSeenMillis, int orPort,
-      int dirPort, SortedSet<String> relayFlags) {
-    this(null, fingerprint, null, lastSeenMillis, orPort, dirPort,
-        relayFlags);
-  }
   public String getFingerprint() {
     return this.fingerprint;
   }

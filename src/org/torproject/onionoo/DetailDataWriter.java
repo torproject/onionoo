@@ -146,6 +146,7 @@ public class DetailDataWriter {
       /* Read status file for this relay if it exists. */
       String descriptorParts = null;
       long publishedMillis = -1L;
+      boolean containsLastRestartedLine = false;
       if (result.containsKey(fingerprint)) {
         File statusFile = result.remove(fingerprint);
         try {
@@ -161,6 +162,8 @@ public class DetailDataWriter {
                   "\"desc_published\":\"1970-01-01 00:00:00".length());
               publishedMillis = dateTimeFormat.parse(published).getTime();
               copyLines = true;
+            } else if (line.startsWith("\"last_restarted\":")) {
+              containsLastRestartedLine = true;
             }
             if (copyLines) {
               sb.append(line + "\n");
@@ -184,20 +187,26 @@ public class DetailDataWriter {
       }
 
       /* Generate new descriptor-specific part if we have a more recent
-       * descriptor. */
+       * descriptor or if the part we read didn't contain a last_restarted
+       * line. */
       if (this.relayServerDescriptors.containsKey(fingerprint) &&
-          this.relayServerDescriptors.get(fingerprint).
-          getPublishedMillis() > publishedMillis) {
+          (this.relayServerDescriptors.get(fingerprint).
+          getPublishedMillis() > publishedMillis ||
+          !containsLastRestartedLine)) {
         ServerDescriptor descriptor = this.relayServerDescriptors.get(
             fingerprint);
         StringBuilder sb = new StringBuilder();
         String publishedDateTime = dateTimeFormat.format(
             descriptor.getPublishedMillis());
+        String lastRestartedString = dateTimeFormat.format(
+            descriptor.getPublishedMillis()
+            - descriptor.getUptime() * 1000L);
         int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
             Math.min(descriptor.getBandwidthBurst(),
             descriptor.getBandwidthObserved()));
         sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
             + "\"uptime\":" + descriptor.getUptime() + ",\n"
+            + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
             + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
             + "\"exit_policy\":[");
         int written = 0;
@@ -229,7 +238,8 @@ public class DetailDataWriter {
       /* Generate network-status-specific part. */
       Node entry = relay.getValue();
       String nickname = entry.getNickname();
-      String address = entry.getAddress();
+      String address = entry.getAddress().equals("0.0.0.0") ? "10.0.0.0" :
+          entry.getAddress();
       String running = entry.getRunning() ? "true" : "false";
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
@@ -240,7 +250,9 @@ public class DetailDataWriter {
           + "\"fingerprint\":\"" + fingerprint + "\",\n"
           + "\"or_address\":[\"" + address + "\"],\n"
           + "\"or_port\":" + orPort + ",\n"
+          + "\"or_addresses\":[\"" + address + ":" + orPort + "\"],\n"
           + "\"dir_port\":" + dirPort + ",\n"
+          + "\"dir_address\":\"" + address + ":" + dirPort + "\",\n"
           + "\"running\":" + running + ",\n");
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {
@@ -353,11 +365,15 @@ public class DetailDataWriter {
         StringBuilder sb = new StringBuilder();
         String publishedDateTime = dateTimeFormat.format(
             descriptor.getPublishedMillis());
+        String lastRestartedString = dateTimeFormat.format(
+            descriptor.getPublishedMillis()
+            - descriptor.getUptime() * 1000L);
         int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
             Math.min(descriptor.getBandwidthBurst(),
             descriptor.getBandwidthObserved()));
         sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
             + "\"uptime\":" + descriptor.getUptime() + ",\n"
+            + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
             + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
             + "\"exit_policy\":[");
         int written = 0;
@@ -390,12 +406,15 @@ public class DetailDataWriter {
       /* Generate network-status-specific part. */
       Node entry = bridge.getValue();
       String running = entry.getRunning() ? "true" : "false";
+      String address = entry.getAddress();
+      /* TODO Add addresses from a lines once Tonga includes them. */
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"hashed_fingerprint\":\"" + fingerprint + "\",\n"
           + "\"or_port\":" + orPort + ",\n"
+          + "\"or_addresses\":[\"" + address + ":" + orPort + "\"],\n"
           + "\"dir_port\":" + dirPort + ",\n"
           + "\"running\":" + running + ",");
       SortedSet<String> relayFlags = entry.getRelayFlags();
