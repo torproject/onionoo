@@ -1,0 +1,161 @@
+body {
+    background-color: white;
+    margin-top: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1em;
+    font-style: normal;
+    color: #000000;
+    padding-top: 0px;
+}
+
+/* images */
+
+img {
+    border: 0;
+}
+
+
+li {
+   margin: .2em .2em .2em 1em;
+}
+
+/* this centers the page */
+
+.center {
+    text-align: center;
+    background-color: white;
+    margin: 0px auto 0 auto;
+    width: 85%;
+}
+
+.center table {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+
+div.bottom {
+    font-size: 0.8em;
+    margin-top: 0.5cm;
+    margin-left: 1em;
+    margin-right: 1em;
+    text-align: center;
+}
+
+/* The main column (left text) */
+
+div.main-column {
+    padding: 15px 0 10px 10px;
+    text-indent: 0pt;
+    font-size: 1em;
+    direction: ltr;
+    text-align: left;
+}
+
+/* formatting styles */
+
+h2 {
+    font-size: 1.4em;
+    margin-bottom: 0em;
+    font-weight: bold;
+    margin-top: 0;
+}
+
+h3 {
+    font-size: 1.2em;
+    margin-bottom: 0em;
+    font-weight: bold;
+    margin-top: 0;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+a:link {
+    color: blue;
+    font-size: 1em;
+}
+
+a:visited {
+    color: purple;
+    font-size: 1em;
+}
+
+a.anchor {
+    font-size: 1em;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+td {
+    vertical-align: top;
+}
+
+/* the banner */
+
+table.banner {
+    width: 100%;
+    height: 79px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+td.banner-left {
+	/* This is done with an <img> in the HTML so it can be clickable
+    background-image: url("images/top-left.png");
+    background-repeat: no-repeat; */
+    width: 193px;
+}
+
+td.banner-middle {
+    background-color: #00802B;
+    background-image: url("/images/top-middle.png");
+    background-repeat: repeat-x;
+    vertical-align: bottom;
+    padding-bottom: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+td.banner-middle a, td.banner-middle a:visited {
+    margin-right: 5px;
+    color: white;
+    font-weight: bold;
+    font-size: 1em;
+}
+
+td.banner-middle a:hover {
+    color: #FF7F00;
+    font-weight: bold;
+    font-size: 1em;
+}
+
+td.banner-right {
+    background-image: url("/images/top-right.png");
+    background-repeat: no-repeat;
+    width: 15px;
+    background-position: right;
+    padding-top: 8px;
+}
+
+.banner-middle a.current {
+    text-decoration: none;
+    color: #FF7F00;
+    font-weight: bold;
+    font-size: 1em;
+    width: auto;
+    left: -50px;
+}
+
+hr {
+	background-color:#002200;
+	color:#666666;
+	font-size:1px;
+	height:1px;
+	line-height:0;
+	margin:15px 0 5px;
+}

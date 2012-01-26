@@ -1,110 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>Onionoo/TorStatusProtocol REST API
-</title>
+<head>
+<title>StatusTor &mdash; a Tor network status protocol</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<link href="css/stylesheet-ltr.css" type="text/css" rel="stylesheet">
+</head>
 <body>
-
-<h1>Onionoo/TorStatusProtocol REST API</h1>
-
-<h2>Summary documents</h2>
-<p>
-Summary list of relays with nicknames, fingerprints, IP addresses, and
-running information and/or bridges with hashed fingerprints and running
-information.
-</p>
-<table>
-<tr>
-<td><a href="/summary/all">GET summary/all</a></td>
-<td>Return the list of all relays and bridges that are currently running
-or that have been running in the past week.</td>
-</tr>
-<tr>
-<td><a href="/summary/running">GET summary/running</a></td>
-<td>Return the list of running relays and bridges.</td>
-</tr>
-<tr>
-<td><a href="/summary/relays">GET summary/relays</a></td>
-<td>Return only the list of relays.</td>
-</tr>
-<tr>
-<td><a href="/summary/bridges">GET summary/bridges</a></td>
-<td>Return only the list of bridges.</td>
-</tr>
-<tr>
-<td><a href="/summary/search/gabelmoo">GET summary/search/:searchtext</a></td>
-<td>Return the list of relays and bridges with searchtext matching
-nickname, fingerprint, IP address, or hashed fingerprint.</td>
-</tr>
-<tr>
-<td><a href="/summary/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET summary/lookup/:fingerprint</a></td>
-<td>Return the relay or bridge with the given fingerprint or hashed
-fingerprint.</td>
-</tr>
-</table>
-
-<h2>Detail documents</h2>
-<p>
-Detail information for one or more relays or bridges.
-</p>
-<table>
-<tr>
-<td><a href="/details/all">GET details/all</a></td>
-<td>Return detail documents for all relays and bridges.</td>
-</tr>
-<tr>
-<td><a href="/details/running">GET details/running</a></td>
-<td>Return detail documents for running relays and bridges.</td>
-</tr>
-<tr>
-<td><a href="/details/relays">GET details/relays</a></td>
-<td>Return detail documents for all relays.</td>
-</tr>
-<tr>
-<td><a href="/details/bridges">GET details/bridges</a></td>
-<td>Return detail documents for all bridges.</td>
-</tr>
-<tr>
-<td><a href="/details/search/gabelmoo">GET details/search/:searchtext</a></td>
-<td>Return detail documents for relays and bridges with searchtext matching
-nickname, fingerprint, IP address, or hashed fingerprint.</td>
-</tr>
-<tr>
-<td><a href="/details/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET details/lookup/:fingerprint</a></td>
-<td>Return the detail document for the given relay or bridge only.</td>
-</tr>
-</table>
-
-<h2>Bandwidth documents</h2>
-<p>
-Bandwidth information for one or more relays or bridges.
-</p>
-<table>
-<tr>
-<td><a href="/bandwidth/all">GET bandwidth/all</a></td>
-<td>Return bandwidth documents for all relays and bridges.</td>
-</tr>
-<tr>
-<td><a href="/bandwidth/running">GET bandwidth/running</a></td>
-<td>Return bandwidth documents for running relays and bridges.</td>
-</tr>
-<tr>
-<td><a href="/bandwidth/relays">GET bandwidth/relays</a></td>
-<td>Return bandwidth documents for all relays.</td>
-</tr>
-<tr>
-<td><a href="/bandwidth/bridges">GET bandwidth/bridges</a></td>
-<td>Return bandwidth documents for all bridges.</td>
-</tr>
-<tr>
-<td><a href="/bandwidth/search/gabelmoo">GET bandwidth/search/:searchtext</a></td>
-<td>Return bandwidth documents for relays and bridges with searchtext
-matching nickname, fingerprint, IP address, or hashed fingerprint.</td>
-</tr>
-<tr>
-<td><a href="/bandwidth/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET bandwidth/lookup/:fingerprint</a></td>
-<td>Return the bandwidth document for the given relay or bridge only.</td>
-</tr>
-</table>
-
+<div class="center">
+<div class="main-column">
+<h3>What is StatusTor?</h3>
+<br>
+<p>StatusTor is a web-based protocol to learn about currently running
+Tor relays and bridges.
+StatusTor itself was not designed as a service for human
+beings&mdash;at least not directly.
+StatusTor provides the data for other applications and websites which in
+turn present Tor network status information to humans.</p>
+<br>
+<h3>What StatusTor clients are available?</h3>
+<br>
+<p>There are currently two StatusTor clients available:</p>
+<ul>
+<li><b>Android app:</b>The <u><font color="gray">Android app</font></u>
+lets you add your relays or bridges to your favorites list and keeps you
+always informed whether they are running or not.
+<li><b>Tor network status website:</b> The
+<u><font color="gray">JavaScript-only Tor network status
+website</font></u> enables you to search for relays by nickname,
+fingerprint, or IP address and sort and filter results by more criteria.
+</ul>
+<br>
+<h3>How can I develop a new StatusTor client?</h3>
+<br>
+<p>You don't find your favorite StatusTor client?
+Want to implement your own and tell us to add it to the list above!
+Here are a few ideas:
+<ul>
+<li><b>Vidalia or arm extension:</b> Extend Vidalia and/or arm to look up
+details for the bridge that the user is running and display what pool the
+bridge is contained in.</li>
+<li><b>Social network site plugin:</b> Add a plugin to Facebook, Google+,
+or the social network site of your choice to show your friends what Tor
+relays and bridges you're running and how that helps users around the
+world.</li>
+<li><b>Desktop tray icon:</b> Write a tray icon for your favorite desktop
+environment that tells you when your relay or bridge is down and that
+displays some basic usage statistics.</li>
+<li><b>E-mail notification service:</b> Improve our e-mail notification
+service Weather by implementing its own relay search or extending it to
+report when a bridge drops off the network.</li>
+<li><b>Command-line tool:</b> Implement a command-line tool that quickly
+searches a relay or bridge and prints out some status information to help
+debug problems.</li>
+</ul>
+<p>Learn more about the StatusTor <a href="protocol.html">protocol</a> to
+implement your own StatusTor client.</p>
+</div>
+</div>
 </body>
 </html>
 
