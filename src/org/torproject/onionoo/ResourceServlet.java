@@ -218,7 +218,7 @@ public class ResourceServlet extends HttpServlet {
           line.startsWith("{\"f\":")) ||
           line.contains("\"f\":\"" + searchTerm.toUpperCase()) ||
           line.substring(line.indexOf("\"a\":[")).contains("\""
-          + searchTerm)) {
+          + searchTerm.toLowerCase())) {
         String lines = this.getFromSummaryLine(line, resourceType);
         if (lines.length() > 0) {
           sb.append((written++ > 0 ? ",\n" : "\n") + lines);
