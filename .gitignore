@@ -1,8 +1,9 @@
 relay-search-data.csv
-import/
+in/
+status/
 lib/
 classes/
-www/
+out/
 onionoo.war
 etc/context.xml
 GeoIP.dat
