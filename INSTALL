@@ -1,0 +1,124 @@
+Clone the Onionoo server repository
+-----------------------------------
+
+Clone the Onionoo server repository into /srv/onionoo/.
+
+$ git clone git://github.com/kloesing/Onionoo /srv/onionoo/
+
+
+Install Java 1.5 or higher, ant 1.8 or higher, and Tomcat 6
+-----------------------------------------------------------
+
+$ javac -version
+javac 1.6.0_26
+
+$ ant -version
+Apache Ant version 1.8.0 compiled on March 11 2010
+
+
+Provide required .jar files
+---------------------------
+
+Download or build the following .jar files and put them in the lib/
+directory using the given filename (or update build.xml if filenames are
+different):
+
+- Apache Commons Codec 1.4, lib/commons-codec-1.4.jar
+- Servlet API, e.g., from Tomcat 6, lib/servlet-api.jar
+- Maxmind GeoIP Java API, lib/maxmindgeoip.jar
+- Tor Metrics Descriptor Library, lib/descriptor.jar
+
+Attempt to compile the Java sources to make sure that everything works
+correctly:
+
+$ ant compile
+
+
+Download a GeoIP database file
+------------------------------
+
+Download a GeoIP database file from Maxmind and put it in
+/srv/onionoo/GeoIP.dat.  If no such file is found, relay IP addresses will
+not be resolved to country codes.
+
+
+Test the rsync of descriptors from metrics.torproject.org
+---------------------------------------------------------
+
+Run the initial rsync:
+
+$ rsync -arz metrics.torproject.org::metrics-recent in
+
+The result should be around 1G of data in the in/ directory, as of January
+2012.
+
+(If you want to pre-populate the bandwidth data with archived data,
+download the tarballs from https://metrics.torproject.org/data.html and
+process them one after the other.  There is no requirement to process data
+in any given order.)
+
+
+Test the hourly data processing process
+---------------------------------------
+
+Run the data processing process that will afterwards be run once per hour.
+The initial run may take a while:
+
+$ ant run
+
+
+Set up an hourly cronjob
+------------------------
+
+Check the contents of bin/update.sh and whether they match the commands
+that worked for you.  Once they do, add a crontab line similar to this
+one:
+
+15 * * * * cd /srv/onionoo/ && bin/update.sh
+
+
+Configure Tomcat
+----------------
+
+The following file may be a useful Tomcat configuration file.  Put it in
+/etc/tomcat6/server.xml:
+
+<Server port="8005" shutdown="SHUTDOWN">
+  <Service name="Catalina">
+    <Connector port="8080" maxHttpHeaderSize="8192"
+               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
+               enableLookups="false" redirectPort="8443" acceptCount="100"
+               connectionTimeout="20000" disableUploadTimeout="true"
+               compression="on" compressionMinSize="2048"
+               noCompressionUserAgents="gozilla, traviata"
+               compressableMimeType="text/html,application/json" />
+    <Engine name="Catalina" defaultHost="85.214.195.203">
+      <Host name="84.214.195.203" appBase="webapps"
+            unpackWARs="true" autoDeploy="true"
+            xmlValidation="false" xmlNamespaceAware="false">
+        <Alias>85.214.195.203</Alias>
+        <Valve className="org.apache.catalina.valves.AccessLogValve"
+               directory="logs" prefix="onionoo_access_log." suffix=".txt"
+               pattern="%l %u %t %r %s %b" resolveHosts="false"/>
+      </Host>
+    </Engine>
+  </Service>
+</Server>
+
+
+Deploy the Tomcat application
+-----------------------------
+
+Create a .war file:
+
+$ ant war
+
+Create a symbolic link to the .war file, so that non-root users can
+re-deploy the application in the future.  Run the following commands as
+root:
+
+# cd /var/lib/tomcat6/webapps/
+# ln -s /srv/onionoo.war ROOT.war
+
+The Onionoo server should now be available at http://localhost:8080/.
+

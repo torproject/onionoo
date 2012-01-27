@@ -7,4 +7,5 @@ out/
 onionoo.war
 etc/context.xml
 GeoIP.dat
+log
 
