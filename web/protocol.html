@@ -215,12 +215,12 @@ Combining address and port in a single string solves this; see
 <i>"or_addresses"</i> below.
 Announced on January 26, will be removed after February 26, 2012.</li>
 <li><b><font color="blue">"or_addresses":</font></b> Array of IPv4 or IPv6
-addresses and TCP ports or port ranges where the relay accepts
+addresses and TCP ports or port lists where the relay accepts
 onion-routing connections.
 Required field.
 Added on January 26, 2012.</li>
 <li><b><font color="blue">"exit_addresses":</font></b> Array of IPv4 or
-IPv6 addresses and TCP ports or port ranges that the relay uses to exit to
+IPv6 addresses and TCP ports or port lists that the relay uses to exit to
 the Internet.
 Only those addresses are listed that are different from onion-routing
 addresses.
@@ -308,7 +308,7 @@ onion-routing address.
 Replaced with <i>"or_addresses"</i>.
 Announced on January 26, will be removed after February 26, 2012.</li>
 <li><b><font color="blue">"or_addresses":</font></b> Array of sanitized
-IPv4 or IPv6 addresses and TCP ports or port ranges where the bridge
+IPv4 or IPv6 addresses and TCP ports or port lists where the bridge
 accepts onion-routing connections.
 Sanitized IP addresses are always in <i>10/8</i> or
 <i>[fd9f:2e19:3bcf/48]</i> IP networks and are only useful to learn which
