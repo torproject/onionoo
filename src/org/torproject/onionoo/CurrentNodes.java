@@ -17,8 +17,8 @@ public class CurrentNodes {
   private long now = System.currentTimeMillis();
 
   public void readRelayNetworkConsensuses() {
-    RelayDescriptorReader reader =
-        DescriptorSourceFactory.createRelayDescriptorReader();
+    DescriptorReader reader =
+        DescriptorSourceFactory.createDescriptorReader();
     reader.addDirectory(new File("in/relay-descriptors/consensuses"));
     reader.setExcludeFiles(new File("status/relay-consensus-history"));
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
@@ -92,8 +92,8 @@ public class CurrentNodes {
   }
 
   public void readBridgeNetworkStatuses() {
-    BridgeDescriptorReader reader =
-        DescriptorSourceFactory.createBridgeDescriptorReader();
+    DescriptorReader reader =
+        DescriptorSourceFactory.createDescriptorReader();
     reader.addDirectory(new File("in/bridge-descriptors/statuses"));
     reader.setExcludeFiles(new File("status/bridge-status-history"));
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();

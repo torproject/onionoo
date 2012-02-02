@@ -28,8 +28,8 @@ public class BandwidthDataWriter {
     this.currentFingerprints.addAll(currentBridges.keySet());
   }
   public void readExtraInfoDescriptors() {
-    RelayDescriptorReader reader =
-        DescriptorSourceFactory.createRelayDescriptorReader();
+    DescriptorReader reader =
+        DescriptorSourceFactory.createDescriptorReader();
     reader.addDirectory(new File("in/relay-descriptors/extra-infos"));
     reader.addDirectory(new File("in/bridge-descriptors/extra-infos"));
     reader.setExcludeFiles(new File("status/extrainfo-history"));

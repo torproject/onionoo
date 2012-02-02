@@ -23,8 +23,8 @@ public class DetailDataWriter {
   private Map<String, ServerDescriptor> relayServerDescriptors =
       new HashMap<String, ServerDescriptor>();
   public void readRelayServerDescriptors() {
-    RelayDescriptorReader reader =
-        DescriptorSourceFactory.createRelayDescriptorReader();
+    DescriptorReader reader =
+        DescriptorSourceFactory.createDescriptorReader();
     reader.addDirectory(new File(
         "in/relay-descriptors/server-descriptors"));
     reader.setExcludeFiles(new File("status/relay-serverdesc-history"));
@@ -54,8 +54,8 @@ public class DetailDataWriter {
   private Map<String, ServerDescriptor> bridgeServerDescriptors =
       new HashMap<String, ServerDescriptor>();
   public void readBridgeServerDescriptors() {
-    RelayDescriptorReader reader =
-        DescriptorSourceFactory.createRelayDescriptorReader();
+    DescriptorReader reader =
+        DescriptorSourceFactory.createDescriptorReader();
     reader.addDirectory(new File(
         "in/bridge-descriptors/server-descriptors"));
     reader.setExcludeFiles(new File("status/bridge-serverdesc-history"));
@@ -85,8 +85,8 @@ public class DetailDataWriter {
   private Map<String, String> bridgePoolAssignments =
       new HashMap<String, String>();
   public void readBridgePoolAssignments() {
-    BridgePoolAssignmentReader reader =
-        DescriptorSourceFactory.createBridgePoolAssignmentReader();
+    DescriptorReader reader =
+        DescriptorSourceFactory.createDescriptorReader();
     reader.addDirectory(new File("in/bridge-pool-assignments"));
     reader.setExcludeFiles(new File("status/bridge-poolassign-history"));
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
