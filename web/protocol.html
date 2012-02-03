@@ -1,17 +1,17 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-<title>StatusTor &mdash; a Tor network status protocol</title>
+<title>Onionoo &mdash; a Tor network status protocol</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <link href="css/stylesheet-ltr.css" type="text/css" rel="stylesheet">
 </head>
 <body>
 <div class="center">
 <div class="main-column">
-<h3>StatusTor protocol overview</h3>
+<h3>Onionoo protocol overview</h3>
 <br>
-<p>The StatusTor service is designed as a RESTful web service.
-StatusTor clients send HTTP GET requests to the StatusTor server which
+<p>The Onionoo service is designed as a RESTful web service.
+Onionoo clients send HTTP GET requests to the Onionoo server which
 responds with JSON-formatted replies.</p>
 <p>TorStatus clients and their developers should follow a few rules:</p>
 <ul>
@@ -32,12 +32,12 @@ Protocol changes will be announced here by writing deprecated API parts in
 <b><font color="red">red</font></b> and new parts in
 <b><font color="blue">blue</font></b>.
 Deprecated parts will be removed one month after their announcement.
-Drop us an
-<a href="mailto:tor-assistants@lists.torproject.org">e-mail</a>, and we're
-going to inform you of upcoming changes.</p>
+Let us <a href="mailto:karsten.loesing@gmx.net">know</a> that you're
+developing a client, and we're going to inform you of upcoming protocol
+changes.</p>
 </li>
 </ul>
-<p>The StatusTor API is described by resource types and available methods
+<p>The Onionoo API is described by resource types and available methods
 below.</p>
 <br>
 <h3>Summary documents</h3>
@@ -470,6 +470,8 @@ Keys are string representation of the time period covered by the bandwidth
 history object.
 Keys are fixed strings <i>"3_days"</i>, <i>"1_week"</i>, <i>"1_month"</i>,
 <i>"3_months"</i>, <i>"1_year"</i>, and <i>"5_years"</i>.
+Keys refer to the last known bandwidth history of a relay, not to the time
+when the bandwidth document was published.
 Each bandwidth history object contains the following key-value pairs:
 <ul>
 <li><b>"first":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
@@ -492,8 +494,10 @@ Can also be derived from the number of elements in the subsequent array.
 Optional field.</li>
 <li><b>"values":</b> Array of normalized bandwidth values in bytes per
 second.
-May contain null values if the relay did not provide enough bandwidth data
-to calculate a mean bandwidth value in a given time period.
+May contain null values if the relay did not provide any bandwidth data or
+only data for less than 20% of a given time period.
+Only includes non-null values for series of at least two subsequent data
+points to enable drawing of line graphs.
 Required field.</li>
 </ul>
 </li>
