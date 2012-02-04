@@ -26,7 +26,11 @@ import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.ServerDescriptor;
 
 /* Write updated detail data files to disk and delete files of relays or
- * bridges that fell out of the summary list. */
+ * bridges that fell out of the summary list.
+ *
+ * The parts of details files coming from server descriptors always come
+ * from the last known descriptor of a relay or bridge, not from the
+ * descriptor that was last referenced in a network status. */
 public class DetailDataWriter {
 
   private SortedMap<String, Node> relays;
