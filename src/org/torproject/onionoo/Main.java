@@ -6,15 +6,23 @@ package org.torproject.onionoo;
 public class Main {
   public static void main(String[] args) {
 
-    printStatus("Updating summary data.");
-    SummaryDataWriter sdw = new SummaryDataWriter();
-    CurrentNodes cn = sdw.readRelaySearchDataFile();
+    printStatus("Updating internal node list.");
+    CurrentNodes cn = new CurrentNodes();
+    cn.readRelaySearchDataFile();
     cn.readRelayNetworkConsensuses();
     cn.setRelayRunningBits();
     cn.lookUpCountries();
     cn.readBridgeNetworkStatuses();
     cn.setBridgeRunningBits();
-    sdw.writeRelaySearchDataFile(cn);
+    cn.writeRelaySearchDataFile();
+
+    printStatus("Updating summary data.");
+    SummaryDataWriter sdw = new SummaryDataWriter();
+    sdw.setLastValidAfterMillis(cn.getLastValidAfterMillis());
+    sdw.setLastPublishedMillis(cn.getLastPublishedMillis());
+    sdw.setCurrentRelays(cn.getCurrentRelays());
+    sdw.setCurrentBridges(cn.getCurrentBridges());
+    sdw.writeSummaryDataFile();
 
     printStatus("Updating detail data.");
     DetailDataWriter ddw = new DetailDataWriter();
