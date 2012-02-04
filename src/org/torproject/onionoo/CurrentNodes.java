@@ -172,8 +172,10 @@ public class CurrentNodes {
       DescriptorFile descriptorFile = descriptorFiles.next();
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          updateRelayNetworkStatusConsensus((RelayNetworkStatusConsensus)
-              descriptor);
+          if (descriptor instanceof RelayNetworkStatusConsensus) {
+            updateRelayNetworkStatusConsensus((RelayNetworkStatusConsensus)
+                descriptor);
+          }
         }
       }
     }
@@ -251,7 +253,9 @@ public class CurrentNodes {
       DescriptorFile descriptorFile = descriptorFiles.next();
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
+          if (descriptor instanceof BridgeNetworkStatus) {
+            updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
+          }
         }
       }
     }

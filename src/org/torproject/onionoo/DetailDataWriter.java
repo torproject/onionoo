@@ -56,15 +56,17 @@ public class DetailDataWriter {
       DescriptorFile descriptorFile = descriptorFiles.next();
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          ServerDescriptor serverDescriptor =
-              (ServerDescriptor) descriptor;
-          String fingerprint = serverDescriptor.getFingerprint();
-          if (!this.relayServerDescriptors.containsKey(fingerprint) ||
-              this.relayServerDescriptors.get(fingerprint).
-              getPublishedMillis()
-              < serverDescriptor.getPublishedMillis()) {
-            this.relayServerDescriptors.put(fingerprint,
-                serverDescriptor);
+          if (descriptor instanceof ServerDescriptor) {
+            ServerDescriptor serverDescriptor =
+                (ServerDescriptor) descriptor;
+            String fingerprint = serverDescriptor.getFingerprint();
+            if (!this.relayServerDescriptors.containsKey(fingerprint) ||
+                this.relayServerDescriptors.get(fingerprint).
+                getPublishedMillis()
+                < serverDescriptor.getPublishedMillis()) {
+              this.relayServerDescriptors.put(fingerprint,
+                  serverDescriptor);
+            }
           }
         }
       }
@@ -84,15 +86,17 @@ public class DetailDataWriter {
       DescriptorFile descriptorFile = descriptorFiles.next();
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          ServerDescriptor serverDescriptor =
-              (ServerDescriptor) descriptor;
-          String fingerprint = serverDescriptor.getFingerprint();
-          if (!this.bridgeServerDescriptors.containsKey(fingerprint) ||
-              this.bridgeServerDescriptors.get(fingerprint).
-              getPublishedMillis()
-              < serverDescriptor.getPublishedMillis()) {
-            this.bridgeServerDescriptors.put(fingerprint,
-                serverDescriptor);
+          if (descriptor instanceof ServerDescriptor) {
+            ServerDescriptor serverDescriptor =
+                (ServerDescriptor) descriptor;
+            String fingerprint = serverDescriptor.getFingerprint();
+            if (!this.bridgeServerDescriptors.containsKey(fingerprint) ||
+                this.bridgeServerDescriptors.get(fingerprint).
+                getPublishedMillis()
+                < serverDescriptor.getPublishedMillis()) {
+              this.bridgeServerDescriptors.put(fingerprint,
+                  serverDescriptor);
+            }
           }
         }
       }
@@ -111,13 +115,15 @@ public class DetailDataWriter {
       DescriptorFile descriptorFile = descriptorFiles.next();
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          BridgePoolAssignment bridgePoolAssignment =
-              (BridgePoolAssignment) descriptor;
-          for (Map.Entry<String, String> e :
-              bridgePoolAssignment.getEntries().entrySet()) {
-            String fingerprint = e.getKey();
-            String details = e.getValue();
-            this.bridgePoolAssignments.put(fingerprint, details);
+          if (descriptor instanceof BridgePoolAssignment) {
+            BridgePoolAssignment bridgePoolAssignment =
+                (BridgePoolAssignment) descriptor;
+            for (Map.Entry<String, String> e :
+                bridgePoolAssignment.getEntries().entrySet()) {
+              String fingerprint = e.getKey();
+              String details = e.getValue();
+              this.bridgePoolAssignments.put(fingerprint, details);
+            }
           }
         }
       }

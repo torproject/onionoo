@@ -73,9 +73,11 @@ public class BandwidthDataWriter {
       DescriptorFile descriptorFile = descriptorFiles.next();
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          ExtraInfoDescriptor extraInfoDescriptor =
-              (ExtraInfoDescriptor) descriptor;
-          this.parseDescriptor(extraInfoDescriptor);
+          if (descriptor instanceof ExtraInfoDescriptor) {
+            ExtraInfoDescriptor extraInfoDescriptor =
+                (ExtraInfoDescriptor) descriptor;
+            this.parseDescriptor(extraInfoDescriptor);
+          }
         }
       }
     }
