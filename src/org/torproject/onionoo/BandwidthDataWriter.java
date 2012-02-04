@@ -40,6 +40,13 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  * past five years. */
 public class BandwidthDataWriter {
 
+  private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+      "yyyy-MM-dd HH:mm:ss");
+  public BandwidthDataWriter() {
+    this.dateTimeFormat.setLenient(false);
+    this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+  }
+
   private SortedSet<String> currentFingerprints = new TreeSet<String>();
   public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
     this.currentFingerprints.addAll(currentRelays.keySet());
@@ -61,13 +68,13 @@ public class BandwidthDataWriter {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
           ExtraInfoDescriptor extraInfoDescriptor =
               (ExtraInfoDescriptor) descriptor;
-          parseDescriptor(extraInfoDescriptor);
+          this.parseDescriptor(extraInfoDescriptor);
         }
       }
     }
   }
 
-  private static void parseDescriptor(ExtraInfoDescriptor descriptor) {
+  private void parseDescriptor(ExtraInfoDescriptor descriptor) {
     String fingerprint = descriptor.getFingerprint();
     boolean updateHistory = false;
     SortedMap<Long, long[]> writeHistory = new TreeMap<Long, long[]>(),
@@ -83,30 +90,24 @@ public class BandwidthDataWriter {
       updateHistory = true;
     }
     if (updateHistory) {
-      readHistoryFromDisk(fingerprint, writeHistory, readHistory);
-      compressHistory(writeHistory);
-      compressHistory(readHistory);
-      writeHistoryToDisk(fingerprint, writeHistory, readHistory);
-      writeBandwidthDataFileToDisk(fingerprint, writeHistory,
+      this.readHistoryFromDisk(fingerprint, writeHistory, readHistory);
+      this.compressHistory(writeHistory);
+      this.compressHistory(readHistory);
+      this.writeHistoryToDisk(fingerprint, writeHistory, readHistory);
+      this.writeBandwidthDataFileToDisk(fingerprint, writeHistory,
           readHistory);
     }
   }
-  private static SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-      "yyyy-MM-dd HH:mm:ss");
-  static {
-    dateTimeFormat.setLenient(false);
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-  }
 
-  private static void parseHistoryLine(String line,
+  private void parseHistoryLine(String line,
       SortedMap<Long, long[]> history) {
     String[] parts = line.split(" ");
     if (parts.length < 6) {
       return;
     }
     try {
-      long endMillis = dateTimeFormat.parse(parts[1] + " " + parts[2]).
-          getTime();
+      long endMillis = this.dateTimeFormat.parse(parts[1] + " "
+          + parts[2]).getTime();
       long intervalMillis = Long.parseLong(parts[3].substring(1)) * 1000L;
       String[] values = parts[5].split(",");
       for (int i = values.length - 1; i >= 0; i--) {
@@ -122,7 +123,7 @@ public class BandwidthDataWriter {
     }
   }
 
-  private static void readHistoryFromDisk(String fingerprint,
+  private void readHistoryFromDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
     File historyFile = new File("status/bandwidth", fingerprint);
@@ -135,9 +136,9 @@ public class BandwidthDataWriter {
           String[] parts = line.split(" ");
           SortedMap<Long, long[]> history = parts[0].equals("r")
               ? readHistory : writeHistory;
-          long startMillis = dateTimeFormat.parse(parts[1] + " "
+          long startMillis = this.dateTimeFormat.parse(parts[1] + " "
               + parts[2]).getTime();
-          long endMillis = dateTimeFormat.parse(parts[3] + " "
+          long endMillis = this.dateTimeFormat.parse(parts[3] + " "
               + parts[4]).getTime();
           long bandwidth = Long.parseLong(parts[5]);
           long previousEndMillis = history.headMap(startMillis).isEmpty()
@@ -163,8 +164,8 @@ public class BandwidthDataWriter {
     }
   }
 
-  private static long now = System.currentTimeMillis();
-  private static void compressHistory(
+  private long now = System.currentTimeMillis();
+  private void compressHistory(
       SortedMap<Long, long[]> history) {
     SortedMap<Long, long[]> uncompressedHistory =
         new TreeMap<Long, long[]>(history);
@@ -173,15 +174,15 @@ public class BandwidthDataWriter {
     for (long[] v : uncompressedHistory.values()) {
       long startMillis = v[0], endMillis = v[1], bandwidth = v[2];
       long intervalLengthMillis;
-      if (now - endMillis <= 72L * 60L * 60L * 1000L) {
+      if (this.now - endMillis <= 72L * 60L * 60L * 1000L) {
         intervalLengthMillis = 15L * 60L * 1000L;
-      } else if (now - endMillis <= 7L * 24L * 60L * 60L * 1000L) {
+      } else if (this.now - endMillis <= 7L * 24L * 60L * 60L * 1000L) {
         intervalLengthMillis = 60L * 60L * 1000L;
-      } else if (now - endMillis <= 31L * 24L * 60L * 60L * 1000L) {
+      } else if (this.now - endMillis <= 31L * 24L * 60L * 60L * 1000L) {
         intervalLengthMillis = 4L * 60L * 60L * 1000L;
-      } else if (now - endMillis <= 92L * 24L * 60L * 60L * 1000L) {
+      } else if (this.now - endMillis <= 92L * 24L * 60L * 60L * 1000L) {
         intervalLengthMillis = 12L * 60L * 60L * 1000L;
-      } else if (now - endMillis <= 366L * 24L * 60L * 60L * 1000L) {
+      } else if (this.now - endMillis <= 366L * 24L * 60L * 60L * 1000L) {
         intervalLengthMillis = 2L * 24L * 60L * 60L * 1000L;
       } else {
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
@@ -207,7 +208,7 @@ public class BandwidthDataWriter {
     }
   }
 
-  private static void writeHistoryToDisk(String fingerprint,
+  private void writeHistoryToDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
     File historyFile = new File("status/bandwidth", fingerprint);
@@ -215,14 +216,14 @@ public class BandwidthDataWriter {
       historyFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(historyFile));
       for (long[] v : writeHistory.values()) {
-        bw.write("w " + dateTimeFormat.format(v[0]) + " "
-            + dateTimeFormat.format(v[1]) + " " + String.valueOf(v[2])
-            + "\n");
+        bw.write("w " + this.dateTimeFormat.format(v[0]) + " "
+            + this.dateTimeFormat.format(v[1]) + " "
+            + String.valueOf(v[2]) + "\n");
       }
       for (long[] v : readHistory.values()) {
-        bw.write("r " + dateTimeFormat.format(v[0]) + " "
-            + dateTimeFormat.format(v[1]) + " " + String.valueOf(v[2])
-            + "\n");
+        bw.write("r " + this.dateTimeFormat.format(v[0]) + " "
+            + this.dateTimeFormat.format(v[1]) + " "
+            + String.valueOf(v[2]) + "\n");
       }
       bw.close();
     } catch (IOException e) {
@@ -232,13 +233,13 @@ public class BandwidthDataWriter {
   }
 
   private File bandwidthFileDirectory = new File("out/bandwidth");
-  private static void writeBandwidthDataFileToDisk(String fingerprint,
+  private void writeBandwidthDataFileToDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
-    if ((writeHistory.isEmpty() ||
-        writeHistory.lastKey() < now - 7L * 24L * 60L * 60L * 1000L) &&
-        (readHistory.isEmpty() ||
-        readHistory.lastKey() < now - 7L * 24L * 60L * 60L * 1000L)) {
+    if ((writeHistory.isEmpty() || writeHistory.lastKey() < this.now
+        - 7L * 24L * 60L * 60L * 1000L) &&
+        (readHistory.isEmpty() || readHistory.lastKey() < this.now
+        - 7L * 24L * 60L * 60L * 1000L)) {
       /* Don't write bandwidth data file to disk. */
       return;
     }
@@ -259,7 +260,7 @@ public class BandwidthDataWriter {
     }
   }
 
-  private static String[] graphNames = new String[] {
+  private String[] graphNames = new String[] {
       "3_days",
       "1_week",
       "1_month",
@@ -267,7 +268,7 @@ public class BandwidthDataWriter {
       "1_year",
       "5_years" };
 
-  private static long[] graphIntervals = new long[] {
+  private long[] graphIntervals = new long[] {
       72L * 60L * 60L * 1000L,
       7L * 24L * 60L * 60L * 1000L,
       31L * 24L * 60L * 60L * 1000L,
@@ -275,7 +276,7 @@ public class BandwidthDataWriter {
       366L * 24L * 60L * 60L * 1000L,
       5L * 366L * 24L * 60L * 60L * 1000L };
 
-  private static long[] dataPointIntervals = new long[] {
+  private long[] dataPointIntervals = new long[] {
       15L * 60L * 1000L,
       60L * 60L * 1000L,
       4L * 60L * 60L * 1000L,
@@ -283,15 +284,14 @@ public class BandwidthDataWriter {
       2L * 24L * 60L * 60L * 1000L,
       10L * 24L * 60L * 60L * 1000L };
 
-  private static String formatHistoryString(
-      SortedMap<Long, long[]> history) {
+  private String formatHistoryString(SortedMap<Long, long[]> history) {
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < graphIntervals.length; i++) {
-      String graphName = graphNames[i];
-      long graphInterval = graphIntervals[i];
-      long dataPointInterval = dataPointIntervals[i];
+    for (int i = 0; i < this.graphIntervals.length; i++) {
+      String graphName = this.graphNames[i];
+      long graphInterval = this.graphIntervals[i];
+      long dataPointInterval = this.dataPointIntervals[i];
       List<Long> dataPoints = new ArrayList<Long>();
-      long intervalStartMillis = ((now - graphInterval)
+      long intervalStartMillis = ((this.now - graphInterval)
           / dataPointInterval) * dataPointInterval;
       long totalMillis = 0L, totalBandwidth = 0L;
       for (long[] v : history.values()) {
@@ -329,7 +329,7 @@ public class BandwidthDataWriter {
       if (firstNonNullIndex < 0) {
         continue;
       }
-      long firstDataPointMillis = (((now - graphInterval)
+      long firstDataPointMillis = (((this.now - graphInterval)
           / dataPointInterval) + firstNonNullIndex) * dataPointInterval
           + dataPointInterval / 2L;
       long lastDataPointMillis = firstDataPointMillis
@@ -338,9 +338,11 @@ public class BandwidthDataWriter {
       int count = lastNonNullIndex - firstNonNullIndex + 1;
       StringBuilder sb2 = new StringBuilder();
       sb2.append("\"" + graphName + "\":{"
-          + "\"first\":\"" + dateTimeFormat.format(firstDataPointMillis)
-          + "\",\"last\":\"" + dateTimeFormat.format(lastDataPointMillis)
-          + "\",\"interval\":" + String.valueOf(dataPointInterval / 1000L)
+          + "\"first\":\""
+          + this.dateTimeFormat.format(firstDataPointMillis) + "\","
+          + "\"last\":\""
+          + this.dateTimeFormat.format(lastDataPointMillis) + "\","
+          +"\"interval\":" + String.valueOf(dataPointInterval / 1000L)
           + ",\"factor\":" + String.format(Locale.US, "%.3f", factor)
           + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
       int written = 0, previousNonNullIndex = -2;
