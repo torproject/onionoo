@@ -68,21 +68,20 @@ public class CurrentNodes {
                 validAfterMillis, orPort, dirPort, relayFlags);
           } else if (line.startsWith("b ")) {
             String[] parts = line.split(" ");
-            if (parts.length < 7) {
+            if (parts.length < 9) {
               System.err.println("Line '" + line + "' in '"
                   + this.internalRelaySearchDataFile.getAbsolutePath()
                   + " is invalid.  Exiting.");
               System.exit(1);
             }
-            int skip = parts.length == 8 ? 1 : 0;
-            String hashedFingerprint = parts[1];
-            String address = parts.length == 8 ? parts[2] : "0.0.0.0";
-            long publishedMillis = dateTimeFormat.parse(parts[2 + skip]
-               + " " + parts[3 + skip]).getTime();
-            int orPort = Integer.parseInt(parts[4 + skip]);
-            int dirPort = Integer.parseInt(parts[5 + skip]);
+            String hashedFingerprint = parts[2];
+            String address = parts[3];
+            long publishedMillis = dateTimeFormat.parse(parts[4] + " "
+                + parts[5]).getTime();
+            int orPort = Integer.parseInt(parts[6]);
+            int dirPort = Integer.parseInt(parts[7]);
             SortedSet<String> relayFlags = new TreeSet<String>(
-                Arrays.asList(parts[6 + skip].split(",")));
+                Arrays.asList(parts[8].split(",")));
             this.addBridge(hashedFingerprint, address, publishedMillis,
                 orPort, dirPort, relayFlags);
           }
@@ -134,8 +133,7 @@ public class CurrentNodes {
         String fingerprint = entry.getFingerprint();
         String published = dateTimeFormat.format(
             entry.getLastSeenMillis());
-        String address = entry.getAddress().equals("0.0.0.0") ? "" :
-            " " + String.valueOf(entry.getAddress());
+        String address = String.valueOf(entry.getAddress());
         String orPort = String.valueOf(entry.getOrPort());
         String dirPort = String.valueOf(entry.getDirPort());
         StringBuilder sb = new StringBuilder();
@@ -143,8 +141,9 @@ public class CurrentNodes {
           sb.append("," + relayFlag);
         }
         String relayFlags = sb.toString().substring(1);
-        bw.write("b " + fingerprint + address + " " + published
-            + " " + orPort + " " + dirPort + " " + relayFlags + "\n");
+        bw.write("b Unnamed " + fingerprint + " " + address + " "
+            + published + " " + orPort + " " + dirPort + " " + relayFlags
+            + "\n");
       }
       bw.close();
     } catch (IOException e) {

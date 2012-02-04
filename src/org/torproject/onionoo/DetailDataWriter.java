@@ -424,9 +424,7 @@ public class DetailDataWriter {
       /* Generate network-status-specific part. */
       Node entry = bridge.getValue();
       String running = entry.getRunning() ? "true" : "false";
-      String address = entry.getAddress().equals("0.0.0.0") ? "10.0.0.0" :
-          entry.getAddress();
-      /* TODO Add addresses from a lines once Tonga includes them. */
+      String address = entry.getAddress();
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
       StringBuilder sb = new StringBuilder();
