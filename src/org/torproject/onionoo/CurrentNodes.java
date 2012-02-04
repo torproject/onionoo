@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.Descriptor;
@@ -24,8 +23,8 @@ import com.maxmind.geoip.LookupService;
  * days. */
 public class CurrentNodes {
 
-  private SortedSet<Long> containedValidAfterMillis = new TreeSet<Long>();
-  private SortedSet<Long> containedPublishedMillis = new TreeSet<Long>();
+  private long lastValidAfterMillis = 0L;
+  private long lastPublishedMillis = 0L;
 
   private long now = System.currentTimeMillis();
 
@@ -44,11 +43,10 @@ public class CurrentNodes {
         }
       }
     }
-    if (!this.containedValidAfterMillis.isEmpty()) {
-      long lastValidAfterMillis = this.containedValidAfterMillis.last();
+    if (this.lastValidAfterMillis > 0L) {
       for (Node entry : this.currentRelays.values()) {
         entry.setRunning(entry.getLastSeenMillis() ==
-            lastValidAfterMillis);
+            this.lastValidAfterMillis);
       }
     }
   }
@@ -79,7 +77,9 @@ public class CurrentNodes {
       Node entry = new Node(nickname, fingerprint, address,
           validAfterMillis, orPort, dirPort, relayFlags);
       this.currentRelays.put(fingerprint, entry);
-      this.containedValidAfterMillis.add(validAfterMillis);
+      if (validAfterMillis > this.lastValidAfterMillis) {
+        this.lastValidAfterMillis = validAfterMillis;
+      }
     }
   }
 
@@ -90,15 +90,15 @@ public class CurrentNodes {
       return;
     }
     try {
-      LookupService cl = new LookupService(geoipDatFile,
+      LookupService ls = new LookupService(geoipDatFile,
           LookupService.GEOIP_MEMORY_CACHE);
       for (Node relay : currentRelays.values()) {
-        String country = cl.getCountry(relay.getAddress()).getCode();
+        String country = ls.getCountry(relay.getAddress()).getCode();
         if (country != null) {
           relay.setCountry(country.toLowerCase());
         }
       }
-      cl.close();
+      ls.close();
     } catch (IOException e) {
       System.err.println("Could not look up countries for relays.");
     }
@@ -118,11 +118,10 @@ public class CurrentNodes {
         }
       }
     }
-    if (!this.containedPublishedMillis.isEmpty()) {
-      long lastPublishedMillis = this.containedPublishedMillis.last();
+    if (this.lastPublishedMillis > 0L) {
       for (Node entry : this.currentBridges.values()) {
         entry.setRunning(entry.getLastSeenMillis() ==
-            lastPublishedMillis);
+            this.lastPublishedMillis);
       }
     }
   }
@@ -150,7 +149,9 @@ public class CurrentNodes {
       Node entry = new Node("Unnamed", fingerprint, address,
           publishedMillis, orPort, dirPort, relayFlags);
       this.currentBridges.put(fingerprint, entry);
-      this.containedPublishedMillis.add(publishedMillis);
+      if (publishedMillis > this.lastPublishedMillis) {
+        this.lastPublishedMillis = publishedMillis;
+      }
     }
   }
 
@@ -167,13 +168,11 @@ public class CurrentNodes {
   }
 
   public long getLastValidAfterMillis() {
-    return this.containedValidAfterMillis.isEmpty() ? 0L :
-        this.containedValidAfterMillis.last();
+    return this.lastValidAfterMillis;
   }
 
   public long getLastPublishedMillis() {
-    return this.containedPublishedMillis.isEmpty() ? 0L :
-        this.containedPublishedMillis.last();
+    return this.lastPublishedMillis;
   }
 }
 
