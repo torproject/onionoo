@@ -25,17 +25,18 @@ import org.torproject.descriptor.DescriptorReader;
 import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.ServerDescriptor;
 
-/* Write detail data files to disk and delete status files of relays or
- * bridges that fell out the search data list. */
+/* Write updated detail data files to disk and delete files of relays or
+ * bridges that fell out of the summary list. */
 public class DetailDataWriter {
 
   private SortedMap<String, Node> relays;
-  public void setCurrentRelays(SortedMap<String, Node> relays) {
-    this.relays = relays;
+  public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
+    this.relays = currentRelays;
   }
+
   private SortedMap<String, Node> bridges;
-  public void setCurrentBridges(SortedMap<String, Node> bridges) {
-    this.bridges = bridges;
+  public void setCurrentBridges(SortedMap<String, Node> currentBridges) {
+    this.bridges = currentBridges;
   }
 
   private Map<String, ServerDescriptor> relayServerDescriptors =
@@ -58,9 +59,6 @@ public class DetailDataWriter {
               this.relayServerDescriptors.get(fingerprint).
               getPublishedMillis()
               < serverDescriptor.getPublishedMillis()) {
-            /* TODO This makes us pick the last published server
-             * descriptor per relay, not the one that is referenced in the
-             * consensus.  This may not be what we want. */
             this.relayServerDescriptors.put(fingerprint,
                 serverDescriptor);
           }
@@ -89,9 +87,6 @@ public class DetailDataWriter {
               this.bridgeServerDescriptors.get(fingerprint).
               getPublishedMillis()
               < serverDescriptor.getPublishedMillis()) {
-            /* TODO This makes us pick the last published server
-             * descriptor per relay, not the one that is referenced in the
-             * consensus.  This may not be what we want. */
             this.bridgeServerDescriptors.put(fingerprint,
                 serverDescriptor);
           }
@@ -118,8 +113,6 @@ public class DetailDataWriter {
               bridgePoolAssignment.getEntries().entrySet()) {
             String fingerprint = e.getKey();
             String details = e.getValue();
-            /* TODO Should we check that assignments don't change over
-             * time? */
             this.bridgePoolAssignments.put(fingerprint, details);
           }
         }
@@ -128,21 +121,21 @@ public class DetailDataWriter {
   }
 
   public void writeDetailDataFiles() {
-    SortedMap<String, File> remainingStatusFiles =
-        this.listAllStatusFiles();
-    remainingStatusFiles = this.updateRelayStatusFiles(
-        remainingStatusFiles);
-    remainingStatusFiles = this.updateBridgeStatusFiles(
-        remainingStatusFiles);
-    this.deleteStatusFiles(remainingStatusFiles);
+    SortedMap<String, File> remainingDetailsFiles =
+        this.listAllDetailsFiles();
+    remainingDetailsFiles = this.updateRelayDetailsFiles(
+        remainingDetailsFiles);
+    remainingDetailsFiles = this.updateBridgeDetailsFiles(
+        remainingDetailsFiles);
+    this.deleteDetailsFiles(remainingDetailsFiles);
   }
 
-  private File statusFileDirectory = new File("out/details");
-  private SortedMap<String, File> listAllStatusFiles() {
+  private File detailsFileDirectory = new File("out/details");
+  private SortedMap<String, File> listAllDetailsFiles() {
     SortedMap<String, File> result = new TreeMap<String, File>();
-    if (statusFileDirectory.exists() &&
-        statusFileDirectory.isDirectory()) {
-      for (File file : statusFileDirectory.listFiles()) {
+    if (detailsFileDirectory.exists() &&
+        detailsFileDirectory.isDirectory()) {
+      for (File file : detailsFileDirectory.listFiles()) {
         if (file.getName().length() == 40) {
           result.put(file.getName(), file);
         }
@@ -151,25 +144,25 @@ public class DetailDataWriter {
     return result;
   }
 
-  private SortedMap<String, File> updateRelayStatusFiles(
-      SortedMap<String, File> remainingStatusFiles) {
+  private SortedMap<String, File> updateRelayDetailsFiles(
+      SortedMap<String, File> remainingDetailsFiles) {
     SortedMap<String, File> result =
-        new TreeMap<String, File>(remainingStatusFiles);
+        new TreeMap<String, File>(remainingDetailsFiles);
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     for (Map.Entry<String, Node> relay : this.relays.entrySet()) {
       String fingerprint = relay.getKey();
 
-      /* Read status file for this relay if it exists. */
+      /* Read details file for this relay if it exists. */
       String descriptorParts = null;
       long publishedMillis = -1L;
       boolean containsLastRestartedLine = false;
       if (result.containsKey(fingerprint)) {
-        File statusFile = result.remove(fingerprint);
+        File detailsFile = result.remove(fingerprint);
         try {
           BufferedReader br = new BufferedReader(new FileReader(
-              statusFile));
+              detailsFile));
           String line;
           boolean copyLines = false;
           StringBuilder sb = new StringBuilder();
@@ -191,13 +184,13 @@ public class DetailDataWriter {
           descriptorParts = sb.toString();
         } catch (IOException e) {
           System.err.println("Could not read '"
-              + statusFile.getAbsolutePath() + "'.  Skipping");
+              + detailsFile.getAbsolutePath() + "'.  Skipping");
           e.printStackTrace();
           publishedMillis = -1L;
           descriptorParts = null;
         } catch (ParseException e) {
           System.err.println("Could not read '"
-              + statusFile.getAbsolutePath() + "'.  Skipping");
+              + detailsFile.getAbsolutePath() + "'.  Skipping");
           e.printStackTrace();
           publishedMillis = -1L;
           descriptorParts = null;
@@ -285,12 +278,12 @@ public class DetailDataWriter {
       }
       String statusParts = sb.toString();
 
-      /* Write status file to disk. */
-      File statusFile = new File(statusFileDirectory, fingerprint);
+      /* Write details file to disk. */
+      File detailsFile = new File(detailsFileDirectory, fingerprint);
       try {
-        statusFile.getParentFile().mkdirs();
+        detailsFile.getParentFile().mkdirs();
         BufferedWriter bw = new BufferedWriter(new FileWriter(
-            statusFile));
+            detailsFile));
         bw.write(statusParts);
         if (descriptorParts != null) {
           bw.write(",\n" + descriptorParts);
@@ -299,8 +292,8 @@ public class DetailDataWriter {
         }
         bw.close();
       } catch (IOException e) {
-        System.err.println("Could not write status file '"
-            + statusFile.getAbsolutePath() + "'.  This file may now be "
+        System.err.println("Could not write details file '"
+            + detailsFile.getAbsolutePath() + "'.  This file may now be "
             + "broken.  Ignoring.");
         e.printStackTrace();
       }
@@ -310,10 +303,10 @@ public class DetailDataWriter {
     return result;
   }
 
-  private SortedMap<String, File> updateBridgeStatusFiles(
-      SortedMap<String, File> remainingStatusFiles) {
+  private SortedMap<String, File> updateBridgeDetailsFiles(
+      SortedMap<String, File> remainingDetailsFiles) {
     SortedMap<String, File> result =
-        new TreeMap<String, File>(remainingStatusFiles);
+        new TreeMap<String, File>(remainingDetailsFiles);
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -324,10 +317,10 @@ public class DetailDataWriter {
       String descriptorParts = null, bridgePoolAssignment = null;
       long publishedMillis = -1L;
       if (result.containsKey(fingerprint)) {
-        File statusFile = result.remove(fingerprint);
+        File detailsFile = result.remove(fingerprint);
         try {
           BufferedReader br = new BufferedReader(new FileReader(
-              statusFile));
+              detailsFile));
           String line;
           boolean copyDescriptorParts = false;
           StringBuilder sb = new StringBuilder();
@@ -359,13 +352,13 @@ public class DetailDataWriter {
           }
         } catch (IOException e) {
           System.err.println("Could not read '"
-              + statusFile.getAbsolutePath() + "'.  Skipping");
+              + detailsFile.getAbsolutePath() + "'.  Skipping");
           e.printStackTrace();
           publishedMillis = -1L;
           descriptorParts = null;
         } catch (ParseException e) {
           System.err.println("Could not read '"
-              + statusFile.getAbsolutePath() + "'.  Skipping");
+              + detailsFile.getAbsolutePath() + "'.  Skipping");
           e.printStackTrace();
           publishedMillis = -1L;
           descriptorParts = null;
@@ -412,10 +405,8 @@ public class DetailDataWriter {
         descriptorParts = sb.toString();
       }
 
-      /* Generate bridge pool assignment if we don't have one yet. */
-      /* TODO Should we check that assignments don't change over time? */
-      if (bridgePoolAssignment == null &&
-          this.bridgePoolAssignments.containsKey(fingerprint)) {
+      /* Look up bridge pool assignment. */
+      if (this.bridgePoolAssignments.containsKey(fingerprint)) {
         bridgePoolAssignment = "\"pool_assignment\":\""
             + this.bridgePoolAssignments.get(fingerprint) + "\"";
       }
@@ -455,17 +446,17 @@ public class DetailDataWriter {
       sb.append("\n}\n");
       String detailsLines = sb.toString();
 
-      /* Write status file to disk. */
-      File statusFile = new File(statusFileDirectory, fingerprint);
+      /* Write details file to disk. */
+      File detailsFile = new File(detailsFileDirectory, fingerprint);
       try {
-        statusFile.getParentFile().mkdirs();
+        detailsFile.getParentFile().mkdirs();
         BufferedWriter bw = new BufferedWriter(new FileWriter(
-            statusFile));
+            detailsFile));
         bw.write(detailsLines);
         bw.close();
       } catch (IOException e) {
         System.err.println("Could not write details file '"
-            + statusFile.getAbsolutePath() + "'.  This file may now be "
+            + detailsFile.getAbsolutePath() + "'.  This file may now be "
             + "broken.  Ignoring.");
         e.printStackTrace();
       }
@@ -475,10 +466,10 @@ public class DetailDataWriter {
     return result;
   }
 
-  private void deleteStatusFiles(
-      SortedMap<String, File> remainingStatusFiles) {
-    for (File statusFile : remainingStatusFiles.values()) {
-      statusFile.delete();
+  private void deleteDetailsFiles(
+      SortedMap<String, File> remainingDetailsFiles) {
+    for (File detailsFile : remainingDetailsFiles.values()) {
+      detailsFile.delete();
     }
   }
 }

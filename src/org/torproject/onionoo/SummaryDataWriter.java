@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.SortedMap;
 import java.util.TimeZone;
 
-/* Read and write relay and bridge summary data from/to disk. */
+/* Write relay and bridge summary data to disk. */
 public class SummaryDataWriter {
 
   private long lastValidAfterMillis;
@@ -24,17 +24,16 @@ public class SummaryDataWriter {
   }
 
   private SortedMap<String, Node> currentRelays;
-  public void setCurrentRelays(SortedMap<String, Node> relays) {
-    this.currentRelays = relays;
+  public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
+    this.currentRelays = currentRelays;
   }
+
   private SortedMap<String, Node> currentBridges;
-  public void setCurrentBridges(SortedMap<String, Node> bridges) {
-    this.currentBridges = bridges;
+  public void setCurrentBridges(SortedMap<String, Node> currentBridges) {
+    this.currentBridges = currentBridges;
   }
 
   private File relaySearchDataFile = new File("out/summary.json");
-
-  /* Write the relay search data file to disk. */
   public void writeSummaryDataFile() {
     try {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(

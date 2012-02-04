@@ -27,7 +27,7 @@ import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.ExtraInfoDescriptor;
 
 /* Write bandwidth data files to disk and delete bandwidth files of relays
- * or bridges that fell out the search data list.
+ * or bridges that fell out of the summary list.
  *
  * Bandwidth history data is available in different resolutions, depending
  * on the considered time interval.  Data for the past 72 hours is
@@ -39,6 +39,7 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  * the past day, past week, past month, past three months, past year, and
  * past five years. */
 public class BandwidthDataWriter {
+
   private SortedSet<String> currentFingerprints = new TreeSet<String>();
   public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
     this.currentFingerprints.addAll(currentRelays.keySet());
@@ -46,6 +47,7 @@ public class BandwidthDataWriter {
   public void setCurrentBridges(SortedMap<String, Node> currentBridges) {
     this.currentFingerprints.addAll(currentBridges.keySet());
   }
+
   public void readExtraInfoDescriptors() {
     DescriptorReader reader =
         DescriptorSourceFactory.createDescriptorReader();
@@ -64,26 +66,27 @@ public class BandwidthDataWriter {
       }
     }
   }
+
   private static void parseDescriptor(ExtraInfoDescriptor descriptor) {
     String fingerprint = descriptor.getFingerprint();
-    boolean readNewHistory = false;
+    boolean updateHistory = false;
     SortedMap<Long, long[]> writeHistory = new TreeMap<Long, long[]>(),
         readHistory = new TreeMap<Long, long[]>();
     if (descriptor.getWriteHistory() != null) {
       parseHistoryLine(descriptor.getWriteHistory().getLine(),
           writeHistory);
-      readNewHistory = true;
+      updateHistory = true;
     }
     if (descriptor.getReadHistory() != null) {
       parseHistoryLine(descriptor.getReadHistory().getLine(),
           readHistory);
-      readNewHistory = true;
+      updateHistory = true;
     }
-    if (readNewHistory) {
-      readRelayHistoryFromDisk(fingerprint, writeHistory, readHistory);
-      compressRelayHistory(writeHistory);
-      compressRelayHistory(readHistory);
-      writeRelayHistoryToDisk(fingerprint, writeHistory, readHistory);
+    if (updateHistory) {
+      readHistoryFromDisk(fingerprint, writeHistory, readHistory);
+      compressHistory(writeHistory);
+      compressHistory(readHistory);
+      writeHistoryToDisk(fingerprint, writeHistory, readHistory);
       writeBandwidthDataFileToDisk(fingerprint, writeHistory,
           readHistory);
     }
@@ -94,6 +97,7 @@ public class BandwidthDataWriter {
     dateTimeFormat.setLenient(false);
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
   }
+
   private static void parseHistoryLine(String line,
       SortedMap<Long, long[]> history) {
     String[] parts = line.split(" ");
@@ -117,7 +121,8 @@ public class BandwidthDataWriter {
           + "'.  Skipping.");
     }
   }
-  private static void readRelayHistoryFromDisk(String fingerprint,
+
+  private static void readHistoryFromDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
     File historyFile = new File("status/bandwidth", fingerprint);
@@ -149,16 +154,17 @@ public class BandwidthDataWriter {
         br.close();
       } catch (ParseException e) {
         System.err.println("Could not parse timestamp while reading "
-            + "relay history file '" + historyFile.getAbsolutePath()
+            + "history file '" + historyFile.getAbsolutePath()
             + "'.  Skipping.");
       } catch (IOException e) {
-        System.err.println("Could not read relay history file '"
+        System.err.println("Could not read history file '"
             + historyFile.getAbsolutePath() + "'.  Skipping.");
       }
     }
   }
+
   private static long now = System.currentTimeMillis();
-  private static void compressRelayHistory(
+  private static void compressHistory(
       SortedMap<Long, long[]> history) {
     SortedMap<Long, long[]> uncompressedHistory =
         new TreeMap<Long, long[]>(history);
@@ -200,7 +206,8 @@ public class BandwidthDataWriter {
           lastEndMillis, lastBandwidth });
     }
   }
-  private static void writeRelayHistoryToDisk(String fingerprint,
+
+  private static void writeHistoryToDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
     File historyFile = new File("status/bandwidth", fingerprint);
@@ -219,10 +226,12 @@ public class BandwidthDataWriter {
       }
       bw.close();
     } catch (IOException e) {
-      System.err.println("Could not write relay history file '"
+      System.err.println("Could not write history file '"
           + historyFile.getAbsolutePath() + "'.  Skipping.");
     }
   }
+
+  private File bandwidthFileDirectory = new File("out/bandwidth");
   private static void writeBandwidthDataFileToDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
@@ -245,10 +254,11 @@ public class BandwidthDataWriter {
           + "\"read_history\":{\n" + readHistoryString + "}}\n");
       bw.close();
     } catch (IOException e) {
-      System.err.println("Could not write detail data file '"
+      System.err.println("Could not write bandwidth data file '"
           + bandwidthFile.getAbsolutePath() + "'.  Skipping.");
     }
   }
+
   private static String[] graphNames = new String[] {
       "3_days",
       "1_week",
@@ -256,6 +266,7 @@ public class BandwidthDataWriter {
       "3_months",
       "1_year",
       "5_years" };
+
   private static long[] graphIntervals = new long[] {
       72L * 60L * 60L * 1000L,
       7L * 24L * 60L * 60L * 1000L,
@@ -263,6 +274,7 @@ public class BandwidthDataWriter {
       92L * 24L * 60L * 60L * 1000L,
       366L * 24L * 60L * 60L * 1000L,
       5L * 366L * 24L * 60L * 60L * 1000L };
+
   private static long[] dataPointIntervals = new long[] {
       15L * 60L * 1000L,
       60L * 60L * 1000L,
@@ -270,6 +282,7 @@ public class BandwidthDataWriter {
       12L * 60L * 60L * 1000L,
       2L * 24L * 60L * 60L * 1000L,
       10L * 24L * 60L * 60L * 1000L };
+
   private static String formatHistoryString(
       SortedMap<Long, long[]> history) {
     StringBuilder sb = new StringBuilder();
@@ -354,7 +367,7 @@ public class BandwidthDataWriter {
     }
     return result;
   }
-  private File bandwidthFileDirectory = new File("out/bandwidth");
+
   public void deleteObsoleteBandwidthFiles() {
     SortedMap<String, File> obsoleteBandwidthFiles =
         new TreeMap<String, File>();
