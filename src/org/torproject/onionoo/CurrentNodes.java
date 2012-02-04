@@ -2,10 +2,23 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.io.*;
-import java.util.*;
-import com.maxmind.geoip.*;
-import org.torproject.descriptor.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.torproject.descriptor.BridgeNetworkStatus;
+import org.torproject.descriptor.Descriptor;
+import org.torproject.descriptor.DescriptorFile;
+import org.torproject.descriptor.DescriptorReader;
+import org.torproject.descriptor.DescriptorSourceFactory;
+import org.torproject.descriptor.NetworkStatusEntry;
+import org.torproject.descriptor.RelayNetworkStatusConsensus;
+
+import com.maxmind.geoip.LookupService;
 
 /* Store relays and bridges that have been running in the past seven
  * days. */

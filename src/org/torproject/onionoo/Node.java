@@ -2,7 +2,7 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.util.*;
+import java.util.SortedSet;
 
 /* Store search data of a single relay that was running in the past seven
  * days. */

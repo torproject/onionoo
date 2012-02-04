@@ -2,9 +2,6 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.util.*;
-import org.torproject.descriptor.*;
-
 /* Update search data and status data files. */
 public class Main {
   public static void main(String[] args) {

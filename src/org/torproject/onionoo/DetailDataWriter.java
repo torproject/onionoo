@@ -2,10 +2,28 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.io.*;
-import java.text.*;
-import java.util.*;
-import org.torproject.descriptor.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TimeZone;
+import java.util.TreeMap;
+
+import org.torproject.descriptor.BridgePoolAssignment;
+import org.torproject.descriptor.Descriptor;
+import org.torproject.descriptor.DescriptorFile;
+import org.torproject.descriptor.DescriptorReader;
+import org.torproject.descriptor.DescriptorSourceFactory;
+import org.torproject.descriptor.ServerDescriptor;
 
 /* Write detail data files to disk and delete status files of relays or
  * bridges that fell out the search data list. */

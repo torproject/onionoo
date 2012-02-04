@@ -2,9 +2,18 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.io.*;
-import java.text.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.SortedSet;
+import java.util.TimeZone;
+import java.util.TreeSet;
 
 /* Read and write relay and bridge summary data from/to disk. */
 public class SummaryDataWriter {
