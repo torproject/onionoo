@@ -21,20 +21,10 @@ public class SummaryDataWriter {
   private File internalRelaySearchDataFile =
       new File("status/summary.csv");
   private File relaySearchDataFile = new File("out/summary.json");
-  private File relaySearchDataBackupFile =
-      new File("out/summary.json.bak");
 
   /* Read the internal relay search data file from disk. */
   public CurrentNodes readRelaySearchDataFile() {
     CurrentNodes result = new CurrentNodes();
-    if (this.relaySearchDataBackupFile.exists()) {
-      System.err.println("Found '"
-          + relaySearchDataBackupFile.getAbsolutePath() + "' which "
-          + "indicates that a previous execution did not terminate "
-          + "cleanly.  Please investigate the problem, delete this file, "
-          + "and try again.  Exiting.");
-      System.exit(1);
-    }
     if (this.internalRelaySearchDataFile.exists() &&
         !this.internalRelaySearchDataFile.isDirectory()) {
       try {
@@ -106,10 +96,6 @@ public class SummaryDataWriter {
   /* Write the relay search data file to disk. */
   public void writeRelaySearchDataFile(CurrentNodes sd) {
 
-    /* TODO Check valid-after times and warn if we're missing one or more
-     * network status consensuses.  The user should know, so that she can
-     * download and import missing network status consensuses. */
-
     /* Write internal relay search data file to disk. */
     try {
       this.internalRelaySearchDataFile.getParentFile().mkdirs();
@@ -158,29 +144,6 @@ public class SummaryDataWriter {
           + "' to disk.  Exiting.");
       e.printStackTrace();
       System.exit(1);
-    }
-
-    /* Make a backup before overwriting the relay search data file. */
-    if (this.relaySearchDataFile.exists() &&
-        !this.relaySearchDataFile.isDirectory()) {
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            this.relaySearchDataFile));
-        BufferedWriter bw = new BufferedWriter(new FileWriter(
-            this.relaySearchDataBackupFile));
-        String line;
-        while ((line = br.readLine()) != null) {
-          bw.write(line + "\n");
-        }
-        bw.close();
-        br.close();
-      } catch (IOException e) {
-        System.err.println("Could not create backup of '"
-            + this.relaySearchDataFile.getAbsolutePath() + "'.  "
-            + "Exiting.");
-        e.printStackTrace();
-        System.exit(1);
-      }
     }
 
     /* (Over-)write relay search data file. */
@@ -241,7 +204,6 @@ public class SummaryDataWriter {
       e.printStackTrace();
       System.exit(1);
     }
-    this.relaySearchDataBackupFile.delete();
   }
 }
 
