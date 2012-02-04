@@ -44,6 +44,9 @@ public class CurrentNodes {
         }
       }
     }
+  }
+
+  public void setRelayRunningBits() {
     if (this.lastValidAfterMillis > 0L) {
       for (Node entry : this.currentRelays.values()) {
         entry.setRunning(entry.getLastSeenMillis() ==
@@ -119,6 +122,9 @@ public class CurrentNodes {
         }
       }
     }
+  }
+
+  public void setBridgeRunningBits() {
     if (this.lastPublishedMillis > 0L) {
       for (Node entry : this.currentBridges.values()) {
         entry.setRunning(entry.getLastSeenMillis() ==

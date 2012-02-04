@@ -10,8 +10,10 @@ public class Main {
     SummaryDataWriter sdw = new SummaryDataWriter();
     CurrentNodes cn = sdw.readRelaySearchDataFile();
     cn.readRelayNetworkConsensuses();
+    cn.setRelayRunningBits();
     cn.lookUpCountries();
     cn.readBridgeNetworkStatuses();
+    cn.setBridgeRunningBits();
     sdw.writeRelaySearchDataFile(cn);
 
     printStatus("Updating detail data.");
