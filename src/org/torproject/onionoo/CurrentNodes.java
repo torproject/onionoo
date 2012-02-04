@@ -26,7 +26,8 @@ public class CurrentNodes {
   private long lastValidAfterMillis = 0L;
   private long lastPublishedMillis = 0L;
 
-  private long now = System.currentTimeMillis();
+  private long cutoff = System.currentTimeMillis()
+      - 7L * 24L * 60L * 60L * 1000L;
 
   public void readRelayNetworkConsensuses() {
     DescriptorReader reader =
@@ -70,7 +71,7 @@ public class CurrentNodes {
   public void addRelay(String nickname, String fingerprint,
       String address, long validAfterMillis, int orPort, int dirPort,
       SortedSet<String> relayFlags) {
-    if (validAfterMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
+    if (validAfterMillis >= cutoff &&
         (!this.currentRelays.containsKey(fingerprint) ||
         this.currentRelays.get(fingerprint).getLastSeenMillis() <
         validAfterMillis)) {
@@ -142,7 +143,7 @@ public class CurrentNodes {
   public void addBridge(String fingerprint, String address,
       long publishedMillis, int orPort, int dirPort,
       SortedSet<String> relayFlags) {
-    if (publishedMillis >= now - 7L * 24L * 60L * 60L * 1000L &&
+    if (publishedMillis >= cutoff &&
         (!this.currentBridges.containsKey(fingerprint) ||
         this.currentBridges.get(fingerprint).getLastSeenMillis() <
         publishedMillis)) {
