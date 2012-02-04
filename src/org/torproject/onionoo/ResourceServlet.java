@@ -184,7 +184,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern fingerprintParameterPattern =
-      Pattern.compile("^[a-zA-Z]+$");
+      Pattern.compile("^[0-9a-zA-Z]+$");
   private Set<String> parseFingerprintParameters(String parameter) {
     if (!fingerprintParameterPattern.matcher(parameter).matches()) {
       return null;
