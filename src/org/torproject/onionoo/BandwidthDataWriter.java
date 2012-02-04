@@ -37,7 +37,14 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  * earlier data in 10 day detail.  These detail levels have been chosen to
  * provide between 92 and 192 data points for graphing the bandwidth of
  * the past day, past week, past month, past three months, past year, and
- * past five years. */
+ * past five years.
+ *
+ * Only update bandwidth data files for which new bandwidth histories are
+ * available.  There's no point in updating bandwidth documents when we
+ * don't have newer bandwidth data to add.  This means that, e.g., the
+ * last 3 days in the bandwidth document may not be equivalent to the last
+ * 3 days as of publishing the document, but that's something clients can
+ * work around. */
 public class BandwidthDataWriter {
 
   private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
