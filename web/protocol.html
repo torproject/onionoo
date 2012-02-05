@@ -13,7 +13,7 @@
 <p>The Onionoo service is designed as a RESTful web service.
 Onionoo clients send HTTP GET requests to the Onionoo server which
 responds with JSON-formatted replies.</p>
-<p>TorStatus clients and their developers should follow a few rules:</p>
+<p>Onionoo clients and their developers should follow a few rules:</p>
 <ul>
 <li><b>Compression:</b> Clients should include an <i>"Accept-Encoding:
 gzip"</i> header in their requests and handle gzip-compressed responses.
@@ -125,36 +125,34 @@ summaries are included in the response.</p>
 <col width="650">
 </colgroup>
 <tr>
-<td><a href="/summary/all">GET summary/all</a></td>
+<td><b>GET summary/all</b></td>
 <td>Return summaries of all relays and bridges that are currently running
 or that have been running in the past week.</td>
 </tr>
 <tr>
-<td><a href="/summary/running">GET summary/running</a></td>
+<td><b>GET summary/running</b></td>
 <td>Return summaries of all relays and bridges that are currently
 running.</td>
 </tr>
 <tr>
-<td><a href="/summary/relays">GET summary/relays</a></td>
+<td><b>GET summary/relays</b></td>
 <td>Return summaries of all relays that are currently running or that have
 been running in the past week, but don't include any bridges.</td>
 </tr>
 <tr>
-<td><a href="/summary/bridges">GET summary/bridges</a></td>
+<td><b>GET summary/bridges</b></td>
 <td>Return summaries of all bridges that are currently running or that
 have been running in the past week, but don't include any relays.</td>
 </tr>
 <tr>
-<td><a href="/summary/search/gabelmoo">GET
-summary/search/<i>:searchtext</i></a></td>
+<td><b>GET summary/search/<i>:searchtext</i></b></td>
 <td>Return summaries of all relays and bridges with <i>:searchtext</i>
 matching the beginning of a nickname, fingerprint, IP address, or hashed
 fingerprint.
 Searches are case-insensitive.</td>
 </tr>
 <tr>
-<td><a href="/summary/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET
-summary/lookup/<i>:fingerprint</i></a></td>
+<td><b>GET summary/lookup/<i>:fingerprint</i></b></td>
 <td>Return the summary of the relay or bridge with <i>:fingerprint</i>
 matching the fingerprint or hashed fingerprint.</td>
 </tr>
@@ -391,36 +389,34 @@ details are included in the response.</p>
 <col width="650">
 </colgroup>
 <tr>
-<td><a href="/details/all">GET details/all</a></td>
+<td><b>GET details/all</b></td>
 <td>Return details of all relays and bridges that are currently running
 or that have been running in the past week.</td>
 </tr>
 <tr>
-<td><a href="/details/running">GET details/running</a></td>
+<td><b>GET details/running</b></td>
 <td>Return details of all relays and bridges that are currently
 running.</td>
 </tr>
 <tr>
-<td><a href="/details/relays">GET details/relays</a></td>
+<td><b>GET details/relays</b></td>
 <td>Return details of all relays that are currently running or that have
 been running in the past week, but don't include any bridges.</td>
 </tr>
 <tr>
-<td><a href="/details/bridges">GET details/bridges</a></td>
+<td><b>GET details/bridges</b></td>
 <td>Return details of all bridges that are currently running or that have
 been running in the past week, but don't include any relays.</td>
 </tr>
 <tr>
-<td><a href="/details/search/gabelmoo">GET
-details/search/<i>:searchtext</i></a></td>
+<td><b>GET details/search/<i>:searchtext</i></b></td>
 <td>Return details of all relays and bridges with <i>:searchtext</i>
 matching the beginning of a nickname, fingerprint, IP address, or hashed
 fingerprint.
 Searches are case-insensitive.</td>
 </tr>
 <tr>
-<td><a href="/details/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET
-details/lookup/<i>:fingerprint</i></a></td>
+<td><b>GET details/lookup/<i>:fingerprint</i></b></td>
 <td>Return the details of the relay or bridge with <i>:fingerprint</i>
 matching the fingerprint or hashed fingerprint.</td>
 </tr>
@@ -547,37 +543,35 @@ bandwidth documents are included in the response.</p>
 <col width="650">
 </colgroup>
 <tr>
-<td><a href="/bandwidth/all">GET bandwidth/all</a></td>
+<td><b>GET bandwidth/all</b></td>
 <td>Return bandwidth documents of all relays and bridges that are
 currently running or that have been running in the past week.</td>
 </tr>
 <tr>
-<td><a href="/bandwidth/running">GET bandwidth/running</a></td>
+<td><b>GET bandwidth/running</b></td>
 <td>Return bandwidth documents of all relays and bridges that are
 currently running.</td>
 </tr>
 <tr>
-<td><a href="/bandwidth/relays">GET bandwidth/relays</a></td>
+<td><b>GET bandwidth/relays</b></td>
 <td>Return bandwidth documents of all relays that are currently running or
 that have been running in the past week, but don't include any bridges.</td>
 </tr>
 <tr>
-<td><a href="/bandwidth/bridges">GET bandwidth/bridges</a></td>
+<td><b>GET bandwidth/bridges</b></td>
 <td>Return bandwidth documents of all bridges that are currently running
 or that have been running in the past week, but don't include any
 relays.</td>
 </tr>
 <tr>
-<td><a href="/bandwidth/search/gabelmoo">GET
-details/search/<i>:searchtext</i></a></td>
+<td><b>GET details/search/<i>:searchtext</i></b></td>
 <td>Return bandwidth documents of all relays and bridges with
 <i>:searchtext</i> matching the beginning of a nickname, fingerprint, IP
 address, or hashed fingerprint.
 Searches are case-insensitive.</td>
 </tr>
 <tr>
-<td><a href="/bandwidth/lookup/F2044413DAC2E02E3D6BCF4735A19BCA1DE97281">GET
-bandwidth/lookup/<i>:fingerprint</i></a></td>
+<td><b>GET bandwidth/lookup/<i>:fingerprint</i></b></td>
 <td>Return the bandwidth document of the relay or bridge with
 <i>:fingerprint</i> matching the fingerprint or hashed fingerprint.</td>
 </tr>
