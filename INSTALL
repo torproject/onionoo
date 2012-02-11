@@ -37,9 +37,10 @@ $ ant compile
 Download a GeoIP database file
 ------------------------------
 
-Download a GeoIP database file from Maxmind and put it in
-/srv/onionoo/GeoIP.dat.  If no such file is found, relay IP addresses will
-not be resolved to country codes.
+Download the GeoLite City database from Maxmind and put it in
+/srv/onionoo/GeoLiteCity.dat.  If no such file is found, relay IP
+addresses will not be resolved to country codes, latitudes, and
+longitudes.
 
 
 Test the rsync of descriptors from metrics.torproject.org

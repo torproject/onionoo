@@ -26,6 +26,7 @@ import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 
+import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
 
 /* Store relays and bridges that have been running in the past seven
@@ -222,18 +223,20 @@ public class CurrentNodes {
   }
 
   public void lookUpCountries() {
-    File geoipDatFile = new File("GeoIP.dat");
-    if (!geoipDatFile.exists()) {
-      System.err.println("No GeoIP.dat file in /.");
+    File geoLiteCityDatFile = new File("GeoLiteCity.dat");
+    if (!geoLiteCityDatFile.exists()) {
+      System.err.println("No GeoLiteCity.dat file in /.");
       return;
     }
     try {
-      LookupService ls = new LookupService(geoipDatFile,
+      LookupService ls = new LookupService(geoLiteCityDatFile,
           LookupService.GEOIP_MEMORY_CACHE);
       for (Node relay : currentRelays.values()) {
-        String country = ls.getCountry(relay.getAddress()).getCode();
-        if (country != null) {
-          relay.setCountry(country.toLowerCase());
+        Location location = ls.getLocation(relay.getAddress());
+        if (location != null) {
+          relay.setLatitude(String.format("%.6f", location.latitude));
+          relay.setLongitude(String.format("%.6f", location.longitude));
+          relay.setCountryCode(location.countryCode);
         }
       }
       ls.close();

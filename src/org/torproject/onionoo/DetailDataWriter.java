@@ -263,7 +263,9 @@ public class DetailDataWriter {
       String running = entry.getRunning() ? "true" : "false";
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
-      String country = entry.getCountry();
+      String countryCode = entry.getCountryCode();
+      String latitude = entry.getLatitude();
+      String longitude = entry.getLongitude();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -283,8 +285,14 @@ public class DetailDataWriter {
         }
         sb.append("]");
       }
-      if (country != null) {
-        sb.append(",\n\"country\":\"" + country + "\"");
+      if (countryCode != null) {
+        sb.append(",\n\"country\":\"" + countryCode + "\"");
+      }
+      if (latitude != null) {
+        sb.append(",\n\"latitude\":" + latitude);
+      }
+      if (longitude != null) {
+        sb.append(",\n\"longitude\":" + longitude);
       }
       String statusParts = sb.toString();
 
