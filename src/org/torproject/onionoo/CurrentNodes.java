@@ -234,8 +234,10 @@ public class CurrentNodes {
       for (Node relay : currentRelays.values()) {
         Location location = ls.getLocation(relay.getAddress());
         if (location != null) {
-          relay.setLatitude(String.format("%.6f", location.latitude));
-          relay.setLongitude(String.format("%.6f", location.longitude));
+          relay.setLatitude(String.format(Locale.US, "%.6f",
+              location.latitude));
+          relay.setLongitude(String.format(Locale.US, "%.6f",
+              location.longitude));
           relay.setCountryCode(location.countryCode);
         }
       }
