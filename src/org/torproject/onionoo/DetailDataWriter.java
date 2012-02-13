@@ -11,18 +11,23 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.DescriptorFile;
 import org.torproject.descriptor.DescriptorReader;
 import org.torproject.descriptor.DescriptorSourceFactory;
+import org.torproject.descriptor.ExitList;
+import org.torproject.descriptor.ExitListEntry;
 import org.torproject.descriptor.ServerDescriptor;
 
 /* Write updated detail data files to disk and delete files of relays or
@@ -66,6 +71,41 @@ public class DetailDataWriter {
                 < serverDescriptor.getPublishedMillis()) {
               this.relayServerDescriptors.put(fingerprint,
                   serverDescriptor);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private long now = System.currentTimeMillis();
+  private Map<String, Set<ExitListEntry>> exitListEntries =
+      new HashMap<String, Set<ExitListEntry>>();
+  public void readExitLists() {
+    DescriptorReader reader =
+        DescriptorSourceFactory.createDescriptorReader();
+    reader.addDirectory(new File(
+        "in/exit-lists"));
+    reader.setExcludeFiles(new File("status/exit-list-history"));
+    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
+    while (descriptorFiles.hasNext()) {
+      DescriptorFile descriptorFile = descriptorFiles.next();
+      if (descriptorFile.getDescriptors() != null) {
+        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
+          if (descriptor instanceof ExitList) {
+            ExitList exitList = (ExitList) descriptor;
+            for (ExitListEntry exitListEntry :
+                exitList.getExitListEntries()) {
+              if (exitListEntry.getScanMillis() <
+                  this.now - 24L * 60L * 60L * 1000L) {
+                continue;
+              }
+              String fingerprint = exitListEntry.getFingerprint();
+              if (!this.exitListEntries.containsKey(fingerprint)) {
+                this.exitListEntries.put(fingerprint,
+                    new HashSet<ExitListEntry>());
+              }
+              this.exitListEntries.get(fingerprint).add(exitListEntry);
             }
           }
         }
@@ -174,7 +214,7 @@ public class DetailDataWriter {
           BufferedReader br = new BufferedReader(new FileReader(
               detailsFile));
           String line;
-          boolean copyLines = false;
+          boolean copyDescriptorParts = false;
           StringBuilder sb = new StringBuilder();
           while ((line = br.readLine()) != null) {
             if (line.startsWith("\"desc_published\":")) {
@@ -182,11 +222,11 @@ public class DetailDataWriter {
                   "\"desc_published\":\"".length(),
                   "\"desc_published\":\"1970-01-01 00:00:00".length());
               publishedMillis = dateTimeFormat.parse(published).getTime();
-              copyLines = true;
+              copyDescriptorParts = true;
             } else if (line.startsWith("\"last_restarted\":")) {
               containsLastRestartedLine = true;
             }
-            if (copyLines) {
+            if (copyDescriptorParts) {
               sb.append(line + "\n");
             }
           }
@@ -293,6 +333,28 @@ public class DetailDataWriter {
       }
       if (longitude != null) {
         sb.append(",\n\"longitude\":" + longitude);
+      }
+
+      /* Add exit addresses if at least one of them is distinct from the
+       * onion-routing addresses. */
+      SortedSet<String> exitAddresses = new TreeSet<String>();
+      if (exitListEntries.containsKey(fingerprint)) {
+        for (ExitListEntry exitListEntry :
+            exitListEntries.get(fingerprint)) {
+          String exitAddress = exitListEntry.getExitAddress();
+          if (!exitAddress.equals(address)) {
+            exitAddresses.add(exitAddress);
+          }
+        }
+      }
+      if (!exitAddresses.isEmpty()) {
+        sb.append(",\n\"exit_addresses\":[");
+        int written = 0;
+        for (String exitAddress : exitAddresses) {
+          sb.append((written++ > 0 ? "," : "") + "\"" + exitAddress
+              + "\"");
+        }
+        sb.append("]");
       }
       String statusParts = sb.toString();
 

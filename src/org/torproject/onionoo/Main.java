@@ -29,6 +29,7 @@ public class Main {
     ddw.setCurrentRelays(cn.getCurrentRelays());
     ddw.setCurrentBridges(cn.getCurrentBridges());
     ddw.readRelayServerDescriptors();
+    ddw.readExitLists();
     ddw.readBridgeServerDescriptors();
     ddw.readBridgePoolAssignments();
     ddw.writeDetailDataFiles();
