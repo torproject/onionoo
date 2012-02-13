@@ -341,6 +341,13 @@ public class BandwidthDataWriter {
       long firstDataPointMillis = (((this.now - graphInterval)
           / dataPointInterval) + firstNonNullIndex) * dataPointInterval
           + dataPointInterval / 2L;
+      if (i > 0 &&
+          firstDataPointMillis >= this.now - graphIntervals[i - 1]) {
+        /* Skip bandwidth history object, because it doesn't contain
+         * anything new that wasn't already contained in the last
+         * bandwidth history object(s). */
+        continue;
+      }
       long lastDataPointMillis = firstDataPointMillis
           + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
       double factor = ((double) maxValue) / 999.0;

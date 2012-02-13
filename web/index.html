@@ -366,11 +366,9 @@ Keys are fixed strings <i>"3_days"</i>, <i>"1_week"</i>, <i>"1_month"</i>,
 <i>"3_months"</i>, <i>"1_year"</i>, and <i>"5_years"</i>.
 Keys refer to the last known bandwidth history of a relay, not to the time
 when the bandwidth document was published.
-<font color="red">A bandwidth history object is only contained if the time
-period it covers is not already contained in another bandwidth history
-object with shorter time period and higher data resolution.
-(Announced on February 13, redundant bandwidth history objects will be
-removed after March 13, 2012.)</font>
+A bandwidth history object is only contained if the time period it covers
+is not already contained in another bandwidth history object with shorter
+time period and higher data resolution.
 Each bandwidth history object contains the following key-value pairs:
 <ul>
 <li><b>"first":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
