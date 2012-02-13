@@ -119,7 +119,7 @@ re-deploy the application in the future.  Run the following commands as
 root:
 
 # cd /var/lib/tomcat6/webapps/
-# ln -s /srv/onionoo.war ROOT.war
+# ln -s /srv/onionoo/onionoo.war ROOT.war
 
 The Onionoo server should now be available at http://localhost:8080/.
 
