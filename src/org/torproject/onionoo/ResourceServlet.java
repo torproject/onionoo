@@ -175,7 +175,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern searchParameterPattern =
-      Pattern.compile("^[0-9a-zA-Z\\.]{1,40}$");
+      Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|^[0-9a-zA-Z\\.]{1,19}$");
   private String parseSearchParameter(String parameter) {
     if (!searchParameterPattern.matcher(parameter).matches()) {
       return null;
@@ -184,7 +184,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern fingerprintParameterPattern =
-      Pattern.compile("^[0-9a-zA-Z]+$");
+      Pattern.compile("^\\$[0-9a-zA-Z]{1,40}$");
   private Set<String> parseFingerprintParameters(String parameter) {
     if (!fingerprintParameterPattern.matcher(parameter).matches()) {
       return null;
@@ -239,13 +239,31 @@ public class ResourceServlet extends HttpServlet {
     pw.print("\"relays\":[");
     int written = 0;
     for (String line : this.relayLines) {
-      if (line.toLowerCase().contains("\"n\":\""
-          + searchTerm.toLowerCase()) ||
-          ("unnamed".startsWith(searchTerm.toLowerCase()) &&
-          line.startsWith("{\"f\":")) ||
-          line.contains("\"f\":\"" + searchTerm.toUpperCase()) ||
-          line.substring(line.indexOf("\"a\":[")).contains("\""
+      boolean lineMatches = false;
+      if (searchTerm.startsWith("$")) {
+        /* Search is for $-prefixed fingerprint. */
+        if (line.contains("\"f\":\""
+            + searchTerm.substring(1).toUpperCase())) {
+          /* $-prefixed fingerprint matches. */
+          lineMatches = true;
+        }
+      } else if (line.toLowerCase().contains("\"n\":\""
           + searchTerm.toLowerCase())) {
+        /* Nickname matches. */
+        lineMatches = true;
+      } else if ("unnamed".startsWith(searchTerm.toLowerCase()) &&
+          line.startsWith("{\"f\":")) {
+        /* Nickname "Unnamed" matches. */
+        lineMatches = true;
+      } else if (line.contains("\"f\":\"" + searchTerm.toUpperCase())) {
+        /* Non-$-prefixed fingerprint matches. */
+        lineMatches = true;
+      } else if (line.substring(line.indexOf("\"a\":[")).contains("\""
+          + searchTerm.toLowerCase())) {
+        /* Address matches. */
+        lineMatches = true;
+      }
+      if (lineMatches) {
         String lines = this.getFromSummaryLine(line, resourceType);
         if (lines.length() > 0) {
           pw.print((written++ > 0 ? ",\n" : "\n") + lines);
@@ -307,6 +325,9 @@ public class ResourceServlet extends HttpServlet {
 
   private void writeMatchingBridges(PrintWriter pw, String searchTerm,
       String resourceType) {
+    if (searchTerm.startsWith("$")) {
+      searchTerm = searchTerm.substring(1);
+    }
     pw.print("\"bridges\":[");
     int written = 0;
     for (String line : this.bridgeLines) {
