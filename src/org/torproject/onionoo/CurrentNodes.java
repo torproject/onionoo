@@ -29,6 +29,7 @@ import org.torproject.descriptor.RelayNetworkStatusConsensus;
 
 import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
+import com.maxmind.geoip.regionName;
 
 /* Store relays and bridges that have been running in the past seven
  * days. */
@@ -240,6 +241,10 @@ public class CurrentNodes {
           relay.setLongitude(String.format(Locale.US, "%.6f",
               location.longitude));
           relay.setCountryCode(location.countryCode);
+          relay.setCountryName(location.countryName);
+          relay.setRegionName(regionName.regionNameByCode(
+              location.countryCode, location.region));
+          relay.setCityName(location.city);
         }
       }
       ls.close();

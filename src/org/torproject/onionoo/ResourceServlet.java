@@ -126,6 +126,7 @@ public class ResourceServlet extends HttpServlet {
     /* Set response headers and start writing the response. */
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setContentType("application/json");
+    response.setCharacterEncoding("utf-8");
     PrintWriter pw = response.getWriter();
     if (uri.equals("/" + resourceType + "/all")) {
       this.writeHeader(pw);

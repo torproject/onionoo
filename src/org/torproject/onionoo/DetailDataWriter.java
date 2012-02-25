@@ -306,6 +306,9 @@ public class DetailDataWriter {
       String countryCode = entry.getCountryCode();
       String latitude = entry.getLatitude();
       String longitude = entry.getLongitude();
+      String countryName = entry.getCountryName();
+      String regionName = entry.getRegionName();
+      String cityName = entry.getCityName();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -333,6 +336,15 @@ public class DetailDataWriter {
       }
       if (longitude != null) {
         sb.append(",\n\"longitude\":" + longitude);
+      }
+      if (countryName != null) {
+        sb.append(",\n\"country_name\":\"" + countryName + "\"");
+      }
+      if (regionName != null) {
+        sb.append(",\n\"region_name\":\"" + regionName + "\"");
+      }
+      if (cityName != null) {
+        sb.append(",\n\"city_name\":\"" + cityName + "\"");
       }
 
       /* Add exit addresses if at least one of them is distinct from the

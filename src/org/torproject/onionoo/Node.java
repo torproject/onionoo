@@ -13,6 +13,9 @@ public class Node {
   private String latitude;
   private String longitude;
   private String countryCode;
+  private String countryName;
+  private String regionName;
+  private String cityName;
   private long lastSeenMillis;
   private int orPort;
   private int dirPort;
@@ -55,6 +58,24 @@ public class Node {
   }
   public String getCountryCode() {
     return this.countryCode;
+  }
+  public void setCountryName(String countryName) {
+    this.countryName = countryName;
+  }
+  public String getCountryName() {
+    return this.countryName;
+  }
+  public void setRegionName(String regionName) {
+    this.regionName = regionName;
+  }
+  public String getRegionName() {
+    return this.regionName;
+  }
+  public void setCityName(String cityName) {
+    this.cityName = cityName;
+  }
+  public String getCityName() {
+    return this.cityName;
   }
   public long getLastSeenMillis() {
     return this.lastSeenMillis;
