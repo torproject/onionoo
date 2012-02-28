@@ -253,6 +253,27 @@ public class CurrentNodes {
     }
   }
 
+  public void lookUpASes() {
+    File geoIPASNumDatFile = new File("GeoIPASNum.dat");
+    if (!geoIPASNumDatFile.exists()) {
+      System.err.println("No GeoIPASNum.dat file in /.");
+      return;
+    }
+    try {
+      LookupService ls = new LookupService(geoIPASNumDatFile);
+      for (Node relay : currentRelays.values()) {
+        String org = ls.getOrg(relay.getAddress());
+        if (org != null && org.indexOf(" ") > 0 && org.startsWith("AS")) {
+          relay.setASNumber(org.substring(0, org.indexOf(" ")));
+          relay.setASName(org.substring(org.indexOf(" ") + 1));
+        }
+      }
+      ls.close();
+    } catch (IOException e) {
+      System.err.println("Could not look up ASes for relays.");
+    }
+  }
+
   public void readBridgeNetworkStatuses() {
     DescriptorReader reader =
         DescriptorSourceFactory.createDescriptorReader();

@@ -12,6 +12,7 @@ public class Main {
     cn.readRelayNetworkConsensuses();
     cn.setRelayRunningBits();
     cn.lookUpCountries();
+    cn.lookUpASes();
     cn.readBridgeNetworkStatuses();
     cn.setBridgeRunningBits();
     cn.writeRelaySearchDataFile();

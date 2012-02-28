@@ -309,6 +309,8 @@ public class DetailDataWriter {
       String countryName = entry.getCountryName();
       String regionName = entry.getRegionName();
       String cityName = entry.getCityName();
+      String aSNumber = entry.getASNumber();
+      String aSName = entry.getASName();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -345,6 +347,12 @@ public class DetailDataWriter {
       }
       if (cityName != null) {
         sb.append(",\n\"city_name\":\"" + cityName + "\"");
+      }
+      if (aSNumber != null) {
+        sb.append(",\n\"as_number\":\"" + aSNumber + "\"");
+      }
+      if (cityName != null) {
+        sb.append(",\n\"as_name\":\"" + aSName + "\"");
       }
 
       /* Add exit addresses if at least one of them is distinct from the

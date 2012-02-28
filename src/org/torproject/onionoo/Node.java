@@ -16,6 +16,8 @@ public class Node {
   private String countryName;
   private String regionName;
   private String cityName;
+  private String aSName;
+  private String aSNumber;
   private long lastSeenMillis;
   private int orPort;
   private int dirPort;
@@ -76,6 +78,18 @@ public class Node {
   }
   public String getCityName() {
     return this.cityName;
+  }
+  public void setASNumber(String aSNumber) {
+    this.aSNumber = aSNumber;
+  }
+  public String getASNumber() {
+    return this.aSNumber;
+  }
+  public void setASName(String aSName) {
+    this.aSName = aSName;
+  }
+  public String getASName() {
+    return this.aSName;
   }
   public long getLastSeenMillis() {
     return this.lastSeenMillis;
