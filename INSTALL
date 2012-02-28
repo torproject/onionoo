@@ -34,13 +34,17 @@ correctly:
 $ ant compile
 
 
-Download a GeoIP database file
-------------------------------
+Download GeoIP and ASN database files
+-------------------------------------
 
 Download the GeoLite City database from Maxmind and put it in
 /srv/onionoo/GeoLiteCity.dat.  If no such file is found, relay IP
 addresses will not be resolved to country codes, latitudes, and
 longitudes.
+
+Also download the GeoLite ASN database from Maxmind and put it in
+/srv/onionoo/GeoIPASNum.dat.  If no such file is found, relay IP
+addresses will not be resolved to AS numbers and names.
 
 
 Test the rsync of descriptors from metrics.torproject.org
