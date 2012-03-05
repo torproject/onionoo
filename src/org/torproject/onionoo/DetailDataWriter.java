@@ -266,7 +266,6 @@ public class DetailDataWriter {
             Math.min(descriptor.getBandwidthBurst(),
             descriptor.getBandwidthObserved()));
         sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
-            + "\"uptime\":" + descriptor.getUptime() + ",\n"
             + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
             + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
             + "\"exit_policy\":[");
@@ -315,10 +314,7 @@ public class DetailDataWriter {
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
           + "\"fingerprint\":\"" + fingerprint + "\",\n"
-          + "\"or_address\":[\"" + address + "\"],\n"
-          + "\"or_port\":" + orPort + ",\n"
           + "\"or_addresses\":[\"" + address + ":" + orPort + "\"],\n"
-          + "\"dir_port\":" + dirPort + ",\n"
           + "\"dir_address\":\"" + address + ":" + dirPort + "\",\n"
           + "\"running\":" + running + ",\n");
       SortedSet<String> relayFlags = entry.getRelayFlags();
@@ -482,26 +478,9 @@ public class DetailDataWriter {
             Math.min(descriptor.getBandwidthBurst(),
             descriptor.getBandwidthObserved()));
         sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
-            + "\"uptime\":" + descriptor.getUptime() + ",\n"
             + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
             + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
-            + "\"exit_policy\":[");
-        int written = 0;
-        for (String exitPolicyLine : descriptor.getExitPolicyLines()) {
-          sb.append((written++ > 0 ? "," : "") + "\n  \"" + exitPolicyLine
-              + "\"");
-        }
-        sb.append("\n],\n\"platform\":\"" + descriptor.getPlatform()
-            + "\"");
-        if (descriptor.getFamilyEntries() != null) {
-          sb.append(",\n\"family\":[");
-          written = 0;
-          for (String familyEntry : descriptor.getFamilyEntries()) {
-            sb.append((written++ > 0 ? "," : "") + "\n  \"" + familyEntry
-                + "\"");
-          }
-          sb.append("\n]");
-        }
+            + "\"platform\":\"" + descriptor.getPlatform() + "\"");
         descriptorParts = sb.toString();
       }
 
@@ -520,9 +499,7 @@ public class DetailDataWriter {
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"hashed_fingerprint\":\"" + fingerprint + "\",\n"
-          + "\"or_port\":" + orPort + ",\n"
           + "\"or_addresses\":[\"" + address + ":" + orPort + "\"],\n"
-          + "\"dir_port\":" + dirPort + ",\n"
           + "\"running\":" + running + ",");
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {

@@ -150,21 +150,6 @@ Omitted if the relay nickname is <i>"Unnamed"</i>.</li>
 <li><b>"fingerprint":</b> Relay fingerprint consisting of 40 upper-case
 hexadecimal characters.
 Required field.</li>
-<li><b><font color="red">"or_address":</font></b> Array of IPv4 or IPv6
-addresses where the relay accepts onion-routing connections.
-Deprecated field.
-Deprecated, because a relay can have a different onion-routing port for
-each onion-routing IP address.
-Combining address and port in a single string solves this; see
-<i>"or_addresses"</i> below.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"or_port":</font></b> Onion-routing port.
-Deprecated field.
-Deprecated, because a relay can have a different onion-routing port for
-each onion-routing IP address.
-Combining address and port in a single string solves this; see
-<i>"or_addresses"</i> below.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"or_addresses":</b> Array of IPv4 or IPv6 addresses and TCP ports
 or port lists where the relay accepts onion-routing connections.
 Required field.</li>
@@ -175,12 +160,6 @@ Only those addresses are listed that are different from onion-routing
 addresses.
 Optional field.
 Omitted if array is empty.</li>
-<li><b><font color="red">"dir_port":</font></b> Directory port.
-Deprecated field.
-Deprecated, because it's not clear which IP address the directory port
-belongs to if there are more than one entries in <i>"or_addresses"</i>.
-Replaced by <i>"dir_address"</i>.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"dir_address":</b> IPv4 address and TCP port where the relay
 accepts directory connections.
 Optional field.
@@ -234,21 +213,6 @@ database by resolving the relay's first onion-routing IP address.
 Optional field.
 Omitted if the relay IP address could not be found in the AS database.
 Added on February 28, 2012.</li>
-<li><b><font color="red">"desc_published":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when the relay last published a descriptor.
-Deprecated field.
-Deprecated, because this information is only useful to calculate the last
-restart time of the relay, together with <i>"uptime"</i>.
-We can as well provide that time directly in <i>"last_restarted"</i>.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"uptime"</font></b> Uptime of the relay when
-publishing its last descriptor.
-Deprecated field.
-Deprecated, because this information is only useful to calculate the last
-restart time of the relay, together with <i>"desc_published"</i>.
-Even worse, it may be mistaken for the current uptime of the relay at the
-time of publishing this detail document.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
 Required field.</li>
@@ -280,13 +244,6 @@ Each array object contains the following key-value pairs:
 <li><b>"hashed_fingerprint":</b> SHA-1 hash of the bridge fingerprint
 consisting of 40 upper-case hexadecimal characters.
 Required field.</li>
-<li><b><font color="red">"or_port":</font></b> TCP port where the bridge
-accepts onion-routing connections.
-Deprecated field.
-Deprecated, because a bridge can use a different port for each
-onion-routing address.
-Replaced with <i>"or_addresses"</i>.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"or_addresses":</b> Array of sanitized IPv4 or IPv6 addresses and
 TCP ports or port lists where the bridge accepts onion-routing
 connections.
@@ -298,13 +255,6 @@ Sanitized IP addresses always change on the 1st of every month at 00:00:00
 UTC, regardless of the bridge actually changing its IP address.
 TCP ports are not sanitized.
 Required field.</li>
-<li><b><font color="red">"dir_port":</font></b> TCP port where the bridge
-accepts directory connections.
-Deprecated field.
-Deprecated, because bridges don't act as directory mirrors and only have a
-non-zero directory port if they're misconfigured.
-Even then, the directory port number is not relevant.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"running":</b> Boolean field saying whether this bridge was listed
 as running in the last bridge network status.
 Required field.</li>
@@ -312,43 +262,15 @@ Required field.</li>
 assigned to this bridge.
 Optional field.
 Omitted if empty.</li>
-<li><b><font color="red">"desc_published":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when the bridge last published a descriptor.
-Deprecated field.
-Deprecated, because this information is only useful to calculate the last
-restart time of the bridge, together with <i>"uptime"</i>.
-We can as well provide that time directly in <i>"last_restarted"</i>.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"uptime"</font></b> Uptime of the bridge when
-publishing its last descriptor.
-Deprecated field.
-Deprecated, because this information is only useful to calculate the last
-restart time of the bridge, together with <i>"desc_published"</i>.
-Even worse, it may be mistaken for the current uptime of the bridge at the
-time of publishing this detail document.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 bridge was last (re-)started.
 Required field.</li>
 <li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
 bridge is willing and capable to provide.
 Required field.</li>
-<li><b><font color="red">"exit_policy":</font></b> Array of exit-policy
-lines.
-Deprecated field.
-Deprecated, because exit policies are not relevant for bridges and only
-indicate a (harmless) misconfiguration.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"platform":</b> Platform string containing operating system and Tor
 version details.
 Omitted if not provided by the bridge.</li>
-<li><b><font color="red">"family":</font></b> Array of hashed fingerprints
-or "Unnamed" nicknames of relays or bridges in the same family as this
-bridge.
-Deprecated field.
-Deprecated, because node families are not relevant for bridges and only
-indicate a (harmless) misconfiguration.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"pool_assignment":</b> Information of the pool that BridgeDB
 assigned this bridge to, including further assignment information if
 available.
