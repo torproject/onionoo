@@ -21,6 +21,8 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.DescriptorFile;
@@ -278,11 +280,14 @@ public class DetailDataWriter {
         }
         sb.append("\n]");
         if (descriptor.getContact() != null) {
-          sb.append(",\n\"contact\":\"" + descriptor.getContact() + "\"");
+          sb.append(",\n\"contact\":\""
+              + StringEscapeUtils.escapeJavaScript(
+              descriptor.getContact()) + "\"");
         }
         if (descriptor.getPlatform() != null) {
-          sb.append(",\n\"platform\":\"" + descriptor.getPlatform()
-              + "\"");
+          sb.append(",\n\"platform\":\""
+              + StringEscapeUtils.escapeJavaScript(
+              descriptor.getPlatform()) + "\"");
         }
         if (descriptor.getFamilyEntries() != null) {
           sb.append(",\n\"family\":[");
@@ -338,19 +343,24 @@ public class DetailDataWriter {
         sb.append(",\n\"longitude\":" + longitude);
       }
       if (countryName != null) {
-        sb.append(",\n\"country_name\":\"" + countryName + "\"");
+        sb.append(",\n\"country_name\":\""
+            + StringEscapeUtils.escapeJavaScript(countryName) + "\"");
       }
       if (regionName != null) {
-        sb.append(",\n\"region_name\":\"" + regionName + "\"");
+        sb.append(",\n\"region_name\":\""
+            + StringEscapeUtils.escapeJavaScript(regionName) + "\"");
       }
       if (cityName != null) {
-        sb.append(",\n\"city_name\":\"" + cityName + "\"");
+        sb.append(",\n\"city_name\":\""
+            + StringEscapeUtils.escapeJavaScript(cityName) + "\"");
       }
       if (aSNumber != null) {
-        sb.append(",\n\"as_number\":\"" + aSNumber + "\"");
+        sb.append(",\n\"as_number\":\""
+            + StringEscapeUtils.escapeJavaScript(aSNumber) + "\"");
       }
       if (cityName != null) {
-        sb.append(",\n\"as_name\":\"" + aSName + "\"");
+        sb.append(",\n\"as_name\":\""
+            + StringEscapeUtils.escapeJavaScript(aSName) + "\"");
       }
 
       /* Add exit addresses if at least one of them is distinct from the
@@ -482,7 +492,8 @@ public class DetailDataWriter {
         sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
             + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
             + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
-            + "\"platform\":\"" + descriptor.getPlatform() + "\"");
+            + "\"platform\":\"" + StringEscapeUtils.escapeJavaScript(
+            descriptor.getPlatform()) + "\"");
         descriptorParts = sb.toString();
       }
 

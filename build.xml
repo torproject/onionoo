@@ -11,6 +11,7 @@
   <path id="classpath">
     <pathelement path="${classes}"/>
     <pathelement location="lib/commons-codec-1.4.jar"/>
+    <pathelement location="lib/commons-lang-2.5.jar"/>
     <pathelement location="lib/servlet-api.jar"/>
     <pathelement location="lib/descriptor.jar"/>
     <pathelement location="lib/maxmindgeoip.jar"/>
