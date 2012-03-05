@@ -40,9 +40,6 @@ public class SummaryDataWriter {
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       long now = System.currentTimeMillis();
-      String validAfterString = dateTimeFormat.format(now);
-      String freshUntilString = dateTimeFormat.format(now
-          + 75L * 60L * 1000L);
       String relaysPublishedString = dateTimeFormat.format(
           this.lastValidAfterMillis);
       String bridgesPublishedString = dateTimeFormat.format(
@@ -50,11 +47,8 @@ public class SummaryDataWriter {
       this.relaySearchDataFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.relaySearchDataFile));
-      bw.write("{\"version\":1,\n"
-          + "\"valid_after\":\"" + validAfterString + "\",\n"
-          + "\"fresh_until\":\"" + freshUntilString + "\",\n"
-          + "\"relays_published\":\"" + relaysPublishedString + "\",\n"
-          + "\"relays\":[");
+      bw.write("{\"relays_published\":\"" + relaysPublishedString
+          + "\",\n\"relays\":[");
       int written = 0;
       for (Node entry : this.currentRelays.values()) {
         String nickname = !entry.getNickname().equals("Unnamed") ?

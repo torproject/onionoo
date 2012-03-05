@@ -28,9 +28,7 @@ public class ResourceServlet extends HttpServlet {
 
   long summaryFileLastModified = 0L;
   boolean readSummaryFile = false;
-  private String versionLine = null, validAfterLine = null,
-      freshUntilLine = null, relaysPublishedLine = null,
-      bridgesPublishedLine = null;
+  private String relaysPublishedLine = null, bridgesPublishedLine = null;
   private List<String> relayLines = new ArrayList<String>(),
       bridgeLines = new ArrayList<String>();
   private void readSummaryFile() {
@@ -40,7 +38,6 @@ public class ResourceServlet extends HttpServlet {
       return;
     }
     if (summaryFile.lastModified() > this.summaryFileLastModified) {
-      this.versionLine = this.validAfterLine = this.freshUntilLine = null;
       this.relayLines.clear();
       this.bridgeLines.clear();
       try {
@@ -48,14 +45,9 @@ public class ResourceServlet extends HttpServlet {
             summaryFile));
         String line;
         while ((line = br.readLine()) != null) {
-          if (line.startsWith("{\"version\":")) {
-            this.versionLine = line;
-          } else if (line.startsWith("\"valid_after\":")) {
-            this.validAfterLine = line;
-          } else if (line.startsWith("\"fresh_until\":")) {
-            this.freshUntilLine = line;
-          } else if (line.startsWith("\"relays_published\":")) {
-            this.relaysPublishedLine = line;
+          if (line.contains("\"relays_published\":")) {
+            this.relaysPublishedLine = line.startsWith("{") ? line :
+                "{" + line;
           } else if (line.startsWith("\"bridges_published\":")) {
             this.bridgesPublishedLine = line;
           } else if (line.startsWith("\"relays\":")) {
@@ -129,25 +121,21 @@ public class ResourceServlet extends HttpServlet {
     response.setCharacterEncoding("utf-8");
     PrintWriter pw = response.getWriter();
     if (uri.equals("/" + resourceType + "/all")) {
-      this.writeHeader(pw);
       pw.print(this.relaysPublishedLine + "\n");
       this.writeAllRelays(pw, resourceType);
       pw.print(this.bridgesPublishedLine + "\n");
       this.writeAllBridges(pw, resourceType);
     } else if (uri.equals("/" + resourceType + "/running")) {
-      this.writeHeader(pw);
       pw.print(this.relaysPublishedLine + "\n");
       this.writeRunningRelays(pw, resourceType);
       pw.print(this.bridgesPublishedLine + "\n");
       this.writeRunningBridges(pw, resourceType);
     } else if (uri.equals("/" + resourceType + "/relays")) {
-      this.writeHeader(pw);
       pw.print(this.relaysPublishedLine + "\n");
       this.writeAllRelays(pw, resourceType);
       pw.print(this.bridgesPublishedLine + "\n");
       this.writeNoBridges(pw);
     } else if (uri.equals("/" + resourceType + "/bridges")) {
-      this.writeHeader(pw);
       pw.print(this.relaysPublishedLine + "\n");
       this.writeNoRelays(pw);
       pw.print(this.bridgesPublishedLine + "\n");
@@ -155,7 +143,6 @@ public class ResourceServlet extends HttpServlet {
     } else if (uri.startsWith("/" + resourceType + "/search/")) {
       String searchParameter = this.parseSearchParameter(uri.substring(
           ("/" + resourceType + "/search/").length()));
-      this.writeHeader(pw);
       pw.print(this.relaysPublishedLine + "\n");
       this.writeMatchingRelays(pw, searchParameter, resourceType);
       pw.print(this.bridgesPublishedLine + "\n");
@@ -163,7 +150,6 @@ public class ResourceServlet extends HttpServlet {
     } else if (uri.startsWith("/" + resourceType + "/lookup/")) {
       Set<String> fingerprintParameters = this.parseFingerprintParameters(
           uri.substring(("/" + resourceType + "/lookup/").length()));
-      this.writeHeader(pw);
       pw.print(this.relaysPublishedLine + "\n");
       this.writeRelaysWithFingerprints(pw, fingerprintParameters,
           resourceType);
@@ -196,12 +182,6 @@ public class ResourceServlet extends HttpServlet {
     }
     parsedFingerprints.add(parameter);
     return parsedFingerprints;
-  }
-
-  private void writeHeader(PrintWriter pw) {
-    pw.print(this.versionLine + "\n");
-    pw.print(this.validAfterLine + "\n");
-    pw.print(this.freshUntilLine + "\n");
   }
 
   private void writeAllRelays(PrintWriter pw, String resourceType) {

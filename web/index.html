@@ -43,30 +43,6 @@ fingerprints, IP addresses, and running information as well as bridges
 with hashed fingerprints and running information.
 Summary documents contain the following fields:
 <ul>
-<li><b><font color="red">"version":</font></b> Version number of this
-document.
-Deprecated field.
-Deploying a versioning scheme to this service seems like overkill.
-Picking new field names and deprecating fields after one month means a lot
-less maintenance overhead.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"valid_after":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when the contents of this document were generated.
-Deprecated field.
-This field was a quite broken way to implement caching.
-The current caching approach is to have clients cache documents for five
-minutes.
-A future caching mechanism is going to use HTTP headers.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"fresh_until":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) until when the contents of this document shall be
-considered fresh.
-Deprecated field.
-This field was a quite broken way to implement caching.
-The current caching approach is to have clients cache documents for five
-minutes.
-A future caching mechanism is going to use HTTP headers.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last contained relay network status consensus started being valid.
 Indicates how recent the relay summaries in this document are.
@@ -159,22 +135,6 @@ Detail documents are based on the network statuses published by the Tor
 directories and the server descriptors published by relays and bridges.
 Detail documents contain the following fields:
 <ul>
-<li><b><font color="red">"version":</font></b> Version number of this
-document.
-Deprecated field.
-Deprecated for the same reason as stated for summary documents.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"valid_after":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when the contents of this document were generated.
-Deprecated field.
-Deprecated for the same reason as stated for summary documents.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"fresh_until":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) until when the contents of this document shall be
-considered fresh.
-Deprecated field.
-Deprecated for the same reason as stated for summary documents.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last contained relay network status consensus started being valid.
 Indicates how recent the relay details in this document are.
@@ -449,22 +409,6 @@ Bandwidth documents are available for all relays and bridges that have
 been running in the past week.
 Bandwidth documents contain the following fields:
 <ul>
-<li><b><font color="red">"version":</font></b> Version number of this
-document.
-Deprecated field.
-Deprecated for the same reason as stated for summary documents.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"valid_after":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when the contents of this document were generated.
-Deprecated field.
-Deprecated for the same reason as stated for summary documents.
-Announced on January 26, will be removed after March 4, 2012.</li>
-<li><b><font color="red">"fresh_until":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) until when the contents of this document shall be
-considered fresh.
-Deprecated field.
-Deprecated for the same reason as stated for summary documents.
-Announced on January 26, will be removed after March 4, 2012.</li>
 <li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last contained relay network status consensus started being valid.
 Indicates how recent the relay bandwidth documents in this document are.
