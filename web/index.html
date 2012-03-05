@@ -215,22 +215,31 @@ Omitted if the relay IP address could not be found in the AS database.
 Added on February 28, 2012.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
-Required field.</li>
+<font color="red">Optional field.</font>
+Missing if router descriptor containing this information cannot be found.
+Made field optional on March 5, 2012.</li>
 <li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
 relay is willing and capable to provide.
-Required field.</li>
+<font color="red">Optional field.</font>
+Missing if router descriptor containing this information cannot be found.
+Made field optional on March 5, 2012.</li>
 <li><b>"exit_policy":</b> Array of exit-policy lines.
-Required field.</li>
+<font color="red">Optional field.</font>
+Missing if router descriptor containing this information cannot be found.
+Made field optional on March 5, 2012.</li>
 <li><b>"contact":</b> Contact address of the relay operator.
-Omitted if empty.</li>
+Omitted if empty or if descriptor containing this information cannot be
+found.</li>
 <li><b>"platform":</b> Platform string containing operating system and Tor
 version details.
 Optional field.
-Omitted if empty.</li>
+Omitted if empty or if descriptor containing this information cannot be
+found.</li>
 <li><b>"family":</b> Array of fingerprints or nicknames of relays in the
 same family as this relay.
 Optional field.
-Omitted if empty.</li>
+Omitted if empty or if descriptor containing this information cannot be
+found.</li>
 </ul>
 </li>
 <li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
@@ -264,13 +273,19 @@ Optional field.
 Omitted if empty.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 bridge was last (re-)started.
-Required field.</li>
+<font color="red">Optional field.</font>
+Missing if router descriptor containing this information cannot be found.
+Made field optional on March 5, 2012.</li>
 <li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
 bridge is willing and capable to provide.
-Required field.</li>
+<font color="red">Optional field.</font>
+Missing if router descriptor containing this information cannot be found.
+Made field optional on March 5, 2012.</li>
 <li><b>"platform":</b> Platform string containing operating system and Tor
 version details.
-Omitted if not provided by the bridge.</li>
+Optional field.
+Omitted if not provided by the bridge or if descriptor containing this
+information cannot be found.</li>
 <li><b>"pool_assignment":</b> Information of the pool that BridgeDB
 assigned this bridge to, including further assignment information if
 available.

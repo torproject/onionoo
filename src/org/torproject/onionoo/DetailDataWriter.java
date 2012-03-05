@@ -231,7 +231,9 @@ public class DetailDataWriter {
             }
           }
           br.close();
-          descriptorParts = sb.toString();
+          if (sb.length() > 0) {
+            descriptorParts = sb.toString();
+          }
         } catch (IOException e) {
           System.err.println("Could not read '"
               + detailsFile.getAbsolutePath() + "'.  Skipping");
