@@ -358,7 +358,7 @@ public class DetailDataWriter {
         sb.append(",\n\"as_number\":\""
             + StringEscapeUtils.escapeJavaScript(aSNumber) + "\"");
       }
-      if (cityName != null) {
+      if (aSName != null) {
         sb.append(",\n\"as_name\":\""
             + StringEscapeUtils.escapeJavaScript(aSName) + "\"");
       }
