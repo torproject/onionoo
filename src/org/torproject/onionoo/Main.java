@@ -17,14 +17,6 @@ public class Main {
     cn.setBridgeRunningBits();
     cn.writeRelaySearchDataFile();
 
-    printStatus("Updating summary data.");
-    SummaryDataWriter sdw = new SummaryDataWriter();
-    sdw.setLastValidAfterMillis(cn.getLastValidAfterMillis());
-    sdw.setLastPublishedMillis(cn.getLastPublishedMillis());
-    sdw.setCurrentRelays(cn.getCurrentRelays());
-    sdw.setCurrentBridges(cn.getCurrentBridges());
-    sdw.writeSummaryDataFile();
-
     printStatus("Updating detail data.");
     DetailDataWriter ddw = new DetailDataWriter();
     ddw.setCurrentRelays(cn.getCurrentRelays());
@@ -41,6 +33,14 @@ public class Main {
     bdw.setCurrentBridges(cn.getCurrentBridges());
     bdw.readExtraInfoDescriptors();
     bdw.deleteObsoleteBandwidthFiles();
+
+    printStatus("Updating summary data.");
+    SummaryDataWriter sdw = new SummaryDataWriter();
+    sdw.setLastValidAfterMillis(cn.getLastValidAfterMillis());
+    sdw.setLastPublishedMillis(cn.getLastPublishedMillis());
+    sdw.setCurrentRelays(cn.getCurrentRelays());
+    sdw.setCurrentBridges(cn.getCurrentBridges());
+    sdw.writeSummaryDataFile();
 
     printStatus("Terminating.");
   }

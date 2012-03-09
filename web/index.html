@@ -16,11 +16,9 @@ responds with JSON-formatted replies.</p>
 gzip"</i> header in their requests and handle gzip-compressed responses.
 Only requests starting at a certain size will be compressed by the
 server.</li>
-<li><b>Caching:</b> Clients should cache all responses for up to five
-minutes.
-A better caching strategy may be employed in the future that will be based
-on the server's information when new data is expected to be
-available.</li>
+<li><b>Caching:</b> Clients should make use of the <i>"Last-Modified"</i>
+header of responses and include that timestamp in a
+<i>"If-Modified-Since"</i> header of subsequent requests.</li>
 <li><b>Protocol changes:</b> There are plenty of reasons why we may have
 to change the protocol described here.
 Clients should be able to handle all valid JSON responses, ignoring

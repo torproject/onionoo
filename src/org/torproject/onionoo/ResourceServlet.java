@@ -26,7 +26,7 @@ public class ResourceServlet extends HttpServlet {
     this.readSummaryFile();
   }
 
-  long summaryFileLastModified = 0L;
+  long summaryFileLastModified = -1L;
   boolean readSummaryFile = false;
   private String relaysPublishedLine = null, bridgesPublishedLine = null;
   private List<String> relayLines = new ArrayList<String>(),
@@ -67,6 +67,11 @@ public class ResourceServlet extends HttpServlet {
     }
     this.summaryFileLastModified = summaryFile.lastModified();
     this.readSummaryFile = true;
+  }
+
+  public long getLastModified(HttpServletRequest request) {
+    this.readSummaryFile();
+    return this.summaryFileLastModified;
   }
 
   public void doGet(HttpServletRequest request,
