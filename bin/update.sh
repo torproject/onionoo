@@ -1,4 +1,4 @@
 #!/bin/bash
-rsync -arz --delete metrics.torproject.org::metrics-recent in
+rsync -arz --delete --exclude 'relay-descriptors/votes' metrics.torproject.org::metrics-recent in
 ant run >> log
 
