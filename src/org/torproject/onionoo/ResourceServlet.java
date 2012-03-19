@@ -8,8 +8,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class ResourceServlet extends HttpServlet {
 
@@ -31,6 +37,9 @@ public class ResourceServlet extends HttpServlet {
   private String relaysPublishedLine = null, bridgesPublishedLine = null;
   private List<String> relayLines = new ArrayList<String>(),
       bridgeLines = new ArrayList<String>();
+  private Map<String, String>
+      relayFingerprintSummaryLines = new HashMap<String, String>(),
+      bridgeFingerprintSummaryLines = new HashMap<String, String>();
   private void readSummaryFile() {
     File summaryFile = new File("/srv/onionoo/out/summary.json");
     if (!summaryFile.exists()) {
@@ -40,6 +49,8 @@ public class ResourceServlet extends HttpServlet {
     if (summaryFile.lastModified() > this.summaryFileLastModified) {
       this.relayLines.clear();
       this.bridgeLines.clear();
+      this.relayFingerprintSummaryLines.clear();
+      this.bridgeFingerprintSummaryLines.clear();
       try {
         BufferedReader br = new BufferedReader(new FileReader(
             summaryFile));
@@ -53,15 +64,42 @@ public class ResourceServlet extends HttpServlet {
           } else if (line.startsWith("\"relays\":")) {
             while ((line = br.readLine()) != null && !line.equals("],")) {
               this.relayLines.add(line);
+              int fingerprintStart = line.indexOf("\"f\":\"");
+              if (fingerprintStart > 0) {
+                fingerprintStart += "\"f\":\"".length();
+                String fingerprint = line.substring(fingerprintStart,
+                    fingerprintStart + 40);
+                String hashedFingerprint = DigestUtils.shaHex(
+                    Hex.decodeHex(fingerprint.toCharArray())).
+                    toUpperCase();
+                this.relayFingerprintSummaryLines.put(fingerprint, line);
+                this.relayFingerprintSummaryLines.put(hashedFingerprint,
+                    line);
+              }
             }
           } else if (line.startsWith("\"bridges\":")) {
             while ((line = br.readLine()) != null && !line.equals("]}")) {
               this.bridgeLines.add(line);
+              int hashedFingerprintStart = line.indexOf("\"h\":\"");
+              if (hashedFingerprintStart > 0) {
+                hashedFingerprintStart += "\"h\":\"".length();
+                String hashedFingerprint = line.substring(
+                    hashedFingerprintStart, hashedFingerprintStart + 40);
+                String hashedHashedFingerprint = DigestUtils.shaHex(
+                    Hex.decodeHex(hashedFingerprint.toCharArray())).
+                    toUpperCase();
+                this.bridgeFingerprintSummaryLines.put(hashedFingerprint,
+                    line);
+                this.bridgeFingerprintSummaryLines.put(
+                    hashedHashedFingerprint, line);
+              }
             }
           }
         }
         br.close();
       } catch (IOException e) {
+        return;
+      } catch (DecoderException e) {
         return;
       }
     }
@@ -222,56 +260,61 @@ public class ResourceServlet extends HttpServlet {
 
   private void writeMatchingRelays(PrintWriter pw, String searchTerm,
       String resourceType) {
-    pw.print("\"relays\":[");
-    int written = 0;
-    for (String line : this.relayLines) {
-      boolean lineMatches = false;
-      if (searchTerm.startsWith("$")) {
-        /* Search is for $-prefixed fingerprint. */
-        if (line.contains("\"f\":\""
-            + searchTerm.substring(1).toUpperCase())) {
-          /* $-prefixed fingerprint matches. */
+    if (searchTerm.length() == 40) {
+      Set<String> fingerprints = new HashSet<String>();
+      fingerprints.add(searchTerm);
+      this.writeRelaysWithFingerprints(pw, fingerprints, resourceType);
+    } else {
+      pw.print("\"relays\":[");
+      int written = 0;
+      for (String line : this.relayLines) {
+        boolean lineMatches = false;
+        if (searchTerm.startsWith("$")) {
+          /* Search is for $-prefixed fingerprint. */
+          if (line.contains("\"f\":\""
+              + searchTerm.substring(1).toUpperCase())) {
+            /* $-prefixed fingerprint matches. */
+            lineMatches = true;
+          }
+        } else if (line.toLowerCase().contains("\"n\":\""
+            + searchTerm.toLowerCase())) {
+          /* Nickname matches. */
+          lineMatches = true;
+        } else if ("unnamed".startsWith(searchTerm.toLowerCase()) &&
+            line.startsWith("{\"f\":")) {
+          /* Nickname "Unnamed" matches. */
+          lineMatches = true;
+        } else if (line.contains("\"f\":\"" + searchTerm.toUpperCase())) {
+          /* Non-$-prefixed fingerprint matches. */
+          lineMatches = true;
+        } else if (line.substring(line.indexOf("\"a\":[")).contains("\""
+            + searchTerm.toLowerCase())) {
+          /* Address matches. */
           lineMatches = true;
         }
-      } else if (line.toLowerCase().contains("\"n\":\""
-          + searchTerm.toLowerCase())) {
-        /* Nickname matches. */
-        lineMatches = true;
-      } else if ("unnamed".startsWith(searchTerm.toLowerCase()) &&
-          line.startsWith("{\"f\":")) {
-        /* Nickname "Unnamed" matches. */
-        lineMatches = true;
-      } else if (line.contains("\"f\":\"" + searchTerm.toUpperCase())) {
-        /* Non-$-prefixed fingerprint matches. */
-        lineMatches = true;
-      } else if (line.substring(line.indexOf("\"a\":[")).contains("\""
-          + searchTerm.toLowerCase())) {
-        /* Address matches. */
-        lineMatches = true;
-      }
-      if (lineMatches) {
-        String lines = this.getFromSummaryLine(line, resourceType);
-        if (lines.length() > 0) {
-          pw.print((written++ > 0 ? ",\n" : "\n") + lines);
+        if (lineMatches) {
+          String lines = this.getFromSummaryLine(line, resourceType);
+          if (lines.length() > 0) {
+            pw.print((written++ > 0 ? ",\n" : "\n") + lines);
+          }
         }
       }
+      pw.print("\n],\n");
     }
-    pw.print("\n],\n");
   }
 
   private void writeRelaysWithFingerprints(PrintWriter pw,
       Set<String> fingerprints, String resourceType) {
     pw.print("\"relays\":[");
     int written = 0;
-    for (String line : this.relayLines) {
-      for (String fingerprint : fingerprints) {
-        if (line.contains("\"f\":\"" + fingerprint.toUpperCase()
-            + "\",")) {
-          String lines = this.getFromSummaryLine(line, resourceType);
-          if (lines.length() > 0) {
-            pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-          }
-          break;
+    for (String fingerprint : fingerprints) {
+      if (this.relayFingerprintSummaryLines.containsKey(
+          fingerprint.toUpperCase())) {
+        String summaryLine = this.relayFingerprintSummaryLines.get(
+            fingerprint.toUpperCase());
+        String lines = this.getFromSummaryLine(summaryLine, resourceType);
+        if (lines.length() > 0) {
+          pw.print((written++ > 0 ? ",\n" : "\n") + lines);
         }
       }
     }
@@ -314,33 +357,37 @@ public class ResourceServlet extends HttpServlet {
     if (searchTerm.startsWith("$")) {
       searchTerm = searchTerm.substring(1);
     }
-    pw.print("\"bridges\":[");
-    int written = 0;
-    for (String line : this.bridgeLines) {
-      if (line.contains("\"h\":\"" + searchTerm.toUpperCase())) {
-        String lines = this.getFromSummaryLine(line, resourceType);
-        if (lines.length() > 0) {
-          pw.print((written++ > 0 ? ",\n" : "\n") + lines);
+    if (searchTerm.length() == 40) {
+      Set<String> fingerprints = new HashSet<String>();
+      fingerprints.add(searchTerm);
+      this.writeBridgesWithFingerprints(pw, fingerprints, resourceType);
+    } else {
+      pw.print("\"bridges\":[");
+      int written = 0;
+      for (String line : this.bridgeLines) {
+        if (line.contains("\"h\":\"" + searchTerm.toUpperCase())) {
+          String lines = this.getFromSummaryLine(line, resourceType);
+          if (lines.length() > 0) {
+            pw.print((written++ > 0 ? ",\n" : "\n") + lines);
+          }
         }
       }
+      pw.print("\n]}\n");
     }
-    pw.print("\n]}\n");
   }
 
   private void writeBridgesWithFingerprints(PrintWriter pw,
       Set<String> fingerprints, String resourceType) {
     pw.print("\"bridges\":[");
     int written = 0;
-    for (String line : this.bridgeLines) {
-      for (String fingerprint : fingerprints) {
-        if (line.contains("\"h\":\"" + fingerprint.toUpperCase()
-            + "\",")) {
-          String lines = this.getFromSummaryLine(line,
-              resourceType);
-          if (lines.length() > 0) {
-            pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-          }
-          break;
+    for (String fingerprint : fingerprints) {
+      if (this.bridgeFingerprintSummaryLines.containsKey(
+          fingerprint.toUpperCase())) {
+        String summaryLine = this.bridgeFingerprintSummaryLines.get(
+            fingerprint.toUpperCase());
+        String lines = this.getFromSummaryLine(summaryLine, resourceType);
+        if (lines.length() > 0) {
+          pw.print((written++ > 0 ? ",\n" : "\n") + lines);
         }
       }
     }
