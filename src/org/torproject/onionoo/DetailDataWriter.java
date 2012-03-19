@@ -508,7 +508,6 @@ public class DetailDataWriter {
       String running = entry.getRunning() ? "true" : "false";
       String address = entry.getAddress();
       int orPort = entry.getOrPort();
-      int dirPort = entry.getDirPort();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"hashed_fingerprint\":\"" + fingerprint + "\",\n"

@@ -39,7 +39,6 @@ public class SummaryDataWriter {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      long now = System.currentTimeMillis();
       String relaysPublishedString = dateTimeFormat.format(
           this.lastValidAfterMillis);
       String bridgesPublishedString = dateTimeFormat.format(
