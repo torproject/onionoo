@@ -240,7 +240,7 @@ public class CurrentNodes {
               location.latitude));
           relay.setLongitude(String.format(Locale.US, "%.6f",
               location.longitude));
-          relay.setCountryCode(location.countryCode);
+          relay.setCountryCode(location.countryCode.toLowerCase());
           relay.setCountryName(location.countryName);
           relay.setRegionName(regionName.regionNameByCode(
               location.countryCode, location.region));
