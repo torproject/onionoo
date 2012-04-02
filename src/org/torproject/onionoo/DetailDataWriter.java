@@ -57,7 +57,11 @@ public class DetailDataWriter {
         DescriptorSourceFactory.createDescriptorReader();
     reader.addDirectory(new File(
         "in/relay-descriptors/server-descriptors"));
-    reader.setExcludeFiles(new File("status/relay-serverdesc-history"));
+    /* Don't remember which server descriptors we already parsed.  If we
+     * parse a server descriptor now and first learn about the relay in a
+     * later consensus, we'll never write the descriptor content anywhere.
+     * The result would be details files containing no descriptor parts
+     * until the relay publishes the next descriptor. */
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();
@@ -122,7 +126,11 @@ public class DetailDataWriter {
         DescriptorSourceFactory.createDescriptorReader();
     reader.addDirectory(new File(
         "in/bridge-descriptors/server-descriptors"));
-    reader.setExcludeFiles(new File("status/bridge-serverdesc-history"));
+    /* Don't remember which server descriptors we already parsed.  If we
+     * parse a server descriptor now and first learn about the relay in a
+     * later status, we'll never write the descriptor content anywhere.
+     * The result would be details files containing no descriptor parts
+     * until the bridge publishes the next descriptor. */
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();
