@@ -7,6 +7,9 @@
   <property name="contextxmltemplate"
             value="${config}/context.xml.template"/>
   <property name="contextxml" value="${config}/context.xml"/>
+  <property name="webxmltemplate"
+            value="${config}/web.xml.template"/>
+  <property name="webxml" value="${config}/web.xml"/>
   <property name="warfile" value="onionoo.war"/>
   <path id="classpath">
     <pathelement path="${classes}"/>
@@ -18,6 +21,7 @@
   </path>
   <target name="init">
     <copy file="${contextxmltemplate}" tofile="${contextxml}"/>
+    <copy file="${webxmltemplate}" tofile="${webxml}"/>
     <mkdir dir="${classes}"/>
   </target>
   <target name="compile"

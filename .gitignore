@@ -5,6 +5,7 @@ lib/
 classes/
 out/
 onionoo.war
+etc/web.xml
 etc/context.xml
 GeoIP.dat
 GeoIPASNum.dat

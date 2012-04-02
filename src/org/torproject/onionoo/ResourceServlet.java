@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +29,11 @@ public class ResourceServlet extends HttpServlet {
 
   private static final long serialVersionUID = 7236658979947465319L;
 
-  public void init() {
+  private String outDirString;
+
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    this.outDirString = config.getInitParameter("outDir");
     this.readSummaryFile();
   }
 
@@ -41,7 +46,7 @@ public class ResourceServlet extends HttpServlet {
       relayFingerprintSummaryLines = new HashMap<String, String>(),
       bridgeFingerprintSummaryLines = new HashMap<String, String>();
   private void readSummaryFile() {
-    File summaryFile = new File("/srv/onionoo/out/summary.json");
+    File summaryFile = new File(this.outDirString + "summary.json");
     if (!summaryFile.exists()) {
       readSummaryFile = false;
       return;
@@ -427,7 +432,7 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File detailsFile = new File("/srv/onionoo/out/details/"
+    File detailsFile = new File(this.outDirString + "details/"
         + fingerprint);
     StringBuilder sb = new StringBuilder();
     String detailsLines = null;
@@ -472,7 +477,7 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File detailsFile = new File("/srv/onionoo/out/bandwidth/"
+    File detailsFile = new File(this.outDirString + "bandwidth/"
         + fingerprint);
     StringBuilder sb = new StringBuilder();
     String bandwidthLines = null;
