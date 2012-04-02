@@ -217,7 +217,6 @@ public class DetailDataWriter {
       /* Read details file for this relay if it exists. */
       String descriptorParts = null;
       long publishedMillis = -1L;
-      boolean containsLastRestartedLine = false;
       if (result.containsKey(fingerprint)) {
         File detailsFile = result.remove(fingerprint);
         try {
@@ -233,8 +232,6 @@ public class DetailDataWriter {
                   "\"desc_published\":\"1970-01-01 00:00:00".length());
               publishedMillis = dateTimeFormat.parse(published).getTime();
               copyDescriptorParts = true;
-            } else if (line.startsWith("\"last_restarted\":")) {
-              containsLastRestartedLine = true;
             }
             if (copyDescriptorParts) {
               sb.append(line + "\n");
@@ -264,8 +261,7 @@ public class DetailDataWriter {
        * line. */
       if (this.relayServerDescriptors.containsKey(fingerprint) &&
           (this.relayServerDescriptors.get(fingerprint).
-          getPublishedMillis() > publishedMillis ||
-          !containsLastRestartedLine)) {
+          getPublishedMillis() > publishedMillis)) {
         ServerDescriptor descriptor = this.relayServerDescriptors.get(
             fingerprint);
         StringBuilder sb = new StringBuilder();
