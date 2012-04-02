@@ -122,6 +122,9 @@ public class ResourceServlet extends HttpServlet {
     }
 
     String uri = request.getRequestURI();
+    if (uri.startsWith("/onionoo/")) {
+      uri = uri.substring("/onionoo".length());
+    }
     String resourceType = null;
     if (uri.startsWith("/summary/")) {
       resourceType = "summary";
