@@ -477,14 +477,14 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File detailsFile = new File(this.outDirString + "bandwidth/"
+    File bandwidthFile = new File(this.outDirString + "bandwidth/"
         + fingerprint);
     StringBuilder sb = new StringBuilder();
     String bandwidthLines = null;
-    if (detailsFile.exists()) {
+    if (bandwidthFile.exists()) {
       try {
         BufferedReader br = new BufferedReader(new FileReader(
-            detailsFile));
+            bandwidthFile));
         String line;
         while ((line = br.readLine()) != null) {
           sb.append(line + "\n");
