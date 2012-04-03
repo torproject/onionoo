@@ -22,10 +22,11 @@ public class Node {
   private int orPort;
   private int dirPort;
   private SortedSet<String> relayFlags;
+  private long consensusWeight;
   private boolean running;
   public Node(String nickname, String fingerprint, String address,
       long lastSeenMillis, int orPort, int dirPort,
-      SortedSet<String> relayFlags) {
+      SortedSet<String> relayFlags, long consensusWeight) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     this.address = address;
@@ -33,6 +34,7 @@ public class Node {
     this.orPort = orPort;
     this.dirPort = dirPort;
     this.relayFlags = relayFlags;
+    this.consensusWeight = consensusWeight;
   }
   public String getFingerprint() {
     return this.fingerprint;
@@ -102,6 +104,9 @@ public class Node {
   }
   public SortedSet<String> getRelayFlags() {
     return this.relayFlags;
+  }
+  public long getConsensusWeight() {
+    return this.consensusWeight;
   }
   public void setRunning(boolean running) {
     this.running = running;

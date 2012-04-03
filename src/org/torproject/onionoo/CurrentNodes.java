@@ -67,8 +67,13 @@ public class CurrentNodes {
             int dirPort = Integer.parseInt(parts[7]);
             SortedSet<String> relayFlags = new TreeSet<String>(
                 Arrays.asList(parts[8].split(",")));
+            long consensusWeight = -1L;
+            if (parts.length > 9) {
+              consensusWeight = Long.parseLong(parts[9]);
+            }
             this.addRelay(nickname, fingerprint, address,
-                validAfterMillis, orPort, dirPort, relayFlags);
+                validAfterMillis, orPort, dirPort, relayFlags,
+                consensusWeight);
           } else if (line.startsWith("b ")) {
             String[] parts = line.split(" ");
             if (parts.length < 9) {
@@ -128,9 +133,11 @@ public class CurrentNodes {
           sb.append("," + relayFlag);
         }
         String relayFlags = sb.toString().substring(1);
+        String consensusWeight = String.valueOf(
+            entry.getConsensusWeight());
         bw.write("r " + nickname + " " + fingerprint + " " + address + " "
             + validAfter + " " + orPort + " " + dirPort + " " + relayFlags
-            + "\n");
+            + " " + consensusWeight + "\n");
       }
       for (Node entry : this.currentBridges.values()) {
         String fingerprint = entry.getFingerprint();
@@ -146,7 +153,7 @@ public class CurrentNodes {
         String relayFlags = sb.toString().substring(1);
         bw.write("b Unnamed " + fingerprint + " " + address + " "
             + published + " " + orPort + " " + dirPort + " " + relayFlags
-            + "\n");
+            + " -1\n");
       }
       bw.close();
     } catch (IOException e) {
@@ -175,8 +182,8 @@ public class CurrentNodes {
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
           if (descriptor instanceof RelayNetworkStatusConsensus) {
-            updateRelayNetworkStatusConsensus((RelayNetworkStatusConsensus)
-                descriptor);
+            updateRelayNetworkStatusConsensus(
+                (RelayNetworkStatusConsensus) descriptor);
           }
         }
       }
@@ -203,20 +210,21 @@ public class CurrentNodes {
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
       SortedSet<String> relayFlags = entry.getFlags();
+      long consensusWeight = entry.getBandwidth();
       this.addRelay(nickname, fingerprint, address, validAfterMillis,
-          orPort, dirPort, relayFlags);
+          orPort, dirPort, relayFlags, consensusWeight);
     }
   }
 
   public void addRelay(String nickname, String fingerprint,
       String address, long validAfterMillis, int orPort, int dirPort,
-      SortedSet<String> relayFlags) {
+      SortedSet<String> relayFlags, long consensusWeight) {
     if (validAfterMillis >= cutoff &&
         (!this.currentRelays.containsKey(fingerprint) ||
         this.currentRelays.get(fingerprint).getLastSeenMillis() <
         validAfterMillis)) {
       Node entry = new Node(nickname, fingerprint, address,
-          validAfterMillis, orPort, dirPort, relayFlags);
+          validAfterMillis, orPort, dirPort, relayFlags, consensusWeight);
       this.currentRelays.put(fingerprint, entry);
       if (validAfterMillis > this.lastValidAfterMillis) {
         this.lastValidAfterMillis = validAfterMillis;
@@ -322,7 +330,7 @@ public class CurrentNodes {
         this.currentBridges.get(fingerprint).getLastSeenMillis() <
         publishedMillis)) {
       Node entry = new Node("Unnamed", fingerprint, address,
-          publishedMillis, orPort, dirPort, relayFlags);
+          publishedMillis, orPort, dirPort, relayFlags, -1L);
       this.currentBridges.put(fingerprint, entry);
       if (publishedMillis > this.lastPublishedMillis) {
         this.lastPublishedMillis = publishedMillis;

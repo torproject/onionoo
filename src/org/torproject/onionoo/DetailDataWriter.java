@@ -321,6 +321,7 @@ public class DetailDataWriter {
       String cityName = entry.getCityName();
       String aSNumber = entry.getASNumber();
       String aSName = entry.getASName();
+      long consensusWeight = entry.getConsensusWeight();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -365,6 +366,10 @@ public class DetailDataWriter {
       if (aSName != null) {
         sb.append(",\n\"as_name\":\""
             + StringEscapeUtils.escapeJavaScript(aSName) + "\"");
+      }
+      if (consensusWeight > 0L) {
+        sb.append(",\n\"consensus_weight\":"
+            + String.valueOf(consensusWeight));
       }
 
       /* Add exit addresses if at least one of them is distinct from the

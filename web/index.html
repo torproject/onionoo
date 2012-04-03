@@ -215,6 +215,12 @@ relay's first onion-routing IP address.
 Optional field.
 Omitted if the relay IP address could not be found in the AS
 database.</li>
+<li><b><font color="blue">"consensus_weight":</font></b> Bandwidth weight
+assigned to this relay by the directory authorities.
+The unit is arbitrary; currently it's kilobytes per second, but that might
+change in the future.
+Required field.
+Added on April 3, 2012.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
 <font color="red">Optional field.</font>
