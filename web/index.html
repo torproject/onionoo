@@ -84,7 +84,11 @@ Required field.</li>
 <p>The following methods are available that all return a single summary
 document.
 The method and its parameters determines which relay and/or bridge
-summaries are included in the response.</p>
+summaries are included in the response.
+<font color="red">These methods have been deprecated on April 3, 2012 and
+will be removed after June 3, 2012.
+See the Methods section at the end of this page.</font>
+</p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
 <colgroup>
 <col width="350">
@@ -93,22 +97,34 @@ summaries are included in the response.</p>
 <tr>
 <td><b>GET summary/all</b></td>
 <td>Return summaries of all relays and bridges that are currently running
-or that have been running in the past week.</td>
+or that have been running in the past week.
+<font color="red">New method:
+<b>GET summary</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET summary/running</b></td>
 <td>Return summaries of all relays and bridges that are currently
-running.</td>
+running.
+<font color="red">New method:
+<b>GET summary?running=true</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET summary/relays</b></td>
 <td>Return summaries of all relays that are currently running or that have
-been running in the past week, but don't include any bridges.</td>
+been running in the past week, but don't include any bridges.
+<font color="red">New method:
+<b>GET summary?type=relay</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET summary/bridges</b></td>
 <td>Return summaries of all bridges that are currently running or that
-have been running in the past week, but don't include any relays.</td>
+have been running in the past week, but don't include any relays.
+<font color="red">New method:
+<b>GET summary?type=bridge</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET summary/search/<i>:searchtext</i></b></td>
@@ -119,7 +135,10 @@ Searches are case-insensitive.
 <font color="blue">Full fingerprints should always be hashed using SHA-1,
 regardless of searching for a relay or a bridge, in order to not
 accidentally leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to search for hashed fingerprints on March 19, 2012.</td>
+Added the option to search for hashed fingerprints on March 19, 2012.
+<font color="red">New method:
+<b>GET summary?search=:searchtext</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET summary/lookup/<i>:fingerprint</i></b></td>
@@ -128,7 +147,10 @@ matching the fingerprint or hashed fingerprint.
 <font color="blue">Fingerprints should always be hashed using SHA-1,
 regardless of looking up a relay or a bridge, in order to not accidentally
 leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to look up hashed fingerprints on March 19, 2012.</td>
+Added the option to look up hashed fingerprints on March 19, 2012.
+<font color="red">New method:
+<b>GET summary?lookup=:fingerprint</b></font>
+</td>
 </tr>
 </table>
 <br>
@@ -304,7 +326,11 @@ Optional field.</li>
 <p>The following methods are available that all return a single details
 document.
 The method and its parameters determines which relay and/or bridge
-details are included in the response.</p>
+details are included in the response.
+<font color="red">These methods have been deprecated on April 3, 2012 and
+will be removed after June 3, 2012.
+See the Methods section at the end of this page.</font>
+</p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
 <colgroup>
 <col width="350">
@@ -313,22 +339,34 @@ details are included in the response.</p>
 <tr>
 <td><b>GET details/all</b></td>
 <td>Return details of all relays and bridges that are currently running
-or that have been running in the past week.</td>
+or that have been running in the past week.
+<font color="red">New method:
+<b>GET details</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET details/running</b></td>
 <td>Return details of all relays and bridges that are currently
-running.</td>
+running.
+<font color="red">New method:
+<b>GET details?running=true</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET details/relays</b></td>
 <td>Return details of all relays that are currently running or that have
-been running in the past week, but don't include any bridges.</td>
+been running in the past week, but don't include any bridges.
+<font color="red">New method:
+<b>GET details?type=relay</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET details/bridges</b></td>
 <td>Return details of all bridges that are currently running or that have
-been running in the past week, but don't include any relays.</td>
+been running in the past week, but don't include any relays.
+<font color="red">New method:
+<b>GET details?type=bridge</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET details/search/<i>:searchtext</i></b></td>
@@ -339,7 +377,10 @@ Searches are case-insensitive.
 <font color="blue">Full fingerprints should always be hashed using SHA-1,
 regardless of searching for a relay or a bridge, in order to not
 accidentally leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to search for hashed fingerprints on March 19, 2012.</td>
+Added the option to search for hashed fingerprints on March 19, 2012.
+<font color="red">New method:
+<b>GET details?search=:searchtext</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET details/lookup/<i>:fingerprint</i></b></td>
@@ -348,7 +389,10 @@ matching the fingerprint or hashed fingerprint.
 <font color="blue">Fingerprints should always be hashed using SHA-1,
 regardless of looking up a relay or a bridge, in order to not accidentally
 leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to look up hashed fingerprints on March 19, 2012.</td>
+Added the option to look up hashed fingerprints on March 19, 2012.
+<font color="red">New method:
+<b>GET details?lookup=:fingerprint</b></font>
+</td>
 </tr>
 </table>
 <br>
@@ -446,7 +490,11 @@ The specification of bandwidth history objects is similar to those in the
 </ul>
 <p>The following methods are available that all return a single document.
 The method and its parameters determines which relay and/or bridge
-bandwidth documents are included in the response.</p>
+bandwidth documents are included in the response.
+<font color="red">These methods have been deprecated on April 3, 2012 and
+will be removed after June 3, 2012.
+See the Methods section at the end of this page.</font>
+</p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
 <colgroup>
 <col width="350">
@@ -455,23 +503,35 @@ bandwidth documents are included in the response.</p>
 <tr>
 <td><b>GET bandwidth/all</b></td>
 <td>Return bandwidth documents of all relays and bridges that are
-currently running or that have been running in the past week.</td>
+currently running or that have been running in the past week.
+<font color="red">New method:
+<b>GET bandwidth</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET bandwidth/running</b></td>
 <td>Return bandwidth documents of all relays and bridges that are
-currently running.</td>
+currently running.
+<font color="red">New method:
+<b>GET bandwidth?running=true</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET bandwidth/relays</b></td>
 <td>Return bandwidth documents of all relays that are currently running or
-that have been running in the past week, but don't include any bridges.</td>
+that have been running in the past week, but don't include any bridges.
+<font color="red">New method:
+<b>GET bandwidth?type=relay</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET bandwidth/bridges</b></td>
 <td>Return bandwidth documents of all bridges that are currently running
 or that have been running in the past week, but don't include any
-relays.</td>
+relays.
+<font color="red">New method:
+<b>GET bandwidth?type=bridge</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET details/search/<i>:searchtext</i></b></td>
@@ -483,7 +543,10 @@ Searches are case-insensitive.
 <font color="blue">Full fingerprints should always be hashed using SHA-1,
 regardless of searching for a relay or a bridge, in order to not
 accidentally leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to search for hashed fingerprints on March 19, 2012.</td>
+Added the option to search for hashed fingerprints on March 19, 2012.
+<font color="red">New method:
+<b>GET bandwidth?search=:searchtext</b></font>
+</td>
 </tr>
 <tr>
 <td><b>GET bandwidth/lookup/<i>:fingerprint</i></b></td>
@@ -492,8 +555,109 @@ Added the option to search for hashed fingerprints on March 19, 2012.</td>
 <font color="blue">Fingerprints should always be hashed using SHA-1,
 regardless of looking up a relay or a bridge, in order to not accidentally
 leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to look up hashed fingerprints on March 19, 2012.</td>
+Added the option to look up hashed fingerprints on March 19, 2012.
+<font color="red">New method:
+<b>GET bandwidth?lookup=:fingerprint</b></font>
+</td>
 </tr>
+</table>
+<br>
+<h3>Methods</h3>
+<p>The following methods each return a single document containing zero or
+more relay and/or bridge documents.</p>
+<table border="0" cellpadding="4" cellspacing="0" summary="">
+<colgroup>
+<col width="150">
+<col width="850">
+</colgroup>
+<tr>
+<td><b>GET summary</b></td>
+<td>Return summaries of all relays and bridges that are currently running
+or that have been running in the past week.
+<font color="blue">Method added on April 3, 2012.</font>
+</td>
+</tr>
+<tr>
+<td><b>GET details</b></td>
+<td>Return details of all relays and bridges that are currently running
+or that have been running in the past week.
+<font color="blue">Method added on April 3, 2012.</font>
+</td>
+</tr>
+<tr>
+<td><b>GET bandwidth</b></td>
+<td>Return bandwidth documents of all relays and bridges that are
+currently running or that have been running in the past week.
+<font color="blue">Method added on April 3, 2012.</font>
+</td>
+</tr>
+</table>
+<p>Each of the methods above can be parameterized to select only a subset
+of relay and/or bridge documents to be included in the response.</p>
+<table border="0" cellpadding="4" cellspacing="0" summary="">
+<colgroup>
+<col width="150">
+<col width="850">
+</colgroup>
+<tr><td><b>type</b></td><td>Return only relay (parameter value
+<b>relay</b>) or only bridge documents (parameter value
+<b>bridge</b>).
+<font color="blue">Parameter added on April 3, 2012.</font>
+</td></tr>
+<tr><td><b>running</b></td><td>Return only running (parameter value
+<b>true</b>) or only non-running relays and/or bridges (paramter value
+<b>false</b>).
+<font color="blue">Parameter added on April 3, 2012.</font>
+</td></tr>
+<tr><td><b>search</b></td><td>Return only relays with the parameter value
+matching the beginning of a nickname, (possibly $-prefixed) fingerprint,
+or IP address, and bridges with the (possibly $-prefixed) hashed
+fingerprint.
+Searches are case-insensitive.
+Full fingerprints should always be hashed using SHA-1, regardless of
+searching for a relay or a bridge, in order to not accidentally leak
+non-hashed bridge fingerprints in the URL.
+<font color="blue">Parameter added on April 3, 2012.</font>
+</td></tr>
+<tr><td><b>lookup</b></td><td>Return only the relay with the parameter
+value matching the fingerprint or the bridge with the parameter value
+matching the hashed fingerprint.
+Fingerprints should always be hashed using SHA-1, regardless of looking up
+a relay or a bridge, in order to not accidentally leak non-hashed bridge
+fingerprints in the URL.
+<font color="blue">Parameter added on April 3, 2012.</font>
+</td></tr>
+</table>
+<p>Relay and/or bridge documents in the response can be ordered and
+limited by providing further parameters.</p>
+<table border="0" cellpadding="4" cellspacing="0" summary="">
+<colgroup>
+<col width="150">
+<col width="850">
+</colgroup>
+<tr><td><b>order</b></td><td>Re-order results by a comma-separated list
+of fields in ascending or descening order.
+Results are first ordered by the second list element, then by the second,
+and so on.
+Possible fields for ordering are: <b>consensus_weight</b>.
+Ascending order is the default; descending order is selected by prepending
+fields with a minus sign (<b>-</b>).
+Relays which don't have any value for a field to be ordered by are always
+appended to the end, regardless or sorting order.
+If no <b>order</b> parameter is given, ordering of results is
+undefined.
+<font color="blue">Parameter added on April 3, 2012.</font>
+</td></tr>
+<tr><td><b>offset</b></td><td>Skip the given number of relays and/or
+bridges.
+<font color="blue">Parameter added on April 3, 2012.</font>
+</td></tr>
+<tr><td><b>limit</b></td><td>Limit result to the given number of
+relays and/or bridges.
+When used together with <b>offset</b>, the offsetting step precedes the
+limiting step.
+<font color="blue">Parameter added on April 3, 2012.</font>
+</td></tr>
 </table>
 </body>
 </html>

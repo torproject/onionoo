@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +43,8 @@ public class ResourceServlet extends HttpServlet {
   boolean readSummaryFile = false;
   private String relaysPublishedLine = null, bridgesPublishedLine = null;
   private List<String> relayLines = new ArrayList<String>(),
-      bridgeLines = new ArrayList<String>();
+      bridgeLines = new ArrayList<String>(),
+      relaysByConsensusWeight = new ArrayList<String>();
   private Map<String, String>
       relayFingerprintSummaryLines = new HashMap<String, String>(),
       bridgeFingerprintSummaryLines = new HashMap<String, String>();
@@ -107,6 +110,44 @@ public class ResourceServlet extends HttpServlet {
       } catch (DecoderException e) {
         return;
       }
+      List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
+      File relaysByConsensusWeightFile =
+          new File(this.outDirString + "/relays-by-consensus-weight.csv");
+      if (relaysByConsensusWeightFile.exists()) {
+        try {
+          BufferedReader br = new BufferedReader(new FileReader(
+              relaysByConsensusWeightFile));
+          String line;
+          while ((line = br.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts.length != 2) {
+              return;
+            }
+            long consensusWeight = Long.parseLong(parts[1]);
+            String fingerprint = parts[0];
+            orderRelaysByConsensusWeight.add(
+                String.format("%020d %s", consensusWeight, fingerprint));
+            String hashedFingerprint = DigestUtils.shaHex(
+                Hex.decodeHex(fingerprint.toCharArray())).
+                toUpperCase();
+            orderRelaysByConsensusWeight.add(
+                String.format("%020d %s", consensusWeight,
+                hashedFingerprint));
+          }
+          br.close();
+          Collections.sort(orderRelaysByConsensusWeight);
+          this.relaysByConsensusWeight = new ArrayList<String>();
+          for (String relay : orderRelaysByConsensusWeight) {
+            this.relaysByConsensusWeight.add(relay.split(" ")[1]);
+          }
+        } catch (IOException e) {
+          return;
+        } catch (NumberFormatException e) {
+          return;
+        } catch (DecoderException e) {
+          return;
+        }
+      }
     }
     this.summaryFileLastModified = summaryFile.lastModified();
     this.readSummaryFile = true;
@@ -131,85 +172,237 @@ public class ResourceServlet extends HttpServlet {
       uri = uri.substring("/onionoo".length());
     }
     String resourceType = null;
+    boolean isOldStyleUri = false;
     if (uri.startsWith("/summary/")) {
       resourceType = "summary";
+      isOldStyleUri = true;
     } else if (uri.startsWith("/details/")) {
       resourceType = "details";
+      isOldStyleUri = true;
     } else if (uri.startsWith("/bandwidth/")) {
+      resourceType = "bandwidth";
+      isOldStyleUri = true;
+    } else if (uri.startsWith("/summary")) {
+      resourceType = "summary";
+    } else if (uri.startsWith("/details")) {
+      resourceType = "details";
+    } else if (uri.startsWith("/bandwidth")) {
       resourceType = "bandwidth";
     } else {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
-    /* Handle any errors resulting from invalid requests. */
-    if (uri.equals("/" + resourceType + "/all")) {
-    } else if (uri.equals("/" + resourceType + "/running")) {
-    } else if (uri.equals("/" + resourceType + "/relays")) {
-    } else if (uri.equals("/" + resourceType + "/bridges")) {
-    } else if (uri.startsWith("/" + resourceType + "/search/")) {
-      String searchParameter = this.parseSearchParameter(uri.substring(
-          ("/" + resourceType + "/search/").length()));
-      if (searchParameter == null) {
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        return;
-      }
-    } else if (uri.startsWith("/" + resourceType + "/lookup/")) {
-      Set<String> fingerprintParameters = this.parseFingerprintParameters(
-          uri.substring(("/" + resourceType + "/lookup/").length()));
-      if (fingerprintParameters == null) {
+    /* Extract parameters either from the old-style URI or from request
+     * parameters. */
+    Map<String, String> parameterMap;
+    if (isOldStyleUri) {
+      parameterMap = this.getParameterMapForOldStyleUri(uri,
+          resourceType);
+      if (parameterMap == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
     } else {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-      return;
+      parameterMap = new HashMap<String, String>();
+      for (Object parameterKey : request.getParameterMap().keySet()) {
+        String[] parameterValues =
+            request.getParameterValues((String) parameterKey);
+        parameterMap.put((String) parameterKey, parameterValues[0]);
+      }
     }
 
-    /* Set response headers and start writing the response. */
+    /* Make sure that the request doesn't contain any unknown
+     * parameters. */
+    Set<String> knownParameters = new HashSet<String>(Arrays.asList(
+        "type,running,search,lookup,order,limit,offset".split(",")));
+    for (String parameterKey : parameterMap.keySet()) {
+      if (!knownParameters.contains(parameterKey)) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+    }
+
+    /* Filter relays and bridges matching the request. */
+    Map<String, String> filteredRelays = new HashMap<String, String>(
+        this.relayFingerprintSummaryLines);
+    Map<String, String> filteredBridges = new HashMap<String, String>(
+        this.bridgeFingerprintSummaryLines);
+    if (parameterMap.containsKey("type")) {
+      String typeParameterValue = parameterMap.get("type");
+      boolean relaysRequested = true;
+      if (typeParameterValue.equals("bridge")) {
+        relaysRequested = false;
+      } else if (!typeParameterValue.equals("relay")) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterByType(filteredRelays, filteredBridges, relaysRequested);
+    }
+    if (parameterMap.containsKey("running")) {
+      String runningParameterValue = parameterMap.get("running");
+      boolean runningRequested = true;
+      if (runningParameterValue.equals("false")) {
+        runningRequested = false;
+      } else if (!runningParameterValue.equals("true")) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterByRunning(filteredRelays, filteredBridges,
+          runningRequested);
+    }
+    if (parameterMap.containsKey("search")) {
+      String searchTerm = this.parseSearchParameter(
+          parameterMap.get("search"));
+      if (searchTerm == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterBySearchTerm(filteredRelays, filteredBridges,
+          searchTerm);
+    }
+    if (parameterMap.containsKey("lookup")) {
+      String fingerprintParameter = this.parseFingerprintParameter(
+          parameterMap.get("lookup"));
+      if (fingerprintParameter == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      String fingerprint = fingerprintParameter.toUpperCase();
+      this.filterByFingerprint(filteredRelays, filteredBridges,
+          fingerprint);
+    }
+
+    /* Re-order and limit results. */
+    List<String> orderedRelays = new ArrayList<String>();
+    List<String> orderedBridges = new ArrayList<String>();
+    if (parameterMap.containsKey("order")) {
+      String orderParameter = parameterMap.get("order");
+      boolean descending = false;
+      if (orderParameter.startsWith("-")) {
+        descending = true;
+        orderParameter = orderParameter.substring(1);
+      }
+      if (!orderParameter.equals("consensus_weight")) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      List<String> orderBy = new ArrayList<String>(
+          this.relaysByConsensusWeight);
+      if (descending) {
+        Collections.reverse(orderBy);
+      }
+      for (String relay : orderBy) {
+        if (filteredRelays.containsKey(relay) &&
+            !orderedRelays.contains(filteredRelays.get(relay))) {
+          orderedRelays.add(filteredRelays.remove(relay));
+        }
+      }
+      for (String relay : filteredRelays.values()) {
+        if (!orderedRelays.contains(filteredRelays.get(relay))) {
+          orderedRelays.add(filteredRelays.remove(relay));
+        }
+      }
+      Set<String> uniqueBridges = new HashSet<String>(
+          filteredBridges.values());
+      orderedBridges.addAll(uniqueBridges);
+    } else {
+      Set<String> uniqueRelays = new HashSet<String>(
+          filteredRelays.values());
+      orderedRelays.addAll(uniqueRelays);
+      Set<String> uniqueBridges = new HashSet<String>(
+          filteredBridges.values());
+      orderedBridges.addAll(uniqueBridges);
+    }
+    if (parameterMap.containsKey("offset")) {
+      String offsetParameter = parameterMap.get("offset");
+      if (offsetParameter.length() > 6) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      int offset = 0;
+      try {
+        offset = Integer.parseInt(offsetParameter);
+      } catch (NumberFormatException e) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      while (offset-- > 0 &&
+          (!orderedRelays.isEmpty() || !orderedBridges.isEmpty())) {
+        if (!orderedRelays.isEmpty()) {
+          orderedRelays.remove(0);
+        } else {
+          orderedBridges.remove(0);
+        }
+      }
+    }
+    if (parameterMap.containsKey("limit")) {
+      String limitParameter = parameterMap.get("limit");
+      if (limitParameter.length() > 6) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      int limit = -1;
+      try {
+        limit = Integer.parseInt(limitParameter);
+      } catch (NumberFormatException e) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      if (limit >= 0) {
+        while (limit < orderedRelays.size()) {
+          orderedRelays.remove(orderedRelays.size() - 1);
+        }
+      }
+      limit -= orderedRelays.size();
+      if (limit >= 0) {
+        while (limit < orderedBridges.size()) {
+          orderedBridges.remove(orderedBridges.size() - 1);
+        }
+      }
+    }
+
+    /* Set response headers and write the response. */
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setContentType("application/json");
     response.setCharacterEncoding("utf-8");
     PrintWriter pw = response.getWriter();
+    this.writeRelays(orderedRelays, pw, resourceType);
+    this.writeBridges(orderedBridges, pw, resourceType);
+    pw.flush();
+    pw.close();
+  }
+
+  private Map<String, String> getParameterMapForOldStyleUri(String uri,
+      String resourceType) {
+    Map<String, String> result = new HashMap<String, String>();
     if (uri.equals("/" + resourceType + "/all")) {
-      pw.print(this.relaysPublishedLine + "\n");
-      this.writeAllRelays(pw, resourceType);
-      pw.print(this.bridgesPublishedLine + "\n");
-      this.writeAllBridges(pw, resourceType);
     } else if (uri.equals("/" + resourceType + "/running")) {
-      pw.print(this.relaysPublishedLine + "\n");
-      this.writeRunningRelays(pw, resourceType);
-      pw.print(this.bridgesPublishedLine + "\n");
-      this.writeRunningBridges(pw, resourceType);
+      result.put("running", "true");
     } else if (uri.equals("/" + resourceType + "/relays")) {
-      pw.print(this.relaysPublishedLine + "\n");
-      this.writeAllRelays(pw, resourceType);
-      pw.print(this.bridgesPublishedLine + "\n");
-      this.writeNoBridges(pw);
+      result.put("type", "relays");
     } else if (uri.equals("/" + resourceType + "/bridges")) {
-      pw.print(this.relaysPublishedLine + "\n");
-      this.writeNoRelays(pw);
-      pw.print(this.bridgesPublishedLine + "\n");
-      this.writeAllBridges(pw, resourceType);
+      result.put("type", "bridges");
     } else if (uri.startsWith("/" + resourceType + "/search/")) {
       String searchParameter = this.parseSearchParameter(uri.substring(
           ("/" + resourceType + "/search/").length()));
-      pw.print(this.relaysPublishedLine + "\n");
-      this.writeMatchingRelays(pw, searchParameter, resourceType);
-      pw.print(this.bridgesPublishedLine + "\n");
-      this.writeMatchingBridges(pw, searchParameter, resourceType);
+      if (searchParameter == null) {
+        result = null;
+      } else {
+        result.put("search", searchParameter);
+      }
     } else if (uri.startsWith("/" + resourceType + "/lookup/")) {
-      Set<String> fingerprintParameters = this.parseFingerprintParameters(
+      String fingerprintParameter = this.parseFingerprintParameter(
           uri.substring(("/" + resourceType + "/lookup/").length()));
-      pw.print(this.relaysPublishedLine + "\n");
-      this.writeRelaysWithFingerprints(pw, fingerprintParameters,
-          resourceType);
-      pw.print(this.bridgesPublishedLine + "\n");
-      this.writeBridgesWithFingerprints(pw, fingerprintParameters,
-          resourceType);
+      if (fingerprintParameter == null) {
+        result = null;
+      } else {
+        result.put("lookup", fingerprintParameter);
+      }
+    } else {
+      result = null;
     }
-    pw.flush();
-    pw.close();
+    return result;
   }
 
   private static Pattern searchParameterPattern =
@@ -223,180 +416,143 @@ public class ResourceServlet extends HttpServlet {
 
   private static Pattern fingerprintParameterPattern =
       Pattern.compile("^[0-9a-zA-Z]{1,40}$");
-  private Set<String> parseFingerprintParameters(String parameter) {
+  private String parseFingerprintParameter(String parameter) {
     if (!fingerprintParameterPattern.matcher(parameter).matches()) {
       return null;
     }
-    Set<String> parsedFingerprints = new HashSet<String>();
     if (parameter.length() != 40) {
       return null;
     }
-    parsedFingerprints.add(parameter);
-    return parsedFingerprints;
+    return parameter;
   }
 
-  private void writeAllRelays(PrintWriter pw, String resourceType) {
-    pw.print("\"relays\":[");
-    int written = 0;
-    for (String line : this.relayLines) {
-      String lines = this.getFromSummaryLine(line, resourceType);
-      if (lines.length() > 0) {
-        pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-      }
-    }
-    pw.print("],\n");
-  }
-
-  private void writeRunningRelays(PrintWriter pw, String resourceType) {
-    pw.print("\"relays\":[");
-    int written = 0;
-    for (String line : this.relayLines) {
-      if (line.contains("\"r\":true")) {
-        String lines = this.getFromSummaryLine(line, resourceType);
-        if (lines.length() > 0) {
-          pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-        }
-      }
-    }
-    pw.print("\n],\n");
-  }
-
-  private void writeNoRelays(PrintWriter pw) {
-    pw.print("\"relays\":[\n");
-    pw.print("],\n");
-  }
-
-  private void writeMatchingRelays(PrintWriter pw, String searchTerm,
-      String resourceType) {
-    if (searchTerm.length() == 40) {
-      Set<String> fingerprints = new HashSet<String>();
-      fingerprints.add(searchTerm);
-      this.writeRelaysWithFingerprints(pw, fingerprints, resourceType);
+  private void filterByType(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, boolean relaysRequested) {
+    if (relaysRequested) {
+      filteredBridges.clear();
     } else {
-      pw.print("\"relays\":[");
-      int written = 0;
-      for (String line : this.relayLines) {
-        boolean lineMatches = false;
-        if (searchTerm.startsWith("$")) {
-          /* Search is for $-prefixed fingerprint. */
-          if (line.contains("\"f\":\""
-              + searchTerm.substring(1).toUpperCase())) {
-            /* $-prefixed fingerprint matches. */
-            lineMatches = true;
-          }
-        } else if (line.toLowerCase().contains("\"n\":\""
-            + searchTerm.toLowerCase())) {
-          /* Nickname matches. */
-          lineMatches = true;
-        } else if ("unnamed".startsWith(searchTerm.toLowerCase()) &&
-            line.startsWith("{\"f\":")) {
-          /* Nickname "Unnamed" matches. */
-          lineMatches = true;
-        } else if (line.contains("\"f\":\"" + searchTerm.toUpperCase())) {
-          /* Non-$-prefixed fingerprint matches. */
-          lineMatches = true;
-        } else if (line.substring(line.indexOf("\"a\":[")).contains("\""
-            + searchTerm.toLowerCase())) {
-          /* Address matches. */
-          lineMatches = true;
-        }
-        if (lineMatches) {
-          String lines = this.getFromSummaryLine(line, resourceType);
-          if (lines.length() > 0) {
-            pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-          }
-        }
-      }
-      pw.print("\n],\n");
+      filteredRelays.clear();
     }
   }
 
-  private void writeRelaysWithFingerprints(PrintWriter pw,
-      Set<String> fingerprints, String resourceType) {
-    pw.print("\"relays\":[");
-    int written = 0;
-    for (String fingerprint : fingerprints) {
-      if (this.relayFingerprintSummaryLines.containsKey(
-          fingerprint.toUpperCase())) {
-        String summaryLine = this.relayFingerprintSummaryLines.get(
-            fingerprint.toUpperCase());
-        String lines = this.getFromSummaryLine(summaryLine, resourceType);
-        if (lines.length() > 0) {
-          pw.print((written++ > 0 ? ",\n" : "\n") + lines);
+  private void filterByRunning(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, boolean runningRequested) {
+    Set<String> removeRelays = new HashSet<String>();
+    for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
+      if (e.getValue().contains("\"r\":true") != runningRequested) {
+        removeRelays.add(e.getKey());
+      }
+    }
+    for (String fingerprint : removeRelays) {
+      filteredRelays.remove(fingerprint);
+    }
+    Set<String> removeBridges = new HashSet<String>();
+    for (Map.Entry<String, String> e : filteredBridges.entrySet()) {
+      if (e.getValue().contains("\"r\":true") != runningRequested) {
+        removeBridges.add(e.getKey());
+      }
+    }
+    for (String fingerprint : removeBridges) {
+      filteredBridges.remove(fingerprint);
+    }
+  }
+
+  private void filterBySearchTerm(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, String searchTerm) {
+    Set<String> removeRelays = new HashSet<String>();
+    for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
+      String line = e.getValue();
+      boolean lineMatches = false;
+      if (searchTerm.startsWith("$")) {
+        /* Search is for $-prefixed fingerprint. */
+        if (line.contains("\"f\":\""
+            + searchTerm.substring(1).toUpperCase())) {
+          /* $-prefixed fingerprint matches. */
+          lineMatches = true;
         }
+      } else if (line.toLowerCase().contains("\"n\":\""
+          + searchTerm.toLowerCase())) {
+        /* Nickname matches. */
+        lineMatches = true;
+      } else if ("unnamed".startsWith(searchTerm.toLowerCase()) &&
+          line.startsWith("{\"f\":")) {
+        /* Nickname "Unnamed" matches. */
+        lineMatches = true;
+      } else if (line.contains("\"f\":\"" + searchTerm.toUpperCase())) {
+        /* Non-$-prefixed fingerprint matches. */
+        lineMatches = true;
+      } else if (line.substring(line.indexOf("\"a\":[")).contains("\""
+          + searchTerm.toLowerCase())) {
+        /* Address matches. */
+        lineMatches = true;
+      }
+      if (!lineMatches) {
+        removeRelays.add(e.getKey());
       }
     }
-    pw.print("\n],\n");
-  }
-
-  private void writeAllBridges(PrintWriter pw, String resourceType) {
-    pw.print("\"bridges\":[");
-    int written = 0;
-    for (String line : this.bridgeLines) {
-      String lines = this.getFromSummaryLine(line, resourceType);
-      if (lines.length() > 0) {
-        pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-      }
+    for (String fingerprint : removeRelays) {
+      filteredRelays.remove(fingerprint);
     }
-    pw.print("\n]}\n");
-  }
-
-  private void writeRunningBridges(PrintWriter pw, String resourceType) {
-    pw.print("\"bridges\":[");
-    int written = 0;
-    for (String line : this.bridgeLines) {
-      if (line.contains("\"r\":true")) {
-        String lines = this.getFromSummaryLine(line, resourceType);
-        if (lines.length() > 0) {
-          pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-        }
-      }
-    }
-    pw.print("\n]}\n");
-  }
-
-  private void writeNoBridges(PrintWriter pw) {
-    pw.print("\"bridges\":[\n");
-    pw.print("]}\n");
-  }
-
-  private void writeMatchingBridges(PrintWriter pw, String searchTerm,
-      String resourceType) {
+    Set<String> removeBridges = new HashSet<String>();
     if (searchTerm.startsWith("$")) {
       searchTerm = searchTerm.substring(1);
     }
-    if (searchTerm.length() == 40) {
-      Set<String> fingerprints = new HashSet<String>();
-      fingerprints.add(searchTerm);
-      this.writeBridgesWithFingerprints(pw, fingerprints, resourceType);
-    } else {
-      pw.print("\"bridges\":[");
-      int written = 0;
-      for (String line : this.bridgeLines) {
-        if (line.contains("\"h\":\"" + searchTerm.toUpperCase())) {
-          String lines = this.getFromSummaryLine(line, resourceType);
-          if (lines.length() > 0) {
-            pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-          }
-        }
+    for (Map.Entry<String, String> e : filteredBridges.entrySet()) {
+      String line = e.getValue();
+      if (!line.contains("\"h\":\"" + searchTerm.toUpperCase())) {
+        removeBridges.add(e.getKey());
       }
-      pw.print("\n]}\n");
+    }
+    for (String fingerprint : removeBridges) {
+      filteredBridges.remove(fingerprint);
     }
   }
 
-  private void writeBridgesWithFingerprints(PrintWriter pw,
-      Set<String> fingerprints, String resourceType) {
+  private void filterByFingerprint(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, String fingerprint) {
+    String relayLine = filteredRelays.get(fingerprint);
+    filteredRelays.clear();
+    if (relayLine != null) {
+      filteredRelays.put(fingerprint, relayLine);
+    }
+    String bridgeLine = filteredBridges.get(fingerprint);
+    filteredBridges.clear();
+    if (bridgeLine != null) {
+      filteredBridges.put(fingerprint, bridgeLine);
+    }
+  }
+
+  private void writeRelays(List<String> relays, PrintWriter pw,
+      String resourceType) {
+    pw.print(this.relaysPublishedLine + "\n");
+    pw.print("\"relays\":[");
+    int written = 0;
+    for (String line : relays) {
+      if (line == null) {
+        /* TODO This is a workaround for a bug; line shouldn't be null. */
+        continue;
+      }
+      String lines = this.getFromSummaryLine(line, resourceType);
+      if (lines.length() > 0) {
+        pw.print((written++ > 0 ? ",\n" : "\n") + lines);
+      }
+    }
+    pw.print("\n],\n");
+  }
+
+  private void writeBridges(List<String> bridges, PrintWriter pw,
+      String resourceType) {
+    pw.print(this.bridgesPublishedLine + "\n");
     pw.print("\"bridges\":[");
     int written = 0;
-    for (String fingerprint : fingerprints) {
-      if (this.bridgeFingerprintSummaryLines.containsKey(
-          fingerprint.toUpperCase())) {
-        String summaryLine = this.bridgeFingerprintSummaryLines.get(
-            fingerprint.toUpperCase());
-        String lines = this.getFromSummaryLine(summaryLine, resourceType);
-        if (lines.length() > 0) {
-          pw.print((written++ > 0 ? ",\n" : "\n") + lines);
-        }
+    for (String line : bridges) {
+      if (line == null) {
+        /* TODO This is a workaround for a bug; line shouldn't be null. */
+        continue;
+      }
+      String lines = this.getFromSummaryLine(line, resourceType);
+      if (lines.length() > 0) {
+        pw.print((written++ > 0 ? ",\n" : "\n") + lines);
       }
     }
     pw.print("\n]}\n");
