@@ -367,7 +367,7 @@ public class DetailDataWriter {
         sb.append(",\n\"as_name\":\""
             + StringEscapeUtils.escapeJavaScript(aSName) + "\"");
       }
-      if (consensusWeight > 0L) {
+      if (consensusWeight >= 0L) {
         sb.append(",\n\"consensus_weight\":"
             + String.valueOf(consensusWeight));
       }
