@@ -113,11 +113,8 @@ have been running in the past week, but don't include any relays.</td>
 <tr>
 <td><b>GET summary/search/<i>:searchtext</i></b></td>
 <td>Return summaries of all relays and bridges with <i>:searchtext</i>
-matching the beginning of a nickname, <font color="blue">(possibly
-$-prefixed)</font> fingerprint, IP address, or <font
-color="blue">(possibly $-prefixed)</font> hashed fingerprint.
-Added the option to search for $-prefixed (hashed) fingerprints on
-February 25, 2012.
+matching the beginning of a nickname, (possibly $-prefixed) fingerprint,
+IP address, or (possibly $-prefixed) hashed fingerprint.
 Searches are case-insensitive.
 <font color="blue">Full fingerprints should always be hashed using SHA-1,
 regardless of searching for a relay or a bridge, in order to not
@@ -183,43 +180,41 @@ GeoIP database by resolving the relay's first onion-routing IP address.
 Optional field.
 Omitted if the relay IP address could not be found in the GeoIP
 database.</li>
-<li><b><font color="blue">"country_name":</font></b> Country name as found
-in a GeoIP database by resolving the relay's first onion-routing IP
-address.
+<li><b>"country_name":</b> Country name as found in a GeoIP database by
+resolving the relay's first onion-routing IP address.
 Optional field.
-Omitted if the relay IP address could not be found in the GeoIP database.
-Added on February 28, 2012.</li>
-<li><b><font color="blue">"region_name":</font></b> Region name as found
-in a GeoIP database by resolving the relay's first onion-routing IP
-address.
+Omitted if the relay IP address could not be found in the GeoIP
+database.</li>
+<li><b>"region_name":</b> Region name as found in a GeoIP database by
+resolving the relay's first onion-routing IP address.
 Optional field.
-Omitted if the relay IP address could not be found in the GeoIP database.
-Added on February 28, 2012.</li>
-<li><b><font color="blue">"city_name":</font></b> City name as found in a
+Omitted if the relay IP address could not be found in the GeoIP
+database.</li>
+<li><b>"city_name":</b> City name as found in a
 GeoIP database by resolving the relay's first onion-routing IP address.
 Optional field.
-Omitted if the relay IP address could not be found in the GeoIP database.
-Added on February 28, 2012.</li>
-<li><b><font color="blue">"latitude":</font></b> Latitude as found in a
-GeoIP database by resolving the relay's first onion-routing IP address.
+Omitted if the relay IP address could not be found in the GeoIP
+database.</li>
+<li><b>"latitude":</b> Latitude as found in a GeoIP database by resolving
+the relay's first onion-routing IP address.
 Optional field.
-Omitted if the relay IP address could not be found in the GeoIP database.
-Added on February 11, 2012.</li>
-<li><b><font color="blue">"longitude":</font></b> Longitude as found in a
-GeoIP database by resolving the relay's first onion-routing IP address.
+Omitted if the relay IP address could not be found in the GeoIP
+database.</li>
+<li><b>"longitude":</b> Longitude as found in a GeoIP database by
+resolving the relay's first onion-routing IP address.
 Optional field.
-Omitted if the relay IP address could not be found in the GeoIP database.
-Added on February 11, 2012.</li>
-<li><b><font color="blue">"as_number":</font></b> AS number as found in an
-AS database by resolving the relay's first onion-routing IP address.
+Omitted if the relay IP address could not be found in the GeoIP
+database.</li>
+<li><b>"as_number":</b> AS number as found in an AS database by
+resolving the relay's first onion-routing IP address.
 Optional field.
-Omitted if the relay IP address could not be found in the AS database.
-Added on February 28, 2012.</li>
-<li><b><font color="blue">"as_name":</font></b> AS name as found in an AS
-database by resolving the relay's first onion-routing IP address.
+Omitted if the relay IP address could not be found in the AS
+database.</li>
+<li><b>"as_name":</b> AS name as found in an AS database by resolving the
+relay's first onion-routing IP address.
 Optional field.
-Omitted if the relay IP address could not be found in the AS database.
-Added on February 28, 2012.</li>
+Omitted if the relay IP address could not be found in the AS
+database.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
 <font color="red">Optional field.</font>
@@ -332,11 +327,8 @@ been running in the past week, but don't include any relays.</td>
 <tr>
 <td><b>GET details/search/<i>:searchtext</i></b></td>
 <td>Return details of all relays and bridges with <i>:searchtext</i>
-matching the beginning of a nickname, <font color="blue">(possibly
-$-prefixed)</font> fingerprint, IP address, or <font
-color="blue">(possibly $-prefixed)</font> hashed fingerprint.
-Added the option to search for $-prefixed (hashed) fingerprints on
-February 25, 2012.
+matching the beginning of a nickname, (possibly $-prefixed) fingerprint,
+IP address, or (possibly $-prefixed) hashed fingerprint.
 Searches are case-insensitive.
 <font color="blue">Full fingerprints should always be hashed using SHA-1,
 regardless of searching for a relay or a bridge, in order to not
@@ -478,11 +470,9 @@ relays.</td>
 <tr>
 <td><b>GET details/search/<i>:searchtext</i></b></td>
 <td>Return bandwidth documents of all relays and bridges with
-<i>:searchtext</i> matching the beginning of a nickname, <font
-color="blue">(possibly $-prefixed)</font> fingerprint, IP address, or
-<font color="blue">(possibly $-prefixed)</font> hashed fingerprint.
-Added the option to search for $-prefixed (hashed) fingerprints on
-February 25, 2012.
+<i>:searchtext</i> matching the beginning of a nickname, (possibly
+$-prefixed) fingerprint, IP address, or (possibly $-prefixed) hashed
+fingerprint.
 Searches are case-insensitive.
 <font color="blue">Full fingerprints should always be hashed using SHA-1,
 regardless of searching for a relay or a bridge, in order to not
