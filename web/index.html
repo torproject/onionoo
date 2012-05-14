@@ -85,8 +85,8 @@ Required field.</li>
 document.
 The method and its parameters determines which relay and/or bridge
 summaries are included in the response.
-<font color="red">These methods have been deprecated on April 3, 2012 and
-will be removed after June 3, 2012.
+<font color="red">These methods have been deprecated on May 14, 2012 and
+will be removed after July 14, 2012.
 See the Methods section at the end of this page.</font>
 </p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
@@ -242,7 +242,7 @@ assigned to this relay by the directory authorities.
 The unit is arbitrary; currently it's kilobytes per second, but that might
 change in the future.
 Required field.
-Added on April 3, 2012.</li>
+Added on May 14, 2012.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
 <font color="red">Optional field.</font>
@@ -327,8 +327,8 @@ Optional field.</li>
 document.
 The method and its parameters determines which relay and/or bridge
 details are included in the response.
-<font color="red">These methods have been deprecated on April 3, 2012 and
-will be removed after June 3, 2012.
+<font color="red">These methods have been deprecated on May 14, 2012 and
+will be removed after July 14, 2012.
 See the Methods section at the end of this page.</font>
 </p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
@@ -491,8 +491,8 @@ The specification of bandwidth history objects is similar to those in the
 <p>The following methods are available that all return a single document.
 The method and its parameters determines which relay and/or bridge
 bandwidth documents are included in the response.
-<font color="red">These methods have been deprecated on April 3, 2012 and
-will be removed after June 3, 2012.
+<font color="red">These methods have been deprecated on May 14, 2012 and
+will be removed after July 14, 2012.
 See the Methods section at the end of this page.</font>
 </p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
@@ -574,21 +574,21 @@ more relay and/or bridge documents.</p>
 <td><b>GET summary</b></td>
 <td>Return summaries of all relays and bridges that are currently running
 or that have been running in the past week.
-<font color="blue">Method added on April 3, 2012.</font>
+<font color="blue">Method added on May 14, 2012.</font>
 </td>
 </tr>
 <tr>
 <td><b>GET details</b></td>
 <td>Return details of all relays and bridges that are currently running
 or that have been running in the past week.
-<font color="blue">Method added on April 3, 2012.</font>
+<font color="blue">Method added on May 14, 2012.</font>
 </td>
 </tr>
 <tr>
 <td><b>GET bandwidth</b></td>
 <td>Return bandwidth documents of all relays and bridges that are
 currently running or that have been running in the past week.
-<font color="blue">Method added on April 3, 2012.</font>
+<font color="blue">Method added on May 14, 2012.</font>
 </td>
 </tr>
 </table>
@@ -602,12 +602,12 @@ of relay and/or bridge documents to be included in the response.</p>
 <tr><td><b>type</b></td><td>Return only relay (parameter value
 <b>relay</b>) or only bridge documents (parameter value
 <b>bridge</b>).
-<font color="blue">Parameter added on April 3, 2012.</font>
+<font color="blue">Parameter added on May 14, 2012.</font>
 </td></tr>
 <tr><td><b>running</b></td><td>Return only running (parameter value
 <b>true</b>) or only non-running relays and/or bridges (paramter value
 <b>false</b>).
-<font color="blue">Parameter added on April 3, 2012.</font>
+<font color="blue">Parameter added on May 14, 2012.</font>
 </td></tr>
 <tr><td><b>search</b></td><td>Return only relays with the parameter value
 matching the beginning of a nickname, (possibly $-prefixed) fingerprint,
@@ -617,7 +617,7 @@ Searches are case-insensitive.
 Full fingerprints should always be hashed using SHA-1, regardless of
 searching for a relay or a bridge, in order to not accidentally leak
 non-hashed bridge fingerprints in the URL.
-<font color="blue">Parameter added on April 3, 2012.</font>
+<font color="blue">Parameter added on May 14, 2012.</font>
 </td></tr>
 <tr><td><b>lookup</b></td><td>Return only the relay with the parameter
 value matching the fingerprint or the bridge with the parameter value
@@ -625,7 +625,7 @@ matching the hashed fingerprint.
 Fingerprints should always be hashed using SHA-1, regardless of looking up
 a relay or a bridge, in order to not accidentally leak non-hashed bridge
 fingerprints in the URL.
-<font color="blue">Parameter added on April 3, 2012.</font>
+<font color="blue">Parameter added on May 14, 2012.</font>
 </td></tr>
 </table>
 <p>Relay and/or bridge documents in the response can be ordered and
@@ -646,17 +646,17 @@ Relays which don't have any value for a field to be ordered by are always
 appended to the end, regardless or sorting order.
 If no <b>order</b> parameter is given, ordering of results is
 undefined.
-<font color="blue">Parameter added on April 3, 2012.</font>
+<font color="blue">Parameter added on May 14, 2012.</font>
 </td></tr>
 <tr><td><b>offset</b></td><td>Skip the given number of relays and/or
 bridges.
-<font color="blue">Parameter added on April 3, 2012.</font>
+<font color="blue">Parameter added on May 14, 2012.</font>
 </td></tr>
 <tr><td><b>limit</b></td><td>Limit result to the given number of
 relays and/or bridges.
 When used together with <b>offset</b>, the offsetting step precedes the
 limiting step.
-<font color="blue">Parameter added on April 3, 2012.</font>
+<font color="blue">Parameter added on May 14, 2012.</font>
 </td></tr>
 </table>
 </body>
