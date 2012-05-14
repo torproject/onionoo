@@ -132,10 +132,9 @@ have been running in the past week, but don't include any relays.
 matching the beginning of a nickname, (possibly $-prefixed) fingerprint,
 IP address, or (possibly $-prefixed) hashed fingerprint.
 Searches are case-insensitive.
-<font color="blue">Full fingerprints should always be hashed using SHA-1,
-regardless of searching for a relay or a bridge, in order to not
-accidentally leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to search for hashed fingerprints on March 19, 2012.
+Full fingerprints should always be hashed using SHA-1, regardless of
+searching for a relay or a bridge, in order to not accidentally leak
+non-hashed bridge fingerprints in the URL.
 <font color="red">New method:
 <b>GET summary?search=:searchtext</b></font>
 </td>
@@ -144,10 +143,9 @@ Added the option to search for hashed fingerprints on March 19, 2012.
 <td><b>GET summary/lookup/<i>:fingerprint</i></b></td>
 <td>Return the summary of the relay or bridge with <i>:fingerprint</i>
 matching the fingerprint or hashed fingerprint.
-<font color="blue">Fingerprints should always be hashed using SHA-1,
-regardless of looking up a relay or a bridge, in order to not accidentally
-leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to look up hashed fingerprints on March 19, 2012.
+Fingerprints should always be hashed using SHA-1, regardless of looking up
+a relay or a bridge, in order to not accidentally leak non-hashed bridge
+fingerprints in the URL.
 <font color="red">New method:
 <b>GET summary?lookup=:fingerprint</b></font>
 </td>
@@ -245,18 +243,16 @@ Required field.
 Added on May 14, 2012.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
-<font color="red">Optional field.</font>
-Missing if router descriptor containing this information cannot be found.
-Made field optional on March 5, 2012.</li>
+Optional field.</li>
 <li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
 relay is willing and capable to provide.
-<font color="red">Optional field.</font>
-Missing if router descriptor containing this information cannot be found.
-Made field optional on March 5, 2012.</li>
+Optional field.
+Missing if router descriptor containing this information cannot be
+found.</li>
 <li><b>"exit_policy":</b> Array of exit-policy lines.
-<font color="red">Optional field.</font>
-Missing if router descriptor containing this information cannot be found.
-Made field optional on March 5, 2012.</li>
+Optional field.
+Missing if router descriptor containing this information cannot be
+found.</li>
 <li><b>"contact":</b> Contact address of the relay operator.
 Omitted if empty or if descriptor containing this information cannot be
 found.</li>
@@ -303,14 +299,14 @@ Optional field.
 Omitted if empty.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 bridge was last (re-)started.
-<font color="red">Optional field.</font>
-Missing if router descriptor containing this information cannot be found.
-Made field optional on March 5, 2012.</li>
+Optional field.
+Missing if router descriptor containing this information cannot be
+found.</li>
 <li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
 bridge is willing and capable to provide.
-<font color="red">Optional field.</font>
-Missing if router descriptor containing this information cannot be found.
-Made field optional on March 5, 2012.</li>
+Optional field.
+Missing if router descriptor containing this information cannot be
+found.</li>
 <li><b>"platform":</b> Platform string containing operating system and Tor
 version details.
 Optional field.
@@ -374,10 +370,9 @@ been running in the past week, but don't include any relays.
 matching the beginning of a nickname, (possibly $-prefixed) fingerprint,
 IP address, or (possibly $-prefixed) hashed fingerprint.
 Searches are case-insensitive.
-<font color="blue">Full fingerprints should always be hashed using SHA-1,
-regardless of searching for a relay or a bridge, in order to not
-accidentally leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to search for hashed fingerprints on March 19, 2012.
+Full fingerprints should always be hashed using SHA-1, regardless of
+searching for a relay or a bridge, in order to not accidentally leak
+non-hashed bridge fingerprints in the URL.
 <font color="red">New method:
 <b>GET details?search=:searchtext</b></font>
 </td>
@@ -386,10 +381,9 @@ Added the option to search for hashed fingerprints on March 19, 2012.
 <td><b>GET details/lookup/<i>:fingerprint</i></b></td>
 <td>Return the details of the relay or bridge with <i>:fingerprint</i>
 matching the fingerprint or hashed fingerprint.
-<font color="blue">Fingerprints should always be hashed using SHA-1,
-regardless of looking up a relay or a bridge, in order to not accidentally
-leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to look up hashed fingerprints on March 19, 2012.
+Fingerprints should always be hashed using SHA-1, regardless of looking up
+a relay or a bridge, in order to not accidentally leak non-hashed bridge
+fingerprints in the URL.
 <font color="red">New method:
 <b>GET details?lookup=:fingerprint</b></font>
 </td>
@@ -540,10 +534,9 @@ relays.
 $-prefixed) fingerprint, IP address, or (possibly $-prefixed) hashed
 fingerprint.
 Searches are case-insensitive.
-<font color="blue">Full fingerprints should always be hashed using SHA-1,
-regardless of searching for a relay or a bridge, in order to not
-accidentally leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to search for hashed fingerprints on March 19, 2012.
+Full fingerprints should always be hashed using SHA-1, regardless of
+searching for a relay or a bridge, in order to not accidentally leak
+non-hashed bridge fingerprints in the URL.
 <font color="red">New method:
 <b>GET bandwidth?search=:searchtext</b></font>
 </td>
@@ -552,10 +545,9 @@ Added the option to search for hashed fingerprints on March 19, 2012.
 <td><b>GET bandwidth/lookup/<i>:fingerprint</i></b></td>
 <td>Return the bandwidth document of the relay or bridge with
 <i>:fingerprint</i> matching the fingerprint or hashed fingerprint.
-<font color="blue">Fingerprints should always be hashed using SHA-1,
-regardless of looking up a relay or a bridge, in order to not accidentally
-leak non-hashed bridge fingerprints in the URL.</font>
-Added the option to look up hashed fingerprints on March 19, 2012.
+Fingerprints should always be hashed using SHA-1, regardless of looking up
+a relay or a bridge, in order to not accidentally leak non-hashed bridge
+fingerprints in the URL.
 <font color="red">New method:
 <b>GET bandwidth?lookup=:fingerprint</b></font>
 </td>
