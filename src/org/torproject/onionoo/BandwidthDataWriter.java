@@ -143,6 +143,12 @@ public class BandwidthDataWriter {
         String line;
         while ((line = br.readLine()) != null) {
           String[] parts = line.split(" ");
+          if (parts.length != 6) {
+            System.err.println("Illegal line '" + line + "' in history "
+                + "file '" + historyFile.getAbsolutePath()
+                + "'.  Skipping this line.");
+            continue;
+          }
           SortedMap<Long, long[]> history = parts[0].equals("r")
               ? readHistory : writeHistory;
           long startMillis = this.dateTimeFormat.parse(parts[1] + " "
