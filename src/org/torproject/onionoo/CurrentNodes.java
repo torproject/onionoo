@@ -35,11 +35,11 @@ import com.maxmind.geoip.regionName;
  * days. */
 public class CurrentNodes {
 
-  private File internalRelaySearchDataFile =
-      new File("status/summary.csv");
+  private File internalRelaySearchDataFile;
 
   /* Read the internal relay search data file from disk. */
-  public void readRelaySearchDataFile() {
+  public void readRelaySearchDataFile(File internalRelaySearchDataFile) {
+    this.internalRelaySearchDataFile = internalRelaySearchDataFile;
     if (this.internalRelaySearchDataFile.exists() &&
         !this.internalRelaySearchDataFile.isDirectory()) {
       try {

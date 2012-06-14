@@ -29,13 +29,14 @@ public class ResourceServlet extends HttpServlet {
 
   private static final long serialVersionUID = 7236658979947465319L;
 
-  private File summaryFile = new File("status/summary.csv");
+  private File summaryFile;
 
   private String outDirString;
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
     this.outDirString = config.getInitParameter("outDir");
+    this.summaryFile = new File(outDirString, "summary");
     this.readSummaryFile();
   }
 
@@ -53,7 +54,7 @@ public class ResourceServlet extends HttpServlet {
     }
     if (summaryFile.lastModified() > this.summaryFileLastModified) {
       CurrentNodes cn = new CurrentNodes();
-      cn.readRelaySearchDataFile();
+      cn.readRelaySearchDataFile(this.summaryFile);
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -100,7 +101,7 @@ public class ResourceServlet extends HttpServlet {
     String fingerprint = entry.getFingerprint();
     String running = entry.getRunning() ? "true" : "false";
     String address = entry.getAddress();
-    return String.format("\n{%s\"f\":\"%s\",\"a\":[\"%s\"],\"r\":%s}",
+    return String.format("{%s\"f\":\"%s\",\"a\":[\"%s\"],\"r\":%s}",
         (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
         fingerprint, address, running);
   }
@@ -110,7 +111,7 @@ public class ResourceServlet extends HttpServlet {
         entry.getNickname() : null;
     String hashedFingerprint = entry.getFingerprint();
     String running = entry.getRunning() ? "true" : "false";
-    return String.format("\n{%s\"h\":\"%s\",\"r\":%s}",
+    return String.format("{%s\"h\":\"%s\",\"r\":%s}",
          (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
          hashedFingerprint, running);
   }

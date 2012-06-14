@@ -2,13 +2,15 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
+import java.io.File;
+
 /* Update search data and status data files. */
 public class Main {
   public static void main(String[] args) {
 
     printStatus("Updating internal node list.");
     CurrentNodes cn = new CurrentNodes();
-    cn.readRelaySearchDataFile();
+    cn.readRelaySearchDataFile(new File("out/summary"));
     cn.readRelayNetworkConsensuses();
     cn.setRelayRunningBits();
     cn.lookUpCountries();
