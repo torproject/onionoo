@@ -47,6 +47,8 @@ public class ResourceServlet extends HttpServlet {
   private Map<String, String>
       relayFingerprintSummaryLines = new HashMap<String, String>(),
       bridgeFingerprintSummaryLines = new HashMap<String, String>();
+  private Map<String, Set<String>> relaysByCountryCode =
+      new HashMap<String, Set<String>>();
   private void readSummaryFile() {
     if (!summaryFile.exists()) {
       readSummaryFile = false;
@@ -75,6 +77,16 @@ public class ResourceServlet extends HttpServlet {
             consensusWeight, fingerprint));
         orderRelaysByConsensusWeight.add(String.format("%020d %s",
             consensusWeight, hashedFingerprint));
+        String countryCode = entry.getCountryCode();
+        if (countryCode == null) {
+          countryCode = "??";
+        }
+        if (!this.relaysByCountryCode.containsKey(countryCode)) {
+          this.relaysByCountryCode.put(countryCode,
+              new HashSet<String>());
+        }
+        this.relaysByCountryCode.get(countryCode).add(fingerprint);
+        this.relaysByCountryCode.get(countryCode).add(hashedFingerprint);
       }
       Collections.sort(orderRelaysByConsensusWeight);
       this.relaysByConsensusWeight = new ArrayList<String>();
@@ -178,7 +190,8 @@ public class ResourceServlet extends HttpServlet {
     /* Make sure that the request doesn't contain any unknown
      * parameters. */
     Set<String> knownParameters = new HashSet<String>(Arrays.asList(
-        "type,running,search,lookup,order,limit,offset".split(",")));
+        "type,running,search,lookup,country,order,limit,offset".
+        split(",")));
     for (String parameterKey : parameterMap.keySet()) {
       if (!knownParameters.contains(parameterKey)) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -234,6 +247,16 @@ public class ResourceServlet extends HttpServlet {
       String fingerprint = fingerprintParameter.toUpperCase();
       this.filterByFingerprint(filteredRelays, filteredBridges,
           fingerprint);
+    }
+    if (parameterMap.containsKey("country")) {
+      String countryCodeParameter = this.parseCountryCodeParameter(
+          parameterMap.get("country"));
+      if (countryCodeParameter == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterByCountryCode(filteredRelays, filteredBridges,
+          countryCodeParameter);
     }
 
     /* Re-order and limit results. */
@@ -389,6 +412,15 @@ public class ResourceServlet extends HttpServlet {
     return parameter;
   }
 
+  private static Pattern countryCodeParameterPattern =
+      Pattern.compile("^[0-9a-zA-Z]{2}$");
+  private String parseCountryCodeParameter(String parameter) {
+    if (!countryCodeParameterPattern.matcher(parameter).matches()) {
+      return null;
+    }
+    return parameter;
+  }
+
   private void filterByType(Map<String, String> filteredRelays,
       Map<String, String> filteredBridges, boolean relaysRequested) {
     if (relaysRequested) {
@@ -500,6 +532,28 @@ public class ResourceServlet extends HttpServlet {
     if (bridgeLine != null) {
       filteredBridges.put(fingerprint, bridgeLine);
     }
+  }
+
+  private void filterByCountryCode(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, String countryCodeParameter) {
+    String countryCode = countryCodeParameter.toLowerCase();
+    if (!this.relaysByCountryCode.containsKey(countryCode)) {
+      filteredRelays.clear();
+    } else {
+      Set<String> relaysWithCountryCode =
+          this.relaysByCountryCode.get(countryCode);
+      Set<String> removeRelays = new HashSet<String>();
+      for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
+        String fingerprint = e.getKey();
+        if (!relaysWithCountryCode.contains(fingerprint)) {
+          removeRelays.add(fingerprint);
+        }
+      }
+      for (String fingerprint : removeRelays) {
+        filteredRelays.remove(fingerprint);
+      }
+    }
+    filteredBridges.clear();
   }
 
   private void writeRelays(List<String> relays, PrintWriter pw,

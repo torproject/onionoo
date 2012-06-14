@@ -31,7 +31,8 @@ public class Node {
   private boolean running;
   public Node(String nickname, String fingerprint, String address,
       long lastSeenMillis, int orPort, int dirPort,
-      SortedSet<String> relayFlags, long consensusWeight) {
+      SortedSet<String> relayFlags, long consensusWeight,
+      String countryCode) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     try {
@@ -47,6 +48,7 @@ public class Node {
     this.dirPort = dirPort;
     this.relayFlags = relayFlags;
     this.consensusWeight = consensusWeight;
+    this.countryCode = countryCode;
   }
   public String getFingerprint() {
     return this.fingerprint;

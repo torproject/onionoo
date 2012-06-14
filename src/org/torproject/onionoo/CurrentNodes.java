@@ -71,9 +71,13 @@ public class CurrentNodes {
             if (parts.length > 9) {
               consensusWeight = Long.parseLong(parts[9]);
             }
+            String countryCode = "??";
+            if (parts.length > 10) {
+              countryCode = parts[10];
+            }
             this.addRelay(nickname, fingerprint, address,
                 validAfterMillis, orPort, dirPort, relayFlags,
-                consensusWeight);
+                consensusWeight, countryCode);
           } else if (line.startsWith("b ")) {
             String[] parts = line.split(" ");
             if (parts.length < 9) {
@@ -136,9 +140,11 @@ public class CurrentNodes {
         String relayFlags = sb.toString().substring(1);
         String consensusWeight = String.valueOf(
             entry.getConsensusWeight());
+        String countryCode = entry.getCountryCode() != null
+            ? entry.getCountryCode() : "??";
         bw.write("r " + nickname + " " + fingerprint + " " + address + " "
             + validAfter + " " + orPort + " " + dirPort + " " + relayFlags
-            + " " + consensusWeight + "\n");
+            + " " + consensusWeight + " " + countryCode + "\n");
       }
       for (Node entry : this.currentBridges.values()) {
         String nickname = entry.getNickname();
@@ -155,7 +161,7 @@ public class CurrentNodes {
         String relayFlags = sb.toString().substring(1);
         bw.write("b " + nickname + " " + fingerprint + " " + address + " "
             + published + " " + orPort + " " + dirPort + " " + relayFlags
-            + " -1\n");
+            + " -1 ??\n");
       }
       bw.close();
     } catch (IOException e) {
@@ -214,19 +220,21 @@ public class CurrentNodes {
       SortedSet<String> relayFlags = entry.getFlags();
       long consensusWeight = entry.getBandwidth();
       this.addRelay(nickname, fingerprint, address, validAfterMillis,
-          orPort, dirPort, relayFlags, consensusWeight);
+          orPort, dirPort, relayFlags, consensusWeight, null);
     }
   }
 
   public void addRelay(String nickname, String fingerprint,
       String address, long validAfterMillis, int orPort, int dirPort,
-      SortedSet<String> relayFlags, long consensusWeight) {
+      SortedSet<String> relayFlags, long consensusWeight,
+      String countryCode) {
     if (validAfterMillis >= cutoff &&
         (!this.currentRelays.containsKey(fingerprint) ||
         this.currentRelays.get(fingerprint).getLastSeenMillis() <
         validAfterMillis)) {
       Node entry = new Node(nickname, fingerprint, address,
-          validAfterMillis, orPort, dirPort, relayFlags, consensusWeight);
+          validAfterMillis, orPort, dirPort, relayFlags, consensusWeight,
+          countryCode);
       this.currentRelays.put(fingerprint, entry);
       if (validAfterMillis > this.lastValidAfterMillis) {
         this.lastValidAfterMillis = validAfterMillis;
@@ -333,7 +341,7 @@ public class CurrentNodes {
         this.currentBridges.get(fingerprint).getLastSeenMillis() <
         publishedMillis)) {
       Node entry = new Node(nickname, fingerprint, address,
-          publishedMillis, orPort, dirPort, relayFlags, -1L);
+          publishedMillis, orPort, dirPort, relayFlags, -1L, null);
       this.currentBridges.put(fingerprint, entry);
       if (publishedMillis > this.lastPublishedMillis) {
         this.lastPublishedMillis = publishedMillis;
