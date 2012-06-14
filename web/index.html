@@ -276,6 +276,11 @@ Required field.</li>
 Required field.
 Each array object contains the following key-value pairs:
 <ul>
+<li><b>"nickname":</b> Bridge nickname consisting of 1&ndash;19
+alphanumerical characters.
+Optional field.
+Omitted if the bridge nickname is <i>"Unnamed"</i>.
+<font color="blue">Added field on June 14, 2012.</font></li>
 <li><b>"hashed_fingerprint":</b> SHA-1 hash of the bridge fingerprint
 consisting of 40 upper-case hexadecimal characters.
 Required field.</li>
@@ -603,13 +608,15 @@ of relay and/or bridge documents to be included in the response.</p>
 </td></tr>
 <tr><td><b>search</b></td><td>Return only relays with the parameter value
 matching the beginning of a nickname, (possibly $-prefixed) fingerprint,
-or IP address, and bridges with the (possibly $-prefixed) hashed
-fingerprint.
+or IP address, and bridges with the nickname or (possibly $-prefixed)
+hashed fingerprint.
 Searches are case-insensitive.
 Full fingerprints should always be hashed using SHA-1, regardless of
 searching for a relay or a bridge, in order to not accidentally leak
 non-hashed bridge fingerprints in the URL.
 <font color="blue">Parameter added on May 14, 2012.</font>
+<font color="blue">Extended search to bridge nicknames on June 14,
+2012.</font>
 </td></tr>
 <tr><td><b>lookup</b></td><td>Return only the relay with the parameter
 value matching the fingerprint or the bridge with the parameter value

@@ -475,7 +475,7 @@ public class ResourceServlet extends HttpServlet {
         /* Nickname matches. */
         lineMatches = true;
       } else if ("unnamed".startsWith(searchTerm.toLowerCase()) &&
-          line.startsWith("{\"f\":")) {
+          (line.startsWith("{\"f\":") || line.startsWith("{\"h\":"))) {
         /* Nickname "Unnamed" matches. */
         lineMatches = true;
       } else if (line.contains("\"f\":\"" + searchTerm.toUpperCase())) {

@@ -82,6 +82,7 @@ public class CurrentNodes {
                   + " is invalid.  Exiting.");
               System.exit(1);
             }
+            String nickname = parts[1];
             String hashedFingerprint = parts[2];
             String address = parts[3];
             long publishedMillis = dateTimeFormat.parse(parts[4] + " "
@@ -90,8 +91,8 @@ public class CurrentNodes {
             int dirPort = Integer.parseInt(parts[7]);
             SortedSet<String> relayFlags = new TreeSet<String>(
                 Arrays.asList(parts[8].split(",")));
-            this.addBridge(hashedFingerprint, address, publishedMillis,
-                orPort, dirPort, relayFlags);
+            this.addBridge(nickname, hashedFingerprint, address,
+                publishedMillis, orPort, dirPort, relayFlags);
           }
         }
         br.close();
@@ -140,6 +141,7 @@ public class CurrentNodes {
             + " " + consensusWeight + "\n");
       }
       for (Node entry : this.currentBridges.values()) {
+        String nickname = entry.getNickname();
         String fingerprint = entry.getFingerprint();
         String published = dateTimeFormat.format(
             entry.getLastSeenMillis());
@@ -151,7 +153,7 @@ public class CurrentNodes {
           sb.append("," + relayFlag);
         }
         String relayFlags = sb.toString().substring(1);
-        bw.write("b Unnamed " + fingerprint + " " + address + " "
+        bw.write("b " + nickname + " " + fingerprint + " " + address + " "
             + published + " " + orPort + " " + dirPort + " " + relayFlags
             + " -1\n");
       }
@@ -312,24 +314,25 @@ public class CurrentNodes {
   private void updateBridgeNetworkStatus(BridgeNetworkStatus status) {
     long publishedMillis = status.getPublishedMillis();
     for (NetworkStatusEntry entry : status.getStatusEntries().values()) {
+      String nickname = entry.getNickname();
       String fingerprint = entry.getFingerprint();
       String address = entry.getAddress();
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
       SortedSet<String> relayFlags = entry.getFlags();
-      this.addBridge(fingerprint, address, publishedMillis, orPort,
-         dirPort, relayFlags);
+      this.addBridge(nickname, fingerprint, address, publishedMillis,
+          orPort, dirPort, relayFlags);
     }
   }
 
-  public void addBridge(String fingerprint, String address,
-      long publishedMillis, int orPort, int dirPort,
+  public void addBridge(String nickname, String fingerprint,
+      String address, long publishedMillis, int orPort, int dirPort,
       SortedSet<String> relayFlags) {
     if (publishedMillis >= cutoff &&
         (!this.currentBridges.containsKey(fingerprint) ||
         this.currentBridges.get(fingerprint).getLastSeenMillis() <
         publishedMillis)) {
-      Node entry = new Node("Unnamed", fingerprint, address,
+      Node entry = new Node(nickname, fingerprint, address,
           publishedMillis, orPort, dirPort, relayFlags, -1L);
       this.currentBridges.put(fingerprint, entry);
       if (publishedMillis > this.lastPublishedMillis) {

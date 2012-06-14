@@ -68,12 +68,15 @@ public class SummaryDataWriter {
           + "\",\n\"bridges\":[");
       written = 0;
       for (Node entry : this.currentBridges.values()) {
+        String nickname = !entry.getNickname().equals("Unnamed") ?
+            entry.getNickname() : null;
         String hashedFingerprint = entry.getFingerprint();
         String running = entry.getRunning() ? "true" : "false";
         if (written++ > 0) {
           bw.write(",");
         }
         bw.write("\n{"
+            + (nickname == null ? "" : "\"n\":\"" + nickname + "\",")
             + "\"h\":\"" + hashedFingerprint + "\","
             + "\"r\":" + running + "}");
       }

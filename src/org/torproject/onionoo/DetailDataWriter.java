@@ -543,11 +543,13 @@ public class DetailDataWriter {
 
       /* Generate network-status-specific part. */
       Node entry = bridge.getValue();
+      String nickname = entry.getNickname();
       String running = entry.getRunning() ? "true" : "false";
       String address = entry.getAddress();
       int orPort = entry.getOrPort();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
+          + "\"nickname\":\"" + nickname + "\",\n"
           + "\"hashed_fingerprint\":\"" + fingerprint + "\",\n"
           + "\"or_addresses\":[\"" + address + ":" + orPort + "\"],\n"
           + "\"running\":" + running + ",");
