@@ -4,10 +4,15 @@ package org.torproject.onionoo;
 
 import java.util.SortedSet;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
+
 /* Store search data of a single relay that was running in the past seven
  * days. */
 public class Node {
   private String fingerprint;
+  private String hashedFingerprint;
   private String nickname;
   private String address;
   private String latitude;
@@ -29,6 +34,13 @@ public class Node {
       SortedSet<String> relayFlags, long consensusWeight) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
+    try {
+      this.hashedFingerprint = DigestUtils.shaHex(Hex.decodeHex(
+          fingerprint.toCharArray())).toUpperCase();
+    } catch (DecoderException e) {
+      throw new IllegalArgumentException("Fingerprint '" + fingerprint
+          + "' is not a valid fingerprint.");
+    }
     this.address = address;
     this.lastSeenMillis = lastSeenMillis;
     this.orPort = orPort;
@@ -38,6 +50,9 @@ public class Node {
   }
   public String getFingerprint() {
     return this.fingerprint;
+  }
+  public String getHashedFingerprint() {
+    return this.hashedFingerprint;
   }
   public String getNickname() {
     return this.nickname;

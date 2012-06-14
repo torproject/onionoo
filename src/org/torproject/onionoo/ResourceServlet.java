@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
@@ -23,13 +25,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
-
 public class ResourceServlet extends HttpServlet {
 
   private static final long serialVersionUID = 7236658979947465319L;
+
+  private File summaryFile = new File("status/summary.csv");
 
   private String outDirString;
 
@@ -41,116 +41,78 @@ public class ResourceServlet extends HttpServlet {
 
   long summaryFileLastModified = -1L;
   boolean readSummaryFile = false;
-  private String relaysPublishedLine = null, bridgesPublishedLine = null;
-  private List<String> relayLines = new ArrayList<String>(),
-      bridgeLines = new ArrayList<String>(),
-      relaysByConsensusWeight = new ArrayList<String>();
+  private String relaysPublishedString, bridgesPublishedString;
+  private List<String> relaysByConsensusWeight = new ArrayList<String>();
   private Map<String, String>
       relayFingerprintSummaryLines = new HashMap<String, String>(),
       bridgeFingerprintSummaryLines = new HashMap<String, String>();
   private void readSummaryFile() {
-    File summaryFile = new File(this.outDirString + "summary.json");
     if (!summaryFile.exists()) {
       readSummaryFile = false;
       return;
     }
     if (summaryFile.lastModified() > this.summaryFileLastModified) {
-      this.relayLines.clear();
-      this.bridgeLines.clear();
-      this.relayFingerprintSummaryLines.clear();
-      this.bridgeFingerprintSummaryLines.clear();
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            summaryFile));
-        String line;
-        while ((line = br.readLine()) != null) {
-          if (line.contains("\"relays_published\":")) {
-            this.relaysPublishedLine = line.startsWith("{") ? line :
-                "{" + line;
-          } else if (line.startsWith("\"bridges_published\":")) {
-            this.bridgesPublishedLine = line;
-          } else if (line.startsWith("\"relays\":")) {
-            while ((line = br.readLine()) != null && !line.equals("],")) {
-              this.relayLines.add(line);
-              int fingerprintStart = line.indexOf("\"f\":\"");
-              if (fingerprintStart > 0) {
-                fingerprintStart += "\"f\":\"".length();
-                String fingerprint = line.substring(fingerprintStart,
-                    fingerprintStart + 40);
-                String hashedFingerprint = DigestUtils.shaHex(
-                    Hex.decodeHex(fingerprint.toCharArray())).
-                    toUpperCase();
-                this.relayFingerprintSummaryLines.put(fingerprint, line);
-                this.relayFingerprintSummaryLines.put(hashedFingerprint,
-                    line);
-              }
-            }
-          } else if (line.startsWith("\"bridges\":")) {
-            while ((line = br.readLine()) != null && !line.equals("]}")) {
-              this.bridgeLines.add(line);
-              int hashedFingerprintStart = line.indexOf("\"h\":\"");
-              if (hashedFingerprintStart > 0) {
-                hashedFingerprintStart += "\"h\":\"".length();
-                String hashedFingerprint = line.substring(
-                    hashedFingerprintStart, hashedFingerprintStart + 40);
-                String hashedHashedFingerprint = DigestUtils.shaHex(
-                    Hex.decodeHex(hashedFingerprint.toCharArray())).
-                    toUpperCase();
-                this.bridgeFingerprintSummaryLines.put(hashedFingerprint,
-                    line);
-                this.bridgeFingerprintSummaryLines.put(
-                    hashedHashedFingerprint, line);
-              }
-            }
-          }
-        }
-        br.close();
-      } catch (IOException e) {
-        return;
-      } catch (DecoderException e) {
-        return;
-      }
+      CurrentNodes cn = new CurrentNodes();
+      cn.readRelaySearchDataFile();
+      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+          "yyyy-MM-dd HH:mm:ss");
+      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      this.relaysPublishedString = dateTimeFormat.format(
+          cn.getLastValidAfterMillis());
+      this.bridgesPublishedString = dateTimeFormat.format(
+          cn.getLastPublishedMillis());
       List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
-      File relaysByConsensusWeightFile =
-          new File(this.outDirString + "/relays-by-consensus-weight.csv");
-      if (relaysByConsensusWeightFile.exists()) {
-        try {
-          BufferedReader br = new BufferedReader(new FileReader(
-              relaysByConsensusWeightFile));
-          String line;
-          while ((line = br.readLine()) != null) {
-            String[] parts = line.split(",");
-            if (parts.length != 2) {
-              return;
-            }
-            long consensusWeight = Long.parseLong(parts[1]);
-            String fingerprint = parts[0];
-            orderRelaysByConsensusWeight.add(
-                String.format("%020d %s", consensusWeight, fingerprint));
-            String hashedFingerprint = DigestUtils.shaHex(
-                Hex.decodeHex(fingerprint.toCharArray())).
-                toUpperCase();
-            orderRelaysByConsensusWeight.add(
-                String.format("%020d %s", consensusWeight,
-                hashedFingerprint));
-          }
-          br.close();
-          Collections.sort(orderRelaysByConsensusWeight);
-          this.relaysByConsensusWeight = new ArrayList<String>();
-          for (String relay : orderRelaysByConsensusWeight) {
-            this.relaysByConsensusWeight.add(relay.split(" ")[1]);
-          }
-        } catch (IOException e) {
-          return;
-        } catch (NumberFormatException e) {
-          return;
-        } catch (DecoderException e) {
-          return;
-        }
+      for (Node entry : cn.getCurrentRelays().values()) {
+        String fingerprint = entry.getFingerprint().toUpperCase();
+        String hashedFingerprint = entry.getHashedFingerprint().
+            toUpperCase();
+        String line = this.formatRelaySummaryLine(entry);
+        this.relayFingerprintSummaryLines.put(fingerprint, line);
+        this.relayFingerprintSummaryLines.put(hashedFingerprint, line);
+        long consensusWeight = entry.getConsensusWeight();
+        orderRelaysByConsensusWeight.add(String.format("%020d %s",
+            consensusWeight, fingerprint));
+        orderRelaysByConsensusWeight.add(String.format("%020d %s",
+            consensusWeight, hashedFingerprint));
+      }
+      Collections.sort(orderRelaysByConsensusWeight);
+      this.relaysByConsensusWeight = new ArrayList<String>();
+      for (String relay : orderRelaysByConsensusWeight) {
+        this.relaysByConsensusWeight.add(relay.split(" ")[1]);
+      }
+      for (Node entry : cn.getCurrentBridges().values()) {
+        String hashedFingerprint = entry.getFingerprint().toUpperCase();
+        String hashedHashedFingerprint = entry.getHashedFingerprint().
+            toUpperCase();
+        String line = this.formatBridgeSummaryLine(entry);
+        this.bridgeFingerprintSummaryLines.put(hashedFingerprint, line);
+        this.bridgeFingerprintSummaryLines.put(hashedHashedFingerprint,
+            line);
       }
     }
     this.summaryFileLastModified = summaryFile.lastModified();
     this.readSummaryFile = true;
+  }
+
+  private String formatRelaySummaryLine(Node entry) {
+    String nickname = !entry.getNickname().equals("Unnamed") ?
+        entry.getNickname() : null;
+    String fingerprint = entry.getFingerprint();
+    String running = entry.getRunning() ? "true" : "false";
+    String address = entry.getAddress();
+    return String.format("\n{%s\"f\":\"%s\",\"a\":[\"%s\"],\"r\":%s}",
+        (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
+        fingerprint, address, running);
+  }
+
+  private String formatBridgeSummaryLine(Node entry) {
+    String nickname = !entry.getNickname().equals("Unnamed") ?
+        entry.getNickname() : null;
+    String hashedFingerprint = entry.getFingerprint();
+    String running = entry.getRunning() ? "true" : "false";
+    return String.format("\n{%s\"h\":\"%s\",\"r\":%s}",
+         (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
+         hashedFingerprint, running);
   }
 
   public long getLastModified(HttpServletRequest request) {
@@ -541,8 +503,8 @@ public class ResourceServlet extends HttpServlet {
 
   private void writeRelays(List<String> relays, PrintWriter pw,
       String resourceType) {
-    pw.print(this.relaysPublishedLine + "\n");
-    pw.print("\"relays\":[");
+    pw.write("{\"relays_published\":\"" + this.relaysPublishedString
+        + "\",\n\"relays\":[");
     int written = 0;
     for (String line : relays) {
       if (line == null) {
@@ -559,8 +521,8 @@ public class ResourceServlet extends HttpServlet {
 
   private void writeBridges(List<String> bridges, PrintWriter pw,
       String resourceType) {
-    pw.print(this.bridgesPublishedLine + "\n");
-    pw.print("\"bridges\":[");
+    pw.write("\"bridges_published\":\"" + this.bridgesPublishedString
+        + "\",\n\"bridges\":[");
     int written = 0;
     for (String line : bridges) {
       if (line == null) {

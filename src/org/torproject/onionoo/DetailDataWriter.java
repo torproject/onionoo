@@ -211,8 +211,6 @@ public class DetailDataWriter {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    Map<String, Long> relaysByConsensusWeight =
-        new HashMap<String, Long>();
     for (Map.Entry<String, Node> relay : this.relays.entrySet()) {
       String fingerprint = relay.getKey();
 
@@ -416,33 +414,6 @@ public class DetailDataWriter {
             + "broken.  Ignoring.");
         e.printStackTrace();
       }
-
-      /* Remember consensus weight to facilitate ordering of results in
-       * the servlet. */
-      relaysByConsensusWeight.put(fingerprint, consensusWeight);
-    }
-
-    /* Write consensus weights to disk to facilitate ordering of results
-     * in the servlet. */
-    File relaysByConsensusWeightFile =
-        new File("out/relays-by-consensus-weight.csv");
-    try {
-      relaysByConsensusWeightFile.getParentFile().mkdirs();
-      BufferedWriter bw = new BufferedWriter(new FileWriter(
-          relaysByConsensusWeightFile));
-      for (Map.Entry<String, Long> e :
-          relaysByConsensusWeight.entrySet()) {
-        String fingerprint = e.getKey();
-        long consensusWeight = e.getValue();
-        bw.write(fingerprint + "," + String.valueOf(consensusWeight)
-            + "\n");
-      }
-      bw.close();
-    } catch (IOException e) {
-      System.err.println("Could not write file '"
-          + relaysByConsensusWeightFile.getAbsolutePath() + "'.  "
-          + "Ordering by consensus_weight may now be broken.  Ignoring.");
-      e.printStackTrace();
     }
 
     /* Return the files that we didn't update. */
