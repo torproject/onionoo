@@ -305,8 +305,8 @@ public class CurrentNodes {
   public void setBridgeRunningBits() {
     if (this.lastPublishedMillis > 0L) {
       for (Node entry : this.currentBridges.values()) {
-        entry.setRunning(entry.getLastSeenMillis() ==
-            this.lastPublishedMillis);
+        entry.setRunning(entry.getRelayFlags().contains("Running") &&
+            entry.getLastSeenMillis() == this.lastPublishedMillis);
       }
     }
   }
