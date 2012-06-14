@@ -11,4 +11,6 @@ GeoIP.dat
 GeoIPASNum.dat
 GeoLiteCity.dat
 log
+.classpath
+.project
 
