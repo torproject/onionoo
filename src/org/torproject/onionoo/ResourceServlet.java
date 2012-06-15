@@ -59,6 +59,8 @@ public class ResourceServlet extends HttpServlet {
     if (summaryFile.lastModified() > this.summaryFileLastModified) {
       CurrentNodes cn = new CurrentNodes();
       cn.readRelaySearchDataFile(this.summaryFile);
+      cn.setRelayRunningBits();
+      cn.setBridgeRunningBits();
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
