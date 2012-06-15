@@ -16,6 +16,8 @@ public class Node {
   private String hashedFingerprint;
   private String nickname;
   private String address;
+  private SortedSet<String> orAddresses;
+  private SortedSet<String> orAddressesAndPorts;
   private SortedSet<String> exitAddresses;
   private String latitude;
   private String longitude;
@@ -32,6 +34,7 @@ public class Node {
   private long consensusWeight;
   private boolean running;
   public Node(String nickname, String fingerprint, String address,
+      SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode) {
@@ -50,6 +53,13 @@ public class Node {
       this.exitAddresses.addAll(exitAddresses);
     }
     this.exitAddresses.remove(this.address);
+    this.orAddresses = new TreeSet<String>();
+    this.orAddressesAndPorts = new TreeSet<String>();
+    if (orAddressesAndPorts != null) {
+      for (String orAddressAndPort : orAddressesAndPorts) {
+        this.addOrAddressAndPort(orAddressAndPort);
+      }
+    }
     this.lastSeenMillis = lastSeenMillis;
     this.orPort = orPort;
     this.dirPort = dirPort;
@@ -69,8 +79,30 @@ public class Node {
   public String getAddress() {
     return this.address;
   }
+  public SortedSet<String> getOrAddresses() {
+    return new TreeSet<String>(this.orAddresses);
+  }
+  public void addOrAddressAndPort(String orAddressAndPort) {
+    if (!orAddressAndPort.contains(":")) {
+      System.err.println("Illegal OR address:port '" + orAddressAndPort
+          + "'.  Exiting.");
+      System.exit(1);
+    } else if (orAddressAndPort.length() > 0) {
+      String orAddress = orAddressAndPort.substring(0,
+          orAddressAndPort.lastIndexOf(":"));
+      if (this.exitAddresses.contains(orAddress)) {
+        this.exitAddresses.remove(orAddress);
+      }
+      this.orAddresses.add(orAddress);
+      this.orAddressesAndPorts.add(orAddressAndPort);
+    }
+  }
+  public SortedSet<String> getOrAddressesAndPorts() {
+    return new TreeSet<String>(this.orAddressesAndPorts);
+  }
   public void addExitAddress(String exitAddress) {
-    if (exitAddress.length() > 0 && !this.address.equals(exitAddress)) {
+    if (exitAddress.length() > 0 && !this.address.equals(exitAddress) &&
+        !this.orAddresses.contains(exitAddress)) {
       this.exitAddresses.add(exitAddress);
     }
   }

@@ -19,6 +19,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -309,8 +310,17 @@ public class DetailDataWriter {
       Node entry = relay.getValue();
       String nickname = entry.getNickname();
       String address = entry.getAddress();
+      SortedSet<String> orAddresses = new TreeSet<String>(
+          entry.getOrAddressesAndPorts());
+      orAddresses.add(address + ":" + entry.getOrPort());
+      StringBuilder orAddressesAndPortsBuilder = new StringBuilder();
+      int addressesWritten = 0;
+      for (String orAddress : orAddresses) {
+        orAddressesAndPortsBuilder.append(
+            (addressesWritten++ > 0 ? "," : "") + "\"" + orAddress
+            + "\"");
+      }
       String running = entry.getRunning() ? "true" : "false";
-      int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
       String countryCode = entry.getCountryCode();
       String latitude = entry.getLatitude();
@@ -325,7 +335,8 @@ public class DetailDataWriter {
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
           + "\"fingerprint\":\"" + fingerprint + "\",\n"
-          + "\"or_addresses\":[\"" + address + ":" + orPort + "\"],\n"
+          + "\"or_addresses\":[" + orAddressesAndPortsBuilder.toString()
+          + "],\n"
           + "\"dir_address\":\"" + address + ":" + dirPort + "\",\n"
           + "\"running\":" + running + ",\n");
       SortedSet<String> relayFlags = entry.getRelayFlags();
@@ -512,12 +523,22 @@ public class DetailDataWriter {
       String nickname = entry.getNickname();
       String running = entry.getRunning() ? "true" : "false";
       String address = entry.getAddress();
-      int orPort = entry.getOrPort();
+      SortedSet<String> orAddresses = new TreeSet<String>(
+          entry.getOrAddressesAndPorts());
+      orAddresses.add(address + ":" + entry.getOrPort());
+      StringBuilder orAddressesAndPortsBuilder = new StringBuilder();
+      int addressesWritten = 0;
+      for (String orAddress : orAddresses) {
+        orAddressesAndPortsBuilder.append(
+            (addressesWritten++ > 0 ? "," : "") + "\"" + orAddress
+            + "\"");
+      }
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
           + "\"hashed_fingerprint\":\"" + fingerprint + "\",\n"
-          + "\"or_addresses\":[\"" + address + ":" + orPort + "\"],\n"
+          + "\"or_addresses\":[" + orAddressesAndPortsBuilder.toString()
+          + "],\n"
           + "\"running\":" + running + ",");
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {

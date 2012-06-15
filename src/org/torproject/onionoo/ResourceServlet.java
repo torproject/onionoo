@@ -118,6 +118,7 @@ public class ResourceServlet extends HttpServlet {
     String running = entry.getRunning() ? "true" : "false";
     SortedSet<String> addresses = new TreeSet<String>();
     addresses.add(entry.getAddress());
+    addresses.addAll(entry.getOrAddresses());
     addresses.addAll(entry.getExitAddresses());
     StringBuilder addressesBuilder = new StringBuilder();
     int written = 0;
@@ -404,7 +405,9 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern searchParameterPattern =
-      Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|^[0-9a-zA-Z\\.]{1,19}$");
+      Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Fingerprint. */
+      + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
+      + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$"); /* IPv6 address. */
   private String parseSearchParameter(String parameter) {
     if (!searchParameterPattern.matcher(parameter).matches()) {
       return null;
