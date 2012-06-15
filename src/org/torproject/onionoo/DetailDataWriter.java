@@ -19,7 +19,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -374,20 +373,16 @@ public class DetailDataWriter {
 
       /* Add exit addresses if at least one of them is distinct from the
        * onion-routing addresses. */
-      SortedSet<String> exitAddresses = new TreeSet<String>();
       if (exitListEntries.containsKey(fingerprint)) {
         for (ExitListEntry exitListEntry :
             exitListEntries.get(fingerprint)) {
-          String exitAddress = exitListEntry.getExitAddress();
-          if (!exitAddress.equals(address)) {
-            exitAddresses.add(exitAddress);
-          }
+          entry.addExitAddress(exitListEntry.getExitAddress());
         }
       }
-      if (!exitAddresses.isEmpty()) {
+      if (!entry.getExitAddresses().isEmpty()) {
         sb.append(",\n\"exit_addresses\":[");
         int written = 0;
-        for (String exitAddress : exitAddresses) {
+        for (String exitAddress : entry.getExitAddresses()) {
           sb.append((written++ > 0 ? "," : "") + "\"" + exitAddress
               + "\"");
         }

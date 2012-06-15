@@ -16,7 +16,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
@@ -112,10 +114,18 @@ public class ResourceServlet extends HttpServlet {
         entry.getNickname() : null;
     String fingerprint = entry.getFingerprint();
     String running = entry.getRunning() ? "true" : "false";
-    String address = entry.getAddress();
-    return String.format("{%s\"f\":\"%s\",\"a\":[\"%s\"],\"r\":%s}",
+    SortedSet<String> addresses = new TreeSet<String>();
+    addresses.add(entry.getAddress());
+    addresses.addAll(entry.getExitAddresses());
+    StringBuilder addressesBuilder = new StringBuilder();
+    int written = 0;
+    for (String address : addresses) {
+      addressesBuilder.append((written++ > 0 ? "," : "") + "\"" + address
+          + "\"");
+    }
+    return String.format("{%s\"f\":\"%s\",\"a\":[%s],\"r\":%s}",
         (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
-        fingerprint, address, running);
+        fingerprint, addressesBuilder.toString(), running);
   }
 
   private String formatBridgeSummaryLine(Node entry) {

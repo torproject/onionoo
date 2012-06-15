@@ -58,8 +58,11 @@ Omitted if the relay nickname is <i>"Unnamed"</i>.</li>
 characters.
 Required field.</li>
 <li><b>"a":</b> Array of IPv4 or IPv6 addresses where the relay accepts
-onion-routing connections.
-Required field.</li>
+onion-routing connections or which the relay used to exit to the Internet
+in the past 24 hours.
+Required field.
+<font color="blue">Extended field to also contain exit addresses on June
+15, 2012.</font></li>
 <li><b>"r":</b> Boolean field saying whether this relay was listed as
 running in the last relay network status consensus.
 Required field.</li>
@@ -182,9 +185,8 @@ Required field.</li>
 <li><b>"or_addresses":</b> Array of IPv4 or IPv6 addresses and TCP ports
 or port lists where the relay accepts onion-routing connections.
 Required field.</li>
-<li><b>"exit_addresses":</b> Array of IPv4 or IPv6 addresses and TCP ports
-or port lists that the relay used to exit to the Internet in the past 24
-hours.
+<li><b>"exit_addresses":</b> Array of IPv4 or IPv6 addresses that the
+relay used to exit to the Internet in the past 24 hours.
 Only those addresses are listed that are different from onion-routing
 addresses.
 Optional field.

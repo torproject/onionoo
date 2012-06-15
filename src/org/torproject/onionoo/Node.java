@@ -3,6 +3,7 @@
 package org.torproject.onionoo;
 
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -15,6 +16,7 @@ public class Node {
   private String hashedFingerprint;
   private String nickname;
   private String address;
+  private SortedSet<String> exitAddresses;
   private String latitude;
   private String longitude;
   private String countryCode;
@@ -30,8 +32,8 @@ public class Node {
   private long consensusWeight;
   private boolean running;
   public Node(String nickname, String fingerprint, String address,
-      long lastSeenMillis, int orPort, int dirPort,
-      SortedSet<String> relayFlags, long consensusWeight,
+      SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
+      int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
@@ -43,6 +45,11 @@ public class Node {
           + "' is not a valid fingerprint.");
     }
     this.address = address;
+    this.exitAddresses = new TreeSet<String>();
+    if (exitAddresses != null) {
+      this.exitAddresses.addAll(exitAddresses);
+    }
+    this.exitAddresses.remove(this.address);
     this.lastSeenMillis = lastSeenMillis;
     this.orPort = orPort;
     this.dirPort = dirPort;
@@ -61,6 +68,14 @@ public class Node {
   }
   public String getAddress() {
     return this.address;
+  }
+  public void addExitAddress(String exitAddress) {
+    if (exitAddress.length() > 0 && !this.address.equals(exitAddress)) {
+      this.exitAddresses.add(exitAddress);
+    }
+  }
+  public SortedSet<String> getExitAddresses() {
+    return new TreeSet<String>(this.exitAddresses);
   }
   public void setLatitude(String latitude) {
     this.latitude = latitude;
