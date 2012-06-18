@@ -8,11 +8,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -48,6 +52,112 @@ public class DetailDataWriter {
   private SortedMap<String, Node> bridges;
   public void setCurrentBridges(SortedMap<String, Node> currentBridges) {
     this.bridges = currentBridges;
+  }
+
+  private static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS = 10L * 1000L;
+  private static final long RDNS_LOOKUP_MAX_DURATION_MILLIS = 5L * 60L
+      * 1000L;
+  private static final long RDNS_LOOKUP_MAX_AGE_MILLIS = 12L * 60L * 60L
+      * 1000L;
+  private static final int RDNS_LOOKUP_WORKERS_NUM = 5;
+  private Set<String> rdnsLookupJobs;
+  private Map<String, String> rdnsLookupResults;
+  private long startedRdnsLookups;
+  private List<RdnsLookupWorker> rdnsLookupWorkers;
+  public void startReverseDomainNameLookups() {
+    this.startedRdnsLookups = System.currentTimeMillis();
+    this.rdnsLookupJobs = new HashSet<String>();
+    for (Node relay : relays.values()) {
+      if (relay.getLastRdnsLookup() < this.startedRdnsLookups
+          - RDNS_LOOKUP_MAX_AGE_MILLIS) {
+        this.rdnsLookupJobs.add(relay.getAddress());
+      }
+    }
+    this.rdnsLookupResults = new HashMap<String, String>();
+    this.rdnsLookupWorkers = new ArrayList<RdnsLookupWorker>();
+    for (int i = 0; i < RDNS_LOOKUP_WORKERS_NUM; i++) {
+      RdnsLookupWorker rdnsLookupWorker = new RdnsLookupWorker();
+      this.rdnsLookupWorkers.add(rdnsLookupWorker);
+      rdnsLookupWorker.setDaemon(true);
+      rdnsLookupWorker.start();
+    }
+  }
+
+  public void finishReverseDomainNameLookups() {
+    for (RdnsLookupWorker rdnsLookupWorker : this.rdnsLookupWorkers) {
+      try {
+        rdnsLookupWorker.join();
+      } catch (InterruptedException e) {
+        /* This is not something that we can take care of.  Just leave the
+         * worker thread alone. */
+      }
+    }
+    synchronized (this.rdnsLookupResults) {
+      for (Node relay : relays.values()) {
+        if (this.rdnsLookupResults.containsKey(relay.getAddress())) {
+          relay.setHostName(this.rdnsLookupResults.get(
+              relay.getAddress()));
+          relay.setLastRdnsLookup(this.startedRdnsLookups);
+        }
+      }
+    }
+  }
+
+  private class RdnsLookupWorker extends Thread {
+    public void run() {
+      while (System.currentTimeMillis() - RDNS_LOOKUP_MAX_DURATION_MILLIS
+          <= startedRdnsLookups) {
+        String rdnsLookupJob = null;
+        synchronized (rdnsLookupJobs) {
+          for (String job : rdnsLookupJobs) {
+            rdnsLookupJob = job;
+            rdnsLookupJobs.remove(job);
+            break;
+          }
+        }
+        if (rdnsLookupJob == null) {
+          break;
+        }
+        RdnsLookupRequest request = new RdnsLookupRequest(this,
+            rdnsLookupJob);
+        request.setDaemon(true);
+        request.start();
+        try {
+          Thread.sleep(RDNS_LOOKUP_MAX_REQUEST_MILLIS);
+        } catch (InterruptedException e) {
+          /* Getting interrupted should be the default case. */
+        }
+        String hostName = request.getHostName();
+        if (hostName != null) {
+          synchronized (rdnsLookupResults) {
+            rdnsLookupResults.put(rdnsLookupJob, hostName);
+          }
+        }
+      }
+    }
+  }
+
+  private class RdnsLookupRequest extends Thread {
+    RdnsLookupWorker parent;
+    String address, hostName;
+    public RdnsLookupRequest(RdnsLookupWorker parent, String address) {
+      this.parent = parent;
+      this.address = address;
+    }
+    public void run() {
+      try {
+        String result = InetAddress.getByName(this.address).getHostName();
+        synchronized (this) {
+          this.hostName = result;
+        }
+      } catch (UnknownHostException e) {
+        /* We'll try again the next time. */
+      }
+      this.parent.interrupt();
+    }
+    public synchronized String getHostName() {
+      return hostName;
+    }
   }
 
   private Map<String, ServerDescriptor> relayServerDescriptors =
@@ -331,6 +441,7 @@ public class DetailDataWriter {
       String aSNumber = entry.getASNumber();
       String aSName = entry.getASName();
       long consensusWeight = entry.getConsensusWeight();
+      String hostName = entry.getHostName();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -380,6 +491,10 @@ public class DetailDataWriter {
       if (consensusWeight >= 0L) {
         sb.append(",\n\"consensus_weight\":"
             + String.valueOf(consensusWeight));
+      }
+      if (hostName != null) {
+        sb.append(",\n\"host_name\":\""
+            + StringEscapeUtils.escapeJavaScript(hostName) + "\"");
       }
 
       /* Add exit addresses if at least one of them is distinct from the

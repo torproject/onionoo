@@ -33,11 +33,13 @@ public class Node {
   private SortedSet<String> relayFlags;
   private long consensusWeight;
   private boolean running;
+  private String hostName;
+  private long lastRdnsLookup = -1L;
   public Node(String nickname, String fingerprint, String address,
       SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
-      String countryCode) {
+      String countryCode, String hostName, long lastRdnsLookup) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     try {
@@ -66,6 +68,8 @@ public class Node {
     this.relayFlags = relayFlags;
     this.consensusWeight = consensusWeight;
     this.countryCode = countryCode;
+    this.hostName = hostName;
+    this.lastRdnsLookup = lastRdnsLookup;
   }
   public String getFingerprint() {
     return this.fingerprint;
@@ -177,6 +181,18 @@ public class Node {
   }
   public boolean getRunning() {
     return this.running;
+  }
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
+  public String getHostName() {
+    return this.hostName;
+  }
+  public void setLastRdnsLookup(long lastRdnsLookup) {
+    this.lastRdnsLookup = lastRdnsLookup;
+  }
+  public long getLastRdnsLookup() {
+    return this.lastRdnsLookup;
   }
 }
 

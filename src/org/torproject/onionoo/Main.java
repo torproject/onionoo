@@ -22,10 +22,12 @@ public class Main {
     DetailDataWriter ddw = new DetailDataWriter();
     ddw.setCurrentRelays(cn.getCurrentRelays());
     ddw.setCurrentBridges(cn.getCurrentBridges());
+    ddw.startReverseDomainNameLookups();
     ddw.readRelayServerDescriptors();
     ddw.readExitLists();
     ddw.readBridgeServerDescriptors();
     ddw.readBridgePoolAssignments();
+    ddw.finishReverseDomainNameLookups();
     ddw.writeDetailDataFiles();
 
     printStatus("Updating bandwidth data.");

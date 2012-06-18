@@ -98,16 +98,22 @@ public class CurrentNodes {
           if (parts.length > 10) {
             countryCode = parts[10];
           }
+          String hostName = null;
+          long lastRdnsLookup = -1L;
+          if (parts.length > 12) {
+            hostName = parts[11].equals("null") ? null : parts[11];
+            lastRdnsLookup = Long.parseLong(parts[12]);
+          }
           if (isRelay) {
             this.addRelay(nickname, fingerprint, address,
                 orAddressesAndPorts, exitAddresses,
                 publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
-                consensusWeight, countryCode);
+                consensusWeight, countryCode, hostName, lastRdnsLookup);
           } else {
             this.addBridge(nickname, fingerprint, address,
                 orAddressesAndPorts, exitAddresses,
                 publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
-                consensusWeight, countryCode);
+                consensusWeight, countryCode, hostName, lastRdnsLookup);
           }
         }
         br.close();
@@ -166,10 +172,14 @@ public class CurrentNodes {
             entry.getConsensusWeight());
         String countryCode = entry.getCountryCode() != null
             ? entry.getCountryCode() : "??";
+        String hostName = entry.getHostName() != null
+            ? entry.getHostName() : "null";
+        long lastRdnsLookup = entry.getLastRdnsLookup();
         bw.write("r " + nickname + " " + fingerprint + " "
             + addressesBuilder.toString() + " " + validAfter + " "
             + orPort + " " + dirPort + " " + relayFlags + " "
-            + consensusWeight + " " + countryCode + "\n");
+            + consensusWeight + " " + countryCode + " " + hostName + " "
+            + String.valueOf(lastRdnsLookup) + "\n");
       }
       for (Node entry : this.currentBridges.values()) {
         String nickname = entry.getNickname();
@@ -194,7 +204,7 @@ public class CurrentNodes {
         String relayFlags = sb.toString().substring(1);
         bw.write("b " + nickname + " " + fingerprint + " "
             + addressesBuilder.toString() + " " + published + " " + orPort
-            + " " + dirPort + " " + relayFlags + " -1 ??\n");
+            + " " + dirPort + " " + relayFlags + " -1 ?? null -1\n");
       }
       bw.close();
     } catch (IOException e) {
@@ -256,7 +266,7 @@ public class CurrentNodes {
       long consensusWeight = entry.getBandwidth();
       this.addRelay(nickname, fingerprint, address, orAddressesAndPorts,
           null, validAfterMillis, orPort, dirPort, relayFlags,
-          consensusWeight, null);
+          consensusWeight, null, null, -1L);
     }
   }
 
@@ -264,14 +274,15 @@ public class CurrentNodes {
       String address, SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long validAfterMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
-      String countryCode) {
+      String countryCode, String hostname, long lastRdnsLookup) {
     if (validAfterMillis >= cutoff &&
         (!this.currentRelays.containsKey(fingerprint) ||
         this.currentRelays.get(fingerprint).getLastSeenMillis() <
         validAfterMillis)) {
       Node entry = new Node(nickname, fingerprint, address,
           orAddressesAndPorts, exitAddresses, validAfterMillis, orPort,
-          dirPort, relayFlags, consensusWeight, countryCode);
+          dirPort, relayFlags, consensusWeight, countryCode, hostname,
+          lastRdnsLookup);
       this.currentRelays.put(fingerprint, entry);
       if (validAfterMillis > this.lastValidAfterMillis) {
         this.lastValidAfterMillis = validAfterMillis;
@@ -368,7 +379,8 @@ public class CurrentNodes {
       int dirPort = entry.getDirPort();
       SortedSet<String> relayFlags = entry.getFlags();
       this.addBridge(nickname, fingerprint, address, orAddressesAndPorts,
-          null, publishedMillis, orPort, dirPort, relayFlags, -1, "??");
+          null, publishedMillis, orPort, dirPort, relayFlags, -1, "??",
+          null, -1L);
     }
   }
 
@@ -376,14 +388,15 @@ public class CurrentNodes {
       String address, SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long publishedMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
-      String countryCode) {
+      String countryCode, String hostname, long lastRdnsLookup) {
     if (publishedMillis >= cutoff &&
         (!this.currentBridges.containsKey(fingerprint) ||
         this.currentBridges.get(fingerprint).getLastSeenMillis() <
         publishedMillis)) {
       Node entry = new Node(nickname, fingerprint, address,
           orAddressesAndPorts, exitAddresses, publishedMillis, orPort,
-          dirPort, relayFlags, consensusWeight, countryCode);
+          dirPort, relayFlags, consensusWeight, countryCode, hostname,
+          lastRdnsLookup);
       this.currentBridges.put(fingerprint, entry);
       if (publishedMillis > this.lastPublishedMillis) {
         this.lastPublishedMillis = publishedMillis;

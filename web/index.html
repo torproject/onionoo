@@ -247,6 +247,14 @@ the directory authorities.
 The unit is arbitrary; currently it's kilobytes per second, but that might
 change in the future.
 Required field.</li>
+<li><b><font color="blue">"host_name":</font></b> Host name as found in a
+reverse DNS lookup of the relay IP address.
+This field is updated at most once in 12 hours, unless the relay IP
+address changes.
+Optional field.
+Omitted if the relay IP address was not looked up or if no lookup request
+was successful yet.
+<font color="blue">Added field on June 18, 2012.</font></li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
 Optional field.</li>
