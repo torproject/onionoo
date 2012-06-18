@@ -274,14 +274,21 @@ public class CurrentNodes {
       String address, SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long validAfterMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
-      String countryCode, String hostname, long lastRdnsLookup) {
+      String countryCode, String hostName, long lastRdnsLookup) {
     if (validAfterMillis >= cutoff &&
         (!this.currentRelays.containsKey(fingerprint) ||
         this.currentRelays.get(fingerprint).getLastSeenMillis() <
         validAfterMillis)) {
+      Node previousRelay = this.currentRelays.containsKey(fingerprint)
+          ? this.currentRelays.get(fingerprint) : null;
+      if (previousRelay != null && hostName == null &&
+          previousRelay.getAddress().equals(address)) {
+        hostName = previousRelay.getHostName();
+        lastRdnsLookup = previousRelay.getLastRdnsLookup();
+      }
       Node entry = new Node(nickname, fingerprint, address,
           orAddressesAndPorts, exitAddresses, validAfterMillis, orPort,
-          dirPort, relayFlags, consensusWeight, countryCode, hostname,
+          dirPort, relayFlags, consensusWeight, countryCode, hostName,
           lastRdnsLookup);
       this.currentRelays.put(fingerprint, entry);
       if (validAfterMillis > this.lastValidAfterMillis) {
