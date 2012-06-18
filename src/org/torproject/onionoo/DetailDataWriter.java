@@ -447,9 +447,12 @@ public class DetailDataWriter {
           + "\"nickname\":\"" + nickname + "\",\n"
           + "\"fingerprint\":\"" + fingerprint + "\",\n"
           + "\"or_addresses\":[" + orAddressesAndPortsBuilder.toString()
-          + "],\n"
-          + "\"dir_address\":\"" + address + ":" + dirPort + "\",\n"
-          + "\"running\":" + running + ",\n");
+          + "]");
+      if (dirPort != 0) {
+        sb.append(",\n\"dir_address\":\"" + address + ":" + dirPort
+            + "\"");
+      }
+      sb.append(",\n\"running\":" + running + ",\n");
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {
         sb.append("\"flags\":[");
