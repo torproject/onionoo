@@ -241,14 +241,14 @@ public class ResourceServlet extends HttpServlet {
           runningRequested);
     }
     if (parameterMap.containsKey("search")) {
-      String searchTerm = this.parseSearchParameter(
+      String[] searchTerms = this.parseSearchParameters(
           parameterMap.get("search"));
-      if (searchTerm == null) {
+      if (searchTerms == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      this.filterBySearchTerm(filteredRelays, filteredBridges,
-          searchTerm);
+      this.filterBySearchTerms(filteredRelays, filteredBridges,
+          searchTerms);
     }
     if (parameterMap.containsKey("lookup")) {
       String fingerprintParameter = this.parseFingerprintParameter(
@@ -383,12 +383,12 @@ public class ResourceServlet extends HttpServlet {
     } else if (uri.equals("/" + resourceType + "/bridges")) {
       result.put("type", "bridges");
     } else if (uri.startsWith("/" + resourceType + "/search/")) {
-      String searchParameter = this.parseSearchParameter(uri.substring(
-          ("/" + resourceType + "/search/").length()));
-      if (searchParameter == null) {
+      String[] searchParameters = this.parseSearchParameters(
+          uri.substring(("/" + resourceType + "/search/").length()));
+      if (searchParameters == null || searchParameters.length != 1) {
         result = null;
       } else {
-        result.put("search", searchParameter);
+        result.put("search", searchParameters[0]);
       }
     } else if (uri.startsWith("/" + resourceType + "/lookup/")) {
       String fingerprintParameter = this.parseFingerprintParameter(
@@ -408,11 +408,19 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Fingerprint. */
       + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
       + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$"); /* IPv6 address. */
-  private String parseSearchParameter(String parameter) {
-    if (!searchParameterPattern.matcher(parameter).matches()) {
-      return null;
+  private String[] parseSearchParameters(String parameter) {
+    String[] searchParameters;
+    if (parameter.contains(" ")) {
+      searchParameters = parameter.split(" ");
+    } else {
+      searchParameters = new String[] { parameter };
     }
-    return parameter;
+    for (String searchParameter : searchParameters) {
+      if (!searchParameterPattern.matcher(searchParameter).matches()) {
+        return null;
+      }
+    }
+    return searchParameters;
   }
 
   private static Pattern fingerprintParameterPattern =
@@ -464,6 +472,13 @@ public class ResourceServlet extends HttpServlet {
     }
     for (String fingerprint : removeBridges) {
       filteredBridges.remove(fingerprint);
+    }
+  }
+
+  private void filterBySearchTerms(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, String[] searchTerms) {
+    for (String searchTerm : searchTerms) {
+      filterBySearchTerm(filteredRelays, filteredBridges, searchTerm);
     }
   }
 
