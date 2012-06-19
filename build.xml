@@ -13,12 +13,9 @@
   <property name="warfile" value="onionoo.war"/>
   <path id="classpath">
     <pathelement path="${classes}"/>
-    <pathelement location="lib/commons-codec-1.4.jar"/>
-    <pathelement location="lib/commons-lang-2.5.jar"/>
-    <pathelement location="lib/commons-compress-1.3.jar"/>
-    <pathelement location="lib/servlet-api.jar"/>
-    <pathelement location="lib/descriptor.jar"/>
-    <pathelement location="lib/maxmindgeoip.jar"/>
+    <fileset dir="${libs}">
+      <include name="*.jar"/>
+    </fileset>
   </path>
   <target name="init">
     <copy file="${contextxmltemplate}" tofile="${contextxml}"/>
@@ -36,9 +33,7 @@
            optimize="false"
            failonerror="true"
            includeantruntime="false">
-      <classpath>
-        <fileset dir="${libs}"/>
-      </classpath>
+      <classpath refid="classpath"/>
     </javac>
   </target>
   <target name="war"
@@ -58,7 +53,7 @@
   </target>
   <target name="run" depends="compile">
     <java fork="true"
-          maxmemory="4096m"
+          maxmemory="2048m"
           classname="org.torproject.onionoo.Main">
       <classpath refid="classpath"/>
     </java>
