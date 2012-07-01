@@ -55,7 +55,7 @@ public class CurrentNodes {
           if (parts.length < 9) {
             System.err.println("Line '" + line + "' in '"
                 + this.internalRelaySearchDataFile.getAbsolutePath()
-                + " is invalid.  Exiting.");
+                + "' is invalid.  Exiting.");
             System.exit(1);
           }
           String nickname = parts[1];
