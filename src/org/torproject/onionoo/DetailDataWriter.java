@@ -314,6 +314,10 @@ public class DetailDataWriter {
     return result;
   }
 
+  private static String escapeJSON(String s) {
+    return StringEscapeUtils.escapeJavaScript(s).replaceAll("\\\\'", "'");
+  }
+
   private SortedMap<String, File> updateRelayDetailsFiles(
       SortedMap<String, File> remainingDetailsFiles) {
     SortedMap<String, File> result =
@@ -395,13 +399,11 @@ public class DetailDataWriter {
         sb.append("\n]");
         if (descriptor.getContact() != null) {
           sb.append(",\n\"contact\":\""
-              + StringEscapeUtils.escapeJavaScript(
-              descriptor.getContact()) + "\"");
+              + escapeJSON(descriptor.getContact()) + "\"");
         }
         if (descriptor.getPlatform() != null) {
           sb.append(",\n\"platform\":\""
-              + StringEscapeUtils.escapeJavaScript(
-              descriptor.getPlatform()) + "\"");
+              + escapeJSON(descriptor.getPlatform()) + "\"");
         }
         if (descriptor.getFamilyEntries() != null) {
           sb.append(",\n\"family\":[");
@@ -473,23 +475,23 @@ public class DetailDataWriter {
       }
       if (countryName != null) {
         sb.append(",\n\"country_name\":\""
-            + StringEscapeUtils.escapeJavaScript(countryName) + "\"");
+            + escapeJSON(countryName) + "\"");
       }
       if (regionName != null) {
         sb.append(",\n\"region_name\":\""
-            + StringEscapeUtils.escapeJavaScript(regionName) + "\"");
+            + escapeJSON(regionName) + "\"");
       }
       if (cityName != null) {
         sb.append(",\n\"city_name\":\""
-            + StringEscapeUtils.escapeJavaScript(cityName) + "\"");
+            + escapeJSON(cityName) + "\"");
       }
       if (aSNumber != null) {
         sb.append(",\n\"as_number\":\""
-            + StringEscapeUtils.escapeJavaScript(aSNumber) + "\"");
+            + escapeJSON(aSNumber) + "\"");
       }
       if (aSName != null) {
         sb.append(",\n\"as_name\":\""
-            + StringEscapeUtils.escapeJavaScript(aSName) + "\"");
+            + escapeJSON(aSName) + "\"");
       }
       if (consensusWeight >= 0L) {
         sb.append(",\n\"consensus_weight\":"
@@ -497,7 +499,7 @@ public class DetailDataWriter {
       }
       if (hostName != null) {
         sb.append(",\n\"host_name\":\""
-            + StringEscapeUtils.escapeJavaScript(hostName) + "\"");
+            + escapeJSON(hostName) + "\"");
       }
 
       /* Add exit addresses if at least one of them is distinct from the
@@ -625,8 +627,8 @@ public class DetailDataWriter {
         sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
             + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
             + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
-            + "\"platform\":\"" + StringEscapeUtils.escapeJavaScript(
-            descriptor.getPlatform()) + "\"");
+            + "\"platform\":\"" + escapeJSON(descriptor.getPlatform())
+            + "\"");
         descriptorParts = sb.toString();
       }
 
