@@ -60,9 +60,7 @@ Required field.</li>
 <li><b>"a":</b> Array of IPv4 or IPv6 addresses where the relay accepts
 onion-routing connections or which the relay used to exit to the Internet
 in the past 24 hours.
-Required field.
-<font color="blue">Extended field to also contain exit addresses on June
-15, 2012.</font></li>
+Required field.</li>
 <li><b>"r":</b> Boolean field saying whether this relay was listed as
 running in the last relay network status consensus.
 Required field.</li>
@@ -76,11 +74,10 @@ Required field.</li>
 Required field.
 Each array object contains the following key-value pairs:
 <ul>
-<li><b><font color="blue">"n":</font></b> Bridge nickname consisting of
-1&ndash;19 alphanumerical characters.
+<li><b>"n":</b> Bridge nickname consisting of 1&ndash;19 alphanumerical
+characters.
 Optional field.
-Omitted if the bridge nickname is <i>"Unnamed"</i>.
-<font color="blue">Added field on June 14, 2012.</font></li>
+Omitted if the bridge nickname is <i>"Unnamed"</i>.</li>
 <li><b>"h":</b> SHA-1 hash of the bridge fingerprint consisting of 40
 upper-case hexadecimal characters.
 Required field.</li>
@@ -247,14 +244,13 @@ the directory authorities.
 The unit is arbitrary; currently it's kilobytes per second, but that might
 change in the future.
 Required field.</li>
-<li><b><font color="blue">"host_name":</font></b> Host name as found in a
-reverse DNS lookup of the relay IP address.
+<li><b>"host_name":</b> Host name as found in a reverse DNS lookup of the
+relay IP address.
 This field is updated at most once in 12 hours, unless the relay IP
 address changes.
 Optional field.
 Omitted if the relay IP address was not looked up or if no lookup request
-was successful yet.
-<font color="blue">Added field on June 18, 2012.</font></li>
+was successful yet.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
 Optional field.</li>
@@ -290,11 +286,10 @@ Required field.</li>
 Required field.
 Each array object contains the following key-value pairs:
 <ul>
-<li><b><font color="blue">"nickname":</font></b> Bridge nickname
-consisting of 1&ndash;19 alphanumerical characters.
+<li><b>"nickname":</b> Bridge nickname consisting of 1&ndash;19
+alphanumerical characters.
 Optional field.
-Omitted if the bridge nickname is <i>"Unnamed"</i>.
-<font color="blue">Added field on June 14, 2012.</font></li>
+Omitted if the bridge nickname is <i>"Unnamed"</i>.</li>
 <li><b>"hashed_fingerprint":</b> SHA-1 hash of the bridge fingerprint
 consisting of 40 upper-case hexadecimal characters.
 Required field.</li>
@@ -625,10 +620,6 @@ of all relays and bridges matching all search terms will be returned.
 Full fingerprints should always be hashed using SHA-1, regardless of
 searching for a relay or a bridge, in order to not accidentally leak
 non-hashed bridge fingerprints in the URL.
-<font color="blue">Extended search to bridge nicknames on June 14,
-2012.</font>
-<font color="blue">Extended search to multiple search terms on June 18,
-2012.</font>
 </td></tr>
 <tr><td><b>lookup</b></td><td>Return only the relay with the parameter
 value matching the fingerprint or the bridge with the parameter value
@@ -637,10 +628,8 @@ Fingerprints should always be hashed using SHA-1, regardless of looking up
 a relay or a bridge, in order to not accidentally leak non-hashed bridge
 fingerprints in the URL.
 </td></tr>
-<tr><td><b><font color="blue">country</font></b></td><td>Return only
-relays which are located in the given country as identified by a
-two-letter lower-case country code.
-<font color="blue">Added parameter on June 14, 2012.</font>
+<tr><td><b>country</b></td><td>Return only relays which are located in the
+given country as identified by a two-letter lower-case country code.
 </td></tr>
 </table>
 <p>Relay and/or bridge documents in the response can be ordered and
