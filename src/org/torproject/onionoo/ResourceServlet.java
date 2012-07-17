@@ -160,21 +160,14 @@ public class ResourceServlet extends HttpServlet {
       uri = uri.substring("/onionoo".length());
     }
     String resourceType = null;
-    boolean isOldStyleUri = false;
-    if (uri.startsWith("/summary/")) {
+    if (uri.startsWith("/summary") &&
+        !uri.startsWith("/summary/")) {
       resourceType = "summary";
-      isOldStyleUri = true;
-    } else if (uri.startsWith("/details/")) {
+    } else if (uri.startsWith("/details") &&
+        !uri.startsWith("/details/")) {
       resourceType = "details";
-      isOldStyleUri = true;
-    } else if (uri.startsWith("/bandwidth/")) {
-      resourceType = "bandwidth";
-      isOldStyleUri = true;
-    } else if (uri.startsWith("/summary")) {
-      resourceType = "summary";
-    } else if (uri.startsWith("/details")) {
-      resourceType = "details";
-    } else if (uri.startsWith("/bandwidth")) {
+    } else if (uri.startsWith("/bandwidth") &&
+        !uri.startsWith("/bandwidth/")) {
       resourceType = "bandwidth";
     } else {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -183,21 +176,11 @@ public class ResourceServlet extends HttpServlet {
 
     /* Extract parameters either from the old-style URI or from request
      * parameters. */
-    Map<String, String> parameterMap;
-    if (isOldStyleUri) {
-      parameterMap = this.getParameterMapForOldStyleUri(uri,
-          resourceType);
-      if (parameterMap == null) {
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        return;
-      }
-    } else {
-      parameterMap = new HashMap<String, String>();
-      for (Object parameterKey : request.getParameterMap().keySet()) {
-        String[] parameterValues =
-            request.getParameterValues((String) parameterKey);
-        parameterMap.put((String) parameterKey, parameterValues[0]);
-      }
+    Map<String, String> parameterMap = new HashMap<String, String>();
+    for (Object parameterKey : request.getParameterMap().keySet()) {
+      String[] parameterValues =
+          request.getParameterValues((String) parameterKey);
+      parameterMap.put((String) parameterKey, parameterValues[0]);
     }
 
     /* Make sure that the request doesn't contain any unknown
@@ -370,38 +353,6 @@ public class ResourceServlet extends HttpServlet {
     this.writeBridges(orderedBridges, pw, resourceType);
     pw.flush();
     pw.close();
-  }
-
-  private Map<String, String> getParameterMapForOldStyleUri(String uri,
-      String resourceType) {
-    Map<String, String> result = new HashMap<String, String>();
-    if (uri.equals("/" + resourceType + "/all")) {
-    } else if (uri.equals("/" + resourceType + "/running")) {
-      result.put("running", "true");
-    } else if (uri.equals("/" + resourceType + "/relays")) {
-      result.put("type", "relays");
-    } else if (uri.equals("/" + resourceType + "/bridges")) {
-      result.put("type", "bridges");
-    } else if (uri.startsWith("/" + resourceType + "/search/")) {
-      String[] searchParameters = this.parseSearchParameters(
-          uri.substring(("/" + resourceType + "/search/").length()));
-      if (searchParameters == null || searchParameters.length != 1) {
-        result = null;
-      } else {
-        result.put("search", searchParameters[0]);
-      }
-    } else if (uri.startsWith("/" + resourceType + "/lookup/")) {
-      String fingerprintParameter = this.parseFingerprintParameter(
-          uri.substring(("/" + resourceType + "/lookup/").length()));
-      if (fingerprintParameter == null) {
-        result = null;
-      } else {
-        result.put("lookup", fingerprintParameter);
-      }
-    } else {
-      result = null;
-    }
-    return result;
   }
 
   private static Pattern searchParameterPattern =
