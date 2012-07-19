@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -190,6 +191,115 @@ public class DetailDataWriter {
             }
           }
         }
+      }
+    }
+  }
+
+  public void calculatePathSelectionProbabilities(
+      SortedMap<String, Integer> bandwidthWeights) {
+    boolean consensusContainsBandwidthWeights = false;
+    double wgg = 0.0, wgd = 0.0, wmg = 0.0, wmm = 0.0, wme = 0.0,
+        wmd = 0.0, wee = 0.0, wed = 0.0;
+    if (bandwidthWeights != null) {
+      SortedSet<String> weightKeys = new TreeSet<String>(Arrays.asList(
+          "Wgg,Wgd,Wmg,Wmm,Wme,Wmd,Wee,Wed".split(",")));
+      weightKeys.removeAll(bandwidthWeights.keySet());
+      if (weightKeys.isEmpty()) {
+        consensusContainsBandwidthWeights = true;
+        wgg = ((double) bandwidthWeights.get("Wgg")) / 10000.0;
+        wgd = ((double) bandwidthWeights.get("Wgd")) / 10000.0;
+        wmg = ((double) bandwidthWeights.get("Wmg")) / 10000.0;
+        wmm = ((double) bandwidthWeights.get("Wmm")) / 10000.0;
+        wme = ((double) bandwidthWeights.get("Wme")) / 10000.0;
+        wmd = ((double) bandwidthWeights.get("Wmd")) / 10000.0;
+        wee = ((double) bandwidthWeights.get("Wee")) / 10000.0;
+        wed = ((double) bandwidthWeights.get("Wed")) / 10000.0;
+      }
+    }
+    SortedMap<String, Double>
+        advertisedBandwidths = new TreeMap<String, Double>(),
+        consensusWeights = new TreeMap<String, Double>(),
+        guardWeights = new TreeMap<String, Double>(),
+        middleWeights = new TreeMap<String, Double>(),
+        exitWeights = new TreeMap<String, Double>();
+    double totalAdvertisedBandwidth = 0.0;
+    double totalConsensusWeight = 0.0;
+    double totalGuardWeight = 0.0;
+    double totalMiddleWeight = 0.0;
+    double totalExitWeight = 0.0;
+    for (Map.Entry<String, Node> e : this.relays.entrySet()) {
+      String fingerprint = e.getKey();
+      Node relay = e.getValue();
+      if (!relay.getRunning()) {
+        continue;
+      }
+      boolean isExit = relay.getRelayFlags().contains("Exit") &&
+          !relay.getRelayFlags().contains("BadExit");
+      boolean isGuard = relay.getRelayFlags().contains("Guard");
+      if (this.relayServerDescriptors.containsKey(fingerprint)) {
+        ServerDescriptor serverDescriptor =
+            this.relayServerDescriptors.get(fingerprint);
+        double advertisedBandwidth = (double) Math.min(Math.min(
+            serverDescriptor.getBandwidthBurst(),
+            serverDescriptor.getBandwidthObserved()),
+            serverDescriptor.getBandwidthRate());
+        advertisedBandwidths.put(fingerprint, advertisedBandwidth);
+        totalAdvertisedBandwidth += advertisedBandwidth;
+      }
+      double consensusWeight = (double) relay.getConsensusWeight();
+      consensusWeights.put(fingerprint, consensusWeight);
+      totalConsensusWeight += consensusWeight;
+      if (consensusContainsBandwidthWeights) {
+        double guardWeight = consensusWeight,
+            middleWeight = consensusWeight,
+            exitWeight = consensusWeight;
+        if (isGuard && isExit) {
+          guardWeight *= wgd;
+          middleWeight *= wmd;
+          exitWeight *= wed;
+        } else if (isGuard) {
+          guardWeight *= wgg;
+          middleWeight *= wmg;
+          exitWeight = 0.0;
+        } else if (isExit) {
+          guardWeight = 0.0;
+          middleWeight *= wme;
+          exitWeight *= wee;
+        } else {
+          guardWeight = 0.0;
+          middleWeight *= wmm;
+          exitWeight = 0.0;
+        }
+        guardWeights.put(fingerprint, guardWeight);
+        middleWeights.put(fingerprint, middleWeight);
+        exitWeights.put(fingerprint, exitWeight);
+        totalGuardWeight += guardWeight;
+        totalMiddleWeight += middleWeight;
+        totalExitWeight += exitWeight;
+      }
+    }
+    for (Map.Entry<String, Node> e : this.relays.entrySet()) {
+      String fingerprint = e.getKey();
+      Node relay = e.getValue();
+      if (advertisedBandwidths.containsKey(fingerprint)) {
+        relay.setAdvertisedBandwidthFraction(advertisedBandwidths.get(
+            fingerprint) / totalAdvertisedBandwidth);
+      }
+      if (consensusWeights.containsKey(fingerprint)) {
+        relay.setConsensusWeightFraction(consensusWeights.get(fingerprint)
+            / totalConsensusWeight);
+      }
+      if (guardWeights.containsKey(fingerprint)) {
+        relay.setGuardProbability(guardWeights.get(fingerprint)
+            / totalGuardWeight);
+      }
+      if (middleWeights.containsKey(fingerprint)) {
+        relay.setMiddleProbability(middleWeights.get(fingerprint)
+            / totalMiddleWeight);
+      }
+      if (exitWeights.containsKey(fingerprint)) {
+        relay.setExitProbability(exitWeights.get(fingerprint)
+            / totalExitWeight);
       }
     }
   }
@@ -444,6 +554,12 @@ public class DetailDataWriter {
       String aSName = entry.getASName();
       long consensusWeight = entry.getConsensusWeight();
       String hostName = entry.getHostName();
+      double advertisedBandwidthFraction =
+          entry.getAdvertisedBandwidthFraction();
+      double consensusWeightFraction = entry.getConsensusWeightFraction();
+      double guardProbability = entry.getGuardProbability();
+      double middleProbability = entry.getMiddleProbability();
+      double exitProbability = entry.getExitProbability();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -500,6 +616,27 @@ public class DetailDataWriter {
       if (hostName != null) {
         sb.append(",\n\"host_name\":\""
             + escapeJSON(hostName) + "\"");
+      }
+      if (advertisedBandwidthFraction >= 0.0) {
+        sb.append(String.format(
+            ",\n\"advertised_bandwidth_fraction\":%.9f",
+            advertisedBandwidthFraction));
+      }
+      if (consensusWeightFraction >= 0.0) {
+        sb.append(String.format(",\n\"consensus_weight_fraction\":%.9f",
+            consensusWeightFraction));
+      }
+      if (guardProbability >= 0.0) {
+        sb.append(String.format(",\n\"guard_probability\":%.9f",
+            guardProbability));
+      }
+      if (middleProbability >= 0.0) {
+        sb.append(String.format(",\n\"middle_probability\":%.9f",
+            middleProbability));
+      }
+      if (exitProbability >= 0.0) {
+        sb.append(String.format(",\n\"exit_probability\":%.9f",
+            exitProbability));
       }
 
       /* Add exit addresses if at least one of them is distinct from the

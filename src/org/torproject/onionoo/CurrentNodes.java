@@ -250,6 +250,10 @@ public class CurrentNodes {
     }
   }
 
+  SortedMap<String, Integer> lastBandwidthWeights = null;
+  public SortedMap<String, Integer> getLastBandwidthWeights() {
+    return this.lastBandwidthWeights;
+  }
   private void updateRelayNetworkStatusConsensus(
       RelayNetworkStatusConsensus consensus) {
     long validAfterMillis = consensus.getValidAfterMillis();
@@ -267,6 +271,9 @@ public class CurrentNodes {
       this.addRelay(nickname, fingerprint, address, orAddressesAndPorts,
           null, validAfterMillis, orPort, dirPort, relayFlags,
           consensusWeight, null, null, -1L);
+    }
+    if (this.lastValidAfterMillis == validAfterMillis) {
+      this.lastBandwidthWeights = consensus.getBandwidthWeights();
     }
   }
 

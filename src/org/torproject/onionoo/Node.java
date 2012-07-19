@@ -35,6 +35,11 @@ public class Node {
   private boolean running;
   private String hostName;
   private long lastRdnsLookup = -1L;
+  private double advertisedBandwidthFraction = -1.0;
+  private double consensusWeightFraction = -1.0;
+  private double guardProbability = -1.0;
+  private double middleProbability = -1.0;
+  private double exitProbability = -1.0;
   public Node(String nickname, String fingerprint, String address,
       SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
@@ -193,6 +198,37 @@ public class Node {
   }
   public long getLastRdnsLookup() {
     return this.lastRdnsLookup;
+  }
+  public void setAdvertisedBandwidthFraction(
+      double advertisedBandwidthFraction) {
+    this.advertisedBandwidthFraction = advertisedBandwidthFraction;
+  }
+  public double getAdvertisedBandwidthFraction() {
+    return this.advertisedBandwidthFraction;
+  }
+  public void setConsensusWeightFraction(double consensusWeightFraction) {
+    this.consensusWeightFraction = consensusWeightFraction;
+  }
+  public double getConsensusWeightFraction() {
+    return this.consensusWeightFraction;
+  }
+  public void setGuardProbability(double guardProbability) {
+    this.guardProbability = guardProbability;
+  }
+  public double getGuardProbability() {
+    return this.guardProbability;
+  }
+  public void setMiddleProbability(double middleProbability) {
+    this.middleProbability = middleProbability;
+  }
+  public double getMiddleProbability() {
+    return this.middleProbability;
+  }
+  public void setExitProbability(double exitProbability) {
+    this.exitProbability = exitProbability;
+  }
+  public double getExitProbability() {
+    return this.exitProbability;
   }
 }
 

@@ -24,6 +24,7 @@ public class Main {
     ddw.setCurrentBridges(cn.getCurrentBridges());
     ddw.startReverseDomainNameLookups();
     ddw.readRelayServerDescriptors();
+    ddw.calculatePathSelectionProbabilities(cn.getLastBandwidthWeights());
     ddw.readExitLists();
     ddw.readBridgeServerDescriptors();
     ddw.readBridgePoolAssignments();

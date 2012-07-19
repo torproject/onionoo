@@ -276,6 +276,54 @@ same family as this relay.
 Optional field.
 Omitted if empty or if descriptor containing this information cannot be
 found.</li>
+<li><b><font color="blue">"advertised_bandwidth_fraction":</font></b>
+Relative advertised bandwidth of this relay compared to the total
+advertised bandwidth in the network.
+If there were no bandwidth authorities, this fraction would be a very
+rough approximation of the probability of this relay to be selected by
+clients.
+Optional field.
+Omitted if the relay is not running, or router descriptor containing this
+information cannot be found.
+<font color="blue">Added field on July 19, 2012.</font></li>
+<li><b><font color="blue">"consensus_weight_fraction":</font></b>
+Fraction of this relay's consensus weight compared to the sum of all
+consensus weights in the network.
+This fraction is a very rough approximation of the probability of this
+relay to be selected by clients.
+Optional field.
+Omitted if the relay is not running.
+<font color="blue">Added field on July 19, 2012.</font></li>
+<li><b><font color="blue">"guard_probability":</font></b>
+Probability of this relay to be selected for the guard position.
+This probability is calculated based on consensus weights, relay flags,
+and bandwidth weights in the consensus.
+Path selection depends on more factors, so that this probability can only
+be an approximation.
+Optional field.
+Omitted if the relay is not running, or the consensus does not contain
+bandwidth weights.
+<font color="blue">Added field on July 19, 2012.</font></li>
+<li><b><font color="blue">"middle_probability":</font></b>
+Probability of this relay to be selected for the middle position.
+This probability is calculated based on consensus weights, relay flags,
+and bandwidth weights in the consensus.
+Path selection depends on more factors, so that this probability can only
+be an approximation.
+Optional field.
+Omitted if the relay is not running, or the consensus does not contain
+bandwidth weights.
+<font color="blue">Added field on July 19, 2012.</font></li>
+<li><b><font color="blue">"exit_probability":</font></b>
+Probability of this relay to be selected for the exit position.
+This probability is calculated based on consensus weights, relay flags,
+and bandwidth weights in the consensus.
+Path selection depends on more factors, so that this probability can only
+be an approximation.
+Optional field.
+Omitted if the relay is not running, or the consensus does not contain
+bandwidth weights.
+<font color="blue">Added field on July 19, 2012.</font></li>
 </ul>
 </li>
 <li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
