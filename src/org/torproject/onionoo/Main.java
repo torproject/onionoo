@@ -38,6 +38,14 @@ public class Main {
     bdw.readExtraInfoDescriptors();
     bdw.deleteObsoleteBandwidthFiles();
 
+    printStatus("Updating weights data.");
+    WeightsDataWriter wdw = new WeightsDataWriter();
+    wdw.setCurrentRelays(cn.getCurrentRelays());
+    wdw.readRelayServerDescriptors();
+    wdw.readRelayNetworkConsensuses();
+    wdw.writeWeightsDataFiles();
+    wdw.deleteObsoleteWeightsDataFiles();
+
     printStatus("Updating summary data.");
     cn.writeRelaySearchDataFile();
 

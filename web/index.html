@@ -616,6 +616,109 @@ fingerprints in the URL.
 </tr>
 </table>
 <br>
+<h3>Weights documents</h3>
+<p>Weights documents contain aggregate statistics of a relay's probability
+to be selected by clients for building paths.
+<font color="blue">Added document type on July 24, 2012.</font>
+Weights documents contain different time intervals and are available for
+all relays that have been running in the past week.
+Weights documents contain the following fields:
+<ul>
+<li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last contained relay network status consensus started being valid.
+Indicates how recent the relay weights documents in this document are.
+Required field.</li>
+<li><b>"relays":</b> Array of objects representing relay weights
+documents.
+Required field.
+Each array object contains the following key-value pairs:
+<ul>
+<li><b>"fingerprint":</b> Relay fingerprint consisting of 40 upper-case
+hexadecimal characters.
+Required field.</li>
+<li><b>"advertised_bandwidth_fraction":</b> History object containing
+relative advertised bandwidth of this relay compared to the total
+advertised bandwidth in the network.
+If there were no bandwidth authorities, this fraction would be a very
+rough approximation of the probability of this relay to be selected by
+clients.
+Optional field.
+Keys are string representation of the time period covered by the weights
+history object.
+Keys are fixed strings <i>"1_week"</i>, <i>"1_month"</i>,
+<i>"3_months"</i>, <i>"1_year"</i>, and <i>"5_years"</i>.
+Keys refer to the last known weights history of a relay, not to the time
+when the weights document was published.
+A weights history object is only contained if the time period it covers
+is not already contained in another weights history object with shorter
+time period and higher data resolution.
+Each weights history object contains the following key-value pairs:
+<ul>
+<li><b>"first":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
+data point in the weights history.
+Required field.</li>
+<li><b>"last":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
+data point in the weights history.
+Required field.</li>
+<li><b>"interval":</b> Time interval between two data points in seconds.
+Required field.</li>
+<li><b>"factor":</b> Factor by which subsequent weights values need to
+be multiplied to get the path-selection probability.
+The idea is that contained weights values are normalized to a range from 0
+to 999 to reduce document size while still providing sufficient detail for
+both slow and fast relays.
+Required field.</li>
+<li><b>"count":</b> Number of provided data points, included mostly for
+debugging purposes.
+Can also be derived from the number of elements in the subsequent array.
+Optional field.</li>
+<li><b>"values":</b> Array of normalized weights values.
+May contain null values if the relay was running less than 20% of a given
+time period.
+Only includes non-null values for series of at least two subsequent data
+points to enable drawing of line graphs.
+Required field.</li>
+</ul>
+</li>
+<li><b>"consensus_weight_fraction":</b> History object containing the
+fraction of this relay's consensus weight compared to the sum of all
+consensus weights in the network.
+This fraction is a very rough approximation of the probability of this
+relay to be selected by clients.
+Optional field.
+The specification of this history object is similar to that in the
+<i>advertised_bandwidth_fraction</i> field above.</li>
+<li><b>"guard_probability":</b> History object containing the probability
+of this relay to be selected for the guard position.
+This probability is calculated based on consensus weights, relay flags,
+and bandwidth weights in the consensus.
+Path selection depends on more factors, so that this probability can only
+be an approximation.
+Optional field.
+The specification of this history object is similar to that in the
+<i>advertised_bandwidth_fraction</i> field above.</li>
+<li><b>"middle_probability":</b> History object containing the probability
+of this relay to be selected for the middle position.
+This probability is calculated based on consensus weights, relay flags,
+and bandwidth weights in the consensus.
+Path selection depends on more factors, so that this probability can only
+be an approximation.
+Optional field.
+The specification of this history object is similar to that in the
+<i>advertised_bandwidth_fraction</i> field above.</li>
+<li><b>"exit_probability":</b> History object containing the probability
+of this relay to be selected for the exit position.
+This probability is calculated based on consensus weights, relay flags,
+and bandwidth weights in the consensus.
+Path selection depends on more factors, so that this probability can only
+be an approximation.
+Optional field.
+The specification of this history object is similar to that in the
+<i>advertised_bandwidth_fraction</i> field above.</li>
+</ul>
+</li>
+</ul>
+<br>
 <h3>Methods</h3>
 <p>The following methods each return a single document containing zero or
 more relay and/or bridge documents.</p>
@@ -640,6 +743,12 @@ or that have been running in the past week.
 <td><b>GET bandwidth</b></td>
 <td>Return bandwidth documents of all relays and bridges that are
 currently running or that have been running in the past week.
+</td>
+</tr>
+<tr>
+<td><b>GET weights</b></td>
+<td>Return weights documents of all relays and bridges that are currently
+running or that have been running in the past week.
 </td>
 </tr>
 </table>

@@ -28,6 +28,10 @@
     <servlet-name>Resource</servlet-name>
     <url-pattern>/bandwidth</url-pattern>
   </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Resource</servlet-name>
+    <url-pattern>/weights</url-pattern>
+  </servlet-mapping>
 
 </web-app>
 

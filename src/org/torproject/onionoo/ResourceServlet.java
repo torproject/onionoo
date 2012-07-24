@@ -166,6 +166,8 @@ public class ResourceServlet extends HttpServlet {
       resourceType = "details";
     } else if (uri.startsWith("/bandwidth")) {
       resourceType = "bandwidth";
+    } else if (uri.startsWith("/weights")) {
+      resourceType = "weights";
     } else {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       return;
@@ -578,6 +580,8 @@ public class ResourceServlet extends HttpServlet {
       return this.writeDetailsLines(summaryLine);
     } else if (resourceType.equals("bandwidth")) {
       return this.writeBandwidthLines(summaryLine);
+    } else if (resourceType.equals("weights")) {
+      return this.writeWeightsLines(summaryLine);
     } else {
       return "";
     }
@@ -666,6 +670,40 @@ public class ResourceServlet extends HttpServlet {
       bandwidthLines = bandwidthLines.substring(0,
           bandwidthLines.length() - 1);
       return bandwidthLines;
+    } else {
+      return "";
+    }
+  }
+
+  private String writeWeightsLines(String summaryLine) {
+    String fingerprint = null;
+    if (summaryLine.contains("\"f\":\"")) {
+      fingerprint = summaryLine.substring(summaryLine.indexOf(
+         "\"f\":\"") + "\"f\":\"".length());
+    } else {
+      return "";
+    }
+    fingerprint = fingerprint.substring(0, 40);
+    File weightsFile = new File(this.outDirString + "weights/"
+        + fingerprint);
+    StringBuilder sb = new StringBuilder();
+    String weightsLines = null;
+    if (weightsFile.exists()) {
+      try {
+        BufferedReader br = new BufferedReader(new FileReader(
+            weightsFile));
+        String line;
+        while ((line = br.readLine()) != null) {
+          sb.append(line + "\n");
+        }
+        br.close();
+        weightsLines = sb.toString();
+      } catch (IOException e) {
+      }
+    }
+    if (weightsLines != null) {
+      weightsLines = weightsLines.substring(0, weightsLines.length() - 1);
+      return weightsLines;
     } else {
       return "";
     }
