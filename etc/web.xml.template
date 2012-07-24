@@ -18,15 +18,15 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>Resource</servlet-name>
-    <url-pattern>/summary/*</url-pattern>
+    <url-pattern>/summary</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>Resource</servlet-name>
-    <url-pattern>/details/*</url-pattern>
+    <url-pattern>/details</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>Resource</servlet-name>
-    <url-pattern>/bandwidth/*</url-pattern>
+    <url-pattern>/bandwidth</url-pattern>
   </servlet-mapping>
 
 </web-app>

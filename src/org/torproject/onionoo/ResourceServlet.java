@@ -160,14 +160,11 @@ public class ResourceServlet extends HttpServlet {
       uri = uri.substring("/onionoo".length());
     }
     String resourceType = null;
-    if (uri.startsWith("/summary") &&
-        !uri.startsWith("/summary/")) {
+    if (uri.startsWith("/summary")) {
       resourceType = "summary";
-    } else if (uri.startsWith("/details") &&
-        !uri.startsWith("/details/")) {
+    } else if (uri.startsWith("/details")) {
       resourceType = "details";
-    } else if (uri.startsWith("/bandwidth") &&
-        !uri.startsWith("/bandwidth/")) {
+    } else if (uri.startsWith("/bandwidth")) {
       resourceType = "bandwidth";
     } else {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
