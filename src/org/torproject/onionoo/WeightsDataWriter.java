@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,13 +34,6 @@ import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
 
 public class WeightsDataWriter {
-
-  private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-      "yyyy-MM-dd HH:mm:ss");
-  public WeightsDataWriter() {
-    this.dateTimeFormat.setLenient(false);
-    this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-  }
 
   private SortedSet<String> currentFingerprints = new TreeSet<String>();
   public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
@@ -97,16 +91,69 @@ public class WeightsDataWriter {
                 freshUntilMillis = consensus.getFreshUntilMillis();
             SortedMap<String, double[]> pathSelectionWeights =
                 this.calculatePathSelectionProbabilities(consensus);
-            for (Map.Entry<String, double[]> e :
-                pathSelectionWeights.entrySet()) {
-              String fingerprint = e.getKey();
-              double[] weights = e.getValue();
-              this.addToHistory(fingerprint, validAfterMillis,
-                  freshUntilMillis, weights);
-            }
+            this.updateWeightsHistory(validAfterMillis, freshUntilMillis,
+                pathSelectionWeights);
           }
         }
       }
+    }
+  }
+
+  private static final int HISTORY_UPDATER_WORKERS_NUM = 4;
+  private void updateWeightsHistory(long validAfterMillis,
+      long freshUntilMillis,
+      SortedMap<String, double[]> pathSelectionWeights) {
+    int files = pathSelectionWeights.size();
+    List<HistoryUpdateWorker> historyUpdateWorkers =
+        new ArrayList<HistoryUpdateWorker>();
+    for (int i = 0; i < HISTORY_UPDATER_WORKERS_NUM; i++) {
+      HistoryUpdateWorker historyUpdateWorker =
+          new HistoryUpdateWorker(validAfterMillis, freshUntilMillis,
+          pathSelectionWeights, this);
+      historyUpdateWorkers.add(historyUpdateWorker);
+      historyUpdateWorker.setDaemon(true);
+      historyUpdateWorker.start();
+    }
+    for (HistoryUpdateWorker historyUpdateWorker : historyUpdateWorkers) {
+      try {
+        historyUpdateWorker.join();
+      } catch (InterruptedException e) {
+        /* This is not something that we can take care of.  Just leave the
+         * worker thread alone. */
+      }
+    }
+  }
+
+  private class HistoryUpdateWorker extends Thread {
+    private long validAfterMillis;
+    private long freshUntilMillis;
+    private SortedMap<String, double[]> pathSelectionWeights;
+    private WeightsDataWriter parent;
+    public HistoryUpdateWorker(long validAfterMillis,
+        long freshUntilMillis,
+        SortedMap<String, double[]> pathSelectionWeights,
+        WeightsDataWriter parent) {
+      this.validAfterMillis = validAfterMillis;
+      this.freshUntilMillis = freshUntilMillis;
+      this.pathSelectionWeights = pathSelectionWeights;
+      this.parent = parent;
+    }
+    public void run() {
+      String fingerprint = null;
+      double[] weights = null;
+      do {
+        fingerprint = null;
+        synchronized (pathSelectionWeights) {
+          if (!pathSelectionWeights.isEmpty()) {
+            fingerprint = pathSelectionWeights.firstKey();
+            weights = pathSelectionWeights.remove(fingerprint);
+          }
+        }
+        if (fingerprint != null) {
+          this.parent.addToHistory(fingerprint, this.validAfterMillis,
+              this.freshUntilMillis, weights);
+        }
+      } while (fingerprint != null);
     }
   }
 
@@ -233,6 +280,10 @@ public class WeightsDataWriter {
     });
     File historyFile = new File("status/weights", fingerprint);
     if (historyFile.exists()) {
+      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+          "yyyy-MM-dd HH:mm:ss");
+      dateTimeFormat.setLenient(false);
+      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       try {
         BufferedReader br = new BufferedReader(new FileReader(
             historyFile));
@@ -245,9 +296,9 @@ public class WeightsDataWriter {
                 + "'.  Skipping this line.");
             continue;
           }
-          long validAfterMillis = this.dateTimeFormat.parse(parts[0]
+          long validAfterMillis = dateTimeFormat.parse(parts[0]
               + " " + parts[1]).getTime();
-          long freshUntilMillis = this.dateTimeFormat.parse(parts[2]
+          long freshUntilMillis = dateTimeFormat.parse(parts[2]
               + " " + parts[3]).getTime();
           long[] interval = new long[] { validAfterMillis,
               freshUntilMillis };
@@ -330,13 +381,16 @@ public class WeightsDataWriter {
       SortedMap<long[], double[]> history) {
     File historyFile = new File("status/weights", fingerprint);
     try {
+      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+          "yyyy-MM-dd HH:mm:ss");
+      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       historyFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(historyFile));
       for (Map.Entry<long[], double[]> e : history.entrySet()) {
         long[] fresh = e.getKey();
         double[] weights = e.getValue();
-        bw.write(this.dateTimeFormat.format(fresh[0]) + " "
-            + this.dateTimeFormat.format(fresh[1]));
+        bw.write(dateTimeFormat.format(fresh[0]) + " "
+            + dateTimeFormat.format(fresh[1]));
         for (double weight : weights) {
           bw.write(String.format(" %.12f", weight));
         }
@@ -492,12 +546,13 @@ public class WeightsDataWriter {
     double factor = ((double) maxValue) / 999.0;
     int count = lastNonNullIndex - firstNonNullIndex + 1;
     StringBuilder sb = new StringBuilder();
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     sb.append("\"" + graphName + "\":{"
-        + "\"first\":\""
-        + this.dateTimeFormat.format(firstDataPointMillis) + "\","
-        + "\"last\":\""
-        + this.dateTimeFormat.format(lastDataPointMillis) + "\","
-        + "\"interval\":" + String.valueOf(dataPointInterval / 1000L)
+        + "\"first\":\"" + dateTimeFormat.format(firstDataPointMillis)
+        + "\",\"last\":\"" + dateTimeFormat.format(lastDataPointMillis)
+        + "\",\"interval\":" + String.valueOf(dataPointInterval / 1000L)
         + ",\"factor\":" + String.format(Locale.US, "%.9f", factor)
         + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
     int dataPointsWritten = 0, previousNonNullIndex = -2;
