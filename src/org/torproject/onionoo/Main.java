@@ -3,6 +3,7 @@
 package org.torproject.onionoo;
 
 import java.io.File;
+import java.util.Date;
 
 /* Update search data and status data files. */
 public class Main {
@@ -53,7 +54,7 @@ public class Main {
   }
 
   private static void printStatus(String message) {
-    System.out.println(message);
+    System.out.println(new Date() + ": " + message);
   }
 }
 
