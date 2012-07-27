@@ -32,3 +32,10 @@ img {
   margin: .2em .2em .2em .2em;
 }
 
+a.anchor {
+  font-size: 1em;
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+}
+
