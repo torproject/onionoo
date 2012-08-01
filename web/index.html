@@ -256,6 +256,22 @@ was successful yet.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
 Optional field.</li>
+<li><b><font color="blue">"bandwidth_rate":</font></b> Average bandwidth
+in bytes per second that this relay is willing to sustain over long
+periods.
+Required field.
+<font color="blue">Added field on August 1, 2012.</font></li>
+<li><b><font color="blue">"bandwidth_burst":</font></b> Bandwidth in bytes
+per second that this relay is willing to sustain in very short intervals.
+Required field.
+<font color="blue">Added field on August 1, 2012.</font></li>
+<li><b><font color="blue">"observed_bandwidth":</font></b> Bandwidth
+estimate in bytes per second of the capacity this relay can handle.
+The relay remembers the maximum bandwidth sustained output over any ten
+second period in the past day, and another sustained input.
+The "observed_bandwidth" value is the lesser of these two numbers.
+Required field.
+<font color="blue">Added field on August 1, 2012.</font></li>
 <li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
 relay is willing and capable to provide.
 Optional field.
@@ -265,6 +281,14 @@ found.</li>
 Optional field.
 Missing if router descriptor containing this information cannot be
 found.</li>
+<li><b><font color="blue">"exit_policy_summary":</font></b> Summary
+version of the relay's exit policy containing a dictionary with either an
+"accept" or a "reject" element.
+If there is an "accept" ("reject") element, the relay accepts (rejects)
+all TCP ports or port ranges in the given list for most IP addresses and
+rejects (accepts) all other ports.
+Optional field.
+<font color="blue">Added field on August 1, 2012.</font></li>
 <li><b>"contact":</b> Contact address of the relay operator.
 Omitted if empty or if descriptor containing this information cannot be
 found.</li>

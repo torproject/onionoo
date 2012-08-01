@@ -40,11 +40,14 @@ public class Node {
   private double guardProbability = -1.0;
   private double middleProbability = -1.0;
   private double exitProbability = -1.0;
+  private String defaultPolicy;
+  private String portList;
   public Node(String nickname, String fingerprint, String address,
       SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
-      String countryCode, String hostName, long lastRdnsLookup) {
+      String countryCode, String hostName, long lastRdnsLookup,
+      String defaultPolicy, String portList) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     try {
@@ -75,6 +78,8 @@ public class Node {
     this.countryCode = countryCode;
     this.hostName = hostName;
     this.lastRdnsLookup = lastRdnsLookup;
+    this.defaultPolicy = defaultPolicy;
+    this.portList = portList;
   }
   public String getFingerprint() {
     return this.fingerprint;
@@ -229,6 +234,12 @@ public class Node {
   }
   public double getExitProbability() {
     return this.exitProbability;
+  }
+  public String getDefaultPolicy() {
+    return this.defaultPolicy;
+  }
+  public String getPortList() {
+    return this.portList;
   }
 }
 

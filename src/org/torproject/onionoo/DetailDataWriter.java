@@ -494,11 +494,16 @@ public class DetailDataWriter {
         String lastRestartedString = dateTimeFormat.format(
             descriptor.getPublishedMillis()
             - descriptor.getUptime() * 1000L);
-        int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
-            Math.min(descriptor.getBandwidthBurst(),
-            descriptor.getBandwidthObserved()));
+        int bandwidthRate = descriptor.getBandwidthRate();
+        int bandwidthBurst = descriptor.getBandwidthBurst();
+        int observedBandwidth = descriptor.getBandwidthObserved();
+        int advertisedBandwidth = Math.min(bandwidthRate,
+            Math.min(bandwidthBurst, observedBandwidth));
         sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
             + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
+            + "\"bandwidth_rate\":" + bandwidthRate + ",\n"
+            + "\"bandwidth_burst\":" + bandwidthBurst + ",\n"
+            + "\"observed_bandwidth\":" + observedBandwidth + ",\n"
             + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
             + "\"exit_policy\":[");
         int written = 0;
@@ -560,6 +565,8 @@ public class DetailDataWriter {
       double guardProbability = entry.getGuardProbability();
       double middleProbability = entry.getMiddleProbability();
       double exitProbability = entry.getExitProbability();
+      String defaultPolicy = entry.getDefaultPolicy();
+      String portList = entry.getPortList();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -637,6 +644,17 @@ public class DetailDataWriter {
       if (exitProbability >= 0.0) {
         sb.append(String.format(",\n\"exit_probability\":%.9f",
             exitProbability));
+      }
+      if (defaultPolicy != null && (defaultPolicy.equals("accept") ||
+          defaultPolicy.equals("reject")) && portList != null) {
+        sb.append(",\n\"exit_policy_summary\":{\"" + defaultPolicy
+            + "\":[");
+        int portsWritten = 0;
+        for (String portOrPortRange : portList.split(",")) {
+          sb.append((portsWritten++ > 0 ? "," : "")
+              + "\"" + portOrPortRange + "\"");
+        }
+        sb.append("]}");
       }
 
       /* Add exit addresses if at least one of them is distinct from the
