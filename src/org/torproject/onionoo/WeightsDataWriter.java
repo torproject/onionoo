@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -103,7 +102,6 @@ public class WeightsDataWriter {
   private void updateWeightsHistory(long validAfterMillis,
       long freshUntilMillis,
       SortedMap<String, double[]> pathSelectionWeights) {
-    int files = pathSelectionWeights.size();
     List<HistoryUpdateWorker> historyUpdateWorkers =
         new ArrayList<HistoryUpdateWorker>();
     for (int i = 0; i < HISTORY_UPDATER_WORKERS_NUM; i++) {
