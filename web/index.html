@@ -782,7 +782,11 @@ running or that have been running in the past week.
 </tr>
 </table>
 <p>Each of the methods above can be parameterized to select only a subset
-of relay and/or bridge documents to be included in the response.</p>
+of relay and/or bridge documents to be included in the response.
+If multiple parameters are specified, they are combined using a logical
+AND operation, meaning that only the intersection of relays and bridges
+matching all parameters is returned.
+</p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
 <colgroup>
 <col width="150">
@@ -797,9 +801,9 @@ of relay and/or bridge documents to be included in the response.</p>
 <b>false</b>).
 </td></tr>
 <tr><td><b>search</b></td><td>Return only relays with the parameter value
-matching the beginning of a nickname, (possibly $-prefixed) fingerprint,
-or IP address, and bridges with the nickname or (possibly $-prefixed)
-hashed fingerprint.
+matching the beginning of a nickname, (possibly $-prefixed) beginning of a
+fingerprint, or beginning of an IP address, and bridges with the beginning
+of a nickname or (possibly $-prefixed) beginning of a hashed fingerprint.
 Searches are case-insensitive.
 If multiple search terms are given, separated by spaces, the intersection
 of all relays and bridges matching all search terms will be returned.
@@ -827,13 +831,15 @@ limited by providing further parameters.</p>
 </colgroup>
 <tr><td><b>order</b></td><td>Re-order results by a comma-separated list
 of fields in ascending or descening order.
-Results are first ordered by the second list element, then by the second,
+Results are first ordered by the first list element, then by the second,
 and so on.
 Possible fields for ordering are: <b>consensus_weight</b>.
 Ascending order is the default; descending order is selected by prepending
 fields with a minus sign (<b>-</b>).
-Relays which don't have any value for a field to be ordered by are always
-appended to the end, regardless or sorting order.
+Relays or bridges which don't have any value for a field to be ordered by
+are always appended to the end, regardless or sorting order.
+The ordering is defined independent of the requested document type and
+does not require the ordering field to be contained in the document.
 If no <b>order</b> parameter is given, ordering of results is
 undefined.
 </td></tr>
