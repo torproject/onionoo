@@ -174,11 +174,11 @@ public class CurrentNodes {
             entry.getLastSeenMillis());
         String orPort = String.valueOf(entry.getOrPort());
         String dirPort = String.valueOf(entry.getDirPort());
-        StringBuilder sb = new StringBuilder();
+        StringBuilder flagsBuilder = new StringBuilder();
+        written = 0;
         for (String relayFlag : entry.getRelayFlags()) {
-          sb.append("," + relayFlag);
+          flagsBuilder.append((written++ > 0 ? "," : "") + relayFlag);
         }
-        String relayFlags = sb.toString().substring(1);
         String consensusWeight = String.valueOf(
             entry.getConsensusWeight());
         String countryCode = entry.getCountryCode() != null
@@ -192,7 +192,7 @@ public class CurrentNodes {
             ? entry.getPortList() : "null";
         bw.write("r " + nickname + " " + fingerprint + " "
             + addressesBuilder.toString() + " " + validAfter + " "
-            + orPort + " " + dirPort + " " + relayFlags + " "
+            + orPort + " " + dirPort + " " + flagsBuilder.toString() + " "
             + consensusWeight + " " + countryCode + " " + hostName + " "
             + String.valueOf(lastRdnsLookup) + " " + defaultPolicy + " "
             + portList + "\n");
@@ -213,15 +213,15 @@ public class CurrentNodes {
         addressesBuilder.append(";");
         String orPort = String.valueOf(entry.getOrPort());
         String dirPort = String.valueOf(entry.getDirPort());
-        StringBuilder sb = new StringBuilder();
+        StringBuilder flagsBuilder = new StringBuilder();
+        written = 0;
         for (String relayFlag : entry.getRelayFlags()) {
-          sb.append("," + relayFlag);
+          flagsBuilder.append((written++ > 0 ? "," : "") + relayFlag);
         }
-        String relayFlags = sb.toString().substring(1);
         bw.write("b " + nickname + " " + fingerprint + " "
             + addressesBuilder.toString() + " " + published + " " + orPort
-            + " " + dirPort + " " + relayFlags + " -1 ?? null -1 null "
-            + "null\n");
+            + " " + dirPort + " " + flagsBuilder.toString()
+            + " -1 ?? null -1 null null\n");
       }
       bw.close();
     } catch (IOException e) {
