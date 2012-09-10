@@ -276,7 +276,9 @@ public class WeightsDataWriter {
         return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
       }
     });
-    File historyFile = new File("status/weights", fingerprint);
+    File historyFile = new File(String.format("status/weights/%s/%s/%s",
+        fingerprint.substring(0, 1), fingerprint.substring(1, 2),
+        fingerprint));
     if (historyFile.exists()) {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
@@ -377,7 +379,9 @@ public class WeightsDataWriter {
 
   private void writeHistoryToDisk(String fingerprint,
       SortedMap<long[], double[]> history) {
-    File historyFile = new File("status/weights", fingerprint);
+    File historyFile = new File(String.format("status/weights/%s/%s/%s",
+        fingerprint.substring(0, 1), fingerprint.substring(1, 2),
+        fingerprint));
     try {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");

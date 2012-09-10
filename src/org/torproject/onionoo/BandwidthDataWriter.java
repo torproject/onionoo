@@ -135,7 +135,9 @@ public class BandwidthDataWriter {
   private void readHistoryFromDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
-    File historyFile = new File("status/bandwidth", fingerprint);
+    File historyFile = new File(String.format("status/bandwidth/%s/%s/%s",
+        fingerprint.substring(0, 1), fingerprint.substring(1, 2),
+        fingerprint));
     if (historyFile.exists()) {
       try {
         BufferedReader br = new BufferedReader(new FileReader(
@@ -226,7 +228,9 @@ public class BandwidthDataWriter {
   private void writeHistoryToDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
-    File historyFile = new File("status/bandwidth", fingerprint);
+    File historyFile = new File(String.format("status/bandwidth/%s/%s/%s",
+        fingerprint.substring(0, 1), fingerprint.substring(1, 2),
+        fingerprint));
     try {
       historyFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(historyFile));
