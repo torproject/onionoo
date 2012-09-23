@@ -44,7 +44,7 @@ with hashed fingerprints and running information.
 Summary documents contain the following fields:
 <ul>
 <li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last contained relay network status consensus started being valid.
+the last known relay network status consensus started being valid.
 Indicates how recent the relay summaries in this document are.
 Required field.</li>
 <li><b>"relays":</b> Array of objects representing relay summaries.
@@ -68,7 +68,7 @@ Required field.</li>
 </ul>
 </li>
 <li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last contained bridge network status was published.
+the last known bridge network status was published.
 Indicates how recent the bridge summaries in this document are.
 Required field.</li>
 <li><b>"bridges":</b> Array of objects representing bridge summaries.
@@ -97,7 +97,7 @@ directories and the server descriptors published by relays and bridges.
 Detail documents contain the following fields:
 <ul>
 <li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last contained relay network status consensus started being valid.
+the last known relay network status consensus started being valid.
 Indicates how recent the relay details in this document are.
 Required field.</li>
 <li><b>"relays":</b> Array of objects representing relay details.
@@ -278,7 +278,7 @@ bandwidth weights.</li>
 </ul>
 </li>
 <li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last contained bridge network status was published.
+the last known bridge network status was published.
 Indicates how recent the bridge details in this document are.
 Required field.</li>
 <li><b>"bridges":</b> Array of objects representing bridge summaries.
@@ -342,7 +342,7 @@ been running in the past week.
 Bandwidth documents contain the following fields:
 <ul>
 <li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last contained relay network status consensus started being valid.
+the last known relay network status consensus started being valid.
 Indicates how recent the relay bandwidth documents in this document are.
 Required field.</li>
 <li><b>"relays":</b> Array of objects representing relay bandwidth
@@ -402,7 +402,7 @@ The specification of bandwidth history objects is similar to those in the
 </ul>
 </li>
 <li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last contained bridge network status was published.
+the last known bridge network status was published.
 Indicates how recent the bridge bandwidth documents in this document are.
 Required field.</li>
 <li><b>"bridges":</b> Array of objects representing bridge bandwidth
@@ -436,7 +436,7 @@ all relays that have been running in the past week.
 Weights documents contain the following fields:
 <ul>
 <li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last contained relay network status consensus started being valid.
+the last known relay network status consensus started being valid.
 Indicates how recent the relay weights documents in this document are.
 Required field.</li>
 <li><b>"relays":</b> Array of objects representing relay weights
@@ -528,6 +528,14 @@ The specification of this history object is similar to that in the
 <i>advertised_bandwidth_fraction</i> field above.</li>
 </ul>
 </li>
+<li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known bridge network status was published.
+Only included for compatibility reasons with the other document types.
+Required field.</li>
+<li><b>"bridges":</b> Empty array of objects that would represent bridge
+weights documents.
+Only included for compatibility reasons with the other document types.
+Required field.</li>
 </ul>
 <br>
 <a name="methods"></a>
