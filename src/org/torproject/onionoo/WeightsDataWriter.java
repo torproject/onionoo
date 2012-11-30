@@ -54,6 +54,11 @@ public class WeightsDataWriter {
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();
+      if (descriptorFile.getException() != null) {
+        System.out.println("Could not parse "
+            + descriptorFile.getFileName());
+        descriptorFile.getException().printStackTrace();
+      }
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
           if (descriptor instanceof ServerDescriptor) {
@@ -81,6 +86,11 @@ public class WeightsDataWriter {
     Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
     while (descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = descriptorFiles.next();
+      if (descriptorFile.getException() != null) {
+        System.out.println("Could not parse "
+            + descriptorFile.getFileName());
+        descriptorFile.getException().printStackTrace();
+      }
       if (descriptorFile.getDescriptors() != null) {
         for (Descriptor descriptor : descriptorFile.getDescriptors()) {
           if (descriptor instanceof RelayNetworkStatusConsensus) {
