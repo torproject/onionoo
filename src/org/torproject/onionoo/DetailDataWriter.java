@@ -220,6 +220,11 @@ public class DetailDataWriter {
         wee = ((double) bandwidthWeights.get("Wee")) / 10000.0;
         wed = ((double) bandwidthWeights.get("Wed")) / 10000.0;
       }
+    } else {
+      System.err.println("Could not determine most recent Wxx parameter "
+          + "values, probably because we didn't parse a consensus in "
+          + "this execution.  All relays' guard/middle/exit weights are "
+          + "going to be 0.0.");
     }
     SortedMap<String, Double>
         advertisedBandwidths = new TreeMap<String, Double>(),
