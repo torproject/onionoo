@@ -185,20 +185,31 @@ Omitted if the relay IP address was not looked up or if no lookup request
 was successful yet.</li>
 <li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
-Optional field.</li>
+Optional field.
+Missing if router descriptor containing this information cannot be
+found.</li>
 <li><b>"bandwidth_rate":</b> Average bandwidth
 in bytes per second that this relay is willing to sustain over long
 periods.
-Required field.</li>
+<font color="red">Optional field.
+Changed from required to optional field on December 4, 2012.</font>
+Missing if router descriptor containing this information cannot be
+found.</li>
 <li><b>"bandwidth_burst":</b> Bandwidth in bytes
 per second that this relay is willing to sustain in very short intervals.
-Required field.</li>
+<font color="red">Optional field.
+Changed from required to optional field on December 4, 2012.</font>
+Missing if router descriptor containing this information cannot be
+found.</li>
 <li><b>"observed_bandwidth":</b> Bandwidth
 estimate in bytes per second of the capacity this relay can handle.
 The relay remembers the maximum bandwidth sustained output over any ten
 second period in the past day, and another sustained input.
 The "observed_bandwidth" value is the lesser of these two numbers.
-Required field.</li>
+<font color="red">Optional field.
+Changed from required to optional field on December 4, 2012.</font>
+Missing if router descriptor containing this information cannot be
+found.</li>
 <li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
 relay is willing and capable to provide.
 Optional field.
