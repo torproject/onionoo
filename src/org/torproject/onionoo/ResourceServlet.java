@@ -279,7 +279,7 @@ public class ResourceServlet extends HttpServlet {
           orderedRelays.add(filteredRelays.remove(relay));
         }
       }
-      for (String relay : filteredRelays.values()) {
+      for (String relay : filteredRelays.keySet()) {
         if (!orderedRelays.contains(filteredRelays.get(relay))) {
           orderedRelays.add(filteredRelays.remove(relay));
         }
