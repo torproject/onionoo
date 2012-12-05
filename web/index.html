@@ -616,6 +616,8 @@ of relay and/or bridge documents to be included in the response.
 If multiple parameters are specified, they are combined using a logical
 AND operation, meaning that only the intersection of relays and bridges
 matching all parameters is returned.
+If the same parameter is specified more than once, only the first
+parameter value is considered.
 </p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
 <colgroup>
@@ -657,7 +659,9 @@ Filtering by country code is case-insensitive.
 </td></tr>
 </table>
 <p>Relay and/or bridge documents in the response can be ordered and
-limited by providing further parameters.</p>
+limited by providing further parameters.
+If the same parameter is specified more than once, only the first
+parameter value is considered.</p>
 <table border="0" cellpadding="4" cellspacing="0" summary="">
 <colgroup>
 <col width="150">
