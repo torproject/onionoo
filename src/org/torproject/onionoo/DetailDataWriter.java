@@ -572,6 +572,9 @@ public class DetailDataWriter {
             (addressesWritten++ > 0 ? "," : "") + "\"" + orAddress
             + "\"");
       }
+      String lastSeen = dateTimeFormat.format(entry.getLastSeenMillis());
+      String firstSeen = dateTimeFormat.format(
+          entry.getFirstSeenMillis());
       String running = entry.getRunning() ? "true" : "false";
       int dirPort = entry.getDirPort();
       String countryCode = entry.getCountryCode();
@@ -602,6 +605,8 @@ public class DetailDataWriter {
         sb.append(",\n\"dir_address\":\"" + address + ":" + dirPort
             + "\"");
       }
+      sb.append(",\n\"last_seen\":\"" + lastSeen + "\"");
+      sb.append(",\n\"first_seen\":\"" + firstSeen + "\"");
       sb.append(",\n\"running\":" + running + ",\n");
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {
@@ -821,6 +826,9 @@ public class DetailDataWriter {
       /* Generate network-status-specific part. */
       Node entry = bridge.getValue();
       String nickname = entry.getNickname();
+      String lastSeen = dateTimeFormat.format(entry.getLastSeenMillis());
+      String firstSeen = dateTimeFormat.format(
+          entry.getFirstSeenMillis());
       String running = entry.getRunning() ? "true" : "false";
       String address = entry.getAddress();
       SortedSet<String> orAddresses = new TreeSet<String>(
@@ -838,8 +846,9 @@ public class DetailDataWriter {
           + "\"nickname\":\"" + nickname + "\",\n"
           + "\"hashed_fingerprint\":\"" + fingerprint + "\",\n"
           + "\"or_addresses\":[" + orAddressesAndPortsBuilder.toString()
-          + "],\n"
-          + "\"running\":" + running + ",");
+          + "],\n\"last_seen\":\"" + lastSeen + "\",\n\"first_seen\":\""
+          + firstSeen + "\",\n\"running\":" + running + ",");
+
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {
         sb.append("\n\"flags\":[");

@@ -27,6 +27,7 @@ public class Node {
   private String cityName;
   private String aSName;
   private String aSNumber;
+  private long firstSeenMillis;
   private long lastSeenMillis;
   private int orPort;
   private int dirPort;
@@ -47,7 +48,7 @@ public class Node {
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostName, long lastRdnsLookup,
-      String defaultPolicy, String portList) {
+      String defaultPolicy, String portList, long firstSeenMillis) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     try {
@@ -80,6 +81,7 @@ public class Node {
     this.lastRdnsLookup = lastRdnsLookup;
     this.defaultPolicy = defaultPolicy;
     this.portList = portList;
+    this.firstSeenMillis = firstSeenMillis;
   }
   public String getFingerprint() {
     return this.fingerprint;
@@ -170,6 +172,9 @@ public class Node {
   }
   public String getASName() {
     return this.aSName;
+  }
+  public long getFirstSeenMillis() {
+    return this.firstSeenMillis;
   }
   public long getLastSeenMillis() {
     return this.lastSeenMillis;

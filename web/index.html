@@ -124,6 +124,20 @@ Omitted if array is empty.</li>
 accepts directory connections.
 Optional field.
 Omitted if the relay does not accept directory connections.</li>
+<li><b><font color="blue">"last_seen":</font></b> UTC timestamp
+(YYYY-MM-DD hh:mm:ss) when this relay was last seen in a network status
+consensus.
+Required field.
+Added field on December 5, 2012.</li>
+<li><b><font color="blue">"first_seen":</font></b> UTC timestamp
+(YYYY-MM-DD hh:mm:ss) when this relay was first seen in a network status
+consensus.
+Note that this timestamp is reset when a relay drops out of the consensus
+for more than 7 days, so that whenever that relay rejoins, it would seem
+as if it joined for the first time; this is a known limitation of the
+current Onionoo design.
+Required field.
+Added field on December 5, 2012.</li>
 <li><b>"running":</b> Boolean field saying whether this relay was listed as
 running in the last relay network status consensus.
 Required field.</li>
@@ -310,6 +324,20 @@ Sanitized IP addresses always change on the 1st of every month at 00:00:00
 UTC, regardless of the bridge actually changing its IP address.
 TCP ports are not sanitized.
 Required field.</li>
+<li><b><font color="blue">"last_seen":</font></b> UTC timestamp
+(YYYY-MM-DD hh:mm:ss) when this bridge was last seen in a bridge network
+status.
+Required field.
+Added field on December 5, 2012.</li>
+<li><b><font color="blue">"first_seen":</font></b> UTC timestamp
+(YYYY-MM-DD hh:mm:ss) when this bridge was first seen in a bridge network
+status.
+Note that this timestamp is reset when a bridge drops out of the network
+status for more than 7 days, so that whenever that bridge rejoins, it
+would seem as if it joined for the first time; this is a known limitation
+of the current Onionoo design.
+Required field.
+Added field on December 5, 2012.</li>
 <li><b>"running":</b> Boolean field saying whether this bridge was listed
 as running in the last bridge network status.
 Required field.</li>

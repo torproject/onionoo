@@ -113,18 +113,23 @@ public class CurrentNodes {
               portList = parts[14];
             }
           }
+          long firstSeenMillis = publishedOrValidAfterMillis;
+          if (parts.length > 16) {
+            firstSeenMillis = dateTimeFormat.parse(parts[15] + " "
+                + parts[16]).getTime();
+          }
           if (isRelay) {
             this.addRelay(nickname, fingerprint, address,
                 orAddressesAndPorts, exitAddresses,
                 publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
                 consensusWeight, countryCode, hostName, lastRdnsLookup,
-                defaultPolicy, portList);
+                defaultPolicy, portList, firstSeenMillis);
           } else {
             this.addBridge(nickname, fingerprint, address,
                 orAddressesAndPorts, exitAddresses,
                 publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
                 consensusWeight, countryCode, hostName, lastRdnsLookup,
-                defaultPolicy, portList);
+                defaultPolicy, portList, firstSeenMillis);
           }
         }
         br.close();
@@ -190,12 +195,14 @@ public class CurrentNodes {
             ? entry.getDefaultPolicy() : "null";
         String portList = entry.getPortList() != null
             ? entry.getPortList() : "null";
+        String firstSeen = dateTimeFormat.format(
+            entry.getFirstSeenMillis());
         bw.write("r " + nickname + " " + fingerprint + " "
             + addressesBuilder.toString() + " " + validAfter + " "
             + orPort + " " + dirPort + " " + flagsBuilder.toString() + " "
             + consensusWeight + " " + countryCode + " " + hostName + " "
             + String.valueOf(lastRdnsLookup) + " " + defaultPolicy + " "
-            + portList + "\n");
+            + portList + " " + firstSeen + "\n");
       }
       for (Node entry : this.currentBridges.values()) {
         String nickname = entry.getNickname();
@@ -218,10 +225,12 @@ public class CurrentNodes {
         for (String relayFlag : entry.getRelayFlags()) {
           flagsBuilder.append((written++ > 0 ? "," : "") + relayFlag);
         }
+        String firstSeen = dateTimeFormat.format(
+            entry.getFirstSeenMillis());
         bw.write("b " + nickname + " " + fingerprint + " "
             + addressesBuilder.toString() + " " + published + " " + orPort
             + " " + dirPort + " " + flagsBuilder.toString()
-            + " -1 ?? null -1 null null\n");
+            + " -1 ?? null -1 null null " + firstSeen + "\n");
       }
       bw.close();
     } catch (IOException e) {
@@ -294,7 +303,8 @@ public class CurrentNodes {
       String portList = entry.getPortList();
       this.addRelay(nickname, fingerprint, address, orAddressesAndPorts,
           null, validAfterMillis, orPort, dirPort, relayFlags,
-          consensusWeight, null, null, -1L, defaultPolicy, portList);
+          consensusWeight, null, null, -1L, defaultPolicy, portList,
+          validAfterMillis);
     }
     if (this.lastValidAfterMillis == validAfterMillis) {
       this.lastBandwidthWeights = consensus.getBandwidthWeights();
@@ -306,7 +316,7 @@ public class CurrentNodes {
       SortedSet<String> exitAddresses, long validAfterMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostName, long lastRdnsLookup,
-      String defaultPolicy, String portList) {
+      String defaultPolicy, String portList, long firstSeenMillis) {
     if (validAfterMillis >= cutoff &&
         (!this.currentRelays.containsKey(fingerprint) ||
         this.currentRelays.get(fingerprint).getLastSeenMillis() <
@@ -318,10 +328,14 @@ public class CurrentNodes {
         hostName = previousRelay.getHostName();
         lastRdnsLookup = previousRelay.getLastRdnsLookup();
       }
+      if (previousRelay != null) {
+        firstSeenMillis = Math.min(firstSeenMillis,
+            previousRelay.getFirstSeenMillis());
+      }
       Node entry = new Node(nickname, fingerprint, address,
           orAddressesAndPorts, exitAddresses, validAfterMillis, orPort,
           dirPort, relayFlags, consensusWeight, countryCode, hostName,
-          lastRdnsLookup, defaultPolicy, portList);
+          lastRdnsLookup, defaultPolicy, portList, firstSeenMillis);
       this.currentRelays.put(fingerprint, entry);
       if (validAfterMillis > this.lastValidAfterMillis) {
         this.lastValidAfterMillis = validAfterMillis;
@@ -424,7 +438,7 @@ public class CurrentNodes {
       SortedSet<String> relayFlags = entry.getFlags();
       this.addBridge(nickname, fingerprint, address, orAddressesAndPorts,
           null, publishedMillis, orPort, dirPort, relayFlags, -1, "??",
-          null, -1L, null, null);
+          null, -1L, null, null, publishedMillis);
     }
   }
 
@@ -433,15 +447,21 @@ public class CurrentNodes {
       SortedSet<String> exitAddresses, long publishedMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostname, long lastRdnsLookup,
-      String defaultPolicy, String portList) {
+      String defaultPolicy, String portList, long firstSeenMillis) {
     if (publishedMillis >= cutoff &&
         (!this.currentBridges.containsKey(fingerprint) ||
         this.currentBridges.get(fingerprint).getLastSeenMillis() <
         publishedMillis)) {
+      Node previousBridge = this.currentBridges.containsKey(fingerprint)
+          ? this.currentBridges.get(fingerprint) : null;
+      if (previousBridge != null) {
+        firstSeenMillis = Math.min(firstSeenMillis,
+            previousBridge.getFirstSeenMillis());
+      }
       Node entry = new Node(nickname, fingerprint, address,
           orAddressesAndPorts, exitAddresses, publishedMillis, orPort,
           dirPort, relayFlags, consensusWeight, countryCode, hostname,
-          lastRdnsLookup, defaultPolicy, portList);
+          lastRdnsLookup, defaultPolicy, portList, firstSeenMillis);
       this.currentBridges.put(fingerprint, entry);
       if (publishedMillis > this.lastPublishedMillis) {
         this.lastPublishedMillis = publishedMillis;
