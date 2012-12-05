@@ -569,8 +569,8 @@ public class DetailDataWriter {
       int addressesWritten = 0;
       for (String orAddress : orAddresses) {
         orAddressesAndPortsBuilder.append(
-            (addressesWritten++ > 0 ? "," : "") + "\"" + orAddress
-            + "\"");
+            (addressesWritten++ > 0 ? "," : "") + "\""
+            + orAddress.toLowerCase() + "\"");
       }
       String lastSeen = dateTimeFormat.format(entry.getLastSeenMillis());
       String firstSeen = dateTimeFormat.format(
@@ -699,8 +699,8 @@ public class DetailDataWriter {
         sb.append(",\n\"exit_addresses\":[");
         int written = 0;
         for (String exitAddress : entry.getExitAddresses()) {
-          sb.append((written++ > 0 ? "," : "") + "\"" + exitAddress
-              + "\"");
+          sb.append((written++ > 0 ? "," : "") + "\""
+              + exitAddress.toLowerCase() + "\"");
         }
         sb.append("]");
       }
@@ -838,8 +838,8 @@ public class DetailDataWriter {
       int addressesWritten = 0;
       for (String orAddress : orAddresses) {
         orAddressesAndPortsBuilder.append(
-            (addressesWritten++ > 0 ? "," : "") + "\"" + orAddress
-            + "\"");
+            (addressesWritten++ > 0 ? "," : "") + "\""
+            + orAddress.toLowerCase() + "\"");
       }
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"

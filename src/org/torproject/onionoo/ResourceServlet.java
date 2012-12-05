@@ -123,8 +123,8 @@ public class ResourceServlet extends HttpServlet {
     StringBuilder addressesBuilder = new StringBuilder();
     int written = 0;
     for (String address : addresses) {
-      addressesBuilder.append((written++ > 0 ? "," : "") + "\"" + address
-          + "\"");
+      addressesBuilder.append((written++ > 0 ? "," : "") + "\""
+          + address.toLowerCase() + "\"");
     }
     return String.format("{%s\"f\":\"%s\",\"a\":[%s],\"r\":%s}",
         (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
