@@ -428,7 +428,15 @@ public class ResourceServlet extends HttpServlet {
   private void filterBySearchTerms(Map<String, String> filteredRelays,
       Map<String, String> filteredBridges, String[] searchTerms) {
     for (String searchTerm : searchTerms) {
-      filterBySearchTerm(filteredRelays, filteredBridges, searchTerm);
+      if (searchTerm.startsWith("$") && searchTerm.length() == 41) {
+        this.filterByFingerprint(filteredRelays, filteredBridges,
+            searchTerm.substring(1).toUpperCase());
+      } else if (!searchTerm.startsWith("$") && searchTerm.length() == 40) {
+        this.filterByFingerprint(filteredRelays, filteredBridges,
+            searchTerm.toUpperCase());
+      } else {
+        filterBySearchTerm(filteredRelays, filteredBridges, searchTerm);
+      }
     }
   }
 
