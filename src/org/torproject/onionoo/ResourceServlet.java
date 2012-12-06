@@ -330,16 +330,12 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      if (limit >= 0) {
-        while (limit < orderedRelays.size()) {
-          orderedRelays.remove(orderedRelays.size() - 1);
-        }
+      while (!orderedRelays.isEmpty() && limit < orderedRelays.size()) {
+        orderedRelays.remove(orderedRelays.size() - 1);
       }
       limit -= orderedRelays.size();
-      if (limit >= 0) {
-        while (limit < orderedBridges.size()) {
-          orderedBridges.remove(orderedBridges.size() - 1);
-        }
+      while (!orderedBridges.isEmpty() && limit < orderedBridges.size()) {
+        orderedBridges.remove(orderedBridges.size() - 1);
       }
     }
 
