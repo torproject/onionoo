@@ -607,10 +607,10 @@ public class DetailDataWriter {
       }
       sb.append(",\n\"last_seen\":\"" + lastSeen + "\"");
       sb.append(",\n\"first_seen\":\"" + firstSeen + "\"");
-      sb.append(",\n\"running\":" + running + ",\n");
+      sb.append(",\n\"running\":" + running);
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {
-        sb.append("\"flags\":[");
+        sb.append(",\n\"flags\":[");
         int written = 0;
         for (String relayFlag : relayFlags) {
           sb.append((written++ > 0 ? "," : "") + "\"" + relayFlag + "\"");
@@ -847,11 +847,11 @@ public class DetailDataWriter {
           + "\"hashed_fingerprint\":\"" + fingerprint + "\",\n"
           + "\"or_addresses\":[" + orAddressesAndPortsBuilder.toString()
           + "],\n\"last_seen\":\"" + lastSeen + "\",\n\"first_seen\":\""
-          + firstSeen + "\",\n\"running\":" + running + ",");
+          + firstSeen + "\",\n\"running\":" + running);
 
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {
-        sb.append("\n\"flags\":[");
+        sb.append(",\n\"flags\":[");
         int written = 0;
         for (String relayFlag : relayFlags) {
           sb.append((written++ > 0 ? "," : "") + "\"" + relayFlag + "\"");
