@@ -860,7 +860,7 @@ public class DetailDataWriter {
       }
 
       /* Append descriptor and bridge pool assignment parts. */
-      if (descriptorParts != null) {
+      if (descriptorParts != null && descriptorParts.length() != 0) {
         sb.append(",\n" + descriptorParts);
       }
       if (bridgePoolAssignment != null) {
