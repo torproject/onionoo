@@ -127,20 +127,16 @@ Omitted if array is empty.</li>
 accepts directory connections.
 Optional field.
 Omitted if the relay does not accept directory connections.</li>
-<li><b><font color="blue">"last_seen":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when this relay was last seen in a network status
-consensus.
-Required field.
-Added field on December 5, 2012.</li>
-<li><b><font color="blue">"first_seen":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when this relay was first seen in a network status
-consensus.
+<li><b>"last_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
+relay was last seen in a network status consensus.
+Required field.</li>
+<li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
+relay was first seen in a network status consensus.
 Note that this timestamp is reset when a relay drops out of the consensus
 for more than 7 days, so that whenever that relay rejoins, it would seem
 as if it joined for the first time; this is a known limitation of the
 current Onionoo design.
-Required field.
-Added field on December 5, 2012.</li>
+Required field.</li>
 <li><b>"running":</b> Boolean field saying whether this relay was listed as
 running in the last relay network status consensus.
 Required field.</li>
@@ -208,14 +204,12 @@ found.</li>
 <li><b>"bandwidth_rate":</b> Average bandwidth
 in bytes per second that this relay is willing to sustain over long
 periods.
-<font color="red">Optional field.
-Changed from required to optional field on December 4, 2012.</font>
+Optional field.
 Missing if router descriptor containing this information cannot be
 found.</li>
 <li><b>"bandwidth_burst":</b> Bandwidth in bytes
 per second that this relay is willing to sustain in very short intervals.
-<font color="red">Optional field.
-Changed from required to optional field on December 4, 2012.</font>
+Optional field.
 Missing if router descriptor containing this information cannot be
 found.</li>
 <li><b>"observed_bandwidth":</b> Bandwidth
@@ -223,8 +217,7 @@ estimate in bytes per second of the capacity this relay can handle.
 The relay remembers the maximum bandwidth sustained output over any ten
 second period in the past day, and another sustained input.
 The "observed_bandwidth" value is the lesser of these two numbers.
-<font color="red">Optional field.
-Changed from required to optional field on December 4, 2012.</font>
+Optional field.
 Missing if router descriptor containing this information cannot be
 found.</li>
 <li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
@@ -328,20 +321,16 @@ Sanitized IP addresses always change on the 1st of every month at 00:00:00
 UTC, regardless of the bridge actually changing its IP address.
 TCP ports are not sanitized.
 Required field.</li>
-<li><b><font color="blue">"last_seen":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when this bridge was last seen in a bridge network
-status.
-Required field.
-Added field on December 5, 2012.</li>
-<li><b><font color="blue">"first_seen":</font></b> UTC timestamp
-(YYYY-MM-DD hh:mm:ss) when this bridge was first seen in a bridge network
-status.
+<li>"last_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this bridge
+was last seen in a bridge network status.
+Required field.</li>
+<li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
+bridge was first seen in a bridge network status.
 Note that this timestamp is reset when a bridge drops out of the network
 status for more than 7 days, so that whenever that bridge rejoins, it
 would seem as if it joined for the first time; this is a known limitation
 of the current Onionoo design.
-Required field.
-Added field on December 5, 2012.</li>
+Required field.</li>
 <li><b>"running":</b> Boolean field saying whether this bridge was listed
 as running in the last bridge network status.
 Required field.</li>
