@@ -11,13 +11,17 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.Descriptor;
@@ -26,10 +30,6 @@ import org.torproject.descriptor.DescriptorReader;
 import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
-
-import com.maxmind.geoip.Location;
-import com.maxmind.geoip.LookupService;
-import com.maxmind.geoip.regionName;
 
 /* Store relays and bridges that have been running in the past seven
  * days. */
@@ -343,53 +343,341 @@ public class CurrentNodes {
     }
   }
 
-  public void lookUpCountries() {
-    File geoLiteCityDatFile = new File("GeoLiteCity.dat");
-    if (!geoLiteCityDatFile.exists()) {
-      System.err.println("No GeoLiteCity.dat file in /.");
-      return;
-    }
-    try {
-      LookupService ls = new LookupService(geoLiteCityDatFile,
-          LookupService.GEOIP_MEMORY_CACHE);
-      for (Node relay : currentRelays.values()) {
-        Location location = ls.getLocation(relay.getAddress());
-        if (location != null) {
-          relay.setLatitude(String.format(Locale.US, "%.6f",
-              location.latitude));
-          relay.setLongitude(String.format(Locale.US, "%.6f",
-              location.longitude));
-          relay.setCountryCode(location.countryCode.toLowerCase());
-          relay.setCountryName(location.countryName);
-          relay.setRegionName(regionName.regionNameByCode(
-              location.countryCode, location.region));
-          relay.setCityName(location.city);
-        }
-      }
-      ls.close();
-    } catch (IOException e) {
-      System.err.println("Could not look up countries for relays.");
-    }
-  }
+  public void lookUpCitiesAndASes() {
 
-  public void lookUpASes() {
-    File geoIPASNumDatFile = new File("GeoIPASNum.dat");
-    if (!geoIPASNumDatFile.exists()) {
-      System.err.println("No GeoIPASNum.dat file in /.");
+    /* Make sure we have all required .csv files. */
+    File[] geoLiteCityBlocksCsvFiles = new File[] {
+        new File("geoip/Manual-GeoLiteCity-Blocks.csv"),
+        new File("geoip/Automatic-GeoLiteCity-Blocks.csv"),
+        new File("geoip/GeoLiteCity-Blocks.csv")
+    };
+    File geoLiteCityBlocksCsvFile = null;
+    for (File file : geoLiteCityBlocksCsvFiles) {
+      if (file.exists()) {
+        geoLiteCityBlocksCsvFile = file;
+        break;
+      }
+    }
+    if (geoLiteCityBlocksCsvFile == null) {
+      System.err.println("No *GeoLiteCity-Blocks.csv file in geoip/.");
       return;
     }
-    try {
-      LookupService ls = new LookupService(geoIPASNumDatFile);
-      for (Node relay : currentRelays.values()) {
-        String org = ls.getOrg(relay.getAddress());
-        if (org != null && org.indexOf(" ") > 0 && org.startsWith("AS")) {
-          relay.setASNumber(org.substring(0, org.indexOf(" ")));
-          relay.setASName(org.substring(org.indexOf(" ") + 1));
+    File geoLiteCityLocationCsvFile =
+        new File("geoip/GeoLiteCity-Location.csv");
+    if (!geoLiteCityLocationCsvFile.exists()) {
+      System.err.println("No GeoLiteCity-Location.csv file in geoip/.");
+      return;
+    }
+    File iso3166CsvFile = new File("geoip/iso3166.csv");
+    if (!iso3166CsvFile.exists()) {
+      System.err.println("No iso3166.csv file in geoip/.");
+      return;
+    }
+    File regionCsvFile = new File("geoip/region.csv");
+    if (!regionCsvFile.exists()) {
+      System.err.println("No region.csv file in geoip/.");
+      return;
+    }
+    File geoIPASNum2CsvFile = new File("geoip/GeoIPASNum2.csv");
+    if (!geoIPASNum2CsvFile.exists()) {
+      System.err.println("No GeoIPASNum2.csv file in geoip/.");
+      return;
+    }
+
+    /* Obtain a map from relay IP address strings to numbers. */
+    Map<String, Long> addressStringNumbers = new HashMap<String, Long>();
+    Pattern ipv4Pattern = Pattern.compile("^[0-9\\.]{7,15}$");
+    for (Node relay : this.currentRelays.values()) {
+      String addressString = relay.getAddress();
+      long addressNumber = -1L;
+      if (ipv4Pattern.matcher(addressString).matches()) {
+        String[] parts = addressString.split("\\.", 4);
+        if (parts.length == 4) {
+          addressNumber = 0L;
+          for (int i = 0; i < 4; i++) {
+            addressNumber *= 256L;
+            int octetValue = -1;
+            try {
+              octetValue = Integer.parseInt(parts[i]);
+            } catch (NumberFormatException e) {
+            }
+            if (octetValue < 0 || octetValue > 255) {
+              addressNumber = -1L;
+              break;
+            }
+            addressNumber += octetValue;
+          }
         }
       }
-      ls.close();
+      if (addressNumber >= 0L) {
+        addressStringNumbers.put(addressString, addressNumber);
+      }
+    }
+    if (addressStringNumbers.isEmpty()) {
+      System.err.println("No relay IP addresses to resolve to cities or "
+          + "ASN.");
+      return;
+    }
+
+    /* Obtain a map from IP address numbers to blocks. */
+    Map<Long, Long> addressNumberBlocks = new HashMap<Long, Long>();
+    try {
+      SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
+          addressStringNumbers.values());
+      long firstAddressNumber = sortedAddressNumbers.first();
+      BufferedReader br = new BufferedReader(new FileReader(
+          geoLiteCityBlocksCsvFile));
+      String line;
+      long previousStartIpNum = -1L;
+      while ((line = br.readLine()) != null) {
+        if (!line.startsWith("\"")) {
+          continue;
+        }
+        String[] parts = line.replaceAll("\"", "").split(",", 3);
+        if (parts.length != 3) {
+          System.err.println("Illegal line '" + line + "' in "
+              + geoLiteCityBlocksCsvFile.getAbsolutePath() + ".");
+          br.close();
+          return;
+        }
+        try {
+          long startIpNum = Long.parseLong(parts[0]);
+          if (startIpNum <= previousStartIpNum) {
+            System.err.println("Line '" + line + "' not sorted in "
+                + geoLiteCityBlocksCsvFile.getAbsolutePath() + ".");
+            br.close();
+            return;
+          }
+          previousStartIpNum = startIpNum;
+          while (firstAddressNumber < startIpNum &&
+              firstAddressNumber != -1L) {
+            sortedAddressNumbers.remove(firstAddressNumber);
+            if (sortedAddressNumbers.isEmpty()) {
+              firstAddressNumber = -1L;
+            } else {
+              firstAddressNumber = sortedAddressNumbers.first();
+            }
+          }
+          long endIpNum = Long.parseLong(parts[1]);
+          while (firstAddressNumber <= endIpNum &&
+              firstAddressNumber != -1L) {
+            long blockNumber = Long.parseLong(parts[2]);
+            addressNumberBlocks.put(firstAddressNumber, blockNumber);
+            sortedAddressNumbers.remove(firstAddressNumber);
+            if (sortedAddressNumbers.isEmpty()) {
+              firstAddressNumber = -1L;
+            } else {
+              firstAddressNumber = sortedAddressNumbers.first();
+            }
+          }
+          if (firstAddressNumber == -1L) {
+            break;
+          }
+        }
+        catch (NumberFormatException e) {
+          System.err.println("Number format exception while parsing line "
+              + "'" + line + "' in "
+              + geoLiteCityBlocksCsvFile.getAbsolutePath() + ".");
+          br.close();
+          return;
+        }
+      }
+      br.close();
     } catch (IOException e) {
-      System.err.println("Could not look up ASes for relays.");
+      System.err.println("I/O exception while reading "
+          + geoLiteCityBlocksCsvFile.getAbsolutePath() + ".");
+      return;
+    }
+
+    /* Obtain a map from relevant blocks to location lines. */
+    Map<Long, String> blockLocations = new HashMap<Long, String>();
+    try {
+      Set<Long> blockNumbers = new HashSet<Long>(
+          addressNumberBlocks.values());
+      BufferedReader br = new BufferedReader(new FileReader(
+          geoLiteCityLocationCsvFile));
+      String line;
+      while ((line = br.readLine()) != null) {
+        if (line.startsWith("C") || line.startsWith("l")) {
+          continue;
+        }
+        String[] parts = line.replaceAll("\"", "").split(",", 9);
+        if (parts.length != 9) {
+          System.err.println("Illegal line '" + line + "' in "
+              + geoLiteCityLocationCsvFile.getAbsolutePath() + ".");
+          br.close();
+          return;
+        }
+        try {
+          long locId = Long.parseLong(parts[0]);
+          if (blockNumbers.contains(locId)) {
+            blockLocations.put(locId, line);
+          }
+        }
+        catch (NumberFormatException e) {
+          System.err.println("Number format exception while parsing line "
+              + "'" + line + "' in "
+              + geoLiteCityLocationCsvFile.getAbsolutePath() + ".");
+          br.close();
+          return;
+        }
+      }
+      br.close();
+    } catch (IOException e) {
+      System.err.println("I/O exception while reading "
+          + geoLiteCityLocationCsvFile.getAbsolutePath() + ".");
+      return;
+    }
+
+    /* Read country names to memory. */
+    Map<String, String> countryNames = new HashMap<String, String>();
+    try {
+      BufferedReader br = new BufferedReader(new FileReader(
+          iso3166CsvFile));
+      String line;
+      while ((line = br.readLine()) != null) {
+        String[] parts = line.replaceAll("\"", "").split(",", 2);
+        if (parts.length != 2) {
+          System.err.println("Illegal line '" + line + "' in "
+              + iso3166CsvFile.getAbsolutePath() + ".");
+          br.close();
+          return;
+        }
+        countryNames.put(parts[0].toLowerCase(), parts[1]);
+      }
+      br.close();
+    } catch (IOException e) {
+      System.err.println("I/O exception while reading "
+          + iso3166CsvFile.getAbsolutePath() + ".");
+      return;
+    }
+
+    /* Read region names to memory. */
+    Map<String, String> regionNames = new HashMap<String, String>();
+    try {
+      BufferedReader br = new BufferedReader(new FileReader(
+          regionCsvFile));
+      String line;
+      while ((line = br.readLine()) != null) {
+        String[] parts = line.replaceAll("\"", "").split(",", 3);
+        if (parts.length != 3) {
+          System.err.println("Illegal line '" + line + "' in "
+              + regionCsvFile.getAbsolutePath() + ".");
+          br.close();
+          return;
+        }
+        regionNames.put(parts[0].toLowerCase() + ","
+            + parts[1].toLowerCase(), parts[2]);
+      }
+      br.close();
+    } catch (IOException e) {
+      System.err.println("I/O exception while reading "
+          + regionCsvFile.getAbsolutePath() + ".");
+      return;
+    }
+
+    /* Obtain a map from IP address numbers to ASN. */
+    Map<Long, String> addressNumberASN = new HashMap<Long, String>();
+    try {
+      SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
+          addressStringNumbers.values());
+      long firstAddressNumber = sortedAddressNumbers.first();
+      BufferedReader br = new BufferedReader(new FileReader(
+          geoIPASNum2CsvFile));
+      String line;
+      long previousStartIpNum = -1L;
+      while ((line = br.readLine()) != null) {
+        String[] parts = line.replaceAll("\"", "").split(",", 3);
+        if (parts.length != 3) {
+          System.err.println("Illegal line '" + line + "' in "
+              + geoIPASNum2CsvFile.getAbsolutePath() + ".");
+          br.close();
+          return;
+        }
+        try {
+          long startIpNum = Long.parseLong(parts[0]);
+          if (startIpNum <= previousStartIpNum) {
+            System.err.println("Line '" + line + "' not sorted in "
+                + geoIPASNum2CsvFile.getAbsolutePath() + ".");
+            br.close();
+            return;
+          }
+          previousStartIpNum = startIpNum;
+          while (firstAddressNumber < startIpNum &&
+              firstAddressNumber != -1L) {
+            sortedAddressNumbers.remove(firstAddressNumber);
+            if (sortedAddressNumbers.isEmpty()) {
+              firstAddressNumber = -1L;
+            } else {
+              firstAddressNumber = sortedAddressNumbers.first();
+            }
+          }
+          long endIpNum = Long.parseLong(parts[1]);
+          while (firstAddressNumber <= endIpNum &&
+              firstAddressNumber != -1L) {
+            if (parts[2].startsWith("AS") &&
+                parts[2].split(" ", 2).length == 2) {
+              addressNumberASN.put(firstAddressNumber, parts[2]);
+            }
+            sortedAddressNumbers.remove(firstAddressNumber);
+            if (sortedAddressNumbers.isEmpty()) {
+              firstAddressNumber = -1L;
+            } else {
+              firstAddressNumber = sortedAddressNumbers.first();
+            }
+          }
+          if (firstAddressNumber == -1L) {
+            break;
+          }
+        }
+        catch (NumberFormatException e) {
+          System.err.println("Number format exception while parsing line "
+              + "'" + line + "' in "
+              + geoIPASNum2CsvFile.getAbsolutePath() + ".");
+          br.close();
+          return;
+        }
+      }
+      br.close();
+    } catch (IOException e) {
+      System.err.println("I/O exception while reading "
+          + geoIPASNum2CsvFile.getAbsolutePath() + ".");
+      return;
+    }
+
+    /* Finally, set relays' city and ASN information. */
+    for (Node relay : currentRelays.values()) {
+      String addressString = relay.getAddress();
+      if (addressStringNumbers.containsKey(addressString)) {
+        long addressNumber = addressStringNumbers.get(addressString);
+        if (addressNumberBlocks.containsKey(addressNumber)) {
+          long blockNumber = addressNumberBlocks.get(addressNumber);
+          if (blockLocations.containsKey(blockNumber)) {
+            String[] parts = blockLocations.get(blockNumber).
+                replaceAll("\"", "").split(",", -1);
+            String countryCode = parts[1].toLowerCase();
+            relay.setCountryCode(countryCode);
+            if (countryNames.containsKey(countryCode)) {
+              relay.setCountryName(countryNames.get(countryCode));
+            }
+            String regionCode = countryCode + ","
+                + parts[2].toLowerCase();
+            if (regionNames.containsKey(regionCode)) {
+              relay.setRegionName(regionNames.get(regionCode));
+            }
+            if (parts[3].length() > 0) {
+              relay.setCityName(parts[3]);
+            }
+            relay.setLatitude(parts[5]);
+            relay.setLongitude(parts[6]);
+          }
+        }
+        if (addressNumberASN.containsKey(addressNumber)) {
+          String[] parts = addressNumberASN.get(addressNumber).split(" ", 2);
+          relay.setASNumber(parts[0]);
+          relay.setASName(parts[1]);
+        }
+      }
     }
   }
 

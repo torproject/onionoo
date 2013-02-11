@@ -1,9 +1,14 @@
 Clone the Onionoo server repository
 -----------------------------------
 
-Clone the Onionoo server repository into /srv/onionoo/.
+Create working directory /srv/onionoo/, make it writable for the metrics
+user, and clone the Onionoo server repository into it.  Commands prefixed
+with # are meant to be run by root, commands with $ by user metrics:
 
-$ git clone git://github.com/kloesing/Onionoo /srv/onionoo/
+# mkdir /srv/onionoo
+# chown metrics:metrics /srv/onionoo
+$ git clone https://git.torproject.org/onionoo.git /srv/onionoo/
+$ cd /srv/onionoo
 
 
 Install Java 1.5 or higher, ant 1.8 or higher, and Tomcat 6
@@ -20,13 +25,13 @@ Provide required .jar files
 ---------------------------
 
 Download or build the following .jar files and put them in the lib/
-directory using the given filename (or update build.xml if filenames are
-different):
+directory:
 
-- Apache Commons Codec 1.4, lib/commons-codec-1.4.jar
-- Servlet API, e.g., from Tomcat 6, lib/servlet-api.jar
-- Maxmind GeoIP Java API, lib/maxmindgeoip.jar
-- Tor Metrics Descriptor Library, lib/descriptor.jar
+- Apache Commons Codec 1.4
+- Apache Commons Compress 1.4.1
+- Apache Commons Lang 2.6
+- Servlet API, e.g., from Tomcat 6
+- Tor Metrics Descriptor Library, metrics-lib
 
 Attempt to compile the Java sources to make sure that everything works
 correctly:
@@ -37,14 +42,50 @@ $ ant compile
 Download GeoIP and ASN database files
 -------------------------------------
 
-Download the GeoLite City database from Maxmind and put it in
-/srv/onionoo/GeoLiteCity.dat.  If no such file is found, relay IP
-addresses will not be resolved to country codes, latitudes, and
-longitudes.
+Onionoo uses an IP-to-city database and an IP-to-ASN database to provide
+additional information about a relay's location.
 
-Also download the GeoLite ASN database from Maxmind and put it in
-/srv/onionoo/GeoIPASNum.dat.  If no such file is found, relay IP
-addresses will not be resolved to AS numbers and names.
+The IP-to-city database to be deployed with Onionoo needs to have its "A1"
+("Anonymous Proxy") entries fixed just like Tor's IP-to-country file.  See
+Tor's src/config/README.geoip for detailed information.
+
+First, change to the geoip/ directory:
+
+$ cd geoip/
+
+Download the most recent MaxMind GeoLite City database and unzip it in the
+current directory, junking paths:
+
+$ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity_CSV/GeoLiteCity-latest.zip
+$ unzip -j GeoLiteCity-latest.zip
+
+Run deanonymind.py in the local directory:
+
+$ python deanonymind.py
+
+Review the output to learn about applied automatic/manual changes and
+watch out for any warnings.  Possibly edit geoip-manual to make
+more/fewer/different manual changes and re-run deanonymind.py.  To look at
+automatic and manual changes, run:
+
+$ diff -U1 GeoLiteCity-Blocks.csv Automatic-GeoLiteCity-Blocks.csv
+$ diff -U1 Automatic-GeoLiteCity-Blocks.csv Manual-GeoLiteCity-Blocks.csv
+
+Download MaxMind's country and region codes files to the current
+directory:
+
+$ wget http://dev.maxmind.com/static/csv/codes/iso3166.csv
+$ wget http://dev.maxmind.com/static/csv/codes/maxmind/region.csv
+
+Download the most recent MaxMind ASN database file and unzip it in the
+current directory:
+
+$ wget http://www.maxmind.com/download/geoip/database/asnum/GeoIPASNum2.zip
+$ unzip GeoIPASNum2.zip
+
+Change back to the root working directory:
+
+$ cd ../
 
 
 Test the rsync of descriptors from metrics.torproject.org
@@ -57,10 +98,10 @@ $ rsync -arz metrics.torproject.org::metrics-recent in
 The result should be around 1G of data in the in/ directory, as of January
 2012.
 
-(If you want to pre-populate the bandwidth data with archived data,
-download the tarballs from https://metrics.torproject.org/data.html and
-process them one after the other.  There is no requirement to process data
-in any given order.)
+(If you want to pre-populate bandwidth and weights data with archived
+data, download the tarballs from https://metrics.torproject.org/data.html
+and process them one after the other.  There is no requirement to process
+data in any given order.)
 
 
 Test the hourly data processing process

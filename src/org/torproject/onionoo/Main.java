@@ -14,8 +14,7 @@ public class Main {
     cn.readRelaySearchDataFile(new File("out/summary"));
     cn.readRelayNetworkConsensuses();
     cn.setRelayRunningBits();
-    cn.lookUpCountries();
-    cn.lookUpASes();
+    cn.lookUpCitiesAndASes();
     cn.readBridgeNetworkStatuses();
     cn.setBridgeRunningBits();
 
