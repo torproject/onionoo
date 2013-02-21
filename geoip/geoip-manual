@@ -6,7 +6,9 @@
 # From geoip-manual (country):
 # Remove MaxMind entry 0.116.0.0-0.119.255.255 which MaxMind says is AT,
 # but which is part of reserved range 0.0.0.0/8.  -KL 2012-06-13
-"7602176","7864319",""
+# Disabled, because MaxMind apparently removed this range from their
+# database.  -KL 2013-02-21
+#"7602176","7864319",""
 
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
@@ -34,8 +36,15 @@
 "644048128","644048383","223"
 
 # Previous and next entry are same country, set to country number without
+# city information.  -KL 2013-02-21
+"644059136","644059391","39"
+
+# Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
 "644121856","644122111","223"
+
+# GB, taken from GeoLite Country February database.  -KL 2013-02-21
+"772808704","772810751","77"
 
 # From geoip-manual (country):
 # CH, because previous MaxMind entry 46.19.141.0-46.19.142.255 is CH, and
@@ -49,9 +58,21 @@
 # -KL 2012-11-27
 "782663680","782663935","77"
 
+# GB, because GeoLite Country February database has GB for both previous
+# and next entry.  -KL 2013-02-21
+"782665472","782666751","77"
+
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
 "786817152","786817215","195"
+
+# SE, because GeoLite Country February database has GB for entire range.
+# -KL 2013-02-21
+"787892224","787894271","190"
+
+# Previous and next entry are same country, set to country number without
+# city information.  -KL 2013-02-21
+"787896576","787896703","190"
 
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
@@ -185,6 +206,18 @@
 # city information.  -KL 2013-02-10
 "1286398976","1286399487","223"
 
+# GB, because GeoLite Country February database says GB for entire range.
+# -KL 2013-02-21
+"1307755520","1307755775","77"
+
+# SE, because GeoLite Country February database says SE for entire range.
+# -KL 2013-02-21
+"1346571776","1346572287","190"
+
+# NL, because GeoLite Country February database says NL for previous and
+# next range.  -KL 2013-02-21
+"1370181888","1370182015","161"
+
 # From geoip-manual (country):
 # GB, despite neither previous (GE) nor next (LV) MaxMind entry being GB,
 # but because RIR delegation files agree with both previous and next
@@ -214,7 +247,9 @@
 
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
-"1795558656","1795558911","223"
+# Disabled, because MaxMind stopped assigning this range to 'A1'
+# -KL 2013-02-21
+#"1795558656","1795558911","223"
 
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
@@ -229,9 +264,17 @@
 # delegation files say 173.0.0.0-173.0.15.255 is US.  -KL 2012-11-27
 "2902458368","2902462463","223"
 
+# Previous and next entry are same city, set to previous entry.
+# -KL 2013-02-21
+"2918532096","2918532103","691"
+
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
 "2918536448","2918536703","223"
+
+# FR, because GeoLite Country February says FR for the entire range.
+# -KL 2013-02-21
+"2954836876","2954836879","75"
 
 # From geoip-manual (country):
 # US, because next MaxMind entry 176.67.84.0-176.67.84.79 is US, and RIR
@@ -243,6 +286,22 @@
 # and RIR delegation files say 176.67.80.0-176.67.87.255 is US.
 # -KL 2012-11-27
 "2957202944","2957203455","223"
+
+# FR, because GeoLite Country February says FR for the entire range.
+# -KL 2013-02-21
+"2988561876","2988561879","75"
+
+# SE, because GeoLite Country February says SE for entire range.
+# -KL 2013-02-21
+"2991177728","2991178751","190"
+
+# SE, because GeoLite Country February says SE for entire range.
+# -KL 2013-02-21
+"2991183872","2991185919","190"
+
+# GB, because GeoLite Country February says GB for this range.
+# -KL 2013-02-21
+"3244847360","3244847615","77"
 
 # From geoip-manual (country):
 # EU, despite neither previous (RU) nor next (UA) MaxMind entry being EU,
@@ -289,6 +348,10 @@
 # city information.  -KL 2013-02-10
 "3483247360","3483247871","223"
 
+# Previous and next entry are same city, set to previous entry.
+# -KL 2013-02-21
+"3483248640","3483248895","17287"
+
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
 "3485724672","3485728767","223"
@@ -326,6 +389,10 @@
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
 "3520656384","3520656639","223"
+
+# GB, because GeoLite Country February database says GB for the entire
+# range.  -KL 2013-02-21
+"3564562432","3564562687","77"
 
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
