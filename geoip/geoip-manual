@@ -31,6 +31,10 @@
 # -KL 2012-11-27
 "629882880","629882880","3"
 
+# Previous and next entry are same city, set to previous entry.
+# -KL 2013-03-07
+"643875072","643875327","1262"
+
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
 "644048128","644048383","223"
@@ -97,6 +101,12 @@
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
 "1083264464","1083264511","223"
+
+# From geoip-manual (country):
+# Removing, because RIR delegation files don't even have an entry for this
+# single-address range, and there's no previous or next range in MaxMind.
+# -KL 2013-03-07
+"1085926766","1085926766",""
 
 # From geoip-manual (country):
 # US, though could as well be CA.  Previous MaxMind entry
@@ -243,7 +253,9 @@
 
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
-"1673576896","1673576959","223"
+# Disabled, because MaxMind stopped assigning this range to 'A1'
+# -KL 2013-03-07
+#"1673576896","1673576959","223"
 
 # Previous and next entry are same country, set to country number without
 # city information.  -KL 2013-02-10
