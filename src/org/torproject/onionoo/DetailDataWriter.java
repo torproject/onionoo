@@ -575,6 +575,8 @@ public class DetailDataWriter {
       String lastSeen = dateTimeFormat.format(entry.getLastSeenMillis());
       String firstSeen = dateTimeFormat.format(
           entry.getFirstSeenMillis());
+      String lastChangedOrAddress = dateTimeFormat.format(
+          entry.getLastChangedOrAddress());
       String running = entry.getRunning() ? "true" : "false";
       int dirPort = entry.getDirPort();
       String countryCode = entry.getCountryCode();
@@ -607,6 +609,8 @@ public class DetailDataWriter {
       }
       sb.append(",\n\"last_seen\":\"" + lastSeen + "\"");
       sb.append(",\n\"first_seen\":\"" + firstSeen + "\"");
+      sb.append(",\n\"last_changed_address_or_port\":\""
+          + lastChangedOrAddress + "\"");
       sb.append(",\n\"running\":" + running);
       SortedSet<String> relayFlags = entry.getRelayFlags();
       if (!relayFlags.isEmpty()) {

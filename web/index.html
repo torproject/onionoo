@@ -130,6 +130,20 @@ Omitted if the relay does not accept directory connections.</li>
 <li><b>"last_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 relay was last seen in a network status consensus.
 Required field.</li>
+<li><font color="blue"><b>"last_changed_address_or_port":</b></font>
+UTC timestamp (YYYY-MM-DD
+hh:mm:ss) when this relay last stopped announcing an IPv4 or IPv6 address
+or TCP port where it previously accepted onion-routing or directory
+connections.
+This timestamp can serve as indicator whether this relay would be a
+suitable fallback directory.
+Note that this timestamp is reset when a relay drops out of the consensus
+for more than 7 days, so that whenever that relay rejoins, it would seem
+as if it changed its address(es) at that time; this is a known limitation
+of the current Onionoo design.
+Required field.
+<font color="blue">Added on March 27.</font>
+</li>
 <li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 relay was first seen in a network status consensus.
 Note that this timestamp is reset when a relay drops out of the consensus

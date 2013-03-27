@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -118,18 +119,25 @@ public class CurrentNodes {
             firstSeenMillis = dateTimeFormat.parse(parts[15] + " "
                 + parts[16]).getTime();
           }
+          long lastChangedAddresses = publishedOrValidAfterMillis;
+          if (parts.length > 18 && !parts[17].equals("null")) {
+            lastChangedAddresses = dateTimeFormat.parse(parts[17] + " "
+                + parts[18]).getTime();
+          }
           if (isRelay) {
             this.addRelay(nickname, fingerprint, address,
                 orAddressesAndPorts, exitAddresses,
                 publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
                 consensusWeight, countryCode, hostName, lastRdnsLookup,
-                defaultPolicy, portList, firstSeenMillis);
+                defaultPolicy, portList, firstSeenMillis,
+                lastChangedAddresses);
           } else {
             this.addBridge(nickname, fingerprint, address,
                 orAddressesAndPorts, exitAddresses,
                 publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
                 consensusWeight, countryCode, hostName, lastRdnsLookup,
-                defaultPolicy, portList, firstSeenMillis);
+                defaultPolicy, portList, firstSeenMillis,
+                lastChangedAddresses);
           }
         }
         br.close();
@@ -158,7 +166,13 @@ public class CurrentNodes {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      long cutoff = System.currentTimeMillis()
+          - 7L * 24L * 60L * 60L * 1000L;
       for (Node entry : this.currentRelays.values()) {
+        long lastSeenMillis = entry.getLastSeenMillis();
+        if (lastSeenMillis < cutoff) {
+          continue;
+        }
         String nickname = entry.getNickname();
         String fingerprint = entry.getFingerprint();
         String address = entry.getAddress();
@@ -175,8 +189,7 @@ public class CurrentNodes {
           addressesBuilder.append((written++ > 0 ? "+" : "")
               + exitAddress);
         }
-        String validAfter = dateTimeFormat.format(
-            entry.getLastSeenMillis());
+        String lastSeen = dateTimeFormat.format(lastSeenMillis);
         String orPort = String.valueOf(entry.getOrPort());
         String dirPort = String.valueOf(entry.getDirPort());
         StringBuilder flagsBuilder = new StringBuilder();
@@ -197,12 +210,15 @@ public class CurrentNodes {
             ? entry.getPortList() : "null";
         String firstSeen = dateTimeFormat.format(
             entry.getFirstSeenMillis());
+        String lastChangedAddresses = dateTimeFormat.format(
+            entry.getLastChangedOrAddress());
         bw.write("r " + nickname + " " + fingerprint + " "
-            + addressesBuilder.toString() + " " + validAfter + " "
+            + addressesBuilder.toString() + " " + lastSeen + " "
             + orPort + " " + dirPort + " " + flagsBuilder.toString() + " "
             + consensusWeight + " " + countryCode + " " + hostName + " "
             + String.valueOf(lastRdnsLookup) + " " + defaultPolicy + " "
-            + portList + " " + firstSeen + "\n");
+            + portList + " " + firstSeen + " " + lastChangedAddresses
+            + "\n");
       }
       for (Node entry : this.currentBridges.values()) {
         String nickname = entry.getNickname();
@@ -230,7 +246,7 @@ public class CurrentNodes {
         bw.write("b " + nickname + " " + fingerprint + " "
             + addressesBuilder.toString() + " " + published + " " + orPort
             + " " + dirPort + " " + flagsBuilder.toString()
-            + " -1 ?? null -1 null null " + firstSeen + "\n");
+            + " -1 ?? null -1 null null " + firstSeen + " null null\n");
       }
       bw.close();
     } catch (IOException e) {
@@ -244,9 +260,6 @@ public class CurrentNodes {
 
   private long lastValidAfterMillis = 0L;
   private long lastPublishedMillis = 0L;
-
-  private long cutoff = System.currentTimeMillis()
-      - 7L * 24L * 60L * 60L * 1000L;
 
   public void readRelayNetworkConsensuses() {
     DescriptorReader reader =
@@ -304,7 +317,7 @@ public class CurrentNodes {
       this.addRelay(nickname, fingerprint, address, orAddressesAndPorts,
           null, validAfterMillis, orPort, dirPort, relayFlags,
           consensusWeight, null, null, -1L, defaultPolicy, portList,
-          validAfterMillis);
+          validAfterMillis, validAfterMillis);
     }
     if (this.lastValidAfterMillis == validAfterMillis) {
       this.lastBandwidthWeights = consensus.getBandwidthWeights();
@@ -313,33 +326,62 @@ public class CurrentNodes {
 
   public void addRelay(String nickname, String fingerprint,
       String address, SortedSet<String> orAddressesAndPorts,
-      SortedSet<String> exitAddresses, long validAfterMillis, int orPort,
+      SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostName, long lastRdnsLookup,
-      String defaultPolicy, String portList, long firstSeenMillis) {
-    if (validAfterMillis >= cutoff &&
-        (!this.currentRelays.containsKey(fingerprint) ||
-        this.currentRelays.get(fingerprint).getLastSeenMillis() <
-        validAfterMillis)) {
-      Node previousRelay = this.currentRelays.containsKey(fingerprint)
-          ? this.currentRelays.get(fingerprint) : null;
-      if (previousRelay != null && hostName == null &&
-          previousRelay.getAddress().equals(address)) {
-        hostName = previousRelay.getHostName();
-        lastRdnsLookup = previousRelay.getLastRdnsLookup();
+      String defaultPolicy, String portList, long firstSeenMillis,
+      long lastChangedAddresses) {
+    /* Remember addresses and OR/dir ports that the relay advertised at
+     * the given time. */
+    SortedMap<Long, Set<String>> lastAddresses =
+        new TreeMap<Long, Set<String>>(Collections.reverseOrder());
+    Set<String> addresses = new HashSet<String>();
+    addresses.add(address + ":" + orPort);
+    if (dirPort > 0) {
+      addresses.add(address + ":" + dirPort);
+    }
+    addresses.addAll(orAddressesAndPorts);
+    lastAddresses.put(lastChangedAddresses, addresses);
+    /* See if there's already an entry for this relay. */
+    if (this.currentRelays.containsKey(fingerprint)) {
+      Node existingEntry = this.currentRelays.get(fingerprint);
+      if (lastSeenMillis < existingEntry.getLastSeenMillis()) {
+        /* Use latest information for nickname, current addresses, etc. */
+        nickname = existingEntry.getNickname();
+        address = existingEntry.getAddress();
+        orAddressesAndPorts = existingEntry.getOrAddressesAndPorts();
+        exitAddresses = existingEntry.getExitAddresses();
+        lastSeenMillis = existingEntry.getLastSeenMillis();
+        orPort = existingEntry.getOrPort();
+        dirPort = existingEntry.getDirPort();
+        relayFlags = existingEntry.getRelayFlags();
+        consensusWeight = existingEntry.getConsensusWeight();
+        countryCode = existingEntry.getCountryCode();
+        defaultPolicy = existingEntry.getDefaultPolicy();
+        portList = existingEntry.getPortList();
       }
-      if (previousRelay != null) {
-        firstSeenMillis = Math.min(firstSeenMillis,
-            previousRelay.getFirstSeenMillis());
+      if (hostName == null &&
+          existingEntry.getAddress().equals(address)) {
+        /* Re-use reverse DNS lookup results if available. */
+        hostName = existingEntry.getHostName();
+        lastRdnsLookup = existingEntry.getLastRdnsLookup();
       }
-      Node entry = new Node(nickname, fingerprint, address,
-          orAddressesAndPorts, exitAddresses, validAfterMillis, orPort,
-          dirPort, relayFlags, consensusWeight, countryCode, hostName,
-          lastRdnsLookup, defaultPolicy, portList, firstSeenMillis);
-      this.currentRelays.put(fingerprint, entry);
-      if (validAfterMillis > this.lastValidAfterMillis) {
-        this.lastValidAfterMillis = validAfterMillis;
-      }
+      /* Update relay-history fields. */
+      firstSeenMillis = Math.min(firstSeenMillis,
+          existingEntry.getFirstSeenMillis());
+      lastAddresses.putAll(existingEntry.getLastAddresses());
+    }
+    /* Add or update entry. */
+    Node entry = new Node(nickname, fingerprint, address,
+        orAddressesAndPorts, exitAddresses, lastSeenMillis, orPort,
+        dirPort, relayFlags, consensusWeight, countryCode, hostName,
+        lastRdnsLookup, defaultPolicy, portList, firstSeenMillis,
+        lastAddresses);
+    this.currentRelays.put(fingerprint, entry);
+    /* If this entry comes from a new consensus, update our global last
+     * valid-after time. */
+    if (lastSeenMillis > this.lastValidAfterMillis) {
+      this.lastValidAfterMillis = lastSeenMillis;
     }
   }
 
@@ -673,7 +715,8 @@ public class CurrentNodes {
           }
         }
         if (addressNumberASN.containsKey(addressNumber)) {
-          String[] parts = addressNumberASN.get(addressNumber).split(" ", 2);
+          String[] parts = addressNumberASN.get(addressNumber).split(" ",
+              2);
           relay.setASNumber(parts[0]);
           relay.setASName(parts[1]);
         }
@@ -726,34 +769,49 @@ public class CurrentNodes {
       SortedSet<String> relayFlags = entry.getFlags();
       this.addBridge(nickname, fingerprint, address, orAddressesAndPorts,
           null, publishedMillis, orPort, dirPort, relayFlags, -1, "??",
-          null, -1L, null, null, publishedMillis);
+          null, -1L, null, null, publishedMillis, -1L);
     }
   }
 
   public void addBridge(String nickname, String fingerprint,
       String address, SortedSet<String> orAddressesAndPorts,
-      SortedSet<String> exitAddresses, long publishedMillis, int orPort,
+      SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostname, long lastRdnsLookup,
-      String defaultPolicy, String portList, long firstSeenMillis) {
-    if (publishedMillis >= cutoff &&
-        (!this.currentBridges.containsKey(fingerprint) ||
-        this.currentBridges.get(fingerprint).getLastSeenMillis() <
-        publishedMillis)) {
-      Node previousBridge = this.currentBridges.containsKey(fingerprint)
-          ? this.currentBridges.get(fingerprint) : null;
-      if (previousBridge != null) {
-        firstSeenMillis = Math.min(firstSeenMillis,
-            previousBridge.getFirstSeenMillis());
+      String defaultPolicy, String portList, long firstSeenMillis,
+      long lastChangedAddresses) {
+    /* See if there's already an entry for this bridge. */
+    if (this.currentBridges.containsKey(fingerprint)) {
+      Node existingEntry = this.currentBridges.get(fingerprint);
+      if (lastSeenMillis < existingEntry.getLastSeenMillis()) {
+        /* Use latest information for nickname, current addresses, etc. */
+        nickname = existingEntry.getNickname();
+        address = existingEntry.getAddress();
+        orAddressesAndPorts = existingEntry.getOrAddressesAndPorts();
+        exitAddresses = existingEntry.getExitAddresses();
+        lastSeenMillis = existingEntry.getLastSeenMillis();
+        orPort = existingEntry.getOrPort();
+        dirPort = existingEntry.getDirPort();
+        relayFlags = existingEntry.getRelayFlags();
+        consensusWeight = existingEntry.getConsensusWeight();
+        countryCode = existingEntry.getCountryCode();
+        defaultPolicy = existingEntry.getDefaultPolicy();
+        portList = existingEntry.getPortList();
       }
-      Node entry = new Node(nickname, fingerprint, address,
-          orAddressesAndPorts, exitAddresses, publishedMillis, orPort,
-          dirPort, relayFlags, consensusWeight, countryCode, hostname,
-          lastRdnsLookup, defaultPolicy, portList, firstSeenMillis);
-      this.currentBridges.put(fingerprint, entry);
-      if (publishedMillis > this.lastPublishedMillis) {
-        this.lastPublishedMillis = publishedMillis;
-      }
+      /* Update relay-history fields. */
+      firstSeenMillis = Math.min(firstSeenMillis,
+          existingEntry.getFirstSeenMillis());
+    }
+    /* Add or update entry. */
+    Node entry = new Node(nickname, fingerprint, address,
+        orAddressesAndPorts, exitAddresses, lastSeenMillis, orPort,
+        dirPort, relayFlags, consensusWeight, countryCode, hostname,
+        lastRdnsLookup, defaultPolicy, portList, firstSeenMillis, null);
+    this.currentBridges.put(fingerprint, entry);
+    /* If this entry comes from a new status, update our global last
+     * published time. */
+    if (lastSeenMillis > this.lastPublishedMillis) {
+      this.lastPublishedMillis = lastSeenMillis;
     }
   }
 

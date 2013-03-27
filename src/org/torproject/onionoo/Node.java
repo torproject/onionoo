@@ -2,8 +2,12 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
+import java.util.SortedMap;
 import java.util.TreeSet;
+import java.util.TreeMap;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -43,12 +47,14 @@ public class Node {
   private double exitProbability = -1.0;
   private String defaultPolicy;
   private String portList;
+  private SortedMap<Long, Set<String>> lastAddresses;
   public Node(String nickname, String fingerprint, String address,
       SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostName, long lastRdnsLookup,
-      String defaultPolicy, String portList, long firstSeenMillis) {
+      String defaultPolicy, String portList, long firstSeenMillis,
+      SortedMap<Long, Set<String>> lastAddresses) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     try {
@@ -82,6 +88,7 @@ public class Node {
     this.defaultPolicy = defaultPolicy;
     this.portList = portList;
     this.firstSeenMillis = firstSeenMillis;
+    this.lastAddresses = lastAddresses;
   }
   public String getFingerprint() {
     return this.fingerprint;
@@ -245,6 +252,28 @@ public class Node {
   }
   public String getPortList() {
     return this.portList;
+  }
+  public SortedMap<Long, Set<String>> getLastAddresses() {
+    return this.lastAddresses == null ? null :
+        new TreeMap<Long, Set<String>>(this.lastAddresses);
+  }
+  public long getLastChangedOrAddress() {
+    long lastChangedAddressesMillis = -1L;
+    if (this.lastAddresses != null) {
+      Set<String> lastAddresses = null;
+      for (Map.Entry<Long, Set<String>> e : this.lastAddresses.entrySet()) {
+        if (lastAddresses != null) {
+          for (String address : e.getValue()) {
+            if (!lastAddresses.contains(address)) {
+              return lastChangedAddressesMillis;
+            }
+          }
+        }
+        lastChangedAddressesMillis = e.getKey();
+        lastAddresses = e.getValue();
+      }
+    }
+    return lastChangedAddressesMillis;
   }
 }
 
