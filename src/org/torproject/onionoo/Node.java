@@ -54,7 +54,7 @@ public class Node {
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostName, long lastRdnsLookup,
       String defaultPolicy, String portList, long firstSeenMillis,
-      SortedMap<Long, Set<String>> lastAddresses) {
+      SortedMap<Long, Set<String>> lastAddresses, String aSNumber) {
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     try {
@@ -89,6 +89,7 @@ public class Node {
     this.portList = portList;
     this.firstSeenMillis = firstSeenMillis;
     this.lastAddresses = lastAddresses;
+    this.aSNumber = aSNumber;
   }
   public String getFingerprint() {
     return this.fingerprint;

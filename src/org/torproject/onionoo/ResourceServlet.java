@@ -45,18 +45,25 @@ public class ResourceServlet extends HttpServlet {
   long summaryFileLastModified = -1L;
   boolean readSummaryFile = false;
   private String relaysPublishedString, bridgesPublishedString;
-  private List<String> relaysByConsensusWeight = new ArrayList<String>();
-  private Map<String, String>
-      relayFingerprintSummaryLines = new HashMap<String, String>(),
-      bridgeFingerprintSummaryLines = new HashMap<String, String>();
-  private Map<String, Set<String>> relaysByCountryCode =
-      new HashMap<String, Set<String>>();
+  private List<String> relaysByConsensusWeight = null;
+  private Map<String, String> relayFingerprintSummaryLines = null,
+      bridgeFingerprintSummaryLines = null;
+  private Map<String, Set<String>> relaysByCountryCode = null,
+      relaysByASNumber = null, relaysByFlag = null;
   private void readSummaryFile() {
     if (!summaryFile.exists()) {
       readSummaryFile = false;
       return;
     }
     if (summaryFile.lastModified() > this.summaryFileLastModified) {
+      List<String> relaysByConsensusWeight = new ArrayList<String>();
+      Map<String, String>
+          relayFingerprintSummaryLines = new HashMap<String, String>(),
+          bridgeFingerprintSummaryLines = new HashMap<String, String>();
+      Map<String, Set<String>>
+          relaysByCountryCode = new HashMap<String, Set<String>>(),
+          relaysByASNumber = new HashMap<String, Set<String>>(),
+          relaysByFlag = new HashMap<String, Set<String>>();
       CurrentNodes cn = new CurrentNodes();
       cn.readRelaySearchDataFile(this.summaryFile);
       cn.setRelayRunningBits();
@@ -74,38 +81,57 @@ public class ResourceServlet extends HttpServlet {
         String hashedFingerprint = entry.getHashedFingerprint().
             toUpperCase();
         String line = this.formatRelaySummaryLine(entry);
-        this.relayFingerprintSummaryLines.put(fingerprint, line);
-        this.relayFingerprintSummaryLines.put(hashedFingerprint, line);
+        relayFingerprintSummaryLines.put(fingerprint, line);
+        relayFingerprintSummaryLines.put(hashedFingerprint, line);
         long consensusWeight = entry.getConsensusWeight();
         orderRelaysByConsensusWeight.add(String.format("%020d %s",
             consensusWeight, fingerprint));
         orderRelaysByConsensusWeight.add(String.format("%020d %s",
             consensusWeight, hashedFingerprint));
-        String countryCode = entry.getCountryCode();
-        if (countryCode == null) {
-          countryCode = "??";
+        if (entry.getCountryCode() != null) {
+          String countryCode = entry.getCountryCode();
+          if (!relaysByCountryCode.containsKey(countryCode)) {
+            relaysByCountryCode.put(countryCode, new HashSet<String>());
+          }
+          relaysByCountryCode.get(countryCode).add(fingerprint);
+          relaysByCountryCode.get(countryCode).add(hashedFingerprint);
         }
-        if (!this.relaysByCountryCode.containsKey(countryCode)) {
-          this.relaysByCountryCode.put(countryCode,
-              new HashSet<String>());
+        if (entry.getASNumber() != null) {
+          String aSNumber = entry.getASNumber();
+          if (!relaysByASNumber.containsKey(aSNumber)) {
+            relaysByASNumber.put(aSNumber, new HashSet<String>());
+          }
+          relaysByASNumber.get(aSNumber).add(fingerprint);
+          relaysByASNumber.get(aSNumber).add(hashedFingerprint);
         }
-        this.relaysByCountryCode.get(countryCode).add(fingerprint);
-        this.relaysByCountryCode.get(countryCode).add(hashedFingerprint);
+        for (String flag : entry.getRelayFlags()) {
+          String flagLowerCase = flag.toLowerCase();
+          if (!relaysByFlag.containsKey(flagLowerCase)) {
+            relaysByFlag.put(flagLowerCase, new HashSet<String>());
+          }
+          relaysByFlag.get(flagLowerCase).add(fingerprint);
+          relaysByFlag.get(flagLowerCase).add(hashedFingerprint);
+        }
       }
       Collections.sort(orderRelaysByConsensusWeight);
-      this.relaysByConsensusWeight = new ArrayList<String>();
+      relaysByConsensusWeight = new ArrayList<String>();
       for (String relay : orderRelaysByConsensusWeight) {
-        this.relaysByConsensusWeight.add(relay.split(" ")[1]);
+        relaysByConsensusWeight.add(relay.split(" ")[1]);
       }
       for (Node entry : cn.getCurrentBridges().values()) {
         String hashedFingerprint = entry.getFingerprint().toUpperCase();
         String hashedHashedFingerprint = entry.getHashedFingerprint().
             toUpperCase();
         String line = this.formatBridgeSummaryLine(entry);
-        this.bridgeFingerprintSummaryLines.put(hashedFingerprint, line);
-        this.bridgeFingerprintSummaryLines.put(hashedHashedFingerprint,
-            line);
+        bridgeFingerprintSummaryLines.put(hashedFingerprint, line);
+        bridgeFingerprintSummaryLines.put(hashedHashedFingerprint, line);
       }
+      this.relaysByConsensusWeight = relaysByConsensusWeight;
+      this.relayFingerprintSummaryLines = relayFingerprintSummaryLines;
+      this.bridgeFingerprintSummaryLines = bridgeFingerprintSummaryLines;
+      this.relaysByCountryCode = relaysByCountryCode;
+      this.relaysByASNumber = relaysByASNumber;
+      this.relaysByFlag = relaysByFlag;
     }
     this.summaryFileLastModified = summaryFile.lastModified();
     this.readSummaryFile = true;
@@ -185,7 +211,7 @@ public class ResourceServlet extends HttpServlet {
     /* Make sure that the request doesn't contain any unknown
      * parameters. */
     Set<String> knownParameters = new HashSet<String>(Arrays.asList(
-        "type,running,search,lookup,country,order,limit,offset".
+        "type,running,search,lookup,country,as,flag,order,limit,offset".
         split(",")));
     for (String parameterKey : parameterMap.keySet()) {
       if (!knownParameters.contains(parameterKey)) {
@@ -252,6 +278,25 @@ public class ResourceServlet extends HttpServlet {
       }
       this.filterByCountryCode(filteredRelays, filteredBridges,
           countryCodeParameter);
+    }
+    if (parameterMap.containsKey("as")) {
+      String aSNumberParameter = this.parseASNumberParameter(
+          parameterMap.get("as"));
+      if (aSNumberParameter == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterByASNumber(filteredRelays, filteredBridges,
+          aSNumberParameter);
+    }
+    if (parameterMap.containsKey("flag")) {
+      String flagParameter = this.parseFlagParameter(
+          parameterMap.get("flag"));
+      if (flagParameter == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterByFlag(filteredRelays, filteredBridges, flagParameter);
     }
 
     /* Re-order and limit results. */
@@ -385,6 +430,24 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^[0-9a-zA-Z]{2}$");
   private String parseCountryCodeParameter(String parameter) {
     if (!countryCodeParameterPattern.matcher(parameter).matches()) {
+      return null;
+    }
+    return parameter;
+  }
+
+  private static Pattern aSNumberParameterPattern =
+      Pattern.compile("^[asAS]{0,2}[0-9]{1,10}$");
+  private String parseASNumberParameter(String parameter) {
+    if (!aSNumberParameterPattern.matcher(parameter).matches()) {
+      return null;
+    }
+    return parameter;
+  }
+
+  private static Pattern flagPattern =
+      Pattern.compile("^[a-zA-Z]{1,20}$");
+  private String parseFlagParameter(String parameter) {
+    if (!flagPattern.matcher(parameter).matches()) {
       return null;
     }
     return parameter;
@@ -530,6 +593,52 @@ public class ResourceServlet extends HttpServlet {
       for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
         String fingerprint = e.getKey();
         if (!relaysWithCountryCode.contains(fingerprint)) {
+          removeRelays.add(fingerprint);
+        }
+      }
+      for (String fingerprint : removeRelays) {
+        filteredRelays.remove(fingerprint);
+      }
+    }
+    filteredBridges.clear();
+  }
+
+  private void filterByASNumber(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, String aSNumberParameter) {
+    String aSNumber = aSNumberParameter.toUpperCase();
+    if (!aSNumber.startsWith("AS")) {
+      aSNumber = "AS" + aSNumber;
+    }
+    if (!this.relaysByASNumber.containsKey(aSNumber)) {
+      filteredRelays.clear();
+    } else {
+      Set<String> relaysWithASNumber =
+          this.relaysByASNumber.get(aSNumber);
+      Set<String> removeRelays = new HashSet<String>();
+      for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
+        String fingerprint = e.getKey();
+        if (!relaysWithASNumber.contains(fingerprint)) {
+          removeRelays.add(fingerprint);
+        }
+      }
+      for (String fingerprint : removeRelays) {
+        filteredRelays.remove(fingerprint);
+      }
+    }
+    filteredBridges.clear();
+  }
+
+  private void filterByFlag(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, String flagParameter) {
+    String flag = flagParameter.toLowerCase();
+    if (!this.relaysByFlag.containsKey(flag)) {
+      filteredRelays.clear();
+    } else {
+      Set<String> relaysWithFlag = this.relaysByFlag.get(flag);
+      Set<String> removeRelays = new HashSet<String>();
+      for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
+        String fingerprint = e.getKey();
+        if (!relaysWithFlag.contains(fingerprint)) {
           removeRelays.add(fingerprint);
         }
       }

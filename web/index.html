@@ -660,6 +660,22 @@ Lookups are case-insensitive.
 given country as identified by a two-letter country code.
 Filtering by country code is case-insensitive.
 </td></tr>
+<tr><td><b><font color="blue">as</font></b></td>
+<td>Return only relays which are located in the
+given autonomous system (AS) as identified by the AS number (with or
+without preceding "AS" part).
+Filtering by AS number is case-insensitive.
+<font color="blue">Added on April 9.</font>
+</td></tr>
+<tr><td><b><font color="blue">flag</font></b></td>
+<td>Return only relays or bridges which have the
+given relay flag assigned by the directory authorities or the bridge
+authority.
+Note that if the flag parameter is specified more than once, only the
+first parameter value will be considered.
+Filtering by flag is case-insensitive.
+<font color="blue">Added on April 9.</font>
+</td></tr>
 </table>
 <p>Relay and/or bridge documents in the response can be ordered and
 limited by providing further parameters.
