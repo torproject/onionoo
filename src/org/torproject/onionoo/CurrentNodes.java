@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,16 +37,12 @@ import org.torproject.descriptor.RelayNetworkStatusConsensus;
  * days. */
 public class CurrentNodes {
 
-  private File internalRelaySearchDataFile;
-
   /* Read the internal relay search data file from disk. */
-  public void readRelaySearchDataFile(File internalRelaySearchDataFile) {
-    this.internalRelaySearchDataFile = internalRelaySearchDataFile;
-    if (this.internalRelaySearchDataFile.exists() &&
-        !this.internalRelaySearchDataFile.isDirectory()) {
+  public void readRelaySearchDataFile(File summaryFile) {
+    if (summaryFile.exists() && !summaryFile.isDirectory()) {
       try {
         BufferedReader br = new BufferedReader(new FileReader(
-            this.internalRelaySearchDataFile));
+            summaryFile));
         String line;
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
@@ -55,7 +52,7 @@ public class CurrentNodes {
           boolean isRelay = parts[0].equals("r");
           if (parts.length < 9) {
             System.err.println("Line '" + line + "' in '"
-                + this.internalRelaySearchDataFile.getAbsolutePath()
+                + summaryFile.getAbsolutePath()
                 + "' is invalid.  Exiting.");
             System.exit(1);
           }
@@ -69,7 +66,7 @@ public class CurrentNodes {
             String[] addressParts = addresses.split(";", -1);
             if (addressParts.length != 3) {
               System.err.println("Line '" + line + "' in '"
-                  + this.internalRelaySearchDataFile.getAbsolutePath()
+                  + summaryFile.getAbsolutePath()
                   + " is invalid.  Exiting.");
               System.exit(1);
             }
@@ -147,14 +144,12 @@ public class CurrentNodes {
         br.close();
       } catch (IOException e) {
         System.err.println("Could not read "
-            + this.internalRelaySearchDataFile.getAbsolutePath()
-            + ".  Exiting.");
+            + summaryFile.getAbsolutePath() + ".  Exiting.");
         e.printStackTrace();
         System.exit(1);
       } catch (ParseException e) {
         System.err.println("Could not read "
-            + this.internalRelaySearchDataFile.getAbsolutePath()
-            + ".  Exiting.");
+            + summaryFile.getAbsolutePath() + ".  Exiting.");
         e.printStackTrace();
         System.exit(1);
       }
@@ -162,21 +157,18 @@ public class CurrentNodes {
   }
 
   /* Write the internal relay search data file to disk. */
-  public void writeRelaySearchDataFile() {
+  public void writeRelaySearchDataFile(File summaryFile,
+      boolean includeOldNodes) {
     try {
-      this.internalRelaySearchDataFile.getParentFile().mkdirs();
+      summaryFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(
-          this.internalRelaySearchDataFile));
+          summaryFile));
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      long cutoff = System.currentTimeMillis()
-          - 7L * 24L * 60L * 60L * 1000L;
-      for (Node entry : this.currentRelays.values()) {
-        long lastSeenMillis = entry.getLastSeenMillis();
-        if (lastSeenMillis < cutoff) {
-          continue;
-        }
+      Collection<Node> relays = includeOldNodes
+          ? this.knownRelays.values() : this.getCurrentRelays().values();
+      for (Node entry : relays) {
         String nickname = entry.getNickname();
         String fingerprint = entry.getFingerprint();
         String address = entry.getAddress();
@@ -193,7 +185,8 @@ public class CurrentNodes {
           addressesBuilder.append((written++ > 0 ? "+" : "")
               + exitAddress);
         }
-        String lastSeen = dateTimeFormat.format(lastSeenMillis);
+        String lastSeen = dateTimeFormat.format(
+            entry.getLastSeenMillis());
         String orPort = String.valueOf(entry.getOrPort());
         String dirPort = String.valueOf(entry.getDirPort());
         StringBuilder flagsBuilder = new StringBuilder();
@@ -226,7 +219,10 @@ public class CurrentNodes {
             + portList + " " + firstSeen + " " + lastChangedAddresses
             + " " + aSNumber + "\n");
       }
-      for (Node entry : this.currentBridges.values()) {
+      Collection<Node> bridges = includeOldNodes
+          ? this.knownBridges.values()
+          : this.getCurrentBridges().values();
+      for (Node entry : bridges) {
         String nickname = entry.getNickname();
         String fingerprint = entry.getFingerprint();
         String published = dateTimeFormat.format(
@@ -258,8 +254,7 @@ public class CurrentNodes {
       bw.close();
     } catch (IOException e) {
       System.err.println("Could not write '"
-          + this.internalRelaySearchDataFile.getAbsolutePath()
-          + "' to disk.  Exiting.");
+          + summaryFile.getAbsolutePath() + "' to disk.  Exiting.");
       e.printStackTrace();
       System.exit(1);
     }
@@ -294,7 +289,7 @@ public class CurrentNodes {
 
   public void setRelayRunningBits() {
     if (this.lastValidAfterMillis > 0L) {
-      for (Node entry : this.currentRelays.values()) {
+      for (Node entry : this.knownRelays.values()) {
         entry.setRunning(entry.getLastSeenMillis() ==
             this.lastValidAfterMillis);
       }
@@ -350,8 +345,8 @@ public class CurrentNodes {
     addresses.addAll(orAddressesAndPorts);
     lastAddresses.put(lastChangedAddresses, addresses);
     /* See if there's already an entry for this relay. */
-    if (this.currentRelays.containsKey(fingerprint)) {
-      Node existingEntry = this.currentRelays.get(fingerprint);
+    if (this.knownRelays.containsKey(fingerprint)) {
+      Node existingEntry = this.knownRelays.get(fingerprint);
       if (lastSeenMillis < existingEntry.getLastSeenMillis()) {
         /* Use latest information for nickname, current addresses, etc. */
         nickname = existingEntry.getNickname();
@@ -384,7 +379,7 @@ public class CurrentNodes {
         dirPort, relayFlags, consensusWeight, countryCode, hostName,
         lastRdnsLookup, defaultPolicy, portList, firstSeenMillis,
         lastAddresses, aSNumber);
-    this.currentRelays.put(fingerprint, entry);
+    this.knownRelays.put(fingerprint, entry);
     /* If this entry comes from a new consensus, update our global last
      * valid-after time. */
     if (lastSeenMillis > this.lastValidAfterMillis) {
@@ -436,7 +431,7 @@ public class CurrentNodes {
     /* Obtain a map from relay IP address strings to numbers. */
     Map<String, Long> addressStringNumbers = new HashMap<String, Long>();
     Pattern ipv4Pattern = Pattern.compile("^[0-9\\.]{7,15}$");
-    for (Node relay : this.currentRelays.values()) {
+    for (Node relay : this.knownRelays.values()) {
       String addressString = relay.getAddress();
       long addressNumber = -1L;
       if (ipv4Pattern.matcher(addressString).matches()) {
@@ -695,7 +690,7 @@ public class CurrentNodes {
     }
 
     /* Finally, set relays' city and ASN information. */
-    for (Node relay : currentRelays.values()) {
+    for (Node relay : knownRelays.values()) {
       String addressString = relay.getAddress();
       if (addressStringNumbers.containsKey(addressString)) {
         long addressNumber = addressStringNumbers.get(addressString);
@@ -756,7 +751,7 @@ public class CurrentNodes {
 
   public void setBridgeRunningBits() {
     if (this.lastPublishedMillis > 0L) {
-      for (Node entry : this.currentBridges.values()) {
+      for (Node entry : this.knownBridges.values()) {
         entry.setRunning(entry.getRelayFlags().contains("Running") &&
             entry.getLastSeenMillis() == this.lastPublishedMillis);
       }
@@ -788,8 +783,8 @@ public class CurrentNodes {
       String defaultPolicy, String portList, long firstSeenMillis,
       long lastChangedAddresses, String aSNumber) {
     /* See if there's already an entry for this bridge. */
-    if (this.currentBridges.containsKey(fingerprint)) {
-      Node existingEntry = this.currentBridges.get(fingerprint);
+    if (this.knownBridges.containsKey(fingerprint)) {
+      Node existingEntry = this.knownBridges.get(fingerprint);
       if (lastSeenMillis < existingEntry.getLastSeenMillis()) {
         /* Use latest information for nickname, current addresses, etc. */
         nickname = existingEntry.getNickname();
@@ -816,7 +811,7 @@ public class CurrentNodes {
         dirPort, relayFlags, consensusWeight, countryCode, hostname,
         lastRdnsLookup, defaultPolicy, portList, firstSeenMillis, null,
         aSNumber);
-    this.currentBridges.put(fingerprint, entry);
+    this.knownBridges.put(fingerprint, entry);
     /* If this entry comes from a new status, update our global last
      * published time. */
     if (lastSeenMillis > this.lastPublishedMillis) {
@@ -824,16 +819,32 @@ public class CurrentNodes {
     }
   }
 
-  private SortedMap<String, Node> currentRelays =
+  private SortedMap<String, Node> knownRelays =
       new TreeMap<String, Node>();
   public SortedMap<String, Node> getCurrentRelays() {
-    return new TreeMap<String, Node>(this.currentRelays);
+    long cutoff = System.currentTimeMillis()
+        - 7L * 24L * 60L * 60L * 1000L;
+    SortedMap<String, Node> currentRelays = new TreeMap<String, Node>();
+    for (Map.Entry<String, Node> e : this.knownRelays.entrySet()) {
+      if (e.getValue().getLastSeenMillis() >= cutoff) {
+        currentRelays.put(e.getKey(), e.getValue());
+      }
+    }
+    return currentRelays;
   }
 
-  private SortedMap<String, Node> currentBridges =
+  private SortedMap<String, Node> knownBridges =
       new TreeMap<String, Node>();
   public SortedMap<String, Node> getCurrentBridges() {
-    return new TreeMap<String, Node>(this.currentBridges);
+    long cutoff = System.currentTimeMillis()
+        - 7L * 24L * 60L * 60L * 1000L;
+    SortedMap<String, Node> currentBridges = new TreeMap<String, Node>();
+    for (Map.Entry<String, Node> e : this.knownBridges.entrySet()) {
+      if (e.getValue().getLastSeenMillis() >= cutoff) {
+        currentBridges.put(e.getKey(), e.getValue());
+      }
+    }
+    return currentBridges;
   }
 
   public long getLastValidAfterMillis() {

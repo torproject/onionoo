@@ -137,20 +137,19 @@ or TCP port where it previously accepted onion-routing or directory
 connections.
 This timestamp can serve as indicator whether this relay would be a
 suitable fallback directory.
-Note that this timestamp is reset when a relay drops out of the consensus
-for more than 7 days, so that whenever that relay rejoins, it would seem
-as if it changed its address(es) at that time; this is a known limitation
-of the current Onionoo design.
 Required field.
 <font color="blue">Added on March 27.</font>
+<font color="blue">On April 9, fixed limitation that timestamp is reset
+when a relay drops out of the consensus for more than 7 days and
+rejoins.</font>
 </li>
 <li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 relay was first seen in a network status consensus.
-Note that this timestamp is reset when a relay drops out of the consensus
-for more than 7 days, so that whenever that relay rejoins, it would seem
-as if it joined for the first time; this is a known limitation of the
-current Onionoo design.
-Required field.</li>
+Required field.
+<font color="blue">On April 9, fixed limitation that timestamp is reset
+when a relay drops out of the consensus for more than 7 days and
+rejoins.</font>
+</li>
 <li><b>"running":</b> Boolean field saying whether this relay was listed as
 running in the last relay network status consensus.
 Required field.</li>
@@ -340,11 +339,11 @@ was last seen in a bridge network status.
 Required field.</li>
 <li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 bridge was first seen in a bridge network status.
-Note that this timestamp is reset when a bridge drops out of the network
-status for more than 7 days, so that whenever that bridge rejoins, it
-would seem as if it joined for the first time; this is a known limitation
-of the current Onionoo design.
-Required field.</li>
+Required field.
+<font color="blue">On April 9, fixed limitation that timestamp is reset
+when a bridge drops out of the network status for more than 7 days and
+rejoins.</font>
+</li>
 <li><b>"running":</b> Boolean field saying whether this bridge was listed
 as running in the last bridge network status.
 Required field.</li>

@@ -11,12 +11,13 @@ public class Main {
 
     printStatus("Updating internal node list.");
     CurrentNodes cn = new CurrentNodes();
-    cn.readRelaySearchDataFile(new File("out/summary"));
+    cn.readRelaySearchDataFile(new File("status/summary"));
     cn.readRelayNetworkConsensuses();
     cn.setRelayRunningBits();
     cn.lookUpCitiesAndASes();
     cn.readBridgeNetworkStatuses();
     cn.setBridgeRunningBits();
+    cn.writeRelaySearchDataFile(new File("status/summary"), true);
 
     printStatus("Updating detail data.");
     DetailDataWriter ddw = new DetailDataWriter();
@@ -47,7 +48,7 @@ public class Main {
     wdw.deleteObsoleteWeightsDataFiles();
 
     printStatus("Updating summary data.");
-    cn.writeRelaySearchDataFile();
+    cn.writeRelaySearchDataFile(new File("out/summary"), false);
 
     printStatus("Terminating.");
   }
