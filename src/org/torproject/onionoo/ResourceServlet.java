@@ -16,8 +16,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -56,6 +58,9 @@ public class ResourceServlet extends HttpServlet {
       bridgeFingerprintSummaryLines = null;
   private Map<String, Set<String>> relaysByCountryCode = null,
       relaysByASNumber = null, relaysByFlag = null;
+  private SortedMap<Integer, Set<String>> relaysByFirstSeenDays = null,
+      bridgesByFirstSeenDays = null, relaysByLastSeenDays = null,
+      bridgesByLastSeenDays = null;
   private void readSummaryFile() {
     if (!summaryFile.exists()) {
       readSummaryFile = false;
@@ -70,6 +75,11 @@ public class ResourceServlet extends HttpServlet {
           relaysByCountryCode = new HashMap<String, Set<String>>(),
           relaysByASNumber = new HashMap<String, Set<String>>(),
           relaysByFlag = new HashMap<String, Set<String>>();
+      SortedMap<Integer, Set<String>>
+          relaysByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
+          bridgesByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
+          relaysByLastSeenDays = new TreeMap<Integer, Set<String>>(),
+          bridgesByLastSeenDays = new TreeMap<Integer, Set<String>>();
       CurrentNodes cn = new CurrentNodes();
       cn.readRelaySearchDataFile(this.summaryFile);
       cn.setRelayRunningBits();
@@ -82,6 +92,7 @@ public class ResourceServlet extends HttpServlet {
       this.bridgesPublishedString = dateTimeFormat.format(
           cn.getLastPublishedMillis());
       List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
+      long now = System.currentTimeMillis();
       for (Node entry : cn.getCurrentRelays().values()) {
         String fingerprint = entry.getFingerprint().toUpperCase();
         String hashedFingerprint = entry.getHashedFingerprint().
@@ -118,6 +129,24 @@ public class ResourceServlet extends HttpServlet {
           relaysByFlag.get(flagLowerCase).add(fingerprint);
           relaysByFlag.get(flagLowerCase).add(hashedFingerprint);
         }
+        int daysSinceFirstSeen = (int) ((now - entry.getFirstSeenMillis())
+            / 86400000L);
+        if (!relaysByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
+          relaysByFirstSeenDays.put(daysSinceFirstSeen,
+              new HashSet<String>());
+        }
+        relaysByFirstSeenDays.get(daysSinceFirstSeen).add(fingerprint);
+        relaysByFirstSeenDays.get(daysSinceFirstSeen).add(
+            hashedFingerprint);
+        int daysSinceLastSeen = (int) ((now - entry.getLastSeenMillis())
+            / 86400000L);
+        if (!relaysByLastSeenDays.containsKey(daysSinceLastSeen)) {
+          relaysByLastSeenDays.put(daysSinceLastSeen,
+              new HashSet<String>());
+        }
+        relaysByLastSeenDays.get(daysSinceLastSeen).add(fingerprint);
+        relaysByLastSeenDays.get(daysSinceLastSeen).add(
+            hashedFingerprint);
       }
       Collections.sort(orderRelaysByConsensusWeight);
       relaysByConsensusWeight = new ArrayList<String>();
@@ -131,6 +160,26 @@ public class ResourceServlet extends HttpServlet {
         String line = this.formatBridgeSummaryLine(entry);
         bridgeFingerprintSummaryLines.put(hashedFingerprint, line);
         bridgeFingerprintSummaryLines.put(hashedHashedFingerprint, line);
+        int daysSinceFirstSeen = (int) ((now - entry.getFirstSeenMillis())
+            / 86400000L);
+        if (!bridgesByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
+          bridgesByFirstSeenDays.put(daysSinceFirstSeen,
+              new HashSet<String>());
+        }
+        bridgesByFirstSeenDays.get(daysSinceFirstSeen).add(
+            hashedFingerprint);
+        bridgesByFirstSeenDays.get(daysSinceFirstSeen).add(
+            hashedHashedFingerprint);
+        int daysSinceLastSeen = (int) ((now - entry.getLastSeenMillis())
+            / 86400000L);
+        if (!bridgesByLastSeenDays.containsKey(daysSinceLastSeen)) {
+          bridgesByLastSeenDays.put(daysSinceLastSeen,
+              new HashSet<String>());
+        }
+        bridgesByLastSeenDays.get(daysSinceLastSeen).add(
+            hashedFingerprint);
+        bridgesByLastSeenDays.get(daysSinceLastSeen).add(
+            hashedHashedFingerprint);
       }
       this.relaysByConsensusWeight = relaysByConsensusWeight;
       this.relayFingerprintSummaryLines = relayFingerprintSummaryLines;
@@ -138,6 +187,10 @@ public class ResourceServlet extends HttpServlet {
       this.relaysByCountryCode = relaysByCountryCode;
       this.relaysByASNumber = relaysByASNumber;
       this.relaysByFlag = relaysByFlag;
+      this.relaysByFirstSeenDays = relaysByFirstSeenDays;
+      this.relaysByLastSeenDays = relaysByLastSeenDays;
+      this.bridgesByFirstSeenDays = bridgesByFirstSeenDays;
+      this.bridgesByLastSeenDays = bridgesByLastSeenDays;
     }
     this.summaryFileLastModified = summaryFile.lastModified();
     this.readSummaryFile = true;
@@ -225,9 +278,9 @@ public class ResourceServlet extends HttpServlet {
 
     /* Make sure that the request doesn't contain any unknown
      * parameters. */
-    Set<String> knownParameters = new HashSet<String>(Arrays.asList(
-        "type,running,search,lookup,country,as,flag,order,limit,offset".
-        split(",")));
+    Set<String> knownParameters = new HashSet<String>(Arrays.asList((
+        "type,running,search,lookup,country,as,flag,first_seen_days,"
+        + "last_seen_days,order,limit,offset").split(",")));
     for (String parameterKey : parameterMap.keySet()) {
       if (!knownParameters.contains(parameterKey)) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -312,6 +365,30 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       this.filterByFlag(filteredRelays, filteredBridges, flagParameter);
+    }
+    if (parameterMap.containsKey("first_seen_days")) {
+      int[] days = this.parseDaysParameter(
+          parameterMap.get("first_seen_days"));
+      if (days == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterNodesByDays(filteredRelays, this.relaysByFirstSeenDays,
+          days);
+      this.filterNodesByDays(filteredBridges, this.bridgesByFirstSeenDays,
+          days);
+    }
+    if (parameterMap.containsKey("last_seen_days")) {
+      int[] days = this.parseDaysParameter(
+          parameterMap.get("last_seen_days"));
+      if (days == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterNodesByDays(filteredRelays, this.relaysByLastSeenDays,
+          days);
+      this.filterNodesByDays(filteredBridges, this.bridgesByLastSeenDays,
+          days);
     }
 
     /* Re-order and limit results. */
@@ -466,6 +543,33 @@ public class ResourceServlet extends HttpServlet {
       return null;
     }
     return parameter;
+  }
+
+  private static Pattern daysPattern = Pattern.compile("^[0-9-]{1,10}$");
+  private int[] parseDaysParameter(String parameter) {
+    if (!daysPattern.matcher(parameter).matches()) {
+      return null;
+    }
+    int x = 0, y = Integer.MAX_VALUE;
+    try {
+      if (!parameter.contains("-")) {
+        x = y = Integer.parseInt(parameter);
+      } else {
+        String[] parts = parameter.split("-", 2);
+        if (parts[0].length() > 0) {
+          x = Integer.parseInt(parts[0]);
+        }
+        if (parts.length > 1 && parts[1].length() > 0) {
+          y = Integer.parseInt(parts[1]);
+        }
+      }
+    } catch (NumberFormatException e) {
+      return null;
+    }
+    if (x > y) {
+      return null;
+    }
+    return new int[] { x, y };
   }
 
   private void filterByType(Map<String, String> filteredRelays,
@@ -662,6 +766,23 @@ public class ResourceServlet extends HttpServlet {
       }
     }
     filteredBridges.clear();
+  }
+
+  private void filterNodesByDays(Map<String, String> filteredNodes,
+      SortedMap<Integer, Set<String>> nodesByDays, int[] days) {
+    Set<String> removeNodes = new HashSet<String>();
+    for (Set<String> nodes : nodesByDays.headMap(days[0]).values()) {
+      removeNodes.addAll(nodes);
+    }
+    if (days[1] < Integer.MAX_VALUE) {
+      for (Set<String> nodes :
+          nodesByDays.tailMap(days[1] + 1).values()) {
+        removeNodes.addAll(nodes);
+      }
+    }
+    for (String fingerprint : removeNodes) {
+      filteredNodes.remove(fingerprint);
+    }
   }
 
   private void writeRelays(List<String> relays, PrintWriter pw,

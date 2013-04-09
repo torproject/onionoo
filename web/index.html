@@ -675,6 +675,29 @@ first parameter value will be considered.
 Filtering by flag is case-insensitive.
 <font color="blue">Added on April 9.</font>
 </td></tr>
+<!--
+<tr><td><b><font color="blue">first_seen_days</font></b></td>
+<td>Return only relays or bridges which
+have first been seen during the given range of days ago.
+A parameter value "x-y" with x &gt;= y returns relays or bridges that have
+first been seen at least x and at most y days ago.
+Accepted short forms are "x", "x-", and "-y" which are interpreted as
+"x-x", "x-infinity", and "0-y".
+<font color="blue">Added on April 9.</font>
+</td></tr>
+<tr><td><b><font color="blue">last_seen_days</font></b></td>
+<td>Return only relays or bridges which
+have last been seen during the given range of days ago.
+A parameter value "x-y" with x &gt;= y returns relays or bridges that have
+last been seen at least x and at most y days ago.
+Accepted short forms are "x", "x-", and "-y" which are interpreted as
+"x-x", "x-infinity", and "0-y".
+Note that relays and bridges that haven't been running in the past week
+are never included in results, so that setting x to 8 or higher will
+always lead to an empty result set.
+<font color="blue">Added on April 9.</font>
+</td></tr>
+-->
 </table>
 <p>Relay and/or bridge documents in the response can be ordered and
 limited by providing further parameters.
