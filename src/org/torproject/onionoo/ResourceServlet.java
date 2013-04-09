@@ -31,15 +31,21 @@ public class ResourceServlet extends HttpServlet {
 
   private static final long serialVersionUID = 7236658979947465319L;
 
+  private boolean maintenanceMode = false;
+
   private File summaryFile;
 
   private String outDirString;
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    this.outDirString = config.getInitParameter("outDir");
-    this.summaryFile = new File(outDirString, "summary");
-    this.readSummaryFile();
+    this.maintenanceMode = config.getInitParameter("maintenance") != null
+        && config.getInitParameter("maintenance").equals("1");
+    if (!this.maintenanceMode) {
+      this.outDirString = config.getInitParameter("outDir");
+      this.summaryFile = new File(outDirString, "summary");
+      this.readSummaryFile();
+    }
   }
 
   long summaryFileLastModified = -1L;
@@ -168,12 +174,21 @@ public class ResourceServlet extends HttpServlet {
   }
 
   public long getLastModified(HttpServletRequest request) {
-    this.readSummaryFile();
-    return this.summaryFileLastModified;
+    if (this.maintenanceMode) {
+      return super.getLastModified(request);
+    } else {
+      this.readSummaryFile();
+      return this.summaryFileLastModified;
+    }
   }
 
   public void doGet(HttpServletRequest request,
       HttpServletResponse response) throws IOException, ServletException {
+
+    if (this.maintenanceMode) {
+      response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+      return;
+    }
 
     this.readSummaryFile();
     if (!this.readSummaryFile) {
