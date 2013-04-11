@@ -624,6 +624,11 @@ public class ResourceServlet extends HttpServlet {
     for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
       String line = e.getValue();
       boolean lineMatches = false;
+      String nickname = "unnamed";
+      if (line.contains("\"n\":\"")) {
+        nickname = line.substring(line.indexOf("\"n\":\"") + 5).
+            split("\"")[0].toLowerCase();
+      }
       if (searchTerm.startsWith("$")) {
         /* Search is for $-prefixed fingerprint. */
         if (line.contains("\"f\":\""
@@ -631,13 +636,8 @@ public class ResourceServlet extends HttpServlet {
           /* $-prefixed fingerprint matches. */
           lineMatches = true;
         }
-      } else if (line.toLowerCase().contains("\"n\":\""
-          + searchTerm.toLowerCase())) {
+      } else if (nickname.contains(searchTerm.toLowerCase())) {
         /* Nickname matches. */
-        lineMatches = true;
-      } else if ("unnamed".startsWith(searchTerm.toLowerCase()) &&
-          line.startsWith("{\"f\":")) {
-        /* Nickname "Unnamed" matches. */
         lineMatches = true;
       } else if (line.contains("\"f\":\"" + searchTerm.toUpperCase())) {
         /* Non-$-prefixed fingerprint matches. */
@@ -658,6 +658,11 @@ public class ResourceServlet extends HttpServlet {
     for (Map.Entry<String, String> e : filteredBridges.entrySet()) {
       String line = e.getValue();
       boolean lineMatches = false;
+      String nickname = "unnamed";
+      if (line.contains("\"n\":\"")) {
+        nickname = line.substring(line.indexOf("\"n\":\"") + 5).
+            split("\"")[0].toLowerCase();
+      }
       if (searchTerm.startsWith("$")) {
         /* Search is for $-prefixed hashed fingerprint. */
         if (line.contains("\"h\":\""
@@ -665,13 +670,8 @@ public class ResourceServlet extends HttpServlet {
           /* $-prefixed hashed fingerprint matches. */
           lineMatches = true;
         }
-      } else if (line.toLowerCase().contains("\"n\":\""
-          + searchTerm.toLowerCase())) {
+      } else if (nickname.contains(searchTerm.toLowerCase())) {
         /* Nickname matches. */
-        lineMatches = true;
-      } else if ("unnamed".startsWith(searchTerm.toLowerCase()) &&
-          line.startsWith("{\"h\":")) {
-        /* Nickname "Unnamed" matches. */
         lineMatches = true;
       } else if (line.contains("\"h\":\"" + searchTerm.toUpperCase())) {
         /* Non-$-prefixed hashed fingerprint matches. */
