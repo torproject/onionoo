@@ -151,6 +151,10 @@ The following file may be a useful Tomcat configuration file.  Put it in
   </Service>
 </Server>
 
+It may also be necessary to increase Tomcat's maximum heap space.  Do this
+by editing JAVA_OPTS in /etc/default/tomcat6 and change "-Xmx128m" to
+"-Xmx512m".
+
 
 Deploy the Tomcat application
 -----------------------------
