@@ -1,5 +1,6 @@
 <project default="run" name="onionoo" basedir=".">
   <property name="sources" value="src"/>
+  <property name="tests" value="test"/>
   <property name="classes" value="classes"/>
   <property name="libs" value="lib"/>
   <property name="config" value="etc"/>
@@ -35,6 +36,27 @@
            includeantruntime="false">
       <classpath refid="classpath"/>
     </javac>
+  </target>
+  <target name="test" depends="compile">
+    <javac destdir="${classes}"
+           srcdir="${tests}"
+           source="1.5"
+           target="1.5"
+           debug="true"
+           deprecation="true"
+           optimize="false"
+           failonerror="true"
+           includeantruntime="false">
+      <classpath refid="classpath"/>
+    </javac>
+    <junit fork="true" haltonfailure="true" printsummary="off">
+      <classpath refid="classpath"/>
+      <formatter type="plain" usefile="false"/>
+      <batchtest>
+        <fileset dir="${classes}"
+                 includes="**/*Test.class"/>
+      </batchtest>
+    </junit>
   </target>
   <target name="war"
           depends="compile">

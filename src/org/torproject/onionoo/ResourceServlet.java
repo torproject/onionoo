@@ -35,17 +35,21 @@ public class ResourceServlet extends HttpServlet {
 
   private boolean maintenanceMode = false;
 
-  private File summaryFile;
-
-  private String outDirString;
+  private File outDir;
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    this.maintenanceMode = config.getInitParameter("maintenance") != null
+    boolean maintenanceMode =
+        config.getInitParameter("maintenance") != null
         && config.getInitParameter("maintenance").equals("1");
-    if (!this.maintenanceMode) {
-      this.outDirString = config.getInitParameter("outDir");
-      this.summaryFile = new File(outDirString, "summary");
+    File outDir = new File(config.getInitParameter("outDir"));
+    this.init(maintenanceMode, outDir);
+  }
+
+  protected void init(boolean maintenanceMode, File outDir) {
+    this.maintenanceMode = maintenanceMode;
+    this.outDir = outDir;
+    if (!maintenanceMode) {
       this.readSummaryFile();
     }
   }
@@ -62,11 +66,13 @@ public class ResourceServlet extends HttpServlet {
       bridgesByFirstSeenDays = null, relaysByLastSeenDays = null,
       bridgesByLastSeenDays = null;
   private void readSummaryFile() {
+    File summaryFile = new File(outDir, "summary");
     if (!summaryFile.exists()) {
       readSummaryFile = false;
       return;
     }
     if (summaryFile.lastModified() > this.summaryFileLastModified) {
+      long summaryFileLastModified = summaryFile.lastModified();
       List<String> relaysByConsensusWeight = new ArrayList<String>();
       Map<String, String>
           relayFingerprintSummaryLines = new HashMap<String, String>(),
@@ -81,7 +87,7 @@ public class ResourceServlet extends HttpServlet {
           relaysByLastSeenDays = new TreeMap<Integer, Set<String>>(),
           bridgesByLastSeenDays = new TreeMap<Integer, Set<String>>();
       CurrentNodes cn = new CurrentNodes();
-      cn.readRelaySearchDataFile(this.summaryFile);
+      cn.readRelaySearchDataFile(summaryFile);
       cn.setRelayRunningBits();
       cn.setBridgeRunningBits();
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
@@ -92,7 +98,6 @@ public class ResourceServlet extends HttpServlet {
       this.bridgesPublishedString = dateTimeFormat.format(
           cn.getLastPublishedMillis());
       List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
-      long now = System.currentTimeMillis();
       for (Node entry : cn.getCurrentRelays().values()) {
         String fingerprint = entry.getFingerprint().toUpperCase();
         String hashedFingerprint = entry.getHashedFingerprint().
@@ -129,8 +134,8 @@ public class ResourceServlet extends HttpServlet {
           relaysByFlag.get(flagLowerCase).add(fingerprint);
           relaysByFlag.get(flagLowerCase).add(hashedFingerprint);
         }
-        int daysSinceFirstSeen = (int) ((now - entry.getFirstSeenMillis())
-            / 86400000L);
+        int daysSinceFirstSeen = (int) ((summaryFileLastModified
+            - entry.getFirstSeenMillis()) / 86400000L);
         if (!relaysByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
           relaysByFirstSeenDays.put(daysSinceFirstSeen,
               new HashSet<String>());
@@ -138,8 +143,8 @@ public class ResourceServlet extends HttpServlet {
         relaysByFirstSeenDays.get(daysSinceFirstSeen).add(fingerprint);
         relaysByFirstSeenDays.get(daysSinceFirstSeen).add(
             hashedFingerprint);
-        int daysSinceLastSeen = (int) ((now - entry.getLastSeenMillis())
-            / 86400000L);
+        int daysSinceLastSeen = (int) ((summaryFileLastModified
+            - entry.getLastSeenMillis()) / 86400000L);
         if (!relaysByLastSeenDays.containsKey(daysSinceLastSeen)) {
           relaysByLastSeenDays.put(daysSinceLastSeen,
               new HashSet<String>());
@@ -160,8 +165,8 @@ public class ResourceServlet extends HttpServlet {
         String line = this.formatBridgeSummaryLine(entry);
         bridgeFingerprintSummaryLines.put(hashedFingerprint, line);
         bridgeFingerprintSummaryLines.put(hashedHashedFingerprint, line);
-        int daysSinceFirstSeen = (int) ((now - entry.getFirstSeenMillis())
-            / 86400000L);
+        int daysSinceFirstSeen = (int) ((summaryFileLastModified
+            - entry.getFirstSeenMillis()) / 86400000L);
         if (!bridgesByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
           bridgesByFirstSeenDays.put(daysSinceFirstSeen,
               new HashSet<String>());
@@ -170,8 +175,8 @@ public class ResourceServlet extends HttpServlet {
             hashedFingerprint);
         bridgesByFirstSeenDays.get(daysSinceFirstSeen).add(
             hashedHashedFingerprint);
-        int daysSinceLastSeen = (int) ((now - entry.getLastSeenMillis())
-            / 86400000L);
+        int daysSinceLastSeen = (int) ((summaryFileLastModified
+            - entry.getLastSeenMillis()) / 86400000L);
         if (!bridgesByLastSeenDays.containsKey(daysSinceLastSeen)) {
           bridgesByLastSeenDays.put(daysSinceLastSeen,
               new HashSet<String>());
@@ -230,13 +235,64 @@ public class ResourceServlet extends HttpServlet {
     if (this.maintenanceMode) {
       return super.getLastModified(request);
     } else {
-      this.readSummaryFile();
-      return this.summaryFileLastModified;
+      return this.getLastModified();
+    }
+  }
+
+  private long getLastModified() {
+    this.readSummaryFile();
+    return this.summaryFileLastModified;
+  }
+
+  protected static class HttpServletRequestWrapper {
+    private HttpServletRequest request;
+    protected HttpServletRequestWrapper(HttpServletRequest request) {
+      this.request = request;
+    }
+    protected String getRequestURI() {
+      return this.request.getRequestURI();
+    }
+    protected Map getParameterMap() {
+      return this.request.getParameterMap();
+    }
+    protected String[] getParameterValues(String parameterKey) {
+      return this.request.getParameterValues(parameterKey);
+    }
+  }
+
+  protected static class HttpServletResponseWrapper {
+    private HttpServletResponse response = null;
+    protected HttpServletResponseWrapper(HttpServletResponse response) {
+      this.response = response;
+    }
+    protected void sendError(int errorStatusCode) throws IOException {
+      this.response.sendError(errorStatusCode);
+    }
+    protected void setHeader(String headerName, String headerValue) {
+      this.response.setHeader(headerName, headerValue);
+    }
+    protected void setContentType(String contentType) {
+      this.response.setContentType(contentType);
+    }
+    protected void setCharacterEncoding(String characterEncoding) {
+      this.response.setCharacterEncoding(characterEncoding);
+    }
+    protected PrintWriter getWriter() throws IOException {
+      return this.response.getWriter();
     }
   }
 
   public void doGet(HttpServletRequest request,
       HttpServletResponse response) throws IOException, ServletException {
+    HttpServletRequestWrapper requestWrapper =
+        new HttpServletRequestWrapper(request);
+    HttpServletResponseWrapper responseWrapper =
+        new HttpServletResponseWrapper(response);
+    this.doGet(requestWrapper, responseWrapper);
+  }
+
+  public void doGet(HttpServletRequestWrapper request,
+      HttpServletResponseWrapper response) throws IOException {
 
     if (this.maintenanceMode) {
       response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
@@ -848,8 +904,7 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File detailsFile = new File(this.outDirString + "details/"
-        + fingerprint);
+    File detailsFile = new File(this.outDir, "details/" + fingerprint);
     StringBuilder sb = new StringBuilder();
     String detailsLines = null;
     if (detailsFile.exists()) {
@@ -893,7 +948,7 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File bandwidthFile = new File(this.outDirString + "bandwidth/"
+    File bandwidthFile = new File(this.outDir, "bandwidth/"
         + fingerprint);
     StringBuilder sb = new StringBuilder();
     String bandwidthLines = null;
@@ -928,8 +983,7 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File weightsFile = new File(this.outDirString + "weights/"
-        + fingerprint);
+    File weightsFile = new File(this.outDir, "weights/" + fingerprint);
     StringBuilder sb = new StringBuilder();
     String weightsLines = null;
     if (weightsFile.exists()) {

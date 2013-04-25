@@ -32,6 +32,7 @@ directory:
 - Apache Commons Lang 2.6
 - Servlet API, e.g., from Tomcat 6
 - Tor Metrics Descriptor Library, metrics-lib
+- Gson 2.2.3 (so far only required for testing)
 
 Attempt to compile the Java sources to make sure that everything works
 correctly:

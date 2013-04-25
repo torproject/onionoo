@@ -822,7 +822,7 @@ public class CurrentNodes {
   private SortedMap<String, Node> knownRelays =
       new TreeMap<String, Node>();
   public SortedMap<String, Node> getCurrentRelays() {
-    long cutoff = System.currentTimeMillis()
+    long cutoff = this.lastValidAfterMillis
         - 7L * 24L * 60L * 60L * 1000L;
     SortedMap<String, Node> currentRelays = new TreeMap<String, Node>();
     for (Map.Entry<String, Node> e : this.knownRelays.entrySet()) {
@@ -836,8 +836,7 @@ public class CurrentNodes {
   private SortedMap<String, Node> knownBridges =
       new TreeMap<String, Node>();
   public SortedMap<String, Node> getCurrentBridges() {
-    long cutoff = System.currentTimeMillis()
-        - 7L * 24L * 60L * 60L * 1000L;
+    long cutoff = this.lastPublishedMillis - 7L * 24L * 60L * 60L * 1000L;
     SortedMap<String, Node> currentBridges = new TreeMap<String, Node>();
     for (Map.Entry<String, Node> e : this.knownBridges.entrySet()) {
       if (e.getValue().getLastSeenMillis() >= cutoff) {
