@@ -537,7 +537,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern flagPattern =
-      Pattern.compile("^[a-zA-Z]{1,20}$");
+      Pattern.compile("^[a-zA-Z0-9]{1,20}$");
   private String parseFlagParameter(String parameter) {
     if (!flagPattern.matcher(parameter).matches()) {
       return null;
