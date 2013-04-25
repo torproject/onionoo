@@ -629,10 +629,12 @@ parameter value is considered.
 <tr><td><b>type</b></td><td>Return only relay (parameter value
 <b>relay</b>) or only bridge documents (parameter value
 <b>bridge</b>).
+Parameter values are case-insensitive.
 </td></tr>
 <tr><td><b>running</b></td><td>Return only running (parameter value
 <b>true</b>) or only non-running relays and/or bridges (paramter value
 <b>false</b>).
+Parameter values are case-insensitive.
 </td></tr>
 <tr><td><b>search</b></td><td>Return only relays with the parameter value
 matching (part of a) nickname, (possibly $-prefixed) beginning of a
@@ -712,6 +714,7 @@ of fields in ascending or descening order.
 Results are first ordered by the first list element, then by the second,
 and so on.
 Possible fields for ordering are: <b>consensus_weight</b>.
+Field names are case-insensitive.
 Ascending order is the default; descending order is selected by prepending
 fields with a minus sign (<b>-</b>).
 Relays or bridges which don't have any value for a field to be ordered by

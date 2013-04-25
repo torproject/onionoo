@@ -294,7 +294,7 @@ public class ResourceServlet extends HttpServlet {
     Map<String, String> filteredBridges = new HashMap<String, String>(
         this.bridgeFingerprintSummaryLines);
     if (parameterMap.containsKey("type")) {
-      String typeParameterValue = parameterMap.get("type");
+      String typeParameterValue = parameterMap.get("type").toLowerCase();
       boolean relaysRequested = true;
       if (typeParameterValue.equals("bridge")) {
         relaysRequested = false;
@@ -305,7 +305,8 @@ public class ResourceServlet extends HttpServlet {
       this.filterByType(filteredRelays, filteredBridges, relaysRequested);
     }
     if (parameterMap.containsKey("running")) {
-      String runningParameterValue = parameterMap.get("running");
+      String runningParameterValue =
+          parameterMap.get("running").toLowerCase();
       boolean runningRequested = true;
       if (runningParameterValue.equals("false")) {
         runningRequested = false;
@@ -395,7 +396,7 @@ public class ResourceServlet extends HttpServlet {
     List<String> orderedRelays = new ArrayList<String>();
     List<String> orderedBridges = new ArrayList<String>();
     if (parameterMap.containsKey("order")) {
-      String orderParameter = parameterMap.get("order");
+      String orderParameter = parameterMap.get("order").toLowerCase();
       boolean descending = false;
       if (orderParameter.startsWith("-")) {
         descending = true;
