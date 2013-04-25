@@ -606,15 +606,7 @@ public class ResourceServlet extends HttpServlet {
   private void filterBySearchTerms(Map<String, String> filteredRelays,
       Map<String, String> filteredBridges, String[] searchTerms) {
     for (String searchTerm : searchTerms) {
-      if (searchTerm.startsWith("$") && searchTerm.length() == 41) {
-        this.filterByFingerprint(filteredRelays, filteredBridges,
-            searchTerm.substring(1).toUpperCase());
-      } else if (!searchTerm.startsWith("$") && searchTerm.length() == 40) {
-        this.filterByFingerprint(filteredRelays, filteredBridges,
-            searchTerm.toUpperCase());
-      } else {
-        filterBySearchTerm(filteredRelays, filteredBridges, searchTerm);
-      }
+      filterBySearchTerm(filteredRelays, filteredBridges, searchTerm);
     }
   }
 
@@ -622,6 +614,7 @@ public class ResourceServlet extends HttpServlet {
       Map<String, String> filteredBridges, String searchTerm) {
     Set<String> removeRelays = new HashSet<String>();
     for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
+      String fingerprint = e.getKey();
       String line = e.getValue();
       boolean lineMatches = false;
       String nickname = "unnamed";
@@ -631,15 +624,15 @@ public class ResourceServlet extends HttpServlet {
       }
       if (searchTerm.startsWith("$")) {
         /* Search is for $-prefixed fingerprint. */
-        if (line.contains("\"f\":\""
-            + searchTerm.substring(1).toUpperCase())) {
+        if (fingerprint.startsWith(
+            searchTerm.substring(1).toUpperCase())) {
           /* $-prefixed fingerprint matches. */
           lineMatches = true;
         }
       } else if (nickname.contains(searchTerm.toLowerCase())) {
         /* Nickname matches. */
         lineMatches = true;
-      } else if (line.contains("\"f\":\"" + searchTerm.toUpperCase())) {
+      } else if (fingerprint.startsWith(searchTerm.toUpperCase())) {
         /* Non-$-prefixed fingerprint matches. */
         lineMatches = true;
       } else if (line.substring(line.indexOf("\"a\":[")).contains("\""
@@ -656,6 +649,7 @@ public class ResourceServlet extends HttpServlet {
     }
     Set<String> removeBridges = new HashSet<String>();
     for (Map.Entry<String, String> e : filteredBridges.entrySet()) {
+      String hashedFingerprint = e.getKey();
       String line = e.getValue();
       boolean lineMatches = false;
       String nickname = "unnamed";
@@ -665,15 +659,15 @@ public class ResourceServlet extends HttpServlet {
       }
       if (searchTerm.startsWith("$")) {
         /* Search is for $-prefixed hashed fingerprint. */
-        if (line.contains("\"h\":\""
-            + searchTerm.substring(1).toUpperCase())) {
+        if (hashedFingerprint.startsWith(
+            searchTerm.substring(1).toUpperCase())) {
           /* $-prefixed hashed fingerprint matches. */
           lineMatches = true;
         }
       } else if (nickname.contains(searchTerm.toLowerCase())) {
         /* Nickname matches. */
         lineMatches = true;
-      } else if (line.contains("\"h\":\"" + searchTerm.toUpperCase())) {
+      } else if (hashedFingerprint.startsWith(searchTerm.toUpperCase())) {
         /* Non-$-prefixed hashed fingerprint matches. */
         lineMatches = true;
       }
