@@ -44,115 +44,128 @@ public class CurrentNodes {
         BufferedReader br = new BufferedReader(new FileReader(
             summaryFile));
         String line;
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss");
-        dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         while ((line = br.readLine()) != null) {
-          String[] parts = line.split(" ");
-          boolean isRelay = parts[0].equals("r");
-          if (parts.length < 9) {
-            System.err.println("Line '" + line + "' in '"
-                + summaryFile.getAbsolutePath()
-                + "' is invalid.  Exiting.");
-            System.exit(1);
-          }
-          String nickname = parts[1];
-          String fingerprint = parts[2];
-          String addresses = parts[3];
-          String address;
-          SortedSet<String> orAddressesAndPorts = new TreeSet<String>();
-          SortedSet<String> exitAddresses = new TreeSet<String>();
-          if (addresses.contains(";")) {
-            String[] addressParts = addresses.split(";", -1);
-            if (addressParts.length != 3) {
-              System.err.println("Line '" + line + "' in '"
-                  + summaryFile.getAbsolutePath()
-                  + " is invalid.  Exiting.");
-              System.exit(1);
-            }
-            address = addressParts[0];
-            if (addressParts[1].length() > 0) {
-              orAddressesAndPorts.addAll(Arrays.asList(
-                  addressParts[1].split("\\+")));
-            }
-            if (addressParts[2].length() > 0) {
-              exitAddresses.addAll(Arrays.asList(
-                  addressParts[2].split("\\+")));
-            }
-          } else {
-            address = addresses;
-          }
-          long publishedOrValidAfterMillis = dateTimeFormat.parse(
-              parts[4] + " " + parts[5]).getTime();
-          int orPort = Integer.parseInt(parts[6]);
-          int dirPort = Integer.parseInt(parts[7]);
-          SortedSet<String> relayFlags = new TreeSet<String>(
-              Arrays.asList(parts[8].split(",")));
-          long consensusWeight = -1L;
-          if (parts.length > 9) {
-            consensusWeight = Long.parseLong(parts[9]);
-          }
-          String countryCode = "??";
-          if (parts.length > 10) {
-            countryCode = parts[10];
-          }
-          String hostName = null;
-          long lastRdnsLookup = -1L;
-          if (parts.length > 12) {
-            hostName = parts[11].equals("null") ? null : parts[11];
-            lastRdnsLookup = Long.parseLong(parts[12]);
-          }
-          String defaultPolicy = null, portList = null;
-          if (parts.length > 14) {
-            if (!parts[13].equals("null")) {
-              defaultPolicy = parts[13];
-            }
-            if (!parts[14].equals("null")) {
-              portList = parts[14];
-            }
-          }
-          long firstSeenMillis = publishedOrValidAfterMillis;
-          if (parts.length > 16) {
-            firstSeenMillis = dateTimeFormat.parse(parts[15] + " "
-                + parts[16]).getTime();
-          }
-          long lastChangedAddresses = publishedOrValidAfterMillis;
-          if (parts.length > 18 && !parts[17].equals("null")) {
-            lastChangedAddresses = dateTimeFormat.parse(parts[17] + " "
-                + parts[18]).getTime();
-          }
-          String aSNumber = null;
-          if (parts.length > 19) {
-            aSNumber = parts[19];
-          }
-          if (isRelay) {
-            this.addRelay(nickname, fingerprint, address,
-                orAddressesAndPorts, exitAddresses,
-                publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
-                consensusWeight, countryCode, hostName, lastRdnsLookup,
-                defaultPolicy, portList, firstSeenMillis,
-                lastChangedAddresses, aSNumber);
-          } else {
-            this.addBridge(nickname, fingerprint, address,
-                orAddressesAndPorts, exitAddresses,
-                publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
-                consensusWeight, countryCode, hostName, lastRdnsLookup,
-                defaultPolicy, portList, firstSeenMillis,
-                lastChangedAddresses, aSNumber);
-          }
+          this.parseSummaryFileLine(line);
         }
         br.close();
       } catch (IOException e) {
-        System.err.println("Could not read "
-            + summaryFile.getAbsolutePath() + ".  Exiting.");
-        e.printStackTrace();
-        System.exit(1);
-      } catch (ParseException e) {
-        System.err.println("Could not read "
-            + summaryFile.getAbsolutePath() + ".  Exiting.");
-        e.printStackTrace();
-        System.exit(1);
+        System.err.println("I/O error while reading "
+            + summaryFile.getAbsolutePath() + ": " + e.getMessage()
+            + ".  Ignoring.");
       }
+    }
+  }
+
+  private void parseSummaryFileLine(String line) {
+    boolean isRelay;
+    String nickname, fingerprint, address, countryCode = "??",
+        hostName = null, defaultPolicy = null, portList = null,
+        aSNumber = null;
+    SortedSet<String> orAddressesAndPorts, exitAddresses, relayFlags;
+    long publishedOrValidAfterMillis, consensusWeight = -1L,
+        lastRdnsLookup = -1L, firstSeenMillis, lastChangedAddresses;
+    int orPort, dirPort;
+    try {
+      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+          "yyyy-MM-dd HH:mm:ss");
+      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      String[] parts = line.split(" ");
+      isRelay = parts[0].equals("r");
+      if (parts.length < 9) {
+        System.err.println("Too few space-separated values in line '"
+            + line + "'.  Skipping.");
+        return;
+      }
+      nickname = parts[1];
+      fingerprint = parts[2];
+      String addresses = parts[3];
+      orAddressesAndPorts = new TreeSet<String>();
+      exitAddresses = new TreeSet<String>();
+      if (addresses.contains(";")) {
+        String[] addressParts = addresses.split(";", -1);
+        if (addressParts.length != 3) {
+          System.err.println("Invalid addresses entry in line '" + line
+              + "'.  Skipping.");
+          return;
+        }
+        address = addressParts[0];
+        if (addressParts[1].length() > 0) {
+          orAddressesAndPorts.addAll(Arrays.asList(
+              addressParts[1].split("\\+")));
+        }
+        if (addressParts[2].length() > 0) {
+          exitAddresses.addAll(Arrays.asList(
+              addressParts[2].split("\\+")));
+        }
+      } else {
+        address = addresses;
+      }
+      publishedOrValidAfterMillis = dateTimeFormat.parse(
+          parts[4] + " " + parts[5]).getTime();
+      orPort = Integer.parseInt(parts[6]);
+      dirPort = Integer.parseInt(parts[7]);
+      relayFlags = new TreeSet<String>(
+          Arrays.asList(parts[8].split(",")));
+      if (parts.length > 9) {
+        consensusWeight = Long.parseLong(parts[9]);
+      }
+      if (parts.length > 10) {
+        countryCode = parts[10];
+      }
+      if (parts.length > 12) {
+        hostName = parts[11].equals("null") ? null : parts[11];
+        lastRdnsLookup = Long.parseLong(parts[12]);
+      }
+      if (parts.length > 14) {
+        if (!parts[13].equals("null")) {
+          defaultPolicy = parts[13];
+        }
+        if (!parts[14].equals("null")) {
+          portList = parts[14];
+        }
+      }
+      firstSeenMillis = publishedOrValidAfterMillis;
+      if (parts.length > 16) {
+        firstSeenMillis = dateTimeFormat.parse(parts[15] + " "
+            + parts[16]).getTime();
+      }
+      lastChangedAddresses = publishedOrValidAfterMillis;
+      if (parts.length > 18 && !parts[17].equals("null")) {
+        lastChangedAddresses = dateTimeFormat.parse(parts[17] + " "
+            + parts[18]).getTime();
+      }
+      if (parts.length > 19) {
+        aSNumber = parts[19];
+      }
+    } catch (NumberFormatException e) {
+      System.err.println("Number format exception while parsing line '"
+          + line + "': " + e.getMessage() + ".  Skipping.");
+      return;
+    } catch (ParseException e) {
+      System.err.println("Parse exception while parsing line '" + line
+          + "': " + e.getMessage() + ".  Skipping.");
+      return;
+    } catch (Exception e) {
+      /* This catch block is only here to handle yet unknown errors.  It
+       * should go away once we're sure what kind of errors can occur. */
+      System.err.println("Unknown exception while parsing line '" + line
+          + "': " + e.getMessage() + ".  Skipping.");
+      return;
+    }
+    if (isRelay) {
+      this.addRelay(nickname, fingerprint, address,
+          orAddressesAndPorts, exitAddresses,
+          publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
+          consensusWeight, countryCode, hostName, lastRdnsLookup,
+          defaultPolicy, portList, firstSeenMillis,
+          lastChangedAddresses, aSNumber);
+    } else {
+      this.addBridge(nickname, fingerprint, address,
+          orAddressesAndPorts, exitAddresses,
+          publishedOrValidAfterMillis, orPort, dirPort, relayFlags,
+          consensusWeight, countryCode, hostName, lastRdnsLookup,
+          defaultPolicy, portList, firstSeenMillis,
+          lastChangedAddresses, aSNumber);
     }
   }
 
