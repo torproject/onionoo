@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,18 +184,9 @@ public class ResourceServletTest {
     }
 
     private static void assertErrorStatusCode(File tempOutDir,
-        String requestURI, int errorStatusCode) {
-      ResourceServletTestHelper helper = new ResourceServletTestHelper(
-          tempOutDir, requestURI, null);
-      helper.runTest();
-      assertEquals(errorStatusCode, helper.response.errorStatusCode);
-    }
-
-    private static void assertErrorStatusCode(File tempOutDir,
-        String requestURI, String parameterKey, String[] parameterValues,
-        int errorStatusCode) {
-      Map<String, String[]> parameters = new HashMap<String, String[]>();
-      parameters.put(parameterKey, parameterValues);
+        String request, int errorStatusCode) {
+      String requestURI = parseRequestURI(request);
+      Map<String, String[]> parameters = parseParameters(request);
       ResourceServletTestHelper helper = new ResourceServletTestHelper(
           tempOutDir, requestURI, parameters);
       helper.runTest();
@@ -204,11 +194,11 @@ public class ResourceServletTest {
     }
 
     private static void assertSummaryDocument(File tempOutDir,
-        String requestURI, String parameterKey, String[] parameterValues,
-        int expectedRelaysNumber, String[] expectedRelaysNicknames,
-        int expectedBridgesNumber, String[] expectedBridgesNicknames) {
-      Map<String, String[]> parameters = new HashMap<String, String[]>();
-      parameters.put(parameterKey, parameterValues);
+        String request, int expectedRelaysNumber,
+        String[] expectedRelaysNicknames, int expectedBridgesNumber,
+        String[] expectedBridgesNicknames) {
+      String requestURI = parseRequestURI(request);
+      Map<String, String[]> parameters = parseParameters(request);
       ResourceServletTestHelper helper = new ResourceServletTestHelper(
           tempOutDir, requestURI, parameters);
       helper.runTest();
@@ -229,6 +219,34 @@ public class ResourceServletTest {
               helper.summaryDocument.bridges[i].n);
         }
       }
+    }
+
+    private static String parseRequestURI(String request) {
+      return request.split("\\?")[0];
+    }
+
+    private static Map<String, String[]> parseParameters(String request) {
+      Map<String, String[]> parameters = null;
+      String[] uriParts = request.split("\\?");
+      if (uriParts.length == 2) {
+        Map<String, List<String>> parameterLists =
+            new HashMap<String, List<String>>();
+        for (String parameter : uriParts[1].split("&")) {
+          String[] parameterParts = parameter.split("=");
+          if (!parameterLists.containsKey(parameterParts[0])) {
+            parameterLists.put(parameterParts[0],
+                new ArrayList<String>());
+          }
+          parameterLists.get(parameterParts[0]).add(parameterParts[1]);
+        }
+        parameters = new HashMap<String, String[]>();
+        for (Map.Entry<String, List<String>> e :
+            parameterLists.entrySet()) {
+          parameters.put(e.getKey(),
+              e.getValue().toArray(new String[e.getValue().size()]));
+        }
+      }
+      return parameters;
     }
   }
 
@@ -305,244 +323,226 @@ public class ResourceServletTest {
 
   @Test()
   public void testNonExistantDocumentType() {
-    ResourceServletTestHelper.assertErrorStatusCode(
-        this.tempOutDir, "/doesnotexist", 400);
+    ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
+        "/doesnotexist", 400);
   }
 
   @Test()
   public void testSUMMARYDocument() {
-    ResourceServletTestHelper.assertErrorStatusCode(
-        this.tempOutDir, "/SUMMARY", 400);
+    ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
+        "/SUMMARY", 400);
   }
 
   @Test()
   public void testTypeRelay() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "type", new String[] { "relay" }, 3, null, 0, null);
+        "/summary?type=relay", 3, null, 0, null);
   }
 
   @Test()
   public void testTypeBridge() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "type", new String[] { "bridge" }, 0, null, 3, null);
+        "/summary?type=bridge", 0, null, 3, null);
   }
 
   @Test()
   public void testTypeBridgerelay() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "type", new String[] { "bridgerelay" }, 400);
+        "/summary?type=bridgerelay", 400);
   }
 
   @Test()
   public void testTypeRelayBridge() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "type", new String[] { "relay", "bridge" }, 3, null,
-        0, null);
+        "/summary?type=relay&type=bridge", 3, null, 0, null);
   }
 
   @Test()
   public void testTypeBridgeRelay() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "type", new String[] { "bridge", "relay" }, 0, null,
-        3, null);
+        "/summary?type=bridge&type=relay", 0, null, 3, null);
   }
 
   @Test()
   public void testTypeRelayRelay() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "type", new String[] { "relay", "relay" }, 3, null, 0,
-        null);
+        "/summary?type=relay&type=relay", 3, null, 0, null);
   }
 
   @Test()
   public void testTYPERelay() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "TYPE", new String[] { "relay" }, 400);
+        "/summary?TYPE=relay", 400);
   }
 
   @Test()
   public void testTypeRELAY() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "type", new String[] { "RELAY" }, 3, null, 0, null);
+        "/summary?type=RELAY", 3, null, 0, null);
   }
 
   @Test()
   public void testRunningTrue() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "running", new String[] { "true" }, 1,
-        new String[] { "Ferrari458" }, 1, new String[] { "gummy" });
+        "/summary?running=true", 1, new String[] { "Ferrari458" }, 1,
+        new String[] { "gummy" });
   }
 
   @Test()
   public void testRunningFalse() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "running", new String[] { "false" }, 2, null, 2,
-        null);
+        "/summary?running=false", 2, null, 2, null);
   }
 
   @Test()
   public void testRunningTruefalse() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "running", new String[] { "truefalse" }, 400);
+        "/summary?running=truefalse", 400);
   }
 
   @Test()
   public void testRunningTrueFalse() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "running", new String[] { "true", "false" }, 1,
+        "/summary?running=true&running=false", 1,
         new String[] { "Ferrari458" }, 1,  new String[] { "gummy" });
   }
 
   @Test()
   public void testRunningFalseTrue() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "running", new String[] { "false", "true" }, 2, null,
-        2, null);
+        "/summary?running=false&running=true", 2, null, 2, null);
   }
 
   @Test()
   public void testRunningTrueTrue() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "running", new String[] { "true", "true" }, 1,
+        "/summary?running=true&running=true", 1,
         new String[] { "Ferrari458" }, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testRUNNINGTrue() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "RUNNING", new String[] { "true" }, 400);
+        "/summary?RUNNING=true", 400);
   }
 
   @Test()
   public void testRunningTRUE() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "running", new String[] { "TRUE" }, 1, null, 1, null);
+        "/summary?running=TRUE", 1, null, 1, null);
   }
 
   @Test()
   public void testSearchTorkaZ() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "TorkaZ" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?search=TorkaZ", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchTorkaX() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "TorkaX" }, 0, null, 0,
-        null);
+        "/summary?search=TorkaX", 0, null, 0, null);
   }
 
   @Test()
   public void testSearchOrkaZ() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "orkaZ" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?search=orkaZ", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchTorka() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "Torka" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?search=Torka", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchTORKAZ() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "TORKAZ" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?search=TORKAZ", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchDollarFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$000C5F55BD4814B917CC474BD537F1A3B33CCE2A" }, 1,
+        "/summary?search=$000C5F55BD4814B917CC474BD537F1A3B33CCE2A", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" }, 1,
+        "/summary?search=000C5F55BD4814B917CC474BD537F1A3B33CCE2A", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchDollarFingerprint39() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$000C5F55BD4814B917CC474BD537F1A3B33CCE2" }, 1,
+        "/summary?search=$000C5F55BD4814B917CC474BD537F1A3B33CCE2", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchDollarFingerprintLowerCase39() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$000c5f55bd4814b917cc474bd537f1a3b33cce2" }, 1,
+        "/summary?search=$000c5f55bd4814b917cc474bd537f1a3b33cce2", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchFingerprintLowerCase39() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "000c5f55bd4814b917cc474bd537f1a3b33cce2" }, 1,
+        "/summary?search=000c5f55bd4814b917cc474bd537f1a3b33cce2", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchDollarHashedFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$5aa14c08d62913e0057a9ad5863b458c0ce94cee" }, 1,
+        "/summary?search=$5aa14c08d62913e0057a9ad5863b458c0ce94cee", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchDollarHashedFingerprint39() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$5aa14c08d62913e0057a9ad5863b458c0ce94ce" }, 1,
+        "/summary?search=$5aa14c08d62913e0057a9ad5863b458c0ce94ce", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testSearchDollarHashedFingerprint41() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$5aa14c08d62913e0057a9ad5863b458c0ce94ceee" },
+        "/summary?search=$5aa14c08d62913e0057a9ad5863b458c0ce94ceee",
         400);
   }
 
   @Test()
   public void testSearchIp() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "62.216.201.221" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?search=62.216.201.221", 1, new String[] { "TorkaZ" }, 0,
+        null);
   }
 
   @Test()
   public void testSearchIp24Network() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "62.216.201" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?search=62.216.201", 1, new String[] { "TorkaZ" }, 0,
+        null);
   }
 
   @Test()
   public void testSearchIpExit() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "62.216.201.222" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?search=62.216.201.222", 1, new String[] { "TorkaZ" }, 0,
+        null);
   }
 
   @Test()
   public void testSearchIpv6() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "[2001:4f8:3:2e::51]" }, 1,
+        "/summary?search=[2001:4f8:3:2e::51]", 1,
         new String[] { "Ferrari458" }, 0, null);
   }
 
@@ -550,23 +550,21 @@ public class ResourceServletTest {
   public void testSearchIpv6Slash64() {
     /* TODO This request should return one bridge. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "[2001:4f8:3:2e::]" }, 0,
-        null, 0, null);
+        "/summary?search=[2001:4f8:3:2e::]", 0, null, 0, null);
   }
 
   @Test()
   public void testSearchIpv6Uncompressed() {
     /* TODO This request should return one bridge. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "[2001:04f8:0003:002e:0000:0000:0000:0051]" }, 0,
+        "/summary?search=[2001:04f8:0003:002e:0000:0000:0000:0051]", 0,
         null, 0, null);
   }
 
   @Test()
   public void testSearchIpv6UpperCase() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "[2001:4F8:3:2E::51]" }, 1,
+        "/summary?search=[2001:4F8:3:2E::51]", 1,
         new String[] { "Ferrari458" }, 0, null);
   }
 
@@ -575,8 +573,7 @@ public class ResourceServletTest {
     /* TODO This request should fail with a 400 status code, because the
      * given IPv6 address is invalid. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "[2001:4f8:3:2e:::51]" }, 0,
-        null, 0, null);
+        "/summary?search=[2001:4f8:3:2e:::51]", 0, null, 0, null);
   }
 
   @Test()
@@ -584,8 +581,7 @@ public class ResourceServletTest {
     /* TODO This request should fail with a 400 status code, because the
      * given IPv6 address is invalid. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "[20014:f80:3:2e::51]" }, 0,
-        null, 0, null);
+        "/summary?search=[20014:f80:3:2e::51]", 0, null, 0, null);
   }
 
   @Test()
@@ -593,444 +589,402 @@ public class ResourceServletTest {
     /* TODO This request should fail with a 400 status code, because the
      * given IPv6 address is invalid. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "[1:2:3:4:5:6:7:8:9]" }, 0,
-        null, 0, null);
+        "/summary?search=[1:2:3:4:5:6:7:8:9]", 0, null, 0, null);
   }
 
   @Test()
   public void testSearchIpv6TcpPort() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "search", new String[] { "[2001:4f8:3:2e::51]:9001" },
-        400);
+        "/summary?search=[2001:4f8:3:2e::51]:9001", 400);
   }
 
   @Test()
   public void testSearchGummy() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "gummy" }, 0, null, 1,
-        new String[] { "gummy" });
+        "/summary?search=gummy", 0, null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchGummi() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "gummi" }, 0, null, 0, null);
+        "/summary?search=gummi", 0, null, 0, null);
   }
 
   @Test()
   public void testSearchUmmy() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "ummy" }, 0, null, 1,
-        new String[] { "gummy" });
+        "/summary?search=ummy", 0, null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchGumm() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "gumm" }, 0, null, 1,
-        new String[] { "gummy" });
+        "/summary?search=gumm", 0, null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchGUMMY() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search", new String[] { "GUMMY" }, 0, null, 1,
-        new String[] { "gummy" });
+        "/summary?search=GUMMY", 0, null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeDollarHashedFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756" }, 0,
+        "/summary?search=$1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeHashedFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756" }, 0,
+        "/summary?search=1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeDollarHashedFingerprint39() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB75" }, 0,
+        "/summary?search=$1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB75", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeDollarHashedFingerprintLowerCase39() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$1fede50ed8dba1dd9f9165f78c8131e4a44ab75" }, 0,
+        "/summary?search=$1fede50ed8dba1dd9f9165f78c8131e4a44ab75", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeHashedFingerprintLowerCase39() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "1fede50ed8dba1dd9f9165f78c8131e4a44ab75" }, 0,
+        "/summary?search=1fede50ed8dba1dd9f9165f78c8131e4a44ab75", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeDollarHashedHashedFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$CE52F898DB3678BCE33FAC28C92774DE90D618B5" }, 0,
+        "/summary?search=$CE52F898DB3678BCE33FAC28C92774DE90D618B5", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeDollarHashedHashedFingerprint39() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$CE52F898DB3678BCE33FAC28C92774DE90D618B" }, 0,
+        "/summary?search=$CE52F898DB3678BCE33FAC28C92774DE90D618B", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeDollarOriginalFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "search",
-        new String[] { "$0010D49C6DA1E46A316563099F41BFE40B6C7183" }, 0,
+        "/summary?search=$0010D49C6DA1E46A316563099F41BFE40B6C7183", 0,
         null, 0, null);
   }
 
   @Test()
   public void testSearchUnderscore() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "search", new String[] { "_" }, 400);
+        "/summary?search=_", 400);
   }
 
   @Test()
   public void testLookupFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "lookup",
-        new String[] { "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" }, 1,
+        "/summary?lookup=000C5F55BD4814B917CC474BD537F1A3B33CCE2A", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testLookupDollarFingerprint() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "lookup",
-        new String[] { "$000C5F55BD4814B917CC474BD537F1A3B33CCE2A" },
-        400);
+        "/summary?lookup=$000C5F55BD4814B917CC474BD537F1A3B33CCE2A", 400);
   }
 
   @Test()
   public void testLookupDollarFingerprint39() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "lookup",
-        new String[] { "$000C5F55BD4814B917CC474BD537F1A3B33CCE2" }, 400);
+        "/summary?lookup=$000C5F55BD4814B917CC474BD537F1A3B33CCE2", 400);
   }
 
   @Test()
   public void testLookupFingerprintLowerCase39() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "lookup",
-        new String[] { "000c5f55bd4814b917cc474bd537f1a3b33cce2" }, 400);
+        "/summary?lookup=000c5f55bd4814b917cc474bd537f1a3b33cce2", 400);
   }
 
   @Test()
   public void testLookupHashedFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "lookup",
-        new String[] { "5aa14c08d62913e0057a9ad5863b458c0ce94cee" }, 1,
+        "/summary?lookup=5aa14c08d62913e0057a9ad5863b458c0ce94cee", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testLookupBridgeHashedFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "lookup",
-        new String[] { "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756" }, 0,
+        "/summary?lookup=1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testSearchBridgeHashedHashedFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "lookup",
-        new String[] { "CE52F898DB3678BCE33FAC28C92774DE90D618B5" }, 0,
+        "/summary?lookup=CE52F898DB3678BCE33FAC28C92774DE90D618B5", 0,
         null, 1, new String[] { "gummy" });
   }
 
   @Test()
   public void testLookupBridgeOriginalFingerprint() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "lookup",
-        new String[] { "0010D49C6DA1E46A316563099F41BFE40B6C7183" }, 0,
+        "/summary?lookup=0010D49C6DA1E46A316563099F41BFE40B6C7183", 0,
         null, 0, null);
   }
 
   @Test()
   public void testCountryDe() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "country", new String[] { "de" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?country=de", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testCountryFr() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "country", new String[] { "fr" }, 0, null, 0, null);
+        "/summary?country=fr", 0, null, 0, null);
   }
 
   @Test()
   public void testCountryZz() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "country", new String[] { "zz" }, 0, null, 0, null);
+        "/summary?country=zz", 0, null, 0, null);
   }
 
   @Test()
   public void testCountryDE() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "country", new String[] { "DE" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?country=DE", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testCountryDeu() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "country", new String[] { "deu" }, 400);
+        "/summary?country=deu", 400);
   }
 
   @Test()
   public void testCountryD() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "country", new String[] { "d" }, 400);
+        "/summary?country=d", 400);
   }
 
   @Test()
   public void testCountryA1() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "country", new String[] { "a1" }, 1,
-        new String[] { "TimMayTribute" }, 0, null);
+        "/summary?country=a1", 1, new String[] { "TimMayTribute" }, 0,
+        null);
   }
 
   @Test()
   public void testCountryDeDe() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "country", new String[] { "de", "de" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?country=de&country=de", 1, new String[] { "TorkaZ" }, 0,
+        null);
   }
 
   @Test()
   public void testAsAS8767() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "as", new String[] { "AS8767" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?as=AS8767", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testAs8767() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "as", new String[] { "8767" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?as=8767", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testAsAS() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "as", new String[] { "AS" }, 400);
+        "/summary?as=AS", 400);
   }
 
   @Test()
   public void testAsas8767() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "as", new String[] { "as8767" }, 1,
-        new String[] { "TorkaZ" }, 0, null);
+        "/summary?as=as8767", 1, new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
   public void testAsASSpace8767() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "as", new String[] { "AS 8767" }, 400);
+        "/summary?as=AS 8767", 400);
   }
 
   @Test()
   public void testFlagRunning() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "flag", new String[] { "Running" }, 3, null, 0, null);
+        "/summary?flag=Running", 3, null, 0, null);
   }
 
   @Test()
   public void testFlagValid() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "flag", new String[] { "Valid" }, 3, null, 0, null);
+        "/summary?flag=Valid", 3, null, 0, null);
   }
 
   @Test()
   public void testFlagFast() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "flag", new String[] { "Fast" }, 2, null, 0, null);
+        "/summary?flag=Fast", 2, null, 0, null);
   }
 
   @Test()
   public void testFlagNamed() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "flag", new String[] { "Named" }, 1, null, 0, null);
+        "/summary?flag=Named", 1, null, 0, null);
   }
 
   @Test()
   public void testFlagUnnamed() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "flag", new String[] { "Unnamed" }, 1, null, 0, null);
+        "/summary?flag=Unnamed", 1, null, 0, null);
   }
 
   @Test()
   public void testFlagV2Dir() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "flag", new String[] { "V2Dir" }, 2, null, 0, null);
+        "/summary?flag=V2Dir", 2, null, 0, null);
   }
 
   @Test()
   public void testFlagGuard() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "flag", new String[] { "Guard" }, 0, null, 0, null);
+        "/summary?flag=Guard", 0, null, 0, null);
   }
 
   @Test()
   public void testFlagCool() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "flag", new String[] { "Cool" }, 0, null, 0, null);
+        "/summary?flag=Cool", 0, null, 0, null);
   }
 
   @Test()
   public void testFirstSeenDaysZeroToTwo() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "0-2" }, 0, null, 0,
-        null);
+        "/summary?first_seen_days=0-2", 0, null, 0, null);
   }
 
   @Test()
   public void testFirstSeenDaysUpToThree() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "-3" }, 0, null, 1,
-        null);
+        "/summary?first_seen_days=-3", 0, null, 1, null);
   }
 
   @Test()
   public void testFirstSeenDaysThree() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "3" }, 0, null, 1,
-        null);
+        "/summary?first_seen_days=3", 0, null, 1, null);
   }
 
   @Test()
   public void testFirstSeenDaysTwoToFive() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "2-5" }, 0, null, 1,
-        null);
+        "/summary?first_seen_days=2-5", 0, null, 1, null);
   }
 
   @Test()
   public void testFirstSeenDaysSixToSixteen() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "6-16" }, 2, null,
-        1, null);
+        "/summary?first_seen_days=6-16", 2, null, 1, null);
   }
 
   @Test()
   public void testFirstSeenDaysNinetysevenOrMore() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "97-" }, 0, null, 1,
-        null);
+        "/summary?first_seen_days=97-", 0, null, 1, null);
   }
 
   @Test()
   public void testFirstSeenDaysNinetyeightOrMore() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "98-" }, 0, null, 0,
-        null);
+        "/summary?first_seen_days=98-", 0, null, 0, null);
   }
 
   @Test()
   public void testFirstSeenDaysDashDash() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "--" }, 400);
+        "/summary?first_seen_days=--", 400);
   }
 
   @Test()
   public void testFirstSeenDaysDashOneDash() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "-1-" }, 400);
+        "/summary?first_seen_days=-1-", 400);
   }
 
   @Test()
   public void testFirstSeenDaysZeroDotDotOne() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "0..1" }, 400);
+        "/summary?first_seen_days=0..1", 400);
   }
 
   @Test()
   public void testFirstSeenDaysElevenDigits() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "12345678901" },
-        400);
+        "/summary?first_seen_days=12345678901", 400);
   }
 
   @Test()
   public void testFirstSeenDaysLargeTenDigitNumber() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "first_seen_days", new String[] { "9999999999" },
-        400);
+        "/summary?first_seen_days=9999999999", 400);
   }
 
   @Test()
   public void testFirstSeenDaysMaxInt() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "last_seen_days",
-        new String[] { String.valueOf(Integer.MAX_VALUE) }, 0, null, 0,
-        null);
+        "/summary?last_seen_days=" + String.valueOf(Integer.MAX_VALUE), 0,
+        null, 0, null);
   }
 
   @Test()
   public void testFirstSeenDaysMaxIntPlusOne() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "first_seen_days",
-        new String[] { String.valueOf(Integer.MAX_VALUE + 1) }, 400);
+        "/summary?first_seen_days="
+        + String.valueOf(Integer.MAX_VALUE + 1), 400);
   }
 
   @Test()
   public void testLastSeenDaysZero() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "last_seen_days", new String[] { "0" }, 1, null, 1,
-        null);
+        "/summary?last_seen_days=0", 1, null, 1, null);
   }
 
   @Test()
   public void testLastSeenDaysUpToZero() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "last_seen_days", new String[] { "-0" }, 1, null, 1,
-        null);
+        "/summary?last_seen_days=-0", 1, null, 1, null);
   }
 
   @Test()
   public void testLastSeenDaysOneToThree() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "last_seen_days", new String[] { "1-3" }, 1, null, 2,
-        null);
+        "/summary?last_seen_days=1-3", 1, null, 2, null);
   }
 
   @Test()
   public void testLastSeenDaysSixOrMore() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "last_seen_days", new String[] { "6-" }, 0, null, 0,
-        null);
+        "/summary?last_seen_days=6-", 0, null, 0, null);
   }
 
   @Test()
   public void testOrderConsensusWeightAscending() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "order", new String[] { "consensus_weight" }, 3,
+        "/summary?order=consensus_weight", 3,
         new String[] { "TorkaZ", "TimMayTribute", "Ferrari458" }, 3,
         null);
   }
@@ -1038,7 +992,7 @@ public class ResourceServletTest {
   @Test()
   public void testOrderConsensusWeightDescending() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "order", new String[] { "-consensus_weight" }, 3,
+        "/summary?order=-consensus_weight", 3,
         new String[] { "Ferrari458", "TimMayTribute", "TorkaZ" }, 3,
         null);
   }
@@ -1046,126 +1000,137 @@ public class ResourceServletTest {
   @Test()
   public void testOrderConsensusWeightAscendingTwice() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "order",
-        new String[] { "consensus_weight,consensus_weight" }, 400);
+        "/summary?order=consensus_weight,consensus_weight", 400);
   }
 
   @Test()
   public void testOrderConsensusWeightAscendingThenDescending() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "order",
-        new String[] { "consensus_weight,-consensus_weight" }, 400);
+        "/summary?order=consensus_weight,-consensus_weight", 400);
   }
 
   @Test()
   public void testOrderConsensusWeightThenNickname() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "order", new String[] { "consensus_weight,nickname" },
-        400);
+        "/summary?order=consensus_weight,nickname", 400);
   }
 
   @Test()
   public void testOrderCONSENSUS_WEIGHT() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "order", new String[] { "CONSENSUS_WEIGHT" }, 3,
+        "/summary?order=CONSENSUS_WEIGHT", 3,
         new String[] { "TorkaZ", "TimMayTribute", "Ferrari458" }, 3,
         null);
   }
 
   @Test()
+  public void testOrderConsensusWeightAscendingLimit1() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?order=consensus_weight&limit=1", 1,
+        new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test()
+  public void testOrderConsensusWeightDecendingLimit1() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?order=-consensus_weight&limit=1", 1,
+        new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test()
   public void testOffsetOne() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "offset", new String[] { "1" }, 2, null, 3, null);
+        "/summary?offset=1", 2, null, 3, null);
   }
 
   @Test()
   public void testOffsetAllRelays() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "offset", new String[] { "3" }, 0, null, 3, null);
+        "/summary?offset=3", 0, null, 3, null);
   }
 
   @Test()
   public void testOffsetAllRelaysAndOneBridge() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "offset", new String[] { "4" }, 0, null, 2, null);
+        "/summary?offset=4", 0, null, 2, null);
   }
 
   @Test()
   public void testOffsetAllRelaysAndAllBridges() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "offset", new String[] { "6" }, 0, null, 0, null);
+        "/summary?offset=6", 0, null, 0, null);
   }
 
   @Test()
   public void testOffsetMoreThanAllRelaysAndAllBridges() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "offset", new String[] { "7" }, 0, null, 0, null);
+        "/summary?offset=7", 0, null, 0, null);
   }
 
   @Test()
   public void testOffsetZero() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "offset", new String[] { "0" }, 3, null, 3, null);
+        "/summary?offset=0", 3, null, 3, null);
   }
 
   @Test()
   public void testOffsetMinusOne() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "offset", new String[] { "-1" }, 3, null, 3, null);
+        "/summary?offset=-1", 3, null, 3, null);
   }
 
   @Test()
   public void testOffsetOneWord() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "offset", new String[] { "one" }, 400);
+        "/summary?offset=one", 400);
   }
 
   @Test()
   public void testLimitOne() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "limit", new String[] { "1" }, 1, null, 0, null);
+        "/summary?limit=1", 1, null, 0, null);
   }
 
   @Test()
   public void testLimitAllRelays() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "limit", new String[] { "3" }, 3, null, 0, null);
+        "/summary?limit=3", 3, null, 0, null);
   }
 
   @Test()
   public void testLimitAllRelaysAndOneBridge() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "limit", new String[] { "4" }, 3, null, 1, null);
+        "/summary?limit=4", 3, null, 1, null);
   }
 
   @Test()
   public void testLimitAllRelaysAndAllBridges() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "limit", new String[] { "6" }, 3, null, 3, null);
+        "/summary?limit=6", 3, null, 3, null);
   }
 
   @Test()
   public void testLimitMoreThanAllRelaysAndAllBridges() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "limit", new String[] { "7" }, 3, null, 3, null);
+        "/summary?limit=7", 3, null, 3, null);
   }
 
   @Test()
   public void testLimitZero() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "limit", new String[] { "0" }, 0, null, 0, null);
+        "/summary?limit=0", 0, null, 0, null);
   }
 
   @Test()
   public void testLimitMinusOne() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
-        "/summary", "limit", new String[] { "-1" }, 0, null, 0, null);
+        "/summary?limit=-1", 0, null, 0, null);
   }
 
   @Test()
   public void testLimitOneWord() {
     ResourceServletTestHelper.assertErrorStatusCode(this.tempOutDir,
-        "/summary", "limit", new String[] { "one" }, 400);
+        "/summary?limit=one", 400);
   }
 }
 
