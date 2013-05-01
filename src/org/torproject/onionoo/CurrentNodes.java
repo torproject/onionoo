@@ -174,8 +174,10 @@ public class CurrentNodes {
       boolean includeOldNodes) {
     try {
       summaryFile.getParentFile().mkdirs();
+      File summaryTempFile = new File(
+          summaryFile.getAbsolutePath() + ".tmp");
       BufferedWriter bw = new BufferedWriter(new FileWriter(
-          summaryFile));
+          summaryTempFile));
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -265,6 +267,8 @@ public class CurrentNodes {
             + "null\n");
       }
       bw.close();
+      summaryFile.delete();
+      summaryTempFile.renameTo(summaryFile);
     } catch (IOException e) {
       System.err.println("Could not write '"
           + summaryFile.getAbsolutePath() + "' to disk.  Exiting.");
