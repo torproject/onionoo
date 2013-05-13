@@ -4,25 +4,15 @@
 # INSTALL for details.
 
 # From geoip-manual (country):
-# Remove MaxMind entry 0.116.0.0-0.119.255.255 which MaxMind says is AT,
-# but which is part of reserved range 0.0.0.0/8.  -KL 2012-06-13
-# Disabled, because MaxMind apparently removed this range from their
-# database.  -KL 2013-02-21
-#"7602176","7864319",""
-
-# From geoip-manual (country):
 # IN, though could as well be UA.  Previous MaxMind entry
 # 5.56.23.0-5.56.23.127 is IN, next MaxMind entry 5.56.24.0-5.56.31.255 is
 # UA, and RIR delegation files say the entire block
 # 5.56.16.0-5.56.23.255 is DE.  -KL 2013-04-08
-"87562112","87562239","103"
+# Reduced to 5.56.23.128-5.56.23.191.  -KL 2013-05-13
+"87562112","87562175","103"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"135013632","135013887","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
+# GB, even though next entry is FR, but because previous entry is GB and
+# RIR says 31.6.0.0-31.6.63.255 is GB.
 "520493568","520494079","77"
 
 # From geoip-manual (country):
@@ -42,17 +32,9 @@
 # -KL 2013-03-07
 "643875072","643875327","1262"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"644048128","644048383","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-21
-"644059136","644059391","39"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"644121856","644122111","223"
+# US, even though previous entry is CA, but because next entry is US and
+# RIR says entire range 38.0.0.0-38.255.255.255 is US.  -KL 2013-05-13
+"644059136","644059391","223"
 
 # GB, taken from GeoLite Country February database.  -KL 2013-02-21
 "772808704","772810751","77"
@@ -73,116 +55,11 @@
 # and next entry.  -KL 2013-02-21
 "782665472","782666751","77"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"786817152","786817215","195"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787879039","787879183","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787879192","787879280","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787879551","787879792","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787879807","787879935","190"
-
-# SE, because GeoLite Country February database has SE for entire range.
-# -KL 2013-02-21
-"787892224","787894271","190"
-
-# From geoip-manual (country):
-# SE, because MaxMind range 46.246.88.0-46.246.127.255 is subdivided into
-# a mix of SE and A1, and RIR delegation files say entire range
-# 46.246.0.0-46.246.127.255 is SE.  -KL 2013-04-08
-"787896320","787896412","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787896414","787896423","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787896447","787896495","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-#"787896576","787896703","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787896832","787896933","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787896935","787896944","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"787896959","787896959","190"
-
-# SE as in previous entry, because next entry contains only 1 IP address
-# in US which seems like an error.  -KL 2013-04-08
-"787897024","787897071","190"
-
-# SE as in next entry, because previous entry contains only 1 IP address
-# in US which seems like an error.  -KL 2013-04-08
-"787897073","787897087","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"846537728","846537983","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"846542848","846543103","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1077383168","1077384191","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1077840384","1077840639","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1083264384","1083264447","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1083264464","1083264511","223"
-
 # From geoip-manual (country):
 # Removing, because RIR delegation files don't even have an entry for this
 # single-address range, and there's no previous or next range in MaxMind.
 # -KL 2013-03-07
 "1085926766","1085926766",""
-
-# From geoip-manual (country):
-# US, though could as well be CA.  Previous MaxMind entry
-# 64.237.32.52-64.237.34.127 is US, next MaxMind entry
-# 64.237.34.144-64.237.34.151 is CA, and RIR delegation files say the
-# entire block 64.237.32.0-64.237.63.255 is US.  -KL 2012-11-27
-"1089282688","1089282703","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1093730816","1093731071","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1095314944","1095314944","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1109848832","1109849087","39"
 
 # From geoip-manual (country):
 # US, though could as well be UY.  Previous MaxMind entry
@@ -197,33 +74,9 @@
 # -KL 2012-11-27
 "1126928384","1126928639","223"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1126931456","1126931711","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1138622208","1138622463","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1145334528","1145335039","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"1159117568","1159117823","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1159676928","1159677183","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1160905216","1160905471","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1170375168","1170375679","223"
+# US, even though next entry is CN, but because previous entry is US and
+# RIR says entire range 68.68.112.0-68.68.127.255 is US.  -KL 2013-05-13
+"1145333320","1145333327","223"
 
 # From geoip-manual (country):
 # US, because previous MaxMind entry 70.159.21.51-70.232.244.255 is US,
@@ -241,60 +94,17 @@
 # US.  -KL 2012-11-27
 "1189672252","1189672447","223"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1249050624","1249051135","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1249051904","1249052671","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1249091584","1249092607","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Updated range.  -KL 2013-04-08
-"1286389760","1286406143","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-#"1286390528","1286390783","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-#"1286391296","1286391807","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-#"1286393856","1286394623","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-#"1286395392","1286396159","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-#"1286398976","1286399487","223"
-
 # GB, because GeoLite Country February database says GB for entire range.
 # -KL 2013-02-21
 "1307755520","1307755775","77"
 
-# From geoip-manual (country) with some tweaks:
-# GB, because RIR delegation files say entire range
-# 79.141.160.0-79.141.175.255 is GB.  -KL 2013-04-08
-"1334681600","1334683391","77"
-
-# From geoip-manual (country):
-# GB, despite neither previous (CH) nor next (IT) MaxMind entry being GB,
-# but because RIR delegation files say entire range
-# 79.141.160.0-79.141.175.255 is GB.  -KL 2013-04-08
-"1334683648","1334685695","77"
-
 # SE, because GeoLite Country February database says SE for entire range.
 # -KL 2013-02-21
 "1346571776","1346572287","190"
+
+# DE, even though previous entry is CH, but because next entry is DE and
+# RIR says entire range 80.255.0.0-80.255.15.255 is DE.  -KL 2013-05-13
+"1358889984","1358890239","57"
 
 # NL, because GeoLite Country February database says NL for previous and
 # next range.  -KL 2013-02-21
@@ -325,80 +135,25 @@
 # -KL 2012-11-27
 "1542379008","1542379519","77"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"1580134592","1580134655","68"
+# PT, even though next entry is GB, but because previous entry is PT and
+# RIR says entire range 94.46.0.0-94.46.255.255 is PT.  -KL 2013-05-13
+"1580075072","1580075183","178"
 
-# From geoip-manual (country):
-# GB, despite neither previous (RU) nor next (FR) MaxMind entry being GB,
-# but because RIR delegation files say entire range
-# 95.141.16.0-95.141.31.255 is GB.  -KL 2013-04-08
-"1603080192","1603080447","77"
-
-# From geoip-manual (country):
-# GB, despite neither previous (FR) nor next (LU) MaxMind entry being GB,
-# but because RIR delegation files say entire range
-# 95.141.16.0-95.141.31.255 is GB.  -KL 2013-04-08
-"1603080704","1603083567","77"
-
-# From geoip-manual (country):
-# GB, despite neither previous (LU) nor next (IT) MaxMind entry being GB,
-# but because RIR delegation files say entire range
-# 95.141.16.0-95.141.31.255 is GB.  -KL 2013-04-08
-"1603083824","1603084287","77"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1632587008","1632587263","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"1645740032","1645741055","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"1645772800","1645773823","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-# Disabled, because MaxMind stopped assigning this range to 'A1'
-# -KL 2013-03-07
-#"1673576896","1673576959","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-# Disabled, because MaxMind stopped assigning this range to 'A1'
-# -KL 2013-02-21
-#"1795558656","1795558911","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"1933909760","1933910015","17"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"2360215808","2360216063","223"
-
-# From geoip-manual (country):
-# US, because next MaxMind entry 173.0.16.0-173.0.65.255 is US, and RIR
-# delegation files say 173.0.0.0-173.0.15.255 is US.  -KL 2012-11-27
-"2902458368","2902462463","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"2918531072","2918532103","223"
-
-# Previous and next entry are same city, set to previous entry.  Disabled,
-# because entry disappeared.  -KL 2013-04-08
-#"2918532096","2918532103","691"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"2918536448","2918536703","223"
+# PT, even though previous entry is GB, but because next entry is PT and
+# RIR says entire range 94.46.0.0-94.46.255.255 is PT.  -KL 2013-05-13
+"1580075185","1580075199","178"
 
 # FR, because GeoLite Country February says FR for the entire range.
 # -KL 2013-02-21
 "2954836876","2954836879","75"
+
+# NL, even though previous entry is CY, but because next entry is NL and
+# RIR says entire range 176.56.160.0-176.56.191.255 is NL.  -KL 2013-05-13
+"2956504064","2956504319","161"
+
+# NL, even though previous entry is RU and next entry is GB, but because
+# RIR says entire range 176.56.160.0-176.56.191.255 is NL.  -KL 2013-05-13
+"2956504576","2956504831","161"
 
 # From geoip-manual (country):
 # US, because next MaxMind entry 176.67.84.0-176.67.84.79 is US, and RIR
@@ -415,41 +170,9 @@
 # -KL 2013-02-21
 "2988561876","2988561879","75"
 
-# SE, because GeoLite Country February says SE for entire range.
-# Updated range.  -KL 2013-04-08
-"2991177728","2991178864","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"2991178879","2991178926","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"2991178928","2991179120","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-04-08
-"2991181695","2991181702","190"
-
-# SE, even though next entry is US, because GeoLite Country April says SE
-# for entire range.  -KL 2013-04-08
-"2991181704","2991181807","190"
-
-# SE, because GeoLite Country February says SE for entire range.
-# -KL 2013-02-21
-"2991183872","2991185919","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3162392960","3162393114","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3162393116","3162393200","190"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3240243200","3240244223","174"
+# GB, even though previous entry is NL and next entry is RU, but because
+# RIR says entire range 185.25.84.0-185.25.87.255 is GB.  -KL 2013-05-13
+"3105444864","3105445887","77"
 
 # GB, because GeoLite Country February says GB for this range.
 # -KL 2013-02-21
@@ -462,80 +185,32 @@
 # -KL 2012-11-27
 "3251148288","3251148543","3"
 
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3262964992","3262965247","44"
-
-# From geoip-manual (country):
-# GB, because next MaxMind entry 195.13.64.0-195.13.68.159 is GB, and RIR
-# delegation files say exact entry is GB.  -KL 2013-04-08
-"3272424448","3272425471","77"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3341849376","3341853471","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3341873152","3341875199","223"
-
 # From geoip-manual (country):
 # US, because previous MaxMind entry 199.96.68.0-199.96.87.127 is US, and
 # RIR delegation files say 199.96.80.0-199.96.87.255 is US.
 # -KL 2012-11-27
 "3344979840","3344979967","223"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3346193920","3346194431","223"
+# US, even though previous entry is MF, but because next entry is US and
+# RIR says entire range 199.101.192.0-199.101.199.255 is US.  -KL 2013-05-13
+"3345334272","3345334527","223"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3355430912","3355432959","223"
+# AU, because previous entry is AU and RIR says entire range
+# 203.98.92.0-203.98.95.255 is AU.  -KL 2013-05-13
+"3412221696","3412221951","17"
 
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
+# US, because previous entry is US, next entry is not adjacent, and RIR
+# says 204.14.72.0-204.14.79.255 is US.  -KL 2013-05-13
 "3423488000","3423490047","223"
 
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3432749056","3432749311","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3450078464","3450079487","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3483239424","3483239679","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3483240704","3483240959","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3483247360","3483247871","223"
+# US, even though previous entry is CA, but because next entry is US and
+# RIR says entire range 204.12.160.0-204.12.191.255 is US.  -KL 2013-05-13
+"3423379456","3423379967","223"
 
 # Previous and next entry are same city, set to previous entry.
 # -KL 2013-02-21
-"3483248640","3483248895","17287"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3485724672","3485728767","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3500664576","3500664831","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3500666752","3500666879","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3509987328","3509987583","223"
+# Extended to 207.158.40.0-207.158.41.255.  -KL 2013-05-13
+"3483248640","3483249151","17287"
 
 # From geoip-manual (country):
 # US, because previous MaxMind entry 209.58.176.144-209.59.31.255 is US,
@@ -543,57 +218,15 @@
 # -KL 2012-11-27
 "3510312960","3510321151","223"
 
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3511256064","3511256319","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3511257088","3511257599","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3519352832","3519352959","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3519354048","3519354111","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3519355392","3519355519","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3520644608","3520644863","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3520656384","3520656639","223"
-
 # GB, because GeoLite Country February database says GB for the entire
 # range.  -KL 2013-02-21
 "3564562432","3564562687","77"
 
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3632994048","3632994303","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3633782528","3633782783","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3633823488","3633823743","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  -KL 2013-02-10
-"3634982400","3634982655","223"
-
-# Previous and next entry are same country, set to country number without
-# city information.  Disabled, because entry disappeared.  -KL 2013-04-08
-"3635187200","3635187455","223"
+# RU, even though next entry is SE and even though RIR says
+# 217.15.160.0-217.15.175.255 is EU (which isn't really a country), but
+# because previous entry is RU and RIR says 217.15.144.0-217.15.159.255 is
+# RU.  -KL 2013-05-13
+"3641679872","3641681151","184"
 
 # From geoip-manual (country):
 # FR, because previous MaxMind entry 217.15.166.0-217.15.166.255 is FR,

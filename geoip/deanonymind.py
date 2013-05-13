@@ -16,12 +16,14 @@ replaced automatically or overriding previously made automatic changes.
 
 def main():
     options = parse_options()
+    country_blocks = read_location_file(options.in_location)
     assignments = read_file(options.in_maxmind)
     assignments = apply_automatic_changes(assignments,
-            options.block_number)
+            options.block_number, country_blocks)
     write_file(options.out_automatic, assignments)
     manual_assignments = read_file(options.in_manual, must_exist=False)
-    assignments = apply_manual_changes(assignments, manual_assignments)
+    assignments = apply_manual_changes(assignments, manual_assignments,
+            options.block_number)
     write_file(options.out_manual, assignments)
 
 def parse_options():
@@ -29,6 +31,10 @@ def parse_options():
     parser.add_option('-i', action='store', dest='in_maxmind',
             default='GeoLiteCity-Blocks.csv', metavar='FILE',
             help='use the specified MaxMind GeoLite City blocks .csv '
+                 'file as input [default: %default]')
+    parser.add_option('-l', action='store', dest='in_location',
+            default='GeoLiteCity-Location.csv', metavar='FILE',
+            help='use the specified MaxMind GeoLite City location .csv '
                  'file as input [default: %default]')
     parser.add_option('-b', action='store', dest='block_number',
             default=242, metavar='NUM',
@@ -49,6 +55,27 @@ def parse_options():
     (options, args) = parser.parse_args()
     return options
 
+def read_location_file(path):
+    if not os.path.exists(path):
+        print 'File %s does not exist.  Exiting.' % (path, )
+        sys.exit(1)
+    countries = {}
+    country_blocks = {}
+    for line in open(path):
+        if line.startswith('C') or line.startswith('l'):
+            continue
+        keys = ['locId', 'country', 'region', 'city', 'postalCode',
+                'latitude', 'longitude', 'metroCode', 'areaCode']
+        stripped_line = line.replace('"', '').strip()
+        parts = stripped_line.split(',')
+        entry = dict((k, v) for k, v in zip(keys, parts))
+        if entry['region'] == '':
+            countries[entry['country']] = entry['locId']
+            country_blocks[entry['locId']] = entry['locId']
+        elif entry['country'] in countries:
+            country_blocks[entry['locId']] = countries[entry['country']]
+    return country_blocks
+
 def read_file(path, must_exist=True):
     if not os.path.exists(path):
         if must_exist:
@@ -66,7 +93,7 @@ def read_file(path, must_exist=True):
             assignments.append(stripped_line)
     return assignments
 
-def apply_automatic_changes(assignments, block_number):
+def apply_automatic_changes(assignments, block_number, country_blocks):
     print '\nApplying automatic changes...'
     result_lines = []
     prev_line = None
@@ -77,19 +104,21 @@ def apply_automatic_changes(assignments, block_number):
             a1_lines.append(line)
         else:
             if len(a1_lines) > 0:
-                new_a1_lines = process_a1_lines(prev_line, a1_lines, line)
+                new_a1_lines = process_a1_lines(prev_line, a1_lines, line,
+                                                country_blocks)
                 for new_a1_line in new_a1_lines:
                     result_lines.append(new_a1_line)
                 a1_lines = []
             result_lines.append(line)
             prev_line = line
     if len(a1_lines) > 0:
-        new_a1_lines = process_a1_lines(prev_line, a1_lines, None)
+        new_a1_lines = process_a1_lines(prev_line, a1_lines, None,
+                                        country_blocks)
         for new_a1_line in new_a1_lines:
             result_lines.append(new_a1_line)
     return result_lines
 
-def process_a1_lines(prev_line, a1_lines, next_line):
+def process_a1_lines(prev_line, a1_lines, next_line, country_blocks):
     if not prev_line or not next_line:
         return a1_lines   # Can't merge first or last line in file.
     if len(a1_lines) > 1:
@@ -104,12 +133,19 @@ def process_a1_lines(prev_line, a1_lines, next_line):
             int(next_entry['start_num'])
     same_block_number = prev_entry['block_number'] == \
             next_entry['block_number']
-    if touches_prev_entry and touches_next_entry and same_block_number:
-        new_line = format_line_with_other_country(a1_entry, prev_entry)
-        print '-%s\n+%s' % (a1_line, new_line, )
-        return [new_line]
-    else:
-        return a1_lines
+    same_country = country_blocks[prev_entry['block_number']] == \
+            country_blocks[next_entry['block_number']]
+    if touches_prev_entry and touches_next_entry:
+        if same_block_number:
+            new_line = format_line_with_other_country(a1_entry, prev_entry)
+            print '-%s\n+%s' % (a1_line, new_line, )
+            return [new_line]
+        elif same_country:
+            new_line = format_line_with_other_country_block(a1_entry,
+                    country_blocks[prev_entry['block_number']])
+            print '-%s\n+%s' % (a1_line, new_line, )
+            return [new_line]
+    return a1_lines
 
 def parse_line(line):
     if not line:
@@ -124,10 +160,15 @@ def format_line_with_other_country(original_entry, other_entry):
     return '"%s","%s","%s"' % (original_entry['start_num'],
             original_entry['end_num'], other_entry['block_number'], )
 
-def apply_manual_changes(assignments, manual_assignments):
+def format_line_with_other_country_block(original_entry, country_block):
+    return '"%s","%s","%s"' % (original_entry['start_num'],
+            original_entry['end_num'], country_block, )
+
+def apply_manual_changes(assignments, manual_assignments, block_number):
     if not manual_assignments:
         return assignments
     print '\nApplying manual changes...'
+    block_number_str = '%d' % (block_number, )
     manual_dict = {}
     for line in manual_assignments:
         start_num = parse_line(line)['start_num']
@@ -146,23 +187,35 @@ def apply_manual_changes(assignments, manual_assignments):
             if entry['end_num'] == manual_entry['end_num']:
                 if len(manual_entry['block_number']) == 0:
                     print '-%s' % (line, )  # only remove, don't replace
-                else:
+                    del manual_dict[start_num]
+                elif entry['block_number'] != manual_entry['block_number']:
                     new_line = format_line_with_other_country(entry,
                             manual_entry)
                     print '-%s\n+%s' % (line, new_line, )
                     result.append(new_line)
-                del manual_dict[start_num]
+                    del manual_dict[start_num]
+                else:
+                    print ('Warning: automatic and manual replacement '
+                           'already match:\n  %s\n  %s\nNot applying '
+                           'manual change.' % (line, manual_line, ))
+                    result.append(line)
             else:
                 print ('Warning: only partial match between '
                        'original/automatically replaced assignment and '
                        'manual assignment:\n  %s\n  %s\nNot applying '
                        'manual change.' % (line, manual_line, ))
                 result.append(line)
+        elif 'block_number' in entry and \
+                entry['block_number'] == block_number_str:
+            print ('Warning: no manual replacement for A1 entry:\n  %s'
+                % (line, ))
+            result.append(line)
         else:
             result.append(line)
     if len(manual_dict) > 0:
-        print ('Warning: could not apply all manual assignments:  %s' %
-                ('\n  '.join(manual_dict.values())), )
+        print 'Warning: could not apply all manual assignments:'
+        for line in manual_dict.values():
+            print '  %s' % (line, )
     return result
 
 def write_file(path, assignments):
