@@ -134,26 +134,17 @@ Omitted if the relay does not accept directory connections.</li>
 <li><b>"last_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 relay was last seen in a network status consensus.
 Required field.</li>
-<li><font color="blue"><b>"last_changed_address_or_port":</b></font>
+<li><b>"last_changed_address_or_port":</b>
 UTC timestamp (YYYY-MM-DD
 hh:mm:ss) when this relay last stopped announcing an IPv4 or IPv6 address
 or TCP port where it previously accepted onion-routing or directory
 connections.
 This timestamp can serve as indicator whether this relay would be a
 suitable fallback directory.
-Required field.
-<font color="blue">Added on March 27.</font>
-<font color="blue">On April 9, fixed limitation that timestamp is reset
-when a relay drops out of the consensus for more than 7 days and
-rejoins.</font>
-</li>
+Required field.</li>
 <li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 relay was first seen in a network status consensus.
-Required field.
-<font color="blue">On April 9, fixed limitation that timestamp is reset
-when a relay drops out of the consensus for more than 7 days and
-rejoins.</font>
-</li>
+Required field.</li>
 <li><b>"running":</b> Boolean field saying whether this relay was listed as
 running in the last relay network status consensus.
 Required field.</li>
@@ -346,11 +337,7 @@ bridge was last seen in a bridge network status.
 Required field.</li>
 <li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 bridge was first seen in a bridge network status.
-Required field.
-<font color="blue">On April 9, fixed limitation that timestamp is reset
-when a bridge drops out of the network status for more than 7 days and
-rejoins.</font>
-</li>
+Required field.</li>
 <li><b>"running":</b> Boolean field saying whether this bridge was listed
 as running in the last bridge network status.
 Required field.</li>
@@ -653,8 +640,6 @@ of all relays and bridges matching all search terms will be returned.
 Full fingerprints should always be hashed using SHA-1, regardless of
 searching for a relay or a bridge, in order to not accidentally leak
 non-hashed bridge fingerprints in the URL.
-<font color="blue">Added support to search for nickname substrings on
-April 11.</font>
 </td></tr>
 <tr><td><b>lookup</b></td><td>Return only the relay with the parameter
 value matching the fingerprint or the bridge with the parameter value
@@ -670,31 +655,28 @@ Lookups are case-insensitive.
 given country as identified by a two-letter country code.
 Filtering by country code is case-insensitive.
 </td></tr>
-<tr><td><b><font color="blue">as</font></b></td>
+<tr><td><b>as</b></td>
 <td>Return only relays which are located in the
 given autonomous system (AS) as identified by the AS number (with or
 without preceding "AS" part).
 Filtering by AS number is case-insensitive.
-<font color="blue">Added on April 9.</font>
 </td></tr>
-<tr><td><b><font color="blue">flag</font></b></td>
+<tr><td><b>flag</b></td>
 <td>Return only relays which have the
 given relay flag assigned by the directory authorities.
 Note that if the flag parameter is specified more than once, only the
 first parameter value will be considered.
 Filtering by flag is case-insensitive.
-<font color="blue">Added on April 9.</font>
 </td></tr>
-<tr><td><b><font color="blue">first_seen_days</font></b></td>
+<tr><td><b>first_seen_days</b></td>
 <td>Return only relays or bridges which
 have first been seen during the given range of days ago.
 A parameter value "x-y" with x &gt;= y returns relays or bridges that have
 first been seen at least x and at most y days ago.
 Accepted short forms are "x", "x-", and "-y" which are interpreted as
 "x-x", "x-infinity", and "0-y".
-<font color="blue">Added on April 9.</font>
 </td></tr>
-<tr><td><b><font color="blue">last_seen_days</font></b></td>
+<tr><td><b>last_seen_days</b></td>
 <td>Return only relays or bridges which
 have last been seen during the given range of days ago.
 A parameter value "x-y" with x &gt;= y returns relays or bridges that have
@@ -704,7 +686,6 @@ Accepted short forms are "x", "x-", and "-y" which are interpreted as
 Note that relays and bridges that haven't been running in the past week
 are never included in results, so that setting x to 8 or higher will
 always lead to an empty result set.
-<font color="blue">Added on April 9.</font>
 </td></tr>
 </table>
 <p>Relay and/or bridge documents in the response can be ordered and
