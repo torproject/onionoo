@@ -206,10 +206,16 @@ public class ResourceServlet extends HttpServlet {
         entry.getNickname() : null;
     String fingerprint = entry.getFingerprint();
     String running = entry.getRunning() ? "true" : "false";
-    SortedSet<String> addresses = new TreeSet<String>();
+    List<String> addresses = new ArrayList<String>();
     addresses.add(entry.getAddress());
-    addresses.addAll(entry.getOrAddresses());
-    addresses.addAll(entry.getExitAddresses());
+    for (String orAddress : entry.getOrAddresses()) {
+      addresses.add(orAddress);
+    }
+    for (String exitAddress : entry.getExitAddresses()) {
+      if (!addresses.contains(exitAddress)) {
+        addresses.add(exitAddress);
+      }
+    }
     StringBuilder addressesBuilder = new StringBuilder();
     int written = 0;
     for (String address : addresses) {

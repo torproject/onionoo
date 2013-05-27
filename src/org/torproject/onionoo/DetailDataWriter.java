@@ -562,9 +562,9 @@ public class DetailDataWriter {
       Node entry = relay.getValue();
       String nickname = entry.getNickname();
       String address = entry.getAddress();
-      SortedSet<String> orAddresses = new TreeSet<String>(
-          entry.getOrAddressesAndPorts());
+      List<String> orAddresses = new ArrayList<String>();
       orAddresses.add(address + ":" + entry.getOrPort());
+      orAddresses.addAll(entry.getOrAddressesAndPorts());
       StringBuilder orAddressesAndPortsBuilder = new StringBuilder();
       int addressesWritten = 0;
       for (String orAddress : orAddresses) {
@@ -835,9 +835,9 @@ public class DetailDataWriter {
           entry.getFirstSeenMillis());
       String running = entry.getRunning() ? "true" : "false";
       String address = entry.getAddress();
-      SortedSet<String> orAddresses = new TreeSet<String>(
-          entry.getOrAddressesAndPorts());
+      List<String> orAddresses = new ArrayList<String>();
       orAddresses.add(address + ":" + entry.getOrPort());
+      orAddresses.addAll(entry.getOrAddressesAndPorts());
       StringBuilder orAddressesAndPortsBuilder = new StringBuilder();
       int addressesWritten = 0;
       for (String orAddress : orAddresses) {

@@ -61,6 +61,8 @@ Required field.</li>
 <li><b>"a":</b> Array of IPv4 or IPv6 addresses where the relay accepts
 onion-routing connections or which the relay used to exit to the Internet
 in the past 24 hours.
+The first address is the primary onion-routing address that the relay used
+to register in the network, subsequent addresses are in arbitrary order.
 IPv6 hex characters are all lower-case.
 Required field.</li>
 <li><b>"r":</b> Boolean field saying whether this relay was listed as
@@ -114,6 +116,8 @@ hexadecimal characters.
 Required field.</li>
 <li><b>"or_addresses":</b> Array of IPv4 or IPv6 addresses and TCP ports
 or port lists where the relay accepts onion-routing connections.
+The first address is the primary onion-routing address that the relay used
+to register in the network, subsequent addresses are in arbitrary order.
 IPv6 hex characters are all lower-case.
 Required field.</li>
 <li><b>"exit_addresses":</b> Array of IPv4 or IPv6 addresses that the
@@ -325,6 +329,9 @@ Required field.</li>
 <li><b>"or_addresses":</b> Array of sanitized IPv4 or IPv6 addresses and
 TCP ports or port lists where the bridge accepts onion-routing
 connections.
+The first address is the primary onion-routing address that the bridge
+used to register in the network, subsequent addresses are in arbitrary
+order.
 IPv6 hex characters are all lower-case.
 Sanitized IP addresses are always in <i>10/8</i> or
 <i>[fd9f:2e19:3bcf/48]</i> IP networks and are only useful to learn which
