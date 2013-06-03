@@ -921,7 +921,10 @@ public class ResourceServlet extends HttpServlet {
         if (line != null) {
           sb.append("{");
           while ((line = br.readLine()) != null) {
-            if (!line.startsWith("\"desc_published\":")) {
+            if (line.equals("}")) {
+              sb.append("}\n");
+              break;
+            } else if (!line.startsWith("\"desc_published\":")) {
               sb.append(line + "\n");
             }
           }
