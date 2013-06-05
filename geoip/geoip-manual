@@ -3,14 +3,6 @@
 # directory to process this file when producing a new geoip file.  See
 # INSTALL for details.
 
-# From geoip-manual (country):
-# IN, though could as well be UA.  Previous MaxMind entry
-# 5.56.23.0-5.56.23.127 is IN, next MaxMind entry 5.56.24.0-5.56.31.255 is
-# UA, and RIR delegation files say the entire block
-# 5.56.16.0-5.56.23.255 is DE.  -KL 2013-04-08
-# Reduced to 5.56.23.128-5.56.23.191.  -KL 2013-05-13
-"87562112","87562175","103"
-
 # GB, even though next entry is FR, but because previous entry is GB and
 # RIR says 31.6.0.0-31.6.63.255 is GB.
 "520493568","520494079","77"
@@ -62,21 +54,10 @@
 "1085926766","1085926766",""
 
 # From geoip-manual (country):
-# US, though could as well be UY.  Previous MaxMind entry
-# 67.15.170.0-67.15.182.255 is US, next MaxMind entry
-# 67.15.183.128-67.15.183.159 is UY, and RIR delegation files say the
-# entire block 67.15.0.0-67.15.255.255 is US.  -KL 2012-11-27
-"1125103360","1125103487","223"
-
-# From geoip-manual (country):
 # US, because next MaxMind entry 67.43.145.0-67.43.155.255 is US, and RIR
 # delegation files say 67.43.144.0-67.43.159.255 is US.
 # -KL 2012-11-27
 "1126928384","1126928639","223"
-
-# US, even though next entry is CN, but because previous entry is US and
-# RIR says entire range 68.68.112.0-68.68.127.255 is US.  -KL 2013-05-13
-"1145333320","1145333327","223"
 
 # From geoip-manual (country):
 # US, because previous MaxMind entry 70.159.21.51-70.232.244.255 is US,
@@ -94,17 +75,9 @@
 # US.  -KL 2012-11-27
 "1189672252","1189672447","223"
 
-# GB, because GeoLite Country February database says GB for entire range.
-# -KL 2013-02-21
-"1307755520","1307755775","77"
-
 # SE, because GeoLite Country February database says SE for entire range.
 # -KL 2013-02-21
 "1346571776","1346572287","190"
-
-# DE, even though previous entry is CH, but because next entry is DE and
-# RIR says entire range 80.255.0.0-80.255.15.255 is DE.  -KL 2013-05-13
-"1358889984","1358890239","57"
 
 # NL, because GeoLite Country February database says NL for previous and
 # next range.  -KL 2013-02-21
@@ -135,18 +108,6 @@
 # -KL 2012-11-27
 "1542379008","1542379519","77"
 
-# PT, even though next entry is GB, but because previous entry is PT and
-# RIR says entire range 94.46.0.0-94.46.255.255 is PT.  -KL 2013-05-13
-"1580075072","1580075183","178"
-
-# PT, even though previous entry is GB, but because next entry is PT and
-# RIR says entire range 94.46.0.0-94.46.255.255 is PT.  -KL 2013-05-13
-"1580075185","1580075199","178"
-
-# FR, because GeoLite Country February says FR for the entire range.
-# -KL 2013-02-21
-"2954836876","2954836879","75"
-
 # NL, even though previous entry is CY, but because next entry is NL and
 # RIR says entire range 176.56.160.0-176.56.191.255 is NL.  -KL 2013-05-13
 "2956504064","2956504319","161"
@@ -166,17 +127,9 @@
 # -KL 2012-11-27
 "2957202944","2957203455","223"
 
-# FR, because GeoLite Country February says FR for the entire range.
-# -KL 2013-02-21
-"2988561876","2988561879","75"
-
 # GB, even though previous entry is NL and next entry is RU, but because
 # RIR says entire range 185.25.84.0-185.25.87.255 is GB.  -KL 2013-05-13
 "3105444864","3105445887","77"
-
-# GB, because GeoLite Country February says GB for this range.
-# -KL 2013-02-21
-"3244847360","3244847615","77"
 
 # From geoip-manual (country):
 # EU, despite neither previous (RU) nor next (UA) MaxMind entry being EU,
@@ -194,10 +147,6 @@
 # US, even though previous entry is MF, but because next entry is US and
 # RIR says entire range 199.101.192.0-199.101.199.255 is US.  -KL 2013-05-13
 "3345334272","3345334527","223"
-
-# AU, because previous entry is AU and RIR says entire range
-# 203.98.92.0-203.98.95.255 is AU.  -KL 2013-05-13
-"3412221696","3412221951","17"
 
 # US, because previous entry is US, next entry is not adjacent, and RIR
 # says 204.14.72.0-204.14.79.255 is US.  -KL 2013-05-13
@@ -217,10 +166,6 @@
 # and RIR delegation files say 209.59.32.0-209.59.63.255 is US.
 # -KL 2012-11-27
 "3510312960","3510321151","223"
-
-# GB, because GeoLite Country February database says GB for the entire
-# range.  -KL 2013-02-21
-"3564562432","3564562687","77"
 
 # RU, even though next entry is SE and even though RIR says
 # 217.15.160.0-217.15.175.255 is EU (which isn't really a country), but
