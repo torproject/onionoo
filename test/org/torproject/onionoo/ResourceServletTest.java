@@ -155,6 +155,8 @@ public class ResourceServletTest {
       }
     }
 
+    /* TODO Instead of writing out/summary and out/update to a temp
+     * directory, we could also write our own DocumentStore instance. */
     private void writeSummaryFile() throws IOException {
       File summaryFile = new File(this.tempOutDir, "summary");
       BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));
@@ -165,7 +167,10 @@ public class ResourceServletTest {
         bw.write(bridge + "\n");
       }
       bw.close();
-      summaryFile.setLastModified(this.lastModified);
+      File updateFile = new File(this.tempOutDir, "update");
+      bw = new BufferedWriter(new FileWriter(updateFile));
+      bw.write(String.valueOf(this.lastModified));
+      bw.close();
     }
 
     private void makeRequest() throws IOException {

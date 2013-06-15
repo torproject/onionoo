@@ -3,10 +3,8 @@
 package org.torproject.onionoo;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,8 +13,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -27,9 +25,6 @@ import java.util.regex.Pattern;
 
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.Descriptor;
-import org.torproject.descriptor.DescriptorFile;
-import org.torproject.descriptor.DescriptorReader;
-import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 
@@ -37,23 +32,44 @@ import org.torproject.descriptor.RelayNetworkStatusConsensus;
  * days. */
 public class CurrentNodes {
 
-  /* Read the internal relay search data file from disk. */
-  public void readRelaySearchDataFile(File summaryFile) {
-    if (summaryFile.exists() && !summaryFile.isDirectory()) {
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            summaryFile));
-        String line;
-        while ((line = br.readLine()) != null) {
-          this.parseSummaryFileLine(line);
-        }
-        br.close();
-      } catch (IOException e) {
-        System.err.println("I/O error while reading "
-            + summaryFile.getAbsolutePath() + ": " + e.getMessage()
-            + ".  Ignoring.");
-      }
+  private DescriptorSource descriptorSource;
+
+  private DocumentStore documentStore;
+
+  /* Initialize an instance for the back-end that is read-only and doesn't
+   * support parsing new descriptor contents. */
+  public CurrentNodes(DocumentStore documentStore) {
+    this(null, documentStore);
+  }
+
+  public CurrentNodes(DescriptorSource descriptorSource,
+      DocumentStore documentStore) {
+    this.descriptorSource = descriptorSource;
+    this.documentStore = documentStore;
+  }
+
+  public void readStatusSummary() {
+    String summaryString = this.documentStore.retrieve(
+        DocumentType.STATUS_SUMMARY);
+    this.initializeFromSummaryString(summaryString);
+  }
+
+  public void readOutSummary() {
+    String summaryString = this.documentStore.retrieve(
+        DocumentType.OUT_SUMMARY);
+    this.initializeFromSummaryString(summaryString);
+  }
+
+  private void initializeFromSummaryString(String summaryString) {
+    if (summaryString == null) {
+      return;
     }
+    Scanner s = new Scanner(summaryString);
+    while (s.hasNextLine()) {
+      String line = s.nextLine();
+      this.parseSummaryFileLine(line);
+    }
+    s.close();
   }
 
   private void parseSummaryFileLine(String line) {
@@ -169,137 +185,127 @@ public class CurrentNodes {
     }
   }
 
-  /* Write the internal relay search data file to disk. */
-  public void writeRelaySearchDataFile(File summaryFile,
-      boolean includeOldNodes) {
-    try {
-      summaryFile.getParentFile().mkdirs();
-      File summaryTempFile = new File(
-          summaryFile.getAbsolutePath() + ".tmp");
-      BufferedWriter bw = new BufferedWriter(new FileWriter(
-          summaryTempFile));
-      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-          "yyyy-MM-dd HH:mm:ss");
-      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      Collection<Node> relays = includeOldNodes
-          ? this.knownRelays.values() : this.getCurrentRelays().values();
-      for (Node entry : relays) {
-        String nickname = entry.getNickname();
-        String fingerprint = entry.getFingerprint();
-        String address = entry.getAddress();
-        StringBuilder addressesBuilder = new StringBuilder();
-        addressesBuilder.append(address + ";");
-        int written = 0;
-        for (String orAddressAndPort : entry.getOrAddressesAndPorts()) {
-          addressesBuilder.append((written++ > 0 ? "+" : "") +
-              orAddressAndPort);
-        }
-        addressesBuilder.append(";");
-        written = 0;
-        for (String exitAddress : entry.getExitAddresses()) {
-          addressesBuilder.append((written++ > 0 ? "+" : "")
-              + exitAddress);
-        }
-        String lastSeen = dateTimeFormat.format(
-            entry.getLastSeenMillis());
-        String orPort = String.valueOf(entry.getOrPort());
-        String dirPort = String.valueOf(entry.getDirPort());
-        StringBuilder flagsBuilder = new StringBuilder();
-        written = 0;
-        for (String relayFlag : entry.getRelayFlags()) {
-          flagsBuilder.append((written++ > 0 ? "," : "") + relayFlag);
-        }
-        String consensusWeight = String.valueOf(
-            entry.getConsensusWeight());
-        String countryCode = entry.getCountryCode() != null
-            ? entry.getCountryCode() : "??";
-        String hostName = entry.getHostName() != null
-            ? entry.getHostName() : "null";
-        long lastRdnsLookup = entry.getLastRdnsLookup();
-        String defaultPolicy = entry.getDefaultPolicy() != null
-            ? entry.getDefaultPolicy() : "null";
-        String portList = entry.getPortList() != null
-            ? entry.getPortList() : "null";
-        String firstSeen = dateTimeFormat.format(
-            entry.getFirstSeenMillis());
-        String lastChangedAddresses = dateTimeFormat.format(
-            entry.getLastChangedOrAddress());
-        String aSNumber = entry.getASNumber() != null
-            ? entry.getASNumber() : "null";
-        bw.write("r " + nickname + " " + fingerprint + " "
-            + addressesBuilder.toString() + " " + lastSeen + " "
-            + orPort + " " + dirPort + " " + flagsBuilder.toString() + " "
-            + consensusWeight + " " + countryCode + " " + hostName + " "
-            + String.valueOf(lastRdnsLookup) + " " + defaultPolicy + " "
-            + portList + " " + firstSeen + " " + lastChangedAddresses
-            + " " + aSNumber + "\n");
+  public void writeStatusSummary() {
+    String summaryString = this.writeSummaryString(true);
+    this.documentStore.store(summaryString, DocumentType.STATUS_SUMMARY);
+  }
+
+  public void writeOutSummary() {
+    String summaryString = this.writeSummaryString(false);
+    this.documentStore.store(summaryString, DocumentType.OUT_SUMMARY);
+    this.documentStore.store(String.valueOf(System.currentTimeMillis()),
+        DocumentType.OUT_UPDATE);
+  }
+
+  /* Write internal relay search data to a string. */
+  private String writeSummaryString(boolean includeOldNodes) {
+    StringBuilder sb = new StringBuilder();
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    Collection<Node> relays = includeOldNodes
+        ? this.knownRelays.values() : this.getCurrentRelays().values();
+    for (Node entry : relays) {
+      String nickname = entry.getNickname();
+      String fingerprint = entry.getFingerprint();
+      String address = entry.getAddress();
+      StringBuilder addressesBuilder = new StringBuilder();
+      addressesBuilder.append(address + ";");
+      int written = 0;
+      for (String orAddressAndPort : entry.getOrAddressesAndPorts()) {
+        addressesBuilder.append((written++ > 0 ? "+" : "") +
+            orAddressAndPort);
       }
-      Collection<Node> bridges = includeOldNodes
-          ? this.knownBridges.values()
-          : this.getCurrentBridges().values();
-      for (Node entry : bridges) {
-        String nickname = entry.getNickname();
-        String fingerprint = entry.getFingerprint();
-        String published = dateTimeFormat.format(
-            entry.getLastSeenMillis());
-        String address = entry.getAddress();
-        StringBuilder addressesBuilder = new StringBuilder();
-        addressesBuilder.append(address + ";");
-        int written = 0;
-        for (String orAddressAndPort : entry.getOrAddressesAndPorts()) {
-          addressesBuilder.append((written++ > 0 ? "+" : "") +
-              orAddressAndPort);
-        }
-        addressesBuilder.append(";");
-        String orPort = String.valueOf(entry.getOrPort());
-        String dirPort = String.valueOf(entry.getDirPort());
-        StringBuilder flagsBuilder = new StringBuilder();
-        written = 0;
-        for (String relayFlag : entry.getRelayFlags()) {
-          flagsBuilder.append((written++ > 0 ? "," : "") + relayFlag);
-        }
-        String firstSeen = dateTimeFormat.format(
-            entry.getFirstSeenMillis());
-        bw.write("b " + nickname + " " + fingerprint + " "
-            + addressesBuilder.toString() + " " + published + " " + orPort
-            + " " + dirPort + " " + flagsBuilder.toString()
-            + " -1 ?? null -1 null null " + firstSeen + " null null "
-            + "null\n");
+      addressesBuilder.append(";");
+      written = 0;
+      for (String exitAddress : entry.getExitAddresses()) {
+        addressesBuilder.append((written++ > 0 ? "+" : "")
+            + exitAddress);
       }
-      bw.close();
-      summaryFile.delete();
-      summaryTempFile.renameTo(summaryFile);
-    } catch (IOException e) {
-      System.err.println("Could not write '"
-          + summaryFile.getAbsolutePath() + "' to disk.  Exiting.");
-      e.printStackTrace();
-      System.exit(1);
+      String lastSeen = dateTimeFormat.format(entry.getLastSeenMillis());
+      String orPort = String.valueOf(entry.getOrPort());
+      String dirPort = String.valueOf(entry.getDirPort());
+      StringBuilder flagsBuilder = new StringBuilder();
+      written = 0;
+      for (String relayFlag : entry.getRelayFlags()) {
+        flagsBuilder.append((written++ > 0 ? "," : "") + relayFlag);
+      }
+      String consensusWeight = String.valueOf(entry.getConsensusWeight());
+      String countryCode = entry.getCountryCode() != null
+          ? entry.getCountryCode() : "??";
+      String hostName = entry.getHostName() != null
+          ? entry.getHostName() : "null";
+      long lastRdnsLookup = entry.getLastRdnsLookup();
+      String defaultPolicy = entry.getDefaultPolicy() != null
+          ? entry.getDefaultPolicy() : "null";
+      String portList = entry.getPortList() != null
+          ? entry.getPortList() : "null";
+      String firstSeen = dateTimeFormat.format(
+          entry.getFirstSeenMillis());
+      String lastChangedAddresses = dateTimeFormat.format(
+          entry.getLastChangedOrAddress());
+      String aSNumber = entry.getASNumber() != null
+          ? entry.getASNumber() : "null";
+      sb.append("r " + nickname + " " + fingerprint + " "
+          + addressesBuilder.toString() + " " + lastSeen + " "
+          + orPort + " " + dirPort + " " + flagsBuilder.toString() + " "
+          + consensusWeight + " " + countryCode + " " + hostName + " "
+          + String.valueOf(lastRdnsLookup) + " " + defaultPolicy + " "
+          + portList + " " + firstSeen + " " + lastChangedAddresses
+          + " " + aSNumber + "\n");
     }
+    Collection<Node> bridges = includeOldNodes
+        ? this.knownBridges.values() : this.getCurrentBridges().values();
+    for (Node entry : bridges) {
+      String nickname = entry.getNickname();
+      String fingerprint = entry.getFingerprint();
+      String published = dateTimeFormat.format(
+          entry.getLastSeenMillis());
+      String address = entry.getAddress();
+      StringBuilder addressesBuilder = new StringBuilder();
+      addressesBuilder.append(address + ";");
+      int written = 0;
+      for (String orAddressAndPort : entry.getOrAddressesAndPorts()) {
+        addressesBuilder.append((written++ > 0 ? "+" : "") +
+            orAddressAndPort);
+      }
+      addressesBuilder.append(";");
+      String orPort = String.valueOf(entry.getOrPort());
+      String dirPort = String.valueOf(entry.getDirPort());
+      StringBuilder flagsBuilder = new StringBuilder();
+      written = 0;
+      for (String relayFlag : entry.getRelayFlags()) {
+        flagsBuilder.append((written++ > 0 ? "," : "") + relayFlag);
+      }
+      String firstSeen = dateTimeFormat.format(
+          entry.getFirstSeenMillis());
+      sb.append("b " + nickname + " " + fingerprint + " "
+          + addressesBuilder.toString() + " " + published + " " + orPort
+          + " " + dirPort + " " + flagsBuilder.toString()
+          + " -1 ?? null -1 null null " + firstSeen + " null null "
+          + "null\n");
+    }
+    return sb.toString();
   }
 
   private long lastValidAfterMillis = 0L;
   private long lastPublishedMillis = 0L;
 
   public void readRelayNetworkConsensuses() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File("in/relay-descriptors/consensuses"));
-    reader.setExcludeFiles(new File("status/relay-consensus-history"));
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof RelayNetworkStatusConsensus) {
-            updateRelayNetworkStatusConsensus(
-                (RelayNetworkStatusConsensus) descriptor);
-          }
-        }
+    if (this.descriptorSource == null) {
+      System.err.println("Not configured to read relay network "
+          + "consensuses.");
+      return;
+    }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        DescriptorType.RELAY_CONSENSUSES,
+        DescriptorHistory.RELAY_CONSENSUS_HISTORY);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof RelayNetworkStatusConsensus) {
+        updateRelayNetworkStatusConsensus(
+            (RelayNetworkStatusConsensus) descriptor);
       }
     }
   }
@@ -407,6 +413,11 @@ public class CurrentNodes {
   public void lookUpCitiesAndASes() {
 
     /* Make sure we have all required .csv files. */
+    // TODO Make paths configurable or allow passing file contents as
+    // strings in order to facilitate testing.
+    // TODO Move look-up code to new LookupService class that is
+    // initialized with geoip files, receives a sorted set of addresses,
+    // performs lookups, and returns results to CurrentNodes.
     File[] geoLiteCityBlocksCsvFiles = new File[] {
         new File("geoip/Manual-GeoLiteCity-Blocks.csv"),
         new File("geoip/Automatic-GeoLiteCity-Blocks.csv"),
@@ -744,24 +755,19 @@ public class CurrentNodes {
   }
 
   public void readBridgeNetworkStatuses() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File("in/bridge-descriptors/statuses"));
-    reader.setExcludeFiles(new File("status/bridge-status-history"));
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof BridgeNetworkStatus) {
-            updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
-          }
-        }
+    if (this.descriptorSource == null) {
+      System.err.println("Not configured to read bridge network "
+          + "statuses.");
+      return;
+    }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        DescriptorType.BRIDGE_STATUSES,
+        DescriptorHistory.BRIDGE_STATUS_HISTORY);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof BridgeNetworkStatus) {
+        updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
       }
     }
   }

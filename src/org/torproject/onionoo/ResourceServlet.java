@@ -2,9 +2,7 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -15,12 +13,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
@@ -35,7 +32,7 @@ public class ResourceServlet extends HttpServlet {
 
   private boolean maintenanceMode = false;
 
-  private File outDir;
+  private DocumentStore documentStore;
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -48,7 +45,7 @@ public class ResourceServlet extends HttpServlet {
 
   protected void init(boolean maintenanceMode, File outDir) {
     this.maintenanceMode = maintenanceMode;
-    this.outDir = outDir;
+    this.documentStore = new DocumentStore(outDir);
     if (!maintenanceMode) {
       this.readSummaryFile();
     }
@@ -66,13 +63,24 @@ public class ResourceServlet extends HttpServlet {
       bridgesByFirstSeenDays = null, relaysByLastSeenDays = null,
       bridgesByLastSeenDays = null;
   private void readSummaryFile() {
-    File summaryFile = new File(outDir, "summary");
-    if (!summaryFile.exists()) {
-      readSummaryFile = false;
+    long summaryFileLastModified = -1L;
+    String updateString = this.documentStore.retrieve(
+        DocumentType.OUT_UPDATE);
+    if (updateString != null) {
+      try {
+        summaryFileLastModified = Long.parseLong(updateString.trim());
+      } catch (NumberFormatException e) {
+        /* Handle below. */
+      }
+    }
+    if (summaryFileLastModified < 0L) {
+      // TODO Does this actually solve anything?  Should we instead
+      // switch to a variant of the maintenance mode and re-check when
+      // the next requests comes in that happens x seconds after this one?
+      this.readSummaryFile = false;
       return;
     }
-    if (summaryFile.lastModified() > this.summaryFileLastModified) {
-      long summaryFileLastModified = summaryFile.lastModified();
+    if (summaryFileLastModified > this.summaryFileLastModified) {
       List<String> relaysByConsensusWeight = new ArrayList<String>();
       Map<String, String>
           relayFingerprintSummaryLines = new HashMap<String, String>(),
@@ -86,8 +94,11 @@ public class ResourceServlet extends HttpServlet {
           bridgesByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
           relaysByLastSeenDays = new TreeMap<Integer, Set<String>>(),
           bridgesByLastSeenDays = new TreeMap<Integer, Set<String>>();
-      CurrentNodes cn = new CurrentNodes();
-      cn.readRelaySearchDataFile(summaryFile);
+      CurrentNodes cn = new CurrentNodes(this.documentStore);
+      cn.readOutSummary();
+      // TODO We should be able to learn if something goes wrong when
+      // reading the summary file, rather than silently having an empty
+      // CurrentNodes instance.
       cn.setRelayRunningBits();
       cn.setBridgeRunningBits();
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
@@ -197,7 +208,7 @@ public class ResourceServlet extends HttpServlet {
       this.bridgesByFirstSeenDays = bridgesByFirstSeenDays;
       this.bridgesByLastSeenDays = bridgesByLastSeenDays;
     }
-    this.summaryFileLastModified = summaryFile.lastModified();
+    this.summaryFileLastModified = summaryFileLastModified;
     this.readSummaryFile = true;
   }
 
@@ -910,37 +921,38 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File detailsFile = new File(this.outDir, "details/" + fingerprint);
+    String documentString = this.documentStore.retrieve(
+        DocumentType.OUT_DETAILS, fingerprint);
     StringBuilder sb = new StringBuilder();
     String detailsLines = null;
-    if (detailsFile.exists()) {
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            detailsFile));
-        String line = br.readLine();
-        if (line != null) {
-          sb.append("{");
-          while ((line = br.readLine()) != null) {
-            if (line.equals("}")) {
-              sb.append("}\n");
-              break;
-            } else if (!line.startsWith("\"desc_published\":")) {
-              sb.append(line + "\n");
-            }
-          }
+    if (documentString != null) {
+      Scanner s = new Scanner(documentString);
+      sb.append("{");
+      if (s.hasNextLine()) {
+        /* Skip version line. */
+        s.nextLine();
+      }
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        if (line.equals("}")) {
+          sb.append("}\n");
+          break;
+        } else if (!line.startsWith("\"desc_published\":")) {
+          sb.append(line + "\n");
         }
-        br.close();
-        detailsLines = sb.toString();
-        if (detailsLines.length() > 1) {
-          detailsLines = detailsLines.substring(0,
-              detailsLines.length() - 1);
-        }
-      } catch (IOException e) {
+      }
+      s.close();
+      detailsLines = sb.toString();
+      if (detailsLines.length() > 1) {
+        detailsLines = detailsLines.substring(0,
+            detailsLines.length() - 1);
       }
     }
     if (detailsLines != null) {
       return detailsLines;
     } else {
+      // TODO We should probably log that we didn't find a details
+      // document that we expected to exist.
       return "";
     }
   }
@@ -957,28 +969,15 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File bandwidthFile = new File(this.outDir, "bandwidth/"
-        + fingerprint);
-    StringBuilder sb = new StringBuilder();
-    String bandwidthLines = null;
-    if (bandwidthFile.exists()) {
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            bandwidthFile));
-        String line;
-        while ((line = br.readLine()) != null) {
-          sb.append(line + "\n");
-        }
-        br.close();
-        bandwidthLines = sb.toString();
-      } catch (IOException e) {
-      }
-    }
+    String bandwidthLines = this.documentStore.retrieve(
+        DocumentType.OUT_BANDWIDTH, fingerprint);
     if (bandwidthLines != null) {
       bandwidthLines = bandwidthLines.substring(0,
           bandwidthLines.length() - 1);
       return bandwidthLines;
     } else {
+      // TODO We should probably log that we didn't find a bandwidth
+      // document that we expected to exist.
       return "";
     }
   }
@@ -992,26 +991,14 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    File weightsFile = new File(this.outDir, "weights/" + fingerprint);
-    StringBuilder sb = new StringBuilder();
-    String weightsLines = null;
-    if (weightsFile.exists()) {
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            weightsFile));
-        String line;
-        while ((line = br.readLine()) != null) {
-          sb.append(line + "\n");
-        }
-        br.close();
-        weightsLines = sb.toString();
-      } catch (IOException e) {
-      }
-    }
+    String weightsLines = this.documentStore.retrieve(
+        DocumentType.OUT_WEIGHTS, fingerprint);
     if (weightsLines != null) {
       weightsLines = weightsLines.substring(0, weightsLines.length() - 1);
       return weightsLines;
     } else {
+      // TODO We should probably log that we didn't find a weights
+      // document that we expected to exist.
       return "";
     }
   }

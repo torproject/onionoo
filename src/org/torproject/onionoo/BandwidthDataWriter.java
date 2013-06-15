@@ -2,18 +2,12 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -21,9 +15,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.torproject.descriptor.Descriptor;
-import org.torproject.descriptor.DescriptorFile;
-import org.torproject.descriptor.DescriptorReader;
-import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.ExtraInfoDescriptor;
 
 /* Write bandwidth data files to disk and delete bandwidth files of relays
@@ -47,6 +38,16 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  * work around. */
 public class BandwidthDataWriter {
 
+  private DescriptorSource descriptorSource;
+
+  private DocumentStore documentStore;
+
+  public BandwidthDataWriter(DescriptorSource descriptorSource,
+      DocumentStore documentStore) {
+    this.descriptorSource = descriptorSource;
+    this.documentStore = documentStore;
+  }
+
   private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
       "yyyy-MM-dd HH:mm:ss");
   public BandwidthDataWriter() {
@@ -63,27 +64,17 @@ public class BandwidthDataWriter {
   }
 
   public void readExtraInfoDescriptors() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File("in/relay-descriptors/extra-infos"));
-    reader.addDirectory(new File("in/bridge-descriptors/extra-infos"));
-    reader.setExcludeFiles(new File("status/extrainfo-history"));
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof ExtraInfoDescriptor) {
-            ExtraInfoDescriptor extraInfoDescriptor =
-                (ExtraInfoDescriptor) descriptor;
-            this.parseDescriptor(extraInfoDescriptor);
-          }
-        }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        new DescriptorType[] { DescriptorType.RELAY_EXTRA_INFOS,
+        DescriptorType.BRIDGE_EXTRA_INFOS },
+        DescriptorHistory.EXTRAINFO_HISTORY);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof ExtraInfoDescriptor) {
+        ExtraInfoDescriptor extraInfoDescriptor =
+            (ExtraInfoDescriptor) descriptor;
+        this.parseDescriptor(extraInfoDescriptor);
       }
     }
   }
@@ -140,49 +131,46 @@ public class BandwidthDataWriter {
   private void readHistoryFromDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
-    File historyFile = new File(String.format("status/bandwidth/%s/%s/%s",
-        fingerprint.substring(0, 1), fingerprint.substring(1, 2),
-        fingerprint));
-    if (historyFile.exists()) {
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            historyFile));
-        String line;
-        while ((line = br.readLine()) != null) {
-          String[] parts = line.split(" ");
-          if (parts.length != 6) {
-            System.err.println("Illegal line '" + line + "' in history "
-                + "file '" + historyFile.getAbsolutePath()
-                + "'.  Skipping this line.");
-            continue;
-          }
-          SortedMap<Long, long[]> history = parts[0].equals("r")
-              ? readHistory : writeHistory;
-          long startMillis = this.dateTimeFormat.parse(parts[1] + " "
-              + parts[2]).getTime();
-          long endMillis = this.dateTimeFormat.parse(parts[3] + " "
-              + parts[4]).getTime();
-          long bandwidth = Long.parseLong(parts[5]);
-          long previousEndMillis = history.headMap(startMillis).isEmpty()
-              ? startMillis
-              : history.get(history.headMap(startMillis).lastKey())[1];
-          long nextStartMillis = history.tailMap(startMillis).isEmpty()
-              ? endMillis : history.tailMap(startMillis).firstKey();
-          if (previousEndMillis <= startMillis &&
-              nextStartMillis >= endMillis) {
-            history.put(startMillis, new long[] { startMillis, endMillis,
-                bandwidth });
-          }
+    String historyString = this.documentStore.retrieve(
+        DocumentType.STATUS_BANDWIDTH, fingerprint);
+    if (historyString == null) {
+      return;
+    }
+    try {
+      Scanner s = new Scanner(historyString);
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        String[] parts = line.split(" ");
+        if (parts.length != 6) {
+          System.err.println("Illegal line '" + line + "' in bandwidth "
+              + "history for fingerprint '" + fingerprint + "'.  "
+              + "Skipping this line.");
+          continue;
         }
-        br.close();
-      } catch (ParseException e) {
-        System.err.println("Could not parse timestamp while reading "
-            + "history file '" + historyFile.getAbsolutePath()
-            + "'.  Skipping.");
-      } catch (IOException e) {
-        System.err.println("Could not read history file '"
-            + historyFile.getAbsolutePath() + "'.  Skipping.");
+        SortedMap<Long, long[]> history = parts[0].equals("r")
+            ? readHistory : writeHistory;
+        long startMillis = this.dateTimeFormat.parse(parts[1] + " "
+            + parts[2]).getTime();
+        long endMillis = this.dateTimeFormat.parse(parts[3] + " "
+            + parts[4]).getTime();
+        long bandwidth = Long.parseLong(parts[5]);
+        long previousEndMillis = history.headMap(startMillis).isEmpty()
+            ? startMillis
+            : history.get(history.headMap(startMillis).lastKey())[1];
+        long nextStartMillis = history.tailMap(startMillis).isEmpty()
+            ? endMillis : history.tailMap(startMillis).firstKey();
+        if (previousEndMillis <= startMillis &&
+            nextStartMillis >= endMillis) {
+          history.put(startMillis, new long[] { startMillis, endMillis,
+              bandwidth });
+        }
       }
+      s.close();
+    } catch (ParseException e) {
+      System.err.println("Could not parse timestamp while reading "
+          + "bandwidth history for fingerprint '" + fingerprint + "'.  "
+          + "Skipping.");
+      e.printStackTrace();
     }
   }
 
@@ -233,30 +221,22 @@ public class BandwidthDataWriter {
   private void writeHistoryToDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
-    File historyFile = new File(String.format("status/bandwidth/%s/%s/%s",
-        fingerprint.substring(0, 1), fingerprint.substring(1, 2),
-        fingerprint));
-    try {
-      historyFile.getParentFile().mkdirs();
-      BufferedWriter bw = new BufferedWriter(new FileWriter(historyFile));
-      for (long[] v : writeHistory.values()) {
-        bw.write("w " + this.dateTimeFormat.format(v[0]) + " "
-            + this.dateTimeFormat.format(v[1]) + " "
-            + String.valueOf(v[2]) + "\n");
-      }
-      for (long[] v : readHistory.values()) {
-        bw.write("r " + this.dateTimeFormat.format(v[0]) + " "
-            + this.dateTimeFormat.format(v[1]) + " "
-            + String.valueOf(v[2]) + "\n");
-      }
-      bw.close();
-    } catch (IOException e) {
-      System.err.println("Could not write history file '"
-          + historyFile.getAbsolutePath() + "'.  Skipping.");
+    StringBuilder sb = new StringBuilder();
+    for (long[] v : writeHistory.values()) {
+      sb.append("w " + this.dateTimeFormat.format(v[0]) + " "
+          + this.dateTimeFormat.format(v[1]) + " "
+          + String.valueOf(v[2]) + "\n");
     }
+    for (long[] v : readHistory.values()) {
+      sb.append("r " + this.dateTimeFormat.format(v[0]) + " "
+          + this.dateTimeFormat.format(v[1]) + " "
+          + String.valueOf(v[2]) + "\n");
+    }
+    String historyString = sb.toString();
+    this.documentStore.store(historyString, DocumentType.STATUS_BANDWIDTH,
+        fingerprint);
   }
 
-  private File bandwidthFileDirectory = new File("out/bandwidth");
   private void writeBandwidthDataFileToDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
@@ -269,19 +249,13 @@ public class BandwidthDataWriter {
     }
     String writeHistoryString = formatHistoryString(writeHistory);
     String readHistoryString = formatHistoryString(readHistory);
-    File bandwidthFile = new File("out/bandwidth", fingerprint);
-    try {
-      bandwidthFile.getParentFile().mkdirs();
-      BufferedWriter bw = new BufferedWriter(new FileWriter(
-          bandwidthFile));
-      bw.write("{\"fingerprint\":\"" + fingerprint + "\",\n"
-          + "\"write_history\":{\n" + writeHistoryString + "},\n"
-          + "\"read_history\":{\n" + readHistoryString + "}}\n");
-      bw.close();
-    } catch (IOException e) {
-      System.err.println("Could not write bandwidth data file '"
-          + bandwidthFile.getAbsolutePath() + "'.  Skipping.");
-    }
+    StringBuilder sb = new StringBuilder();
+    sb.append("{\"fingerprint\":\"" + fingerprint + "\",\n"
+        + "\"write_history\":{\n" + writeHistoryString + "},\n"
+        + "\"read_history\":{\n" + readHistoryString + "}}\n");
+    String historyString = sb.toString();
+    this.documentStore.store(historyString, DocumentType.OUT_BANDWIDTH,
+        fingerprint);
   }
 
   private String[] graphNames = new String[] {
@@ -402,23 +376,16 @@ public class BandwidthDataWriter {
   }
 
   public void deleteObsoleteBandwidthFiles() {
-    SortedMap<String, File> obsoleteBandwidthFiles =
-        new TreeMap<String, File>();
-    if (bandwidthFileDirectory.exists() &&
-        bandwidthFileDirectory.isDirectory()) {
-      for (File file : bandwidthFileDirectory.listFiles()) {
-        if (file.getName().length() == 40) {
-          obsoleteBandwidthFiles.put(file.getName(), file);
-        }
-      }
-    }
+    SortedSet<String> obsoleteBandwidthFiles = this.documentStore.list(
+        DocumentType.OUT_BANDWIDTH);
     for (String fingerprint : this.currentFingerprints) {
-      if (obsoleteBandwidthFiles.containsKey(fingerprint)) {
+      if (obsoleteBandwidthFiles.contains(fingerprint)) {
         obsoleteBandwidthFiles.remove(fingerprint);
       }
     }
-    for (File bandwidthFile : obsoleteBandwidthFiles.values()) {
-      bandwidthFile.delete();
+    for (String fingerprint : obsoleteBandwidthFiles) {
+      this.documentStore.remove(DocumentType.OUT_BANDWIDTH,
+          fingerprint);
     }
   }
 }

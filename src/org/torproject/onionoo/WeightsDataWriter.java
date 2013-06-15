@@ -2,22 +2,16 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -25,14 +19,21 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.torproject.descriptor.Descriptor;
-import org.torproject.descriptor.DescriptorFile;
-import org.torproject.descriptor.DescriptorReader;
-import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
 
 public class WeightsDataWriter {
+
+  private DescriptorSource descriptorSource;
+
+  private DocumentStore documentStore;
+
+  public WeightsDataWriter(DescriptorSource descriptorSource,
+      DocumentStore documentStore) {
+    this.descriptorSource = descriptorSource;
+    this.documentStore = documentStore;
+  }
 
   private SortedSet<String> currentFingerprints = new TreeSet<String>();
   public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
@@ -47,63 +48,41 @@ public class WeightsDataWriter {
   private Map<String, Integer> advertisedBandwidths =
       new HashMap<String, Integer>();
   public void readRelayServerDescriptors() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File(
-        "in/relay-descriptors/server-descriptors"));
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof ServerDescriptor) {
-            ServerDescriptor serverDescriptor =
-                (ServerDescriptor) descriptor;
-            String digest = serverDescriptor.getServerDescriptorDigest().
-                toUpperCase();
-            int advertisedBandwidth = Math.min(Math.min(
-                serverDescriptor.getBandwidthBurst(),
-                serverDescriptor.getBandwidthObserved()),
-                serverDescriptor.getBandwidthRate());
-            this.advertisedBandwidths.put(digest, advertisedBandwidth);
-          }
-        }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        DescriptorType.RELAY_SERVER_DESCRIPTORS);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof ServerDescriptor) {
+        ServerDescriptor serverDescriptor =
+            (ServerDescriptor) descriptor;
+        String digest = serverDescriptor.getServerDescriptorDigest().
+            toUpperCase();
+        int advertisedBandwidth = Math.min(Math.min(
+            serverDescriptor.getBandwidthBurst(),
+            serverDescriptor.getBandwidthObserved()),
+            serverDescriptor.getBandwidthRate());
+        this.advertisedBandwidths.put(digest, advertisedBandwidth);
       }
     }
   }
 
   public void readRelayNetworkConsensuses() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File("in/relay-descriptors/consensuses"));
-    reader.setExcludeFiles(new File(
-        "status/weights-relay-consensus-history"));
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof RelayNetworkStatusConsensus) {
-            RelayNetworkStatusConsensus consensus =
-                (RelayNetworkStatusConsensus) descriptor;
-            long validAfterMillis = consensus.getValidAfterMillis(),
-                freshUntilMillis = consensus.getFreshUntilMillis();
-            SortedMap<String, double[]> pathSelectionWeights =
-                this.calculatePathSelectionProbabilities(consensus);
-            this.updateWeightsHistory(validAfterMillis, freshUntilMillis,
-                pathSelectionWeights);
-          }
-        }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        DescriptorType.RELAY_CONSENSUSES,
+        DescriptorHistory.WEIGHTS_RELAY_CONSENSUS_HISTORY);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof RelayNetworkStatusConsensus) {
+        RelayNetworkStatusConsensus consensus =
+            (RelayNetworkStatusConsensus) descriptor;
+        long validAfterMillis = consensus.getValidAfterMillis(),
+            freshUntilMillis = consensus.getFreshUntilMillis();
+        SortedMap<String, double[]> pathSelectionWeights =
+            this.calculatePathSelectionProbabilities(consensus);
+        this.updateWeightsHistory(validAfterMillis, freshUntilMillis,
+            pathSelectionWeights);
       }
     }
   }
@@ -286,24 +265,22 @@ public class WeightsDataWriter {
         return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
       }
     });
-    File historyFile = new File(String.format("status/weights/%s/%s/%s",
-        fingerprint.substring(0, 1), fingerprint.substring(1, 2),
-        fingerprint));
-    if (historyFile.exists()) {
+    String historyString = this.documentStore.retrieve(
+        DocumentType.STATUS_WEIGHTS, fingerprint);
+    if (historyString != null) {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setLenient(false);
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            historyFile));
-        String line;
-        while ((line = br.readLine()) != null) {
+        Scanner s = new Scanner(historyString);
+        while (s.hasNextLine()) {
+          String line = s.nextLine();
           String[] parts = line.split(" ");
           if (parts.length != 9) {
-            System.err.println("Illegal line '" + line + "' in history "
-                + "file '" + historyFile.getAbsolutePath()
-                + "'.  Skipping this line.");
+            System.err.println("Illegal line '" + line + "' in weights "
+                + "history for fingerprint '" + fingerprint + "'.  "
+                + "Skipping this line.");
             continue;
           }
           long validAfterMillis = dateTimeFormat.parse(parts[0]
@@ -320,14 +297,12 @@ public class WeightsDataWriter {
               Double.parseDouble(parts[8]) };
           history.put(interval, weights);
         }
-        br.close();
+        s.close();
       } catch (ParseException e) {
         System.err.println("Could not parse timestamp while reading "
-            + "history file '" + historyFile.getAbsolutePath()
-            + "'.  Skipping.");
-      } catch (IOException e) {
-        System.err.println("Could not read history file '"
-            + historyFile.getAbsolutePath() + "'.  Skipping.");
+            + "weights history for fingerprint '" + fingerprint + "'.  "
+            + "Skipping.");
+        e.printStackTrace();
       }
     }
     return history;
@@ -389,33 +364,25 @@ public class WeightsDataWriter {
 
   private void writeHistoryToDisk(String fingerprint,
       SortedMap<long[], double[]> history) {
-    File historyFile = new File(String.format("status/weights/%s/%s/%s",
-        fingerprint.substring(0, 1), fingerprint.substring(1, 2),
-        fingerprint));
-    try {
-      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-          "yyyy-MM-dd HH:mm:ss");
-      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      historyFile.getParentFile().mkdirs();
-      BufferedWriter bw = new BufferedWriter(new FileWriter(historyFile));
-      for (Map.Entry<long[], double[]> e : history.entrySet()) {
-        long[] fresh = e.getKey();
-        double[] weights = e.getValue();
-        bw.write(dateTimeFormat.format(fresh[0]) + " "
-            + dateTimeFormat.format(fresh[1]));
-        for (double weight : weights) {
-          bw.write(String.format(" %.12f", weight));
-        }
-        bw.write("\n");
+    StringBuilder sb = new StringBuilder();
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    for (Map.Entry<long[], double[]> e : history.entrySet()) {
+      long[] fresh = e.getKey();
+      double[] weights = e.getValue();
+      sb.append(dateTimeFormat.format(fresh[0]) + " "
+          + dateTimeFormat.format(fresh[1]));
+      for (double weight : weights) {
+        sb.append(String.format(" %.12f", weight));
       }
-      bw.close();
-    } catch (IOException e) {
-      System.err.println("Could not write weights file '"
-          + historyFile.getAbsolutePath() + "'.  Skipping.");
+      sb.append("\n");
     }
+    String historyString = sb.toString();
+    this.documentStore.store(historyString, DocumentType.STATUS_WEIGHTS,
+        fingerprint);
   }
 
-  private File weightsFileDirectory = new File("out/weights");
   public void writeWeightsDataFiles() {
     for (String fingerprint : this.currentFingerprints) {
       SortedMap<long[], double[]> history =
@@ -427,17 +394,8 @@ public class WeightsDataWriter {
       }
       String historyString = this.formatHistoryString(fingerprint,
           history);
-      File weightsFile = new File(weightsFileDirectory, fingerprint);
-      try {
-        weightsFile.getParentFile().mkdirs();
-        BufferedWriter bw = new BufferedWriter(new FileWriter(
-            weightsFile));
-        bw.write(historyString);
-        bw.close();
-      } catch (IOException e) {
-        System.err.println("Could not write weights data file '"
-            + weightsFile.getAbsolutePath() + "'.  Skipping.");
-      }
+      this.documentStore.store(historyString, DocumentType.OUT_WEIGHTS,
+          fingerprint);
     }
   }
 
@@ -591,23 +549,16 @@ public class WeightsDataWriter {
   }
 
   public void deleteObsoleteWeightsDataFiles() {
-    SortedMap<String, File> obsoleteWeightsFiles =
-        new TreeMap<String, File>();
-    if (weightsFileDirectory.exists() &&
-        weightsFileDirectory.isDirectory()) {
-      for (File file : weightsFileDirectory.listFiles()) {
-        if (file.getName().length() == 40) {
-          obsoleteWeightsFiles.put(file.getName(), file);
-        }
-      }
-    }
+    SortedSet<String> obsoleteWeightsFiles;
+    obsoleteWeightsFiles = this.documentStore.list(
+        DocumentType.OUT_WEIGHTS);
     for (String fingerprint : this.currentFingerprints) {
-      if (obsoleteWeightsFiles.containsKey(fingerprint)) {
+      if (obsoleteWeightsFiles.contains(fingerprint)) {
         obsoleteWeightsFiles.remove(fingerprint);
       }
     }
-    for (File weightsFile : obsoleteWeightsFiles.values()) {
-      weightsFile.delete();
+    for (String fingerprint : obsoleteWeightsFiles) {
+      this.documentStore.remove(DocumentType.OUT_WEIGHTS, fingerprint);
     }
   }
 }

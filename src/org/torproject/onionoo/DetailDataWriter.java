@@ -2,12 +2,6 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -16,9 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -30,9 +24,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
-import org.torproject.descriptor.DescriptorFile;
-import org.torproject.descriptor.DescriptorReader;
-import org.torproject.descriptor.DescriptorSourceFactory;
 import org.torproject.descriptor.ExitList;
 import org.torproject.descriptor.ExitListEntry;
 import org.torproject.descriptor.ServerDescriptor;
@@ -44,6 +35,16 @@ import org.torproject.descriptor.ServerDescriptor;
  * from the last known descriptor of a relay or bridge, not from the
  * descriptor that was last referenced in a network status. */
 public class DetailDataWriter {
+
+  private DescriptorSource descriptorSource;
+
+  private DocumentStore documentStore;
+
+  public DetailDataWriter(DescriptorSource descriptorSource,
+      DocumentStore documentStore) {
+    this.descriptorSource = descriptorSource;
+    this.documentStore = documentStore;
+  }
 
   private SortedMap<String, Node> relays;
   public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
@@ -164,37 +165,25 @@ public class DetailDataWriter {
   private Map<String, ServerDescriptor> relayServerDescriptors =
       new HashMap<String, ServerDescriptor>();
   public void readRelayServerDescriptors() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File(
-        "in/relay-descriptors/server-descriptors"));
     /* Don't remember which server descriptors we already parsed.  If we
      * parse a server descriptor now and first learn about the relay in a
      * later consensus, we'll never write the descriptor content anywhere.
      * The result would be details files containing no descriptor parts
      * until the relay publishes the next descriptor. */
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof ServerDescriptor) {
-            ServerDescriptor serverDescriptor =
-                (ServerDescriptor) descriptor;
-            String fingerprint = serverDescriptor.getFingerprint();
-            if (!this.relayServerDescriptors.containsKey(fingerprint) ||
-                this.relayServerDescriptors.get(fingerprint).
-                getPublishedMillis()
-                < serverDescriptor.getPublishedMillis()) {
-              this.relayServerDescriptors.put(fingerprint,
-                  serverDescriptor);
-            }
-          }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        DescriptorType.RELAY_SERVER_DESCRIPTORS);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof ServerDescriptor) {
+        ServerDescriptor serverDescriptor = (ServerDescriptor) descriptor;
+        String fingerprint = serverDescriptor.getFingerprint();
+        if (!this.relayServerDescriptors.containsKey(fingerprint) ||
+            this.relayServerDescriptors.get(fingerprint).
+            getPublishedMillis()
+            < serverDescriptor.getPublishedMillis()) {
+          this.relayServerDescriptors.put(fingerprint,
+              serverDescriptor);
         }
       }
     }
@@ -318,37 +307,25 @@ public class DetailDataWriter {
   private Map<String, Set<ExitListEntry>> exitListEntries =
       new HashMap<String, Set<ExitListEntry>>();
   public void readExitLists() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File(
-        "in/exit-lists"));
-    reader.setExcludeFiles(new File("status/exit-list-history"));
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof ExitList) {
-            ExitList exitList = (ExitList) descriptor;
-            for (ExitListEntry exitListEntry :
-                exitList.getExitListEntries()) {
-              if (exitListEntry.getScanMillis() <
-                  this.now - 24L * 60L * 60L * 1000L) {
-                continue;
-              }
-              String fingerprint = exitListEntry.getFingerprint();
-              if (!this.exitListEntries.containsKey(fingerprint)) {
-                this.exitListEntries.put(fingerprint,
-                    new HashSet<ExitListEntry>());
-              }
-              this.exitListEntries.get(fingerprint).add(exitListEntry);
-            }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        DescriptorType.EXIT_LISTS, DescriptorHistory.EXIT_LIST_HISTORY);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof ExitList) {
+        ExitList exitList = (ExitList) descriptor;
+        for (ExitListEntry exitListEntry :
+            exitList.getExitListEntries()) {
+          if (exitListEntry.getScanMillis() <
+              this.now - 24L * 60L * 60L * 1000L) {
+            continue;
           }
+          String fingerprint = exitListEntry.getFingerprint();
+          if (!this.exitListEntries.containsKey(fingerprint)) {
+            this.exitListEntries.put(fingerprint,
+                new HashSet<ExitListEntry>());
+          }
+          this.exitListEntries.get(fingerprint).add(exitListEntry);
         }
       }
     }
@@ -357,37 +334,25 @@ public class DetailDataWriter {
   private Map<String, ServerDescriptor> bridgeServerDescriptors =
       new HashMap<String, ServerDescriptor>();
   public void readBridgeServerDescriptors() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File(
-        "in/bridge-descriptors/server-descriptors"));
     /* Don't remember which server descriptors we already parsed.  If we
      * parse a server descriptor now and first learn about the relay in a
      * later status, we'll never write the descriptor content anywhere.
      * The result would be details files containing no descriptor parts
      * until the bridge publishes the next descriptor. */
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof ServerDescriptor) {
-            ServerDescriptor serverDescriptor =
-                (ServerDescriptor) descriptor;
-            String fingerprint = serverDescriptor.getFingerprint();
-            if (!this.bridgeServerDescriptors.containsKey(fingerprint) ||
-                this.bridgeServerDescriptors.get(fingerprint).
-                getPublishedMillis()
-                < serverDescriptor.getPublishedMillis()) {
-              this.bridgeServerDescriptors.put(fingerprint,
-                  serverDescriptor);
-            }
-          }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof ServerDescriptor) {
+        ServerDescriptor serverDescriptor = (ServerDescriptor) descriptor;
+        String fingerprint = serverDescriptor.getFingerprint();
+        if (!this.bridgeServerDescriptors.containsKey(fingerprint) ||
+            this.bridgeServerDescriptors.get(fingerprint).
+            getPublishedMillis()
+            < serverDescriptor.getPublishedMillis()) {
+          this.bridgeServerDescriptors.put(fingerprint,
+              serverDescriptor);
         }
       }
     }
@@ -396,67 +361,40 @@ public class DetailDataWriter {
   private Map<String, String> bridgePoolAssignments =
       new HashMap<String, String>();
   public void readBridgePoolAssignments() {
-    DescriptorReader reader =
-        DescriptorSourceFactory.createDescriptorReader();
-    reader.addDirectory(new File("in/bridge-pool-assignments"));
-    reader.setExcludeFiles(new File("status/bridge-poolassign-history"));
-    Iterator<DescriptorFile> descriptorFiles = reader.readDescriptors();
-    while (descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        System.out.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
-      }
-      if (descriptorFile.getDescriptors() != null) {
-        for (Descriptor descriptor : descriptorFile.getDescriptors()) {
-          if (descriptor instanceof BridgePoolAssignment) {
-            BridgePoolAssignment bridgePoolAssignment =
-                (BridgePoolAssignment) descriptor;
-            for (Map.Entry<String, String> e :
-                bridgePoolAssignment.getEntries().entrySet()) {
-              String fingerprint = e.getKey();
-              String details = e.getValue();
-              this.bridgePoolAssignments.put(fingerprint, details);
-            }
-          }
+    DescriptorQueue descriptorQueue =
+        this.descriptorSource.getDescriptorQueue(
+        DescriptorType.BRIDGE_POOL_ASSIGNMENTS,
+        DescriptorHistory.BRIDGE_POOLASSIGN_HISTORY);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      if (descriptor instanceof BridgePoolAssignment) {
+        BridgePoolAssignment bridgePoolAssignment =
+            (BridgePoolAssignment) descriptor;
+        for (Map.Entry<String, String> e :
+            bridgePoolAssignment.getEntries().entrySet()) {
+          String fingerprint = e.getKey();
+          String details = e.getValue();
+          this.bridgePoolAssignments.put(fingerprint, details);
         }
       }
     }
   }
 
-  public void writeDetailDataFiles() {
-    SortedMap<String, File> remainingDetailsFiles =
-        this.listAllDetailsFiles();
-    remainingDetailsFiles = this.updateRelayDetailsFiles(
-        remainingDetailsFiles);
-    remainingDetailsFiles = this.updateBridgeDetailsFiles(
-        remainingDetailsFiles);
+  public void writeOutDetails() {
+    SortedSet<String> remainingDetailsFiles = new TreeSet<String>();
+    remainingDetailsFiles.addAll(this.documentStore.list(
+        DocumentType.OUT_DETAILS));
+    this.updateRelayDetailsFiles(remainingDetailsFiles);
+    this.updateBridgeDetailsFiles(remainingDetailsFiles);
     this.deleteDetailsFiles(remainingDetailsFiles);
-  }
-
-  private File detailsFileDirectory = new File("out/details");
-  private SortedMap<String, File> listAllDetailsFiles() {
-    SortedMap<String, File> result = new TreeMap<String, File>();
-    if (detailsFileDirectory.exists() &&
-        detailsFileDirectory.isDirectory()) {
-      for (File file : detailsFileDirectory.listFiles()) {
-        if (file.getName().length() == 40) {
-          result.put(file.getName(), file);
-        }
-      }
-    }
-    return result;
   }
 
   private static String escapeJSON(String s) {
     return StringEscapeUtils.escapeJavaScript(s).replaceAll("\\\\'", "'");
   }
 
-  private SortedMap<String, File> updateRelayDetailsFiles(
-      SortedMap<String, File> remainingDetailsFiles) {
-    SortedMap<String, File> result =
-        new TreeMap<String, File>(remainingDetailsFiles);
+  private void updateRelayDetailsFiles(
+      SortedSet<String> remainingDetailsFiles) {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -466,42 +404,40 @@ public class DetailDataWriter {
       /* Read details file for this relay if it exists. */
       String descriptorParts = null;
       long publishedMillis = -1L;
-      if (result.containsKey(fingerprint)) {
-        File detailsFile = result.remove(fingerprint);
-        try {
-          BufferedReader br = new BufferedReader(new FileReader(
-              detailsFile));
-          String line;
-          boolean copyDescriptorParts = false;
-          StringBuilder sb = new StringBuilder();
-          while ((line = br.readLine()) != null) {
-            if (line.startsWith("\"desc_published\":")) {
-              String published = line.substring(
-                  "\"desc_published\":\"".length(),
-                  "\"desc_published\":\"1970-01-01 00:00:00".length());
-              publishedMillis = dateTimeFormat.parse(published).getTime();
-              copyDescriptorParts = true;
+      if (remainingDetailsFiles.contains(fingerprint)) {
+        remainingDetailsFiles.remove(fingerprint);
+        String documentString = this.documentStore.retrieve(
+            DocumentType.OUT_DETAILS, fingerprint);
+        if (documentString != null) {
+          try {
+            boolean copyDescriptorParts = false;
+            StringBuilder sb = new StringBuilder();
+            Scanner s = new Scanner(documentString);
+            while (s.hasNextLine()) {
+              String line = s.nextLine();
+              if (line.startsWith("\"desc_published\":")) {
+                String published = line.substring(
+                    "\"desc_published\":\"".length(),
+                    "\"desc_published\":\"1970-01-01 00:00:00".length());
+                publishedMillis = dateTimeFormat.parse(published).
+                    getTime();
+                copyDescriptorParts = true;
+              }
+              if (copyDescriptorParts) {
+                sb.append(line + "\n");
+              }
             }
-            if (copyDescriptorParts) {
-              sb.append(line + "\n");
+            s.close();
+            if (sb.length() > 0) {
+              descriptorParts = sb.toString();
             }
+          } catch (ParseException e) {
+            System.err.println("Could not parse timestamp in details.json "
+                + "file for '" + fingerprint + "'.  Ignoring.");
+            e.printStackTrace();
+            publishedMillis = -1L;
+            descriptorParts = null;
           }
-          br.close();
-          if (sb.length() > 0) {
-            descriptorParts = sb.toString();
-          }
-        } catch (IOException e) {
-          System.err.println("Could not read '"
-              + detailsFile.getAbsolutePath() + "'.  Skipping");
-          e.printStackTrace();
-          publishedMillis = -1L;
-          descriptorParts = null;
-        } catch (ParseException e) {
-          System.err.println("Could not read '"
-              + detailsFile.getAbsolutePath() + "'.  Skipping");
-          e.printStackTrace();
-          publishedMillis = -1L;
-          descriptorParts = null;
         }
       }
 
@@ -708,37 +644,23 @@ public class DetailDataWriter {
         }
         sb.append("]");
       }
-      String statusParts = sb.toString();
+
+      /* Add descriptor parts. */
+      if (descriptorParts != null) {
+        sb.append(",\n" + descriptorParts);
+      } else {
+        sb.append("\n}\n");
+      }
 
       /* Write details file to disk. */
-      File detailsFile = new File(detailsFileDirectory, fingerprint);
-      try {
-        detailsFile.getParentFile().mkdirs();
-        BufferedWriter bw = new BufferedWriter(new FileWriter(
-            detailsFile));
-        bw.write(statusParts);
-        if (descriptorParts != null) {
-          bw.write(",\n" + descriptorParts);
-        } else {
-          bw.write("\n}\n");
-        }
-        bw.close();
-      } catch (IOException e) {
-        System.err.println("Could not write details file '"
-            + detailsFile.getAbsolutePath() + "'.  This file may now be "
-            + "broken.  Ignoring.");
-        e.printStackTrace();
-      }
+      String detailsLines = sb.toString();
+      this.documentStore.store(detailsLines, DocumentType.OUT_DETAILS,
+          fingerprint);
     }
-
-    /* Return the files that we didn't update. */
-    return result;
   }
 
-  private SortedMap<String, File> updateBridgeDetailsFiles(
-      SortedMap<String, File> remainingDetailsFiles) {
-    SortedMap<String, File> result =
-        new TreeMap<String, File>(remainingDetailsFiles);
+  private void updateBridgeDetailsFiles(
+      SortedSet<String> remainingDetailsFiles) {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -748,52 +670,51 @@ public class DetailDataWriter {
       /* Read details file for this bridge if it exists. */
       String descriptorParts = null, bridgePoolAssignment = null;
       long publishedMillis = -1L;
-      if (result.containsKey(fingerprint)) {
-        File detailsFile = result.remove(fingerprint);
-        try {
-          BufferedReader br = new BufferedReader(new FileReader(
-              detailsFile));
-          String line;
+      if (remainingDetailsFiles.contains(fingerprint)) {
+        remainingDetailsFiles.remove(fingerprint);
+        String documentString = this.documentStore.retrieve(
+            DocumentType.OUT_DETAILS, fingerprint);
+        if (documentString != null) {
+          try {
           boolean copyDescriptorParts = false;
-          StringBuilder sb = new StringBuilder();
-          while ((line = br.readLine()) != null) {
-            if (line.startsWith("\"desc_published\":")) {
-              String published = line.substring(
-                  "\"desc_published\":\"".length(),
-                  "\"desc_published\":\"1970-01-01 00:00:00".length());
-              publishedMillis = dateTimeFormat.parse(published).getTime();
-              copyDescriptorParts = true;
-            } else if (line.startsWith("\"pool_assignment\":")) {
-              bridgePoolAssignment = line;
-              copyDescriptorParts = false;
-            } else if (line.equals("}")) {
-              copyDescriptorParts = false;
+            StringBuilder sb = new StringBuilder();
+            Scanner s = new Scanner(documentString);
+            while (s.hasNextLine()) {
+              String line = s.nextLine();
+              if (line.startsWith("\"desc_published\":")) {
+                String published = line.substring(
+                    "\"desc_published\":\"".length(),
+                    "\"desc_published\":\"1970-01-01 00:00:00".length());
+                publishedMillis = dateTimeFormat.parse(published).
+                    getTime();
+                copyDescriptorParts = true;
+              } else if (line.startsWith("\"pool_assignment\":")) {
+                bridgePoolAssignment = line;
+                copyDescriptorParts = false;
+              } else if (line.equals("}")) {
+                copyDescriptorParts = false;
+              }
+              if (copyDescriptorParts) {
+                sb.append(line + "\n");
+              }
             }
-            if (copyDescriptorParts) {
-              sb.append(line + "\n");
+            s.close();
+            descriptorParts = sb.toString();
+            if (descriptorParts.endsWith(",\n")) {
+              descriptorParts = descriptorParts.substring(0,
+                  descriptorParts.length() - 2);
+            } else if (descriptorParts.endsWith("\n")) {
+              descriptorParts = descriptorParts.substring(0,
+                  descriptorParts.length() - 1);
             }
+          } catch (ParseException e) {
+            System.err.println("Could not parse timestamp in "
+                + "details.json file for '" + fingerprint + "'.  "
+                + "Ignoring.");
+            e.printStackTrace();
+            publishedMillis = -1L;
+            descriptorParts = null;
           }
-          br.close();
-          descriptorParts = sb.toString();
-          if (descriptorParts.endsWith(",\n")) {
-            descriptorParts = descriptorParts.substring(0,
-                descriptorParts.length() - 2);
-          } else if (descriptorParts.endsWith("\n")) {
-            descriptorParts = descriptorParts.substring(0,
-                descriptorParts.length() - 1);
-          }
-        } catch (IOException e) {
-          System.err.println("Could not read '"
-              + detailsFile.getAbsolutePath() + "'.  Skipping");
-          e.printStackTrace();
-          publishedMillis = -1L;
-          descriptorParts = null;
-        } catch (ParseException e) {
-          System.err.println("Could not read '"
-              + detailsFile.getAbsolutePath() + "'.  Skipping");
-          e.printStackTrace();
-          publishedMillis = -1L;
-          descriptorParts = null;
         }
       }
 
@@ -871,32 +792,18 @@ public class DetailDataWriter {
         sb.append(",\n" + bridgePoolAssignment);
       }
       sb.append("\n}\n");
-      String detailsLines = sb.toString();
 
       /* Write details file to disk. */
-      File detailsFile = new File(detailsFileDirectory, fingerprint);
-      try {
-        detailsFile.getParentFile().mkdirs();
-        BufferedWriter bw = new BufferedWriter(new FileWriter(
-            detailsFile));
-        bw.write(detailsLines);
-        bw.close();
-      } catch (IOException e) {
-        System.err.println("Could not write details file '"
-            + detailsFile.getAbsolutePath() + "'.  This file may now be "
-            + "broken.  Ignoring.");
-        e.printStackTrace();
-      }
+      String detailsLines = sb.toString();
+      this.documentStore.store(detailsLines, DocumentType.OUT_DETAILS,
+          fingerprint);
     }
-
-    /* Return the files that we didn't update. */
-    return result;
   }
 
   private void deleteDetailsFiles(
-      SortedMap<String, File> remainingDetailsFiles) {
-    for (File detailsFile : remainingDetailsFiles.values()) {
-      detailsFile.delete();
+      SortedSet<String> remainingDetailsFiles) {
+    for (String fingerprint : remainingDetailsFiles) {
+      this.documentStore.remove(DocumentType.OUT_DETAILS, fingerprint);
     }
   }
 }
