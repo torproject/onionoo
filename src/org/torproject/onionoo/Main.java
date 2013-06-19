@@ -19,8 +19,12 @@ public class Main {
         new File("out"));
     printStatusTime("Initialized document store");
 
+    printStatus("Initializing lookup service.");
+    LookupService ls = new LookupService(new File("geoip"));
+    printStatusTime("Initialized Geoip lookup service");
+
     printStatus("Updating internal node list.");
-    CurrentNodes cn = new CurrentNodes(dso, ds);
+    CurrentNodes cn = new CurrentNodes(dso, ls, ds);
     cn.readStatusSummary();
     printStatusTime("Read status summary");
     cn.readRelayNetworkConsensuses();
