@@ -29,15 +29,17 @@ public class WeightsDataWriter {
 
   private DocumentStore documentStore;
 
+  private SortedSet<String> currentFingerprints = new TreeSet<String>();
+
   public WeightsDataWriter(DescriptorSource descriptorSource,
       DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
     this.documentStore = documentStore;
   }
 
-  private SortedSet<String> currentFingerprints = new TreeSet<String>();
-  public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
-    this.currentFingerprints.addAll(currentRelays.keySet());
+  public void setCurrentNodes(
+      SortedMap<String, NodeStatus> currentNodes) {
+    this.currentFingerprints.addAll(currentNodes.keySet());
   }
 
   /* Read advertised bandwidths of all server descriptors in
@@ -265,9 +267,10 @@ public class WeightsDataWriter {
         return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
       }
     });
-    String historyString = this.documentStore.retrieve(
-        DocumentType.STATUS_WEIGHTS, fingerprint);
-    if (historyString != null) {
+    WeightsStatus weightsStatus = this.documentStore.retrieve(
+        WeightsStatus.class, false, fingerprint);
+    if (weightsStatus != null) {
+      String historyString = weightsStatus.documentString;
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setLenient(false);
@@ -378,9 +381,9 @@ public class WeightsDataWriter {
       }
       sb.append("\n");
     }
-    String historyString = sb.toString();
-    this.documentStore.store(historyString, DocumentType.STATUS_WEIGHTS,
-        fingerprint);
+    WeightsStatus weightsStatus = new WeightsStatus();
+    weightsStatus.documentString = sb.toString();
+    this.documentStore.store(weightsStatus, fingerprint);
   }
 
   public void writeWeightsDataFiles() {
@@ -392,10 +395,10 @@ public class WeightsDataWriter {
         /* Don't write weights data file to disk. */
         continue;
       }
-      String historyString = this.formatHistoryString(fingerprint,
-          history);
-      this.documentStore.store(historyString, DocumentType.OUT_WEIGHTS,
-          fingerprint);
+      WeightsDocument weightsDocument = new WeightsDocument();
+      weightsDocument.documentString = this.formatHistoryString(
+          fingerprint, history);
+      this.documentStore.store(weightsDocument, fingerprint);
     }
   }
 
@@ -550,15 +553,15 @@ public class WeightsDataWriter {
 
   public void deleteObsoleteWeightsDataFiles() {
     SortedSet<String> obsoleteWeightsFiles;
-    obsoleteWeightsFiles = this.documentStore.list(
-        DocumentType.OUT_WEIGHTS);
+    obsoleteWeightsFiles = this.documentStore.list(WeightsDocument.class,
+        false);
     for (String fingerprint : this.currentFingerprints) {
       if (obsoleteWeightsFiles.contains(fingerprint)) {
         obsoleteWeightsFiles.remove(fingerprint);
       }
     }
     for (String fingerprint : obsoleteWeightsFiles) {
-      this.documentStore.remove(DocumentType.OUT_WEIGHTS, fingerprint);
+      this.documentStore.remove(WeightsDocument.class, fingerprint);
     }
   }
 }

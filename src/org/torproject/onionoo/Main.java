@@ -4,6 +4,7 @@ package org.torproject.onionoo;
 
 import java.io.File;
 import java.util.Date;
+import java.util.SortedMap;
 
 /* Update search data and status data files. */
 public class Main {
@@ -24,34 +25,37 @@ public class Main {
     printStatusTime("Initialized Geoip lookup service");
 
     printStatus("Updating internal node list.");
-    CurrentNodes cn = new CurrentNodes(dso, ls, ds);
-    cn.readStatusSummary();
+    NodeDataWriter ndw = new NodeDataWriter(dso, ls, ds);
+    ndw.readStatusSummary();
     printStatusTime("Read status summary");
-    cn.readRelayNetworkConsensuses();
+    ndw.readRelayNetworkConsensuses();
     printStatusTime("Read network status consensuses");
-    cn.setRelayRunningBits();
-    printStatusTime("Set relay running bits");
-    cn.lookUpCitiesAndASes();
+    ndw.lookUpCitiesAndASes();
     printStatusTime("Looked up cities and ASes");
-    cn.readBridgeNetworkStatuses();
+    ndw.readBridgeNetworkStatuses();
     printStatusTime("Read bridge network statuses");
-    cn.setBridgeRunningBits();
-    printStatusTime("Set bridge running bits");
-    cn.writeStatusSummary();
+    ndw.setRunningBits();
+    printStatusTime("Set running bits");
+    ndw.writeStatusSummary();
     printStatusTime("Wrote status summary");
+    SortedMap<String, NodeStatus> currentNodes = ndw.getCurrentNodes();
+    SortedMap<String, Integer> lastBandwidthWeights =
+        ndw.getLastBandwidthWeights();
     // TODO Could write statistics here, too.
 
     printStatus("Updating detail data.");
-    DetailDataWriter ddw = new DetailDataWriter(dso, ds);
-    ddw.setCurrentRelays(cn.getCurrentRelays());
-    printStatusTime("Set current relays");
-    ddw.setCurrentBridges(cn.getCurrentBridges());
-    printStatusTime("Set current bridges");
+    DetailsDataWriter ddw = new DetailsDataWriter(dso, ds);
+    // TODO Instead of using ndw's currentNodes and lastBandwidthWeights,
+    // parse statuses once again, keeping separate parse history.  Allows
+    // us to run ndw and ddw in parallel in the future.  Alternatively,
+    // merge ndw and ddw, because they're doing similar things anyway.
+    ddw.setCurrentNodes(currentNodes);
+    printStatusTime("Set current node fingerprints");
     ddw.startReverseDomainNameLookups();
     printStatusTime("Started reverse domain name lookups");
     ddw.readRelayServerDescriptors();
     printStatusTime("Read relay server descriptors");
-    ddw.calculatePathSelectionProbabilities(cn.getLastBandwidthWeights());
+    ddw.calculatePathSelectionProbabilities(lastBandwidthWeights);
     printStatusTime("Calculated path selection probabilities");
     ddw.readExitLists();
     printStatusTime("Read exit lists");
@@ -67,34 +71,42 @@ public class Main {
 
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter(dso, ds);
-    bdw.setCurrentRelays(cn.getCurrentRelays());
-    printStatusTime("Set current relays");
-    bdw.setCurrentBridges(cn.getCurrentBridges());
-    printStatusTime("Set current bridges");
+    bdw.setCurrentNodes(currentNodes);
+    printStatusTime("Set current node fingerprints");
     bdw.readExtraInfoDescriptors();
     printStatusTime("Read extra-info descriptors");
+    // TODO Evaluate overhead of not deleting obsolete bandwidth files.
+    // An advantage would be that we don't need ndw's currentNodes
+    // anymore, which allows us to run ndw and bdw in parallel in the
+    // future.
     bdw.deleteObsoleteBandwidthFiles();
     printStatusTime("Deleted obsolete bandwidth files");
     // TODO Could write statistics here, too.
 
     printStatus("Updating weights data.");
     WeightsDataWriter wdw = new WeightsDataWriter(dso, ds);
-    wdw.setCurrentRelays(cn.getCurrentRelays());
-    printStatusTime("Set current relays");
+    wdw.setCurrentNodes(currentNodes);
+    printStatusTime("Set current node fingerprints");
     wdw.readRelayServerDescriptors();
     printStatusTime("Read relay server descriptors");
     wdw.readRelayNetworkConsensuses();
     printStatusTime("Read relay network consensuses");
     wdw.writeWeightsDataFiles();
     printStatusTime("Wrote weights data files");
+    // TODO Evaluate overhead of not deleting obsolete weights files.  An
+    // advantage would be that we don't need ndw's currentNodes anymore,
+    // which allows us to run ndw and wdw in parallel in the future.
     wdw.deleteObsoleteWeightsDataFiles();
     printStatusTime("Deleted obsolete weights files");
     // TODO Could write statistics here, too.
 
     printStatus("Updating summary data.");
-    cn.writeOutSummary();
+    ndw.writeOutSummary();
     printStatusTime("Wrote out summary");
     // TODO Could write statistics here, too.
+
+    // TODO "Shut down" lookup service and write statistics about number
+    // of (successfully) looked up addresses.
 
     printStatus("Shutting down descriptor source.");
     dso.writeHistoryFiles();
@@ -103,6 +115,8 @@ public class Main {
     printStatusTime("Shut down descriptor source");
 
     printStatus("Shutting down document store.");
+    ds.flushDocumentCache();
+    printStatusTime("Flushed document cache");
     printStatistics(ds.getStatsString());
     printStatusTime("Shut down document store");
 

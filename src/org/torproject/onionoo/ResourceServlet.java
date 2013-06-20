@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -64,9 +65,10 @@ public class ResourceServlet extends HttpServlet {
       bridgesByLastSeenDays = null;
   private void readSummaryFile() {
     long summaryFileLastModified = -1L;
-    String updateString = this.documentStore.retrieve(
-        DocumentType.OUT_UPDATE);
-    if (updateString != null) {
+    UpdateStatus updateStatus = this.documentStore.retrieve(
+        UpdateStatus.class, false);
+    if (updateStatus != null && updateStatus.documentString != null) {
+      String updateString = updateStatus.documentString;
       try {
         summaryFileLastModified = Long.parseLong(updateString.trim());
       } catch (NumberFormatException e) {
@@ -94,25 +96,42 @@ public class ResourceServlet extends HttpServlet {
           bridgesByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
           relaysByLastSeenDays = new TreeMap<Integer, Set<String>>(),
           bridgesByLastSeenDays = new TreeMap<Integer, Set<String>>();
-      CurrentNodes cn = new CurrentNodes(this.documentStore);
-      cn.readOutSummary();
+      long relaysLastValidAfterMillis = -1L,
+          bridgesLastPublishedMillis = -1L;
+      Set<NodeStatus> currentRelays = new HashSet<NodeStatus>(),
+          currentBridges = new HashSet<NodeStatus>();
+      SortedSet<String> fingerprints = this.documentStore.list(
+          NodeStatus.class, false);
       // TODO We should be able to learn if something goes wrong when
       // reading the summary file, rather than silently having an empty
-      // CurrentNodes instance.
-      cn.setRelayRunningBits();
-      cn.setBridgeRunningBits();
+      // list of fingerprints.
+      for (String fingerprint : fingerprints) {
+        NodeStatus node = this.documentStore.retrieve(NodeStatus.class,
+            true, fingerprint);
+        if (node.isRelay()) {
+          relaysLastValidAfterMillis = Math.max(
+              relaysLastValidAfterMillis, node.getLastSeenMillis());
+          currentRelays.add(node);
+        } else {
+          bridgesLastPublishedMillis = Math.max(
+              bridgesLastPublishedMillis, node.getLastSeenMillis());
+          currentBridges.add(node);
+        }
+      }
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       this.relaysPublishedString = dateTimeFormat.format(
-          cn.getLastValidAfterMillis());
+          relaysLastValidAfterMillis);
       this.bridgesPublishedString = dateTimeFormat.format(
-          cn.getLastPublishedMillis());
+          bridgesLastPublishedMillis);
       List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
-      for (Node entry : cn.getCurrentRelays().values()) {
+      for (NodeStatus entry : currentRelays) {
         String fingerprint = entry.getFingerprint().toUpperCase();
         String hashedFingerprint = entry.getHashedFingerprint().
             toUpperCase();
+        entry.setRunning(entry.getLastSeenMillis() ==
+            relaysLastValidAfterMillis);
         String line = this.formatRelaySummaryLine(entry);
         relayFingerprintSummaryLines.put(fingerprint, line);
         relayFingerprintSummaryLines.put(hashedFingerprint, line);
@@ -169,10 +188,12 @@ public class ResourceServlet extends HttpServlet {
       for (String relay : orderRelaysByConsensusWeight) {
         relaysByConsensusWeight.add(relay.split(" ")[1]);
       }
-      for (Node entry : cn.getCurrentBridges().values()) {
+      for (NodeStatus entry : currentBridges) {
         String hashedFingerprint = entry.getFingerprint().toUpperCase();
         String hashedHashedFingerprint = entry.getHashedFingerprint().
             toUpperCase();
+        entry.setRunning(entry.getRelayFlags().contains("Running") &&
+            entry.getLastSeenMillis() == bridgesLastPublishedMillis);
         String line = this.formatBridgeSummaryLine(entry);
         bridgeFingerprintSummaryLines.put(hashedFingerprint, line);
         bridgeFingerprintSummaryLines.put(hashedHashedFingerprint, line);
@@ -212,7 +233,7 @@ public class ResourceServlet extends HttpServlet {
     this.readSummaryFile = true;
   }
 
-  private String formatRelaySummaryLine(Node entry) {
+  private String formatRelaySummaryLine(NodeStatus entry) {
     String nickname = !entry.getNickname().equals("Unnamed") ?
         entry.getNickname() : null;
     String fingerprint = entry.getFingerprint();
@@ -238,7 +259,7 @@ public class ResourceServlet extends HttpServlet {
         fingerprint, addressesBuilder.toString(), running);
   }
 
-  private String formatBridgeSummaryLine(Node entry) {
+  private String formatBridgeSummaryLine(NodeStatus entry) {
     String nickname = !entry.getNickname().equals("Unnamed") ?
         entry.getNickname() : null;
     String hashedFingerprint = entry.getFingerprint();
@@ -921,8 +942,9 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    String documentString = this.documentStore.retrieve(
-        DocumentType.OUT_DETAILS, fingerprint);
+    DetailsDocument detailsDocument = this.documentStore.retrieve(
+        DetailsDocument.class, false, fingerprint);
+    String documentString = detailsDocument.documentString;
     StringBuilder sb = new StringBuilder();
     String detailsLines = null;
     if (documentString != null) {
@@ -969,8 +991,9 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    String bandwidthLines = this.documentStore.retrieve(
-        DocumentType.OUT_BANDWIDTH, fingerprint);
+    BandwidthDocument bandwidthDocument = this.documentStore.retrieve(
+        BandwidthDocument.class, false, fingerprint);
+    String bandwidthLines = bandwidthDocument.documentString;
     if (bandwidthLines != null) {
       bandwidthLines = bandwidthLines.substring(0,
           bandwidthLines.length() - 1);
@@ -991,8 +1014,9 @@ public class ResourceServlet extends HttpServlet {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    String weightsLines = this.documentStore.retrieve(
-        DocumentType.OUT_WEIGHTS, fingerprint);
+    WeightsDocument weightsDocument = this.documentStore.retrieve(
+        WeightsDocument.class, false, fingerprint);
+    String weightsLines = weightsDocument.documentString;
     if (weightsLines != null) {
       weightsLines = weightsLines.substring(0, weightsLines.length() - 1);
       return weightsLines;

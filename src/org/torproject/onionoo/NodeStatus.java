@@ -2,10 +2,16 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.TreeMap;
 
@@ -15,7 +21,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 /* Store search data of a single relay that was running in the past seven
  * days. */
-public class Node {
+public class NodeStatus extends Document {
+  private boolean isRelay;
   private String fingerprint;
   private String hashedFingerprint;
   private String nickname;
@@ -48,18 +55,19 @@ public class Node {
   private String defaultPolicy;
   private String portList;
   private SortedMap<Long, Set<String>> lastAddresses;
-  public Node(String nickname, String fingerprint, String address,
-      SortedSet<String> orAddressesAndPorts,
+  public NodeStatus(boolean isRelay, String nickname, String fingerprint,
+      String address, SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostName, long lastRdnsLookup,
       String defaultPolicy, String portList, long firstSeenMillis,
-      SortedMap<Long, Set<String>> lastAddresses, String aSNumber) {
+      long lastChangedAddresses, String aSNumber) {
+    this.isRelay = isRelay;
     this.nickname = nickname;
     this.fingerprint = fingerprint;
     try {
       this.hashedFingerprint = DigestUtils.shaHex(Hex.decodeHex(
-          fingerprint.toCharArray())).toUpperCase();
+          this.fingerprint.toCharArray())).toUpperCase();
     } catch (DecoderException e) {
       throw new IllegalArgumentException("Fingerprint '" + fingerprint
           + "' is not a valid fingerprint.");
@@ -88,8 +96,202 @@ public class Node {
     this.defaultPolicy = defaultPolicy;
     this.portList = portList;
     this.firstSeenMillis = firstSeenMillis;
-    this.lastAddresses = lastAddresses;
+    this.lastAddresses =
+        new TreeMap<Long, Set<String>>(Collections.reverseOrder());
+    Set<String> addresses = new HashSet<String>();
+    addresses.add(address + ":" + orPort);
+    if (dirPort > 0) {
+      addresses.add(address + ":" + dirPort);
+    }
+    addresses.addAll(orAddressesAndPorts);
+    this.lastAddresses.put(lastChangedAddresses, addresses);
     this.aSNumber = aSNumber;
+  }
+
+  public static NodeStatus fromString(String documentString) {
+    boolean isRelay = false;
+    String nickname = null, fingerprint = null, address = null,
+        countryCode = null, hostName = null, defaultPolicy = null,
+        portList = null, aSNumber = null;
+    SortedSet<String> orAddressesAndPorts = null, exitAddresses = null,
+        relayFlags = null;
+    long lastSeenMillis = -1L, consensusWeight = -1L,
+        lastRdnsLookup = -1L, firstSeenMillis = -1L,
+        lastChangedAddresses = -1L;
+    int orPort = -1, dirPort = -1;
+    try {
+      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+          "yyyy-MM-dd HH:mm:ss");
+      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      String[] parts = documentString.trim().split(" ");
+      isRelay = parts[0].equals("r");
+      if (parts.length < 9) {
+        System.err.println("Too few space-separated values in line '"
+            + documentString.trim() + "'.  Skipping.");
+        return null;
+      }
+      nickname = parts[1];
+      fingerprint = parts[2];
+      orAddressesAndPorts = new TreeSet<String>();
+      exitAddresses = new TreeSet<String>();
+      String addresses = parts[3];
+      if (addresses.contains(";")) {
+        String[] addressParts = addresses.split(";", -1);
+        if (addressParts.length != 3) {
+          System.err.println("Invalid addresses entry in line '"
+              + documentString.trim() + "'.  Skipping.");
+          return null;
+        }
+        address = addressParts[0];
+        if (addressParts[1].length() > 0) {
+          orAddressesAndPorts.addAll(Arrays.asList(
+              addressParts[1].split("\\+")));
+        }
+        if (addressParts[2].length() > 0) {
+          exitAddresses.addAll(Arrays.asList(
+              addressParts[2].split("\\+")));
+        }
+      } else {
+        address = addresses;
+      }
+      lastSeenMillis = dateTimeFormat.parse(parts[4] + " " + parts[5]).
+          getTime();
+      orPort = Integer.parseInt(parts[6]);
+      dirPort = Integer.parseInt(parts[7]);
+      relayFlags = new TreeSet<String>(
+          Arrays.asList(parts[8].split(",")));
+      if (parts.length > 9) {
+        consensusWeight = Long.parseLong(parts[9]);
+      }
+      if (parts.length > 10) {
+        countryCode = parts[10];
+      }
+      if (parts.length > 12) {
+        hostName = parts[11].equals("null") ? null : parts[11];
+        lastRdnsLookup = Long.parseLong(parts[12]);
+      }
+      if (parts.length > 14) {
+        if (!parts[13].equals("null")) {
+          defaultPolicy = parts[13];
+        }
+        if (!parts[14].equals("null")) {
+          portList = parts[14];
+        }
+      }
+      firstSeenMillis = lastSeenMillis;
+      if (parts.length > 16) {
+        firstSeenMillis = dateTimeFormat.parse(parts[15] + " "
+            + parts[16]).getTime();
+      }
+      lastChangedAddresses = lastSeenMillis;
+      if (parts.length > 18 && !parts[17].equals("null")) {
+        lastChangedAddresses = dateTimeFormat.parse(parts[17] + " "
+            + parts[18]).getTime();
+      }
+      if (parts.length > 19) {
+        aSNumber = parts[19];
+      }
+    } catch (NumberFormatException e) {
+      System.err.println("Number format exception while parsing node "
+          + "status line '" + documentString + "': " + e.getMessage()
+          + ".  Skipping.");
+      return null;
+    } catch (ParseException e) {
+      System.err.println("Parse exception while parsing node status "
+          + "line '" + documentString + "': " + e.getMessage() + ".  "
+          + "Skipping.");
+      return null;
+    } catch (Exception e) {
+      /* This catch block is only here to handle yet unknown errors.  It
+       * should go away once we're sure what kind of errors can occur. */
+      System.err.println("Unknown exception while parsing node status "
+          + "line '" + documentString + "': " + e.getMessage() + ".  "
+          + "Skipping.");
+      return null;
+    }
+    NodeStatus newNodeStatus = new NodeStatus(isRelay, nickname,
+        fingerprint, address, orAddressesAndPorts, exitAddresses,
+        lastSeenMillis, orPort, dirPort, relayFlags, consensusWeight,
+        countryCode, hostName, lastRdnsLookup, defaultPolicy, portList,
+        firstSeenMillis, lastChangedAddresses, aSNumber);
+    return newNodeStatus;
+  }
+
+  public void update(NodeStatus newNodeStatus) {
+    if (newNodeStatus.lastSeenMillis > this.lastSeenMillis) {
+      this.nickname = newNodeStatus.nickname;
+      this.address = newNodeStatus.address;
+      this.orAddressesAndPorts = newNodeStatus.orAddressesAndPorts;
+      this.exitAddresses = newNodeStatus.exitAddresses;
+      this.lastSeenMillis = newNodeStatus.lastSeenMillis;
+      this.orPort = newNodeStatus.orPort;
+      this.dirPort = newNodeStatus.dirPort;
+      this.relayFlags = newNodeStatus.relayFlags;
+      this.consensusWeight = newNodeStatus.consensusWeight;
+      this.countryCode = newNodeStatus.countryCode;
+      this.defaultPolicy = newNodeStatus.defaultPolicy;
+      this.portList = newNodeStatus.portList;
+      this.aSNumber = newNodeStatus.aSNumber;
+    }
+    if (this.isRelay && newNodeStatus.isRelay) {
+      this.lastAddresses.putAll(newNodeStatus.lastAddresses);
+    }
+    this.firstSeenMillis = Math.min(newNodeStatus.firstSeenMillis,
+        this.getFirstSeenMillis());
+  }
+
+  public String toString() {
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    StringBuilder sb = new StringBuilder();
+    sb.append(this.isRelay ? "r" : "b");
+    sb.append(" " + this.nickname);
+    sb.append(" " + this.fingerprint);
+    sb.append(" " + this.address + ";");
+    int written = 0;
+    for (String orAddressAndPort : this.orAddressesAndPorts) {
+      sb.append((written++ > 0 ? "+" : "") + orAddressAndPort);
+    }
+    sb.append(";");
+    if (this.isRelay) {
+      written = 0;
+      for (String exitAddress : this.exitAddresses) {
+        sb.append((written++ > 0 ? "+" : "")
+            + exitAddress);
+      }
+    }
+    sb.append(" " + dateTimeFormat.format(this.lastSeenMillis));
+    sb.append(" " + this.orPort);
+    sb.append(" " + this.dirPort + " ");
+    written = 0;
+    for (String relayFlag : this.relayFlags) {
+      sb.append((written++ > 0 ? "," : "") + relayFlag);
+    }
+    if (this.isRelay) {
+      sb.append(" " + String.valueOf(this.consensusWeight));
+      sb.append(" " + (this.countryCode != null ? this.countryCode : "??"));
+      sb.append(" " + (this.hostName != null ? this.hostName : "null"));
+      sb.append(" " + String.valueOf(this.lastRdnsLookup));
+      sb.append(" " + (this.defaultPolicy != null ? this.defaultPolicy
+          : "null"));
+      sb.append(" " + (this.portList != null ? this.portList : "null"));
+    } else {
+      sb.append(" -1 ?? null -1 null null");
+    }
+    sb.append(" " + dateTimeFormat.format(this.firstSeenMillis));
+    if (this.isRelay) {
+      sb.append(" " + dateTimeFormat.format(
+          this.getLastChangedOrAddress()));
+      sb.append(" " + (this.aSNumber != null ? this.aSNumber : "null"));
+    } else {
+      sb.append(" null null null");
+    }
+    return sb.toString();
+  }
+
+  public boolean isRelay() {
+    return this.isRelay;
   }
   public String getFingerprint() {
     return this.fingerprint;

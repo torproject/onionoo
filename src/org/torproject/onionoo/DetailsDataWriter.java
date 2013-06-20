@@ -34,26 +34,33 @@ import org.torproject.descriptor.ServerDescriptor;
  * The parts of details files coming from server descriptors always come
  * from the last known descriptor of a relay or bridge, not from the
  * descriptor that was last referenced in a network status. */
-public class DetailDataWriter {
+public class DetailsDataWriter {
 
   private DescriptorSource descriptorSource;
 
   private DocumentStore documentStore;
 
-  public DetailDataWriter(DescriptorSource descriptorSource,
+  private SortedMap<String, NodeStatus> relays;
+
+  private SortedMap<String, NodeStatus> bridges;
+
+  public DetailsDataWriter(DescriptorSource descriptorSource,
       DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
     this.documentStore = documentStore;
   }
 
-  private SortedMap<String, Node> relays;
-  public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
-    this.relays = currentRelays;
-  }
-
-  private SortedMap<String, Node> bridges;
-  public void setCurrentBridges(SortedMap<String, Node> currentBridges) {
-    this.bridges = currentBridges;
+  public void setCurrentNodes(
+      SortedMap<String, NodeStatus> currentNodes) {
+    this.relays = new TreeMap<String, NodeStatus>();
+    this.bridges = new TreeMap<String, NodeStatus>();
+    for (Map.Entry<String, NodeStatus> e : currentNodes.entrySet()) {
+      if (e.getValue().isRelay()) {
+        this.relays.put(e.getKey(), e.getValue());
+      } else {
+        this.bridges.put(e.getKey(), e.getValue());
+      }
+    }
   }
 
   private static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS = 10L * 1000L;
@@ -69,7 +76,7 @@ public class DetailDataWriter {
   public void startReverseDomainNameLookups() {
     this.startedRdnsLookups = System.currentTimeMillis();
     this.rdnsLookupJobs = new HashSet<String>();
-    for (Node relay : relays.values()) {
+    for (NodeStatus relay : relays.values()) {
       if (relay.getLastRdnsLookup() < this.startedRdnsLookups
           - RDNS_LOOKUP_MAX_AGE_MILLIS) {
         this.rdnsLookupJobs.add(relay.getAddress());
@@ -95,7 +102,7 @@ public class DetailDataWriter {
       }
     }
     synchronized (this.rdnsLookupResults) {
-      for (Node relay : relays.values()) {
+      for (NodeStatus relay : relays.values()) {
         if (this.rdnsLookupResults.containsKey(relay.getAddress())) {
           relay.setHostName(this.rdnsLookupResults.get(
               relay.getAddress()));
@@ -226,9 +233,9 @@ public class DetailDataWriter {
     double totalGuardWeight = 0.0;
     double totalMiddleWeight = 0.0;
     double totalExitWeight = 0.0;
-    for (Map.Entry<String, Node> e : this.relays.entrySet()) {
+    for (Map.Entry<String, NodeStatus> e : this.relays.entrySet()) {
       String fingerprint = e.getKey();
-      Node relay = e.getValue();
+      NodeStatus relay = e.getValue();
       if (!relay.getRunning()) {
         continue;
       }
@@ -277,9 +284,9 @@ public class DetailDataWriter {
         totalExitWeight += exitWeight;
       }
     }
-    for (Map.Entry<String, Node> e : this.relays.entrySet()) {
+    for (Map.Entry<String, NodeStatus> e : this.relays.entrySet()) {
       String fingerprint = e.getKey();
-      Node relay = e.getValue();
+      NodeStatus relay = e.getValue();
       if (advertisedBandwidths.containsKey(fingerprint)) {
         relay.setAdvertisedBandwidthFraction(advertisedBandwidths.get(
             fingerprint) / totalAdvertisedBandwidth);
@@ -383,7 +390,7 @@ public class DetailDataWriter {
   public void writeOutDetails() {
     SortedSet<String> remainingDetailsFiles = new TreeSet<String>();
     remainingDetailsFiles.addAll(this.documentStore.list(
-        DocumentType.OUT_DETAILS));
+        DetailsDocument.class, false));
     this.updateRelayDetailsFiles(remainingDetailsFiles);
     this.updateBridgeDetailsFiles(remainingDetailsFiles);
     this.deleteDetailsFiles(remainingDetailsFiles);
@@ -398,7 +405,7 @@ public class DetailDataWriter {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    for (Map.Entry<String, Node> relay : this.relays.entrySet()) {
+    for (Map.Entry<String, NodeStatus> relay : this.relays.entrySet()) {
       String fingerprint = relay.getKey();
 
       /* Read details file for this relay if it exists. */
@@ -406,8 +413,10 @@ public class DetailDataWriter {
       long publishedMillis = -1L;
       if (remainingDetailsFiles.contains(fingerprint)) {
         remainingDetailsFiles.remove(fingerprint);
-        String documentString = this.documentStore.retrieve(
-            DocumentType.OUT_DETAILS, fingerprint);
+        // TODO Use parsed details document here.
+        DetailsDocument detailsDocument = this.documentStore.retrieve(
+            DetailsDocument.class, false, fingerprint);
+        String documentString = detailsDocument.documentString;
         if (documentString != null) {
           try {
             boolean copyDescriptorParts = false;
@@ -495,7 +504,7 @@ public class DetailDataWriter {
       }
 
       /* Generate network-status-specific part. */
-      Node entry = relay.getValue();
+      NodeStatus entry = relay.getValue();
       String nickname = entry.getNickname();
       String address = entry.getAddress();
       List<String> orAddresses = new ArrayList<String>();
@@ -653,9 +662,9 @@ public class DetailDataWriter {
       }
 
       /* Write details file to disk. */
-      String detailsLines = sb.toString();
-      this.documentStore.store(detailsLines, DocumentType.OUT_DETAILS,
-          fingerprint);
+      DetailsDocument detailsDocument = new DetailsDocument();
+      detailsDocument.documentString = sb.toString();
+      this.documentStore.store(detailsDocument, fingerprint);
     }
   }
 
@@ -664,7 +673,7 @@ public class DetailDataWriter {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    for (Map.Entry<String, Node> bridge : this.bridges.entrySet()) {
+    for (Map.Entry<String, NodeStatus> bridge : this.bridges.entrySet()) {
       String fingerprint = bridge.getKey();
 
       /* Read details file for this bridge if it exists. */
@@ -672,8 +681,10 @@ public class DetailDataWriter {
       long publishedMillis = -1L;
       if (remainingDetailsFiles.contains(fingerprint)) {
         remainingDetailsFiles.remove(fingerprint);
-        String documentString = this.documentStore.retrieve(
-            DocumentType.OUT_DETAILS, fingerprint);
+        // TODO Use parsed details document here.
+        DetailsDocument detailsDocument = this.documentStore.retrieve(
+            DetailsDocument.class, false, fingerprint);
+        String documentString = detailsDocument.documentString;
         if (documentString != null) {
           try {
           boolean copyDescriptorParts = false;
@@ -749,7 +760,7 @@ public class DetailDataWriter {
       }
 
       /* Generate network-status-specific part. */
-      Node entry = bridge.getValue();
+      NodeStatus entry = bridge.getValue();
       String nickname = entry.getNickname();
       String lastSeen = dateTimeFormat.format(entry.getLastSeenMillis());
       String firstSeen = dateTimeFormat.format(
@@ -794,16 +805,16 @@ public class DetailDataWriter {
       sb.append("\n}\n");
 
       /* Write details file to disk. */
-      String detailsLines = sb.toString();
-      this.documentStore.store(detailsLines, DocumentType.OUT_DETAILS,
-          fingerprint);
+      DetailsDocument detailsDocument = new DetailsDocument();
+      detailsDocument.documentString = sb.toString();
+      this.documentStore.store(detailsDocument, fingerprint);
     }
   }
 
   private void deleteDetailsFiles(
       SortedSet<String> remainingDetailsFiles) {
     for (String fingerprint : remainingDetailsFiles) {
-      this.documentStore.remove(DocumentType.OUT_DETAILS, fingerprint);
+      this.documentStore.remove(DetailsDocument.class, fingerprint);
     }
   }
 }

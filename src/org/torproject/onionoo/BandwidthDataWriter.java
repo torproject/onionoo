@@ -42,6 +42,8 @@ public class BandwidthDataWriter {
 
   private DocumentStore documentStore;
 
+  private SortedSet<String> currentFingerprints = new TreeSet<String>();
+
   public BandwidthDataWriter(DescriptorSource descriptorSource,
       DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
@@ -55,12 +57,9 @@ public class BandwidthDataWriter {
     this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
   }
 
-  private SortedSet<String> currentFingerprints = new TreeSet<String>();
-  public void setCurrentRelays(SortedMap<String, Node> currentRelays) {
-    this.currentFingerprints.addAll(currentRelays.keySet());
-  }
-  public void setCurrentBridges(SortedMap<String, Node> currentBridges) {
-    this.currentFingerprints.addAll(currentBridges.keySet());
+  public void setCurrentNodes(
+      SortedMap<String, NodeStatus> currentNodes) {
+    this.currentFingerprints.addAll(currentNodes.keySet());
   }
 
   public void readExtraInfoDescriptors() {
@@ -131,11 +130,12 @@ public class BandwidthDataWriter {
   private void readHistoryFromDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
-    String historyString = this.documentStore.retrieve(
-        DocumentType.STATUS_BANDWIDTH, fingerprint);
-    if (historyString == null) {
+    BandwidthStatus bandwidthStatus = this.documentStore.retrieve(
+        BandwidthStatus.class, false, fingerprint);
+    if (bandwidthStatus == null) {
       return;
     }
+    String historyString = bandwidthStatus.documentString;
     try {
       Scanner s = new Scanner(historyString);
       while (s.hasNextLine()) {
@@ -232,9 +232,9 @@ public class BandwidthDataWriter {
           + this.dateTimeFormat.format(v[1]) + " "
           + String.valueOf(v[2]) + "\n");
     }
-    String historyString = sb.toString();
-    this.documentStore.store(historyString, DocumentType.STATUS_BANDWIDTH,
-        fingerprint);
+    BandwidthStatus bandwidthStatus = new BandwidthStatus();
+    bandwidthStatus.documentString = sb.toString();
+    this.documentStore.store(bandwidthStatus, fingerprint);
   }
 
   private void writeBandwidthDataFileToDisk(String fingerprint,
@@ -253,9 +253,9 @@ public class BandwidthDataWriter {
     sb.append("{\"fingerprint\":\"" + fingerprint + "\",\n"
         + "\"write_history\":{\n" + writeHistoryString + "},\n"
         + "\"read_history\":{\n" + readHistoryString + "}}\n");
-    String historyString = sb.toString();
-    this.documentStore.store(historyString, DocumentType.OUT_BANDWIDTH,
-        fingerprint);
+    BandwidthDocument bandwidthDocument = new BandwidthDocument();
+    bandwidthDocument.documentString = sb.toString();
+    this.documentStore.store(bandwidthDocument, fingerprint);
   }
 
   private String[] graphNames = new String[] {
@@ -377,15 +377,14 @@ public class BandwidthDataWriter {
 
   public void deleteObsoleteBandwidthFiles() {
     SortedSet<String> obsoleteBandwidthFiles = this.documentStore.list(
-        DocumentType.OUT_BANDWIDTH);
+        BandwidthDocument.class, false);
     for (String fingerprint : this.currentFingerprints) {
       if (obsoleteBandwidthFiles.contains(fingerprint)) {
         obsoleteBandwidthFiles.remove(fingerprint);
       }
     }
     for (String fingerprint : obsoleteBandwidthFiles) {
-      this.documentStore.remove(DocumentType.OUT_BANDWIDTH,
-          fingerprint);
+      this.documentStore.remove(BandwidthDocument.class, fingerprint);
     }
   }
 }
