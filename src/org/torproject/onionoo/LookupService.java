@@ -379,6 +379,10 @@ public class LookupService {
       lookupResults.put(addressString, lookupResult);
     }
 
+    /* Keep statistics. */
+    this.addressesLookedUp += addressStrings.size();
+    this.addressesResolved += lookupResults.size();
+
     return lookupResults;
   }
 
@@ -391,5 +395,21 @@ public class LookupService {
     String longitude;
     String aSNumber;
     String aSName;
+  }
+
+  int addressesLookedUp = 0, addressesResolved = 0;
+
+  public String getStatsString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("    " + formatDecimalNumber(addressesLookedUp)
+        + " addresses looked up\n");
+    sb.append("    " + formatDecimalNumber(addressesResolved)
+        + " addresses resolved\n");
+    return sb.toString();
+  }
+
+  //TODO This method should go into a utility class.
+  private static String formatDecimalNumber(long decimalNumber) {
+    return String.format("%,d", decimalNumber);
   }
 }

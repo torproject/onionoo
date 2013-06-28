@@ -10,19 +10,17 @@ import java.util.SortedMap;
 public class Main {
   public static void main(String[] args) {
 
-    printStatus("Initializing descriptor source.");
+    printStatus("Initializing.");
     DescriptorSource dso = new DescriptorSource(new File("in"),
         new File("status"));
     printStatusTime("Initialized descriptor source");
-
-    printStatus("Initializing document store.");
     DocumentStore ds = new DocumentStore(new File("status"),
         new File("out"));
     printStatusTime("Initialized document store");
-
-    printStatus("Initializing lookup service.");
     LookupService ls = new LookupService(new File("geoip"));
     printStatusTime("Initialized Geoip lookup service");
+    ReverseDomainNameResolver rdnr = new ReverseDomainNameResolver();
+    printStatusTime("Initialized reverse domain name resolver");
 
     printStatus("Updating internal node list.");
     NodeDataWriter ndw = new NodeDataWriter(dso, ls, ds);
@@ -38,13 +36,14 @@ public class Main {
     printStatusTime("Set running bits");
     ndw.writeStatusSummary();
     printStatusTime("Wrote status summary");
+    ndw.writeOutSummary();
+    printStatusTime("Wrote out summary");
     SortedMap<String, NodeStatus> currentNodes = ndw.getCurrentNodes();
     SortedMap<String, Integer> lastBandwidthWeights =
         ndw.getLastBandwidthWeights();
-    // TODO Could write statistics here, too.
 
     printStatus("Updating detail data.");
-    DetailsDataWriter ddw = new DetailsDataWriter(dso, ds);
+    DetailsDataWriter ddw = new DetailsDataWriter(dso, rdnr, ds);
     // TODO Instead of using ndw's currentNodes and lastBandwidthWeights,
     // parse statuses once again, keeping separate parse history.  Allows
     // us to run ndw and ddw in parallel in the future.  Alternatively,
@@ -67,7 +66,6 @@ public class Main {
     printStatusTime("Finished reverse domain name lookups");
     ddw.writeOutDetails();
     printStatusTime("Wrote detail data files");
-    // TODO Could write statistics here, too.
 
     printStatus("Updating bandwidth data.");
     BandwidthDataWriter bdw = new BandwidthDataWriter(dso, ds);
@@ -81,7 +79,6 @@ public class Main {
     // future.
     bdw.deleteObsoleteBandwidthFiles();
     printStatusTime("Deleted obsolete bandwidth files");
-    // TODO Could write statistics here, too.
 
     printStatus("Updating weights data.");
     WeightsDataWriter wdw = new WeightsDataWriter(dso, ds);
@@ -98,27 +95,24 @@ public class Main {
     // which allows us to run ndw and wdw in parallel in the future.
     wdw.deleteObsoleteWeightsDataFiles();
     printStatusTime("Deleted obsolete weights files");
-    // TODO Could write statistics here, too.
 
-    printStatus("Updating summary data.");
-    ndw.writeOutSummary();
-    printStatusTime("Wrote out summary");
-    // TODO Could write statistics here, too.
-
-    // TODO "Shut down" lookup service and write statistics about number
-    // of (successfully) looked up addresses.
-
-    printStatus("Shutting down descriptor source.");
+    printStatus("Shutting down.");
     dso.writeHistoryFiles();
     printStatusTime("Wrote parse histories");
-    printStatistics(dso.getStatsString());
-    printStatusTime("Shut down descriptor source");
-
-    printStatus("Shutting down document store.");
     ds.flushDocumentCache();
     printStatusTime("Flushed document cache");
-    printStatistics(ds.getStatsString());
-    printStatusTime("Shut down document store");
+
+    printStatus("Gathering statistics.");
+    printStatistics("Node data writer", ndw.getStatsString());
+    /* TODO Add statistics to remaining *Writers. */
+    //printStatistics("Details data writer", ddw.getStatsString());
+    //printStatistics("Bandwidth data writer", bdw.getStatsString());
+    //printStatistics("Weights data writer", wdw.getStatsString());
+    printStatistics("Descriptor source", dso.getStatsString());
+    printStatistics("Document store", ds.getStatsString());
+    printStatistics("GeoIP lookup service", ls.getStatsString());
+    printStatistics("Reverse domain name resolver",
+        rdnr.getStatsString());
 
     printStatus("Terminating.");
   }
@@ -131,8 +125,8 @@ public class Main {
     printedLastStatusMessage = System.currentTimeMillis();
   }
 
-  private static void printStatistics(String message) {
-    System.out.print("  Statistics:\n" + message);
+  private static void printStatistics(String component, String message) {
+    System.out.print("  " + component + " statistics:\n" + message);
   }
 
   private static void printStatusTime(String message) {

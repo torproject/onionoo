@@ -374,6 +374,10 @@ public class DocumentStore {
   }
 
   public void flushDocumentCache() {
+    /* Write cached node statuses to disk, and write update file
+     * containing current time.  It's important to write the update file
+     * now, not earlier, because the front-end should not read new node
+     * statuses until all details, bandwidths, and weights are ready. */
     if (this.listedArchivedNodeStatuses) {
       this.writeNodeStatuses(false);
       this.writeNodeStatuses(true);

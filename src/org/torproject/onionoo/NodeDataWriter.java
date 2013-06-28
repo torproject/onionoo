@@ -33,6 +33,9 @@ public class NodeDataWriter {
 
   private SortedMap<String, Integer> lastBandwidthWeights = null;
 
+  private int relaysUpdated = 0, relaysAdded = 0,
+      relayConsensusesProcessed = 0, bridgesUpdated = 0,
+      bridgesAdded = 0, bridgeStatusesProcessed = 0;
   public NodeDataWriter(DescriptorSource descriptorSource,
       LookupService lookupService, DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
@@ -115,10 +118,13 @@ public class NodeDataWriter {
           validAfterMillis, null);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
+        this.relaysUpdated++;
       } else {
         this.knownNodes.put(fingerprint, newNodeStatus);
+        this.relaysAdded++;
       }
     }
+    this.relayConsensusesProcessed++;
     if (this.relaysLastValidAfterMillis == validAfterMillis) {
       this.lastBandwidthWeights = consensus.getBandwidthWeights();
     }
@@ -195,10 +201,13 @@ public class NodeDataWriter {
           -1L, null, null, publishedMillis, -1L, null);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
+        this.bridgesUpdated++;
       } else {
         this.knownNodes.put(fingerprint, newNodeStatus);
+        this.bridgesAdded++;
       }
     }
+    this.bridgeStatusesProcessed++;
   }
 
   public void writeStatusSummary() {
@@ -232,6 +241,28 @@ public class NodeDataWriter {
 
   public SortedMap<String, Integer> getLastBandwidthWeights() {
     return this.lastBandwidthWeights;
+  }
+
+  public String getStatsString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("    " + formatDecimalNumber(relayConsensusesProcessed)
+        + " relay consensuses processed\n");
+    sb.append("    " + formatDecimalNumber(relaysUpdated)
+        + " relays updated\n");
+    sb.append("    " + formatDecimalNumber(relaysAdded)
+        + " relays added\n");
+    sb.append("    " + formatDecimalNumber(bridgeStatusesProcessed)
+        + " bridge statuses processed\n");
+    sb.append("    " + formatDecimalNumber(bridgesUpdated)
+        + " bridges updated\n");
+    sb.append("    " + formatDecimalNumber(bridgesAdded)
+        + " bridges added\n");
+    return sb.toString();
+  }
+
+  //TODO This method should go into a utility class.
+  private static String formatDecimalNumber(long decimalNumber) {
+    return String.format("%,d", decimalNumber);
   }
 }
 
