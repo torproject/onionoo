@@ -21,17 +21,41 @@ public class Main {
     printStatusTime("Initialized Geoip lookup service");
     ReverseDomainNameResolver rdnr = new ReverseDomainNameResolver();
     printStatusTime("Initialized reverse domain name resolver");
-
-    printStatus("Updating internal node list.");
     NodeDataWriter ndw = new NodeDataWriter(dso, ls, ds);
-    ndw.readStatusSummary();
-    printStatusTime("Read status summary");
+    printStatusTime("Initialized node data writer");
+    DetailsDataWriter ddw = new DetailsDataWriter(dso, rdnr, ds);
+    printStatusTime("Initialized details data writer");
+    BandwidthDataWriter bdw = new BandwidthDataWriter(dso, ds);
+    printStatusTime("Initialized bandwidth data writer");
+    WeightsDataWriter wdw = new WeightsDataWriter(dso, ds);
+    printStatusTime("Initialized weights data writer");
+
+    // TODO Instead of creating nine, partly overlapping descriptor
+    // queues, register for descriptor type and let DescriptorSource
+    // parse everything just once.
+    printStatus("Reading descriptors.");
     ndw.readRelayNetworkConsensuses();
     printStatusTime("Read network status consensuses");
-    ndw.lookUpCitiesAndASes();
-    printStatusTime("Looked up cities and ASes");
     ndw.readBridgeNetworkStatuses();
     printStatusTime("Read bridge network statuses");
+    ddw.readRelayServerDescriptors();
+    printStatusTime("Read relay server descriptors");
+    ddw.readExitLists();
+    printStatusTime("Read exit lists");
+    ddw.readBridgeServerDescriptors();
+    printStatusTime("Read bridge server descriptors");
+    ddw.readBridgePoolAssignments();
+    printStatusTime("Read bridge-pool assignments");
+    bdw.readExtraInfoDescriptors();
+    printStatusTime("Read extra-info descriptors");
+    wdw.readRelayServerDescriptors();
+    printStatusTime("Read relay server descriptors");
+    wdw.readRelayNetworkConsensuses();
+    printStatusTime("Read relay network consensuses");
+
+    printStatus("Updating internal node list.");
+    ndw.lookUpCitiesAndASes();
+    printStatusTime("Looked up cities and ASes");
     ndw.setRunningBits();
     printStatusTime("Set running bits");
     ndw.writeStatusSummary();
@@ -43,7 +67,6 @@ public class Main {
         ndw.getLastBandwidthWeights();
 
     printStatus("Updating detail data.");
-    DetailsDataWriter ddw = new DetailsDataWriter(dso, rdnr, ds);
     // TODO Instead of using ndw's currentNodes and lastBandwidthWeights,
     // parse statuses once again, keeping separate parse history.  Allows
     // us to run ndw and ddw in parallel in the future.  Alternatively,
@@ -52,27 +75,16 @@ public class Main {
     printStatusTime("Set current node fingerprints");
     ddw.startReverseDomainNameLookups();
     printStatusTime("Started reverse domain name lookups");
-    ddw.readRelayServerDescriptors();
-    printStatusTime("Read relay server descriptors");
     ddw.calculatePathSelectionProbabilities(lastBandwidthWeights);
     printStatusTime("Calculated path selection probabilities");
-    ddw.readExitLists();
-    printStatusTime("Read exit lists");
-    ddw.readBridgeServerDescriptors();
-    printStatusTime("Read bridge server descriptors");
-    ddw.readBridgePoolAssignments();
-    printStatusTime("Read bridge-pool assignments");
     ddw.finishReverseDomainNameLookups();
     printStatusTime("Finished reverse domain name lookups");
     ddw.writeOutDetails();
     printStatusTime("Wrote detail data files");
 
     printStatus("Updating bandwidth data.");
-    BandwidthDataWriter bdw = new BandwidthDataWriter(dso, ds);
     bdw.setCurrentNodes(currentNodes);
     printStatusTime("Set current node fingerprints");
-    bdw.readExtraInfoDescriptors();
-    printStatusTime("Read extra-info descriptors");
     // TODO Evaluate overhead of not deleting obsolete bandwidth files.
     // An advantage would be that we don't need ndw's currentNodes
     // anymore, which allows us to run ndw and bdw in parallel in the
@@ -81,13 +93,8 @@ public class Main {
     printStatusTime("Deleted obsolete bandwidth files");
 
     printStatus("Updating weights data.");
-    WeightsDataWriter wdw = new WeightsDataWriter(dso, ds);
     wdw.setCurrentNodes(currentNodes);
     printStatusTime("Set current node fingerprints");
-    wdw.readRelayServerDescriptors();
-    printStatusTime("Read relay server descriptors");
-    wdw.readRelayNetworkConsensuses();
-    printStatusTime("Read relay network consensuses");
     wdw.writeWeightsDataFiles();
     printStatusTime("Wrote weights data files");
     // TODO Evaluate overhead of not deleting obsolete weights files.  An

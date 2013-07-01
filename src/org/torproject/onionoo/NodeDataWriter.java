@@ -41,9 +41,10 @@ public class NodeDataWriter {
     this.descriptorSource = descriptorSource;
     this.lookupService = lookupService;
     this.documentStore = documentStore;
+    this.readStatusSummary();
   }
 
-  public void readStatusSummary() {
+  private void readStatusSummary() {
     SortedSet<String> fingerprints = this.documentStore.list(
         NodeStatus.class, true);
     for (String fingerprint : fingerprints) {
