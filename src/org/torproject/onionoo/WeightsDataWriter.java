@@ -23,7 +23,7 @@ import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
 
-public class WeightsDataWriter {
+public class WeightsDataWriter implements DescriptorListener {
 
   private DescriptorSource descriptorSource;
 
@@ -35,6 +35,23 @@ public class WeightsDataWriter {
       DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
     this.documentStore = documentStore;
+    this.registerDescriptorListeners();
+  }
+
+  private void registerDescriptorListeners() {
+    this.descriptorSource.registerListener(this,
+        DescriptorType.RELAY_CONSENSUSES);
+    this.descriptorSource.registerListener(this,
+        DescriptorType.RELAY_SERVER_DESCRIPTORS);
+  }
+
+  public void processDescriptor(Descriptor descriptor, boolean relay) {
+    if (descriptor instanceof ServerDescriptor) {
+      this.processRelayServerDescriptor((ServerDescriptor) descriptor);
+    } else if (descriptor instanceof RelayNetworkStatusConsensus) {
+      this.processRelayNetworkConsensus(
+          (RelayNetworkStatusConsensus) descriptor);
+    }
   }
 
   public void setCurrentNodes(
@@ -42,51 +59,33 @@ public class WeightsDataWriter {
     this.currentFingerprints.addAll(currentNodes.keySet());
   }
 
-  /* Read advertised bandwidths of all server descriptors in
-   * in/relay-descriptors/server-descriptors/ to memory.  Ideally, we'd
-   * skip descriptors that we read before and obtain their advertised
-   * bandwidths from some temp file.  This approach should do for now,
-   * though. */
   private Map<String, Integer> advertisedBandwidths =
       new HashMap<String, Integer>();
-  public void readRelayServerDescriptors() {
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        DescriptorType.RELAY_SERVER_DESCRIPTORS);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof ServerDescriptor) {
-        ServerDescriptor serverDescriptor =
-            (ServerDescriptor) descriptor;
-        String digest = serverDescriptor.getServerDescriptorDigest().
-            toUpperCase();
-        int advertisedBandwidth = Math.min(Math.min(
-            serverDescriptor.getBandwidthBurst(),
-            serverDescriptor.getBandwidthObserved()),
-            serverDescriptor.getBandwidthRate());
-        this.advertisedBandwidths.put(digest, advertisedBandwidth);
-      }
-    }
+
+  private void processRelayServerDescriptor(
+      ServerDescriptor serverDescriptor) {
+    /* Read advertised bandwidths of all server descriptors in
+     * in/relay-descriptors/server-descriptors/ to memory.  Ideally, we'd
+     * skip descriptors that we read before and obtain their advertised
+     * bandwidths from some temp file.  This approach should do for now,
+     * though. */
+    String digest = serverDescriptor.getServerDescriptorDigest().
+        toUpperCase();
+    int advertisedBandwidth = Math.min(Math.min(
+        serverDescriptor.getBandwidthBurst(),
+        serverDescriptor.getBandwidthObserved()),
+        serverDescriptor.getBandwidthRate());
+    this.advertisedBandwidths.put(digest, advertisedBandwidth);
   }
 
-  public void readRelayNetworkConsensuses() {
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        DescriptorType.RELAY_CONSENSUSES,
-        DescriptorHistory.WEIGHTS_RELAY_CONSENSUS_HISTORY);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof RelayNetworkStatusConsensus) {
-        RelayNetworkStatusConsensus consensus =
-            (RelayNetworkStatusConsensus) descriptor;
-        long validAfterMillis = consensus.getValidAfterMillis(),
-            freshUntilMillis = consensus.getFreshUntilMillis();
-        SortedMap<String, double[]> pathSelectionWeights =
-            this.calculatePathSelectionProbabilities(consensus);
-        this.updateWeightsHistory(validAfterMillis, freshUntilMillis,
-            pathSelectionWeights);
-      }
-    }
+  private void processRelayNetworkConsensus(
+      RelayNetworkStatusConsensus consensus) {
+    long validAfterMillis = consensus.getValidAfterMillis(),
+        freshUntilMillis = consensus.getFreshUntilMillis();
+    SortedMap<String, double[]> pathSelectionWeights =
+        this.calculatePathSelectionProbabilities(consensus);
+    this.updateWeightsHistory(validAfterMillis, freshUntilMillis,
+        pathSelectionWeights);
   }
 
   private static final int HISTORY_UPDATER_WORKERS_NUM = 4;

@@ -16,7 +16,7 @@ import org.torproject.onionoo.LookupService.LookupResult;
 
 /* Store relays and bridges that have been running in the past seven
  * days. */
-public class NodeDataWriter {
+public class NodeDataWriter implements DescriptorListener {
 
   private DescriptorSource descriptorSource;
 
@@ -33,63 +33,29 @@ public class NodeDataWriter {
 
   private SortedMap<String, Integer> lastBandwidthWeights = null;
 
-  private int relaysUpdated = 0, relaysAdded = 0,
-      relayConsensusesProcessed = 0, bridgesUpdated = 0,
-      bridgesAdded = 0, bridgeStatusesProcessed = 0;
+  private int relayConsensusesProcessed = 0, bridgeStatusesProcessed = 0;
+
   public NodeDataWriter(DescriptorSource descriptorSource,
       LookupService lookupService, DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
     this.lookupService = lookupService;
     this.documentStore = documentStore;
-    this.readStatusSummary();
+    this.registerDescriptorListeners();
   }
 
-  private void readStatusSummary() {
-    SortedSet<String> fingerprints = this.documentStore.list(
-        NodeStatus.class, true);
-    for (String fingerprint : fingerprints) {
-      NodeStatus node = this.documentStore.retrieve(NodeStatus.class,
-          true, fingerprint);
-      if (node.isRelay()) {
-        this.relaysLastValidAfterMillis = Math.max(
-            this.relaysLastValidAfterMillis, node.getLastSeenMillis());
-      } else {
-        this.bridgesLastPublishedMillis = Math.max(
-            this.bridgesLastPublishedMillis, node.getLastSeenMillis());
-      }
-      this.knownNodes.put(fingerprint, node);
-    }
+  private void registerDescriptorListeners() {
+    this.descriptorSource.registerListener(this,
+        DescriptorType.RELAY_CONSENSUSES);
+    this.descriptorSource.registerListener(this,
+        DescriptorType.BRIDGE_STATUSES);
   }
 
-  public void readRelayNetworkConsensuses() {
-    if (this.descriptorSource == null) {
-      System.err.println("Not configured to read relay network "
-          + "consensuses.");
-      return;
-    }
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        DescriptorType.RELAY_CONSENSUSES,
-        DescriptorHistory.RELAY_CONSENSUS_HISTORY);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof RelayNetworkStatusConsensus) {
-        updateRelayNetworkStatusConsensus(
-            (RelayNetworkStatusConsensus) descriptor);
-      }
-    }
-  }
-
-  public void setRunningBits() {
-    for (NodeStatus node : this.knownNodes.values()) {
-      if (node.isRelay() &&
-          node.getLastSeenMillis() == this.relaysLastValidAfterMillis) {
-        node.setRunning(true);
-      }
-      if (!node.isRelay() &&
-          node.getLastSeenMillis() == this.bridgesLastPublishedMillis) {
-        node.setRunning(true);
-      }
+  public void processDescriptor(Descriptor descriptor, boolean relay) {
+    if (descriptor instanceof RelayNetworkStatusConsensus) {
+      updateRelayNetworkStatusConsensus(
+          (RelayNetworkStatusConsensus) descriptor);
+    } else if (descriptor instanceof BridgeNetworkStatus) {
+      updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
     }
   }
 
@@ -119,15 +85,74 @@ public class NodeDataWriter {
           validAfterMillis, null);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
-        this.relaysUpdated++;
       } else {
         this.knownNodes.put(fingerprint, newNodeStatus);
-        this.relaysAdded++;
       }
     }
     this.relayConsensusesProcessed++;
     if (this.relaysLastValidAfterMillis == validAfterMillis) {
       this.lastBandwidthWeights = consensus.getBandwidthWeights();
+    }
+  }
+
+  private void updateBridgeNetworkStatus(BridgeNetworkStatus status) {
+    long publishedMillis = status.getPublishedMillis();
+    if (publishedMillis > this.bridgesLastPublishedMillis) {
+      this.bridgesLastPublishedMillis = publishedMillis;
+    }
+    for (NetworkStatusEntry entry : status.getStatusEntries().values()) {
+      String nickname = entry.getNickname();
+      String fingerprint = entry.getFingerprint();
+      String address = entry.getAddress();
+      SortedSet<String> orAddressesAndPorts = new TreeSet<String>(
+          entry.getOrAddresses());
+      int orPort = entry.getOrPort();
+      int dirPort = entry.getDirPort();
+      SortedSet<String> relayFlags = entry.getFlags();
+      NodeStatus newNodeStatus = new NodeStatus(false, nickname,
+          fingerprint, address, orAddressesAndPorts, null,
+          publishedMillis, orPort, dirPort, relayFlags, -1L, "??", null,
+          -1L, null, null, publishedMillis, -1L, null);
+      if (this.knownNodes.containsKey(fingerprint)) {
+        this.knownNodes.get(fingerprint).update(newNodeStatus);
+      } else {
+        this.knownNodes.put(fingerprint, newNodeStatus);
+      }
+    }
+    this.bridgeStatusesProcessed++;
+  }
+
+  public void readStatusSummary() {
+    SortedSet<String> fingerprints = this.documentStore.list(
+        NodeStatus.class, true);
+    for (String fingerprint : fingerprints) {
+      NodeStatus node = this.documentStore.retrieve(NodeStatus.class,
+          true, fingerprint);
+      if (node.isRelay()) {
+        this.relaysLastValidAfterMillis = Math.max(
+            this.relaysLastValidAfterMillis, node.getLastSeenMillis());
+      } else {
+        this.bridgesLastPublishedMillis = Math.max(
+            this.bridgesLastPublishedMillis, node.getLastSeenMillis());
+      }
+      if (this.knownNodes.containsKey(fingerprint)) {
+        this.knownNodes.get(fingerprint).update(node);
+      } else {
+        this.knownNodes.put(fingerprint, node);
+      }
+    }
+  }
+
+  public void setRunningBits() {
+    for (NodeStatus node : this.knownNodes.values()) {
+      if (node.isRelay() &&
+          node.getLastSeenMillis() == this.relaysLastValidAfterMillis) {
+        node.setRunning(true);
+      }
+      if (!node.isRelay() &&
+          node.getLastSeenMillis() == this.bridgesLastPublishedMillis) {
+        node.setRunning(true);
+      }
     }
   }
 
@@ -162,53 +187,6 @@ public class NodeDataWriter {
         node.setASName(lookupResult.aSName);
       }
     }
-  }
-
-  public void readBridgeNetworkStatuses() {
-    if (this.descriptorSource == null) {
-      System.err.println("Not configured to read bridge network "
-          + "statuses.");
-      return;
-    }
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        DescriptorType.BRIDGE_STATUSES,
-        DescriptorHistory.BRIDGE_STATUS_HISTORY);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof BridgeNetworkStatus) {
-        updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
-      }
-    }
-  }
-
-  private void updateBridgeNetworkStatus(BridgeNetworkStatus status) {
-    long publishedMillis = status.getPublishedMillis();
-    if (publishedMillis > this.bridgesLastPublishedMillis) {
-      this.bridgesLastPublishedMillis = publishedMillis;
-    }
-    for (NetworkStatusEntry entry : status.getStatusEntries().values()) {
-      String nickname = entry.getNickname();
-      String fingerprint = entry.getFingerprint();
-      String address = entry.getAddress();
-      SortedSet<String> orAddressesAndPorts = new TreeSet<String>(
-          entry.getOrAddresses());
-      int orPort = entry.getOrPort();
-      int dirPort = entry.getDirPort();
-      SortedSet<String> relayFlags = entry.getFlags();
-      NodeStatus newNodeStatus = new NodeStatus(false, nickname,
-          fingerprint, address, orAddressesAndPorts, null,
-          publishedMillis, orPort, dirPort, relayFlags, -1L, "??", null,
-          -1L, null, null, publishedMillis, -1L, null);
-      if (this.knownNodes.containsKey(fingerprint)) {
-        this.knownNodes.get(fingerprint).update(newNodeStatus);
-        this.bridgesUpdated++;
-      } else {
-        this.knownNodes.put(fingerprint, newNodeStatus);
-        this.bridgesAdded++;
-      }
-    }
-    this.bridgeStatusesProcessed++;
   }
 
   public void writeStatusSummary() {
@@ -248,16 +226,8 @@ public class NodeDataWriter {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + formatDecimalNumber(relayConsensusesProcessed)
         + " relay consensuses processed\n");
-    sb.append("    " + formatDecimalNumber(relaysUpdated)
-        + " relays updated\n");
-    sb.append("    " + formatDecimalNumber(relaysAdded)
-        + " relays added\n");
     sb.append("    " + formatDecimalNumber(bridgeStatusesProcessed)
         + " bridge statuses processed\n");
-    sb.append("    " + formatDecimalNumber(bridgesUpdated)
-        + " bridges updated\n");
-    sb.append("    " + formatDecimalNumber(bridgesAdded)
-        + " bridges added\n");
     return sb.toString();
   }
 

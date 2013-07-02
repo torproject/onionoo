@@ -32,7 +32,7 @@ import org.torproject.descriptor.ServerDescriptor;
  * The parts of details files coming from server descriptors always come
  * from the last known descriptor of a relay or bridge, not from the
  * descriptor that was last referenced in a network status. */
-public class DetailsDataWriter {
+public class DetailsDataWriter implements DescriptorListener {
 
   private DescriptorSource descriptorSource;
 
@@ -50,6 +50,30 @@ public class DetailsDataWriter {
     this.descriptorSource = descriptorSource;
     this.reverseDomainNameResolver = reverseDomainNameResolver;
     this.documentStore = documentStore;
+    this.registerDescriptorListeners();
+  }
+
+  private void registerDescriptorListeners() {
+    this.descriptorSource.registerListener(this,
+        DescriptorType.RELAY_SERVER_DESCRIPTORS);
+    this.descriptorSource.registerListener(this,
+        DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
+    this.descriptorSource.registerListener(this,
+        DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
+    this.descriptorSource.registerListener(this,
+        DescriptorType.EXIT_LISTS);
+  }
+
+  public void processDescriptor(Descriptor descriptor, boolean relay) {
+    if (descriptor instanceof ServerDescriptor && relay) {
+      this.processRelayServerDescriptor((ServerDescriptor) descriptor);
+    } else if (descriptor instanceof ServerDescriptor && !relay) {
+      this.processBridgeServerDescriptor((ServerDescriptor) descriptor);
+    } else if (descriptor instanceof BridgePoolAssignment) {
+      this.processBridgePoolAssignment((BridgePoolAssignment) descriptor);
+    } else if (descriptor instanceof ExitList) {
+      this.processExitList((ExitList) descriptor);
+    }
   }
 
   public void setCurrentNodes(
@@ -92,28 +116,19 @@ public class DetailsDataWriter {
 
   private Map<String, ServerDescriptor> relayServerDescriptors =
       new HashMap<String, ServerDescriptor>();
-  public void readRelayServerDescriptors() {
+
+  private void processRelayServerDescriptor(
+      ServerDescriptor serverDescriptor) {
     /* Don't remember which server descriptors we already parsed.  If we
      * parse a server descriptor now and first learn about the relay in a
      * later consensus, we'll never write the descriptor content anywhere.
      * The result would be details files containing no descriptor parts
      * until the relay publishes the next descriptor. */
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        DescriptorType.RELAY_SERVER_DESCRIPTORS);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof ServerDescriptor) {
-        ServerDescriptor serverDescriptor = (ServerDescriptor) descriptor;
-        String fingerprint = serverDescriptor.getFingerprint();
-        if (!this.relayServerDescriptors.containsKey(fingerprint) ||
-            this.relayServerDescriptors.get(fingerprint).
-            getPublishedMillis()
-            < serverDescriptor.getPublishedMillis()) {
-          this.relayServerDescriptors.put(fingerprint,
-              serverDescriptor);
-        }
-      }
+    String fingerprint = serverDescriptor.getFingerprint();
+    if (!this.relayServerDescriptors.containsKey(fingerprint) ||
+        this.relayServerDescriptors.get(fingerprint).getPublishedMillis()
+        < serverDescriptor.getPublishedMillis()) {
+      this.relayServerDescriptors.put(fingerprint, serverDescriptor);
     }
   }
 
@@ -232,79 +247,53 @@ public class DetailsDataWriter {
   }
 
   private long now = System.currentTimeMillis();
+
   private Map<String, Set<ExitListEntry>> exitListEntries =
       new HashMap<String, Set<ExitListEntry>>();
-  public void readExitLists() {
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        DescriptorType.EXIT_LISTS, DescriptorHistory.EXIT_LIST_HISTORY);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof ExitList) {
-        ExitList exitList = (ExitList) descriptor;
-        for (ExitListEntry exitListEntry :
-            exitList.getExitListEntries()) {
-          if (exitListEntry.getScanMillis() <
-              this.now - 24L * 60L * 60L * 1000L) {
-            continue;
-          }
-          String fingerprint = exitListEntry.getFingerprint();
-          if (!this.exitListEntries.containsKey(fingerprint)) {
-            this.exitListEntries.put(fingerprint,
-                new HashSet<ExitListEntry>());
-          }
-          this.exitListEntries.get(fingerprint).add(exitListEntry);
-        }
+
+  private void processExitList(ExitList exitList) {
+    for (ExitListEntry exitListEntry : exitList.getExitListEntries()) {
+      if (exitListEntry.getScanMillis() <
+          this.now - 24L * 60L * 60L * 1000L) {
+        continue;
       }
+      String fingerprint = exitListEntry.getFingerprint();
+      if (!this.exitListEntries.containsKey(fingerprint)) {
+        this.exitListEntries.put(fingerprint,
+            new HashSet<ExitListEntry>());
+      }
+      this.exitListEntries.get(fingerprint).add(exitListEntry);
     }
   }
 
   private Map<String, ServerDescriptor> bridgeServerDescriptors =
       new HashMap<String, ServerDescriptor>();
-  public void readBridgeServerDescriptors() {
+
+  private void processBridgeServerDescriptor(
+      ServerDescriptor serverDescriptor) {
     /* Don't remember which server descriptors we already parsed.  If we
      * parse a server descriptor now and first learn about the relay in a
      * later status, we'll never write the descriptor content anywhere.
      * The result would be details files containing no descriptor parts
      * until the bridge publishes the next descriptor. */
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof ServerDescriptor) {
-        ServerDescriptor serverDescriptor = (ServerDescriptor) descriptor;
-        String fingerprint = serverDescriptor.getFingerprint();
-        if (!this.bridgeServerDescriptors.containsKey(fingerprint) ||
-            this.bridgeServerDescriptors.get(fingerprint).
-            getPublishedMillis()
-            < serverDescriptor.getPublishedMillis()) {
-          this.bridgeServerDescriptors.put(fingerprint,
-              serverDescriptor);
-        }
-      }
+    String fingerprint = serverDescriptor.getFingerprint();
+    if (!this.bridgeServerDescriptors.containsKey(fingerprint) ||
+        this.bridgeServerDescriptors.get(fingerprint).getPublishedMillis()
+        < serverDescriptor.getPublishedMillis()) {
+      this.bridgeServerDescriptors.put(fingerprint, serverDescriptor);
     }
   }
 
   private Map<String, String> bridgePoolAssignments =
       new HashMap<String, String>();
-  public void readBridgePoolAssignments() {
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        DescriptorType.BRIDGE_POOL_ASSIGNMENTS,
-        DescriptorHistory.BRIDGE_POOLASSIGN_HISTORY);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof BridgePoolAssignment) {
-        BridgePoolAssignment bridgePoolAssignment =
-            (BridgePoolAssignment) descriptor;
-        for (Map.Entry<String, String> e :
-            bridgePoolAssignment.getEntries().entrySet()) {
-          String fingerprint = e.getKey();
-          String details = e.getValue();
-          this.bridgePoolAssignments.put(fingerprint, details);
-        }
-      }
+
+  private void processBridgePoolAssignment(
+      BridgePoolAssignment bridgePoolAssignment) {
+    for (Map.Entry<String, String> e :
+        bridgePoolAssignment.getEntries().entrySet()) {
+      String fingerprint = e.getKey();
+      String details = e.getValue();
+      this.bridgePoolAssignments.put(fingerprint, details);
     }
   }
 

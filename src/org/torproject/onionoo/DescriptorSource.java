@@ -9,9 +9,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -24,20 +27,24 @@ enum DescriptorType {
   RELAY_CONSENSUSES,
   RELAY_SERVER_DESCRIPTORS,
   RELAY_EXTRA_INFOS,
+  EXIT_LISTS,
   BRIDGE_STATUSES,
   BRIDGE_SERVER_DESCRIPTORS,
   BRIDGE_EXTRA_INFOS,
   BRIDGE_POOL_ASSIGNMENTS,
-  EXIT_LISTS,
+}
+
+interface DescriptorListener {
+  abstract void processDescriptor(Descriptor descriptor, boolean relay);
 }
 
 enum DescriptorHistory {
-  EXTRAINFO_HISTORY,
-  EXIT_LIST_HISTORY,
-  BRIDGE_POOLASSIGN_HISTORY,
-  WEIGHTS_RELAY_CONSENSUS_HISTORY,
   RELAY_CONSENSUS_HISTORY,
+  RELAY_EXTRAINFO_HISTORY,
+  EXIT_LIST_HISTORY,
   BRIDGE_STATUS_HISTORY,
+  BRIDGE_EXTRAINFO_HISTORY,
+  BRIDGE_POOLASSIGN_HISTORY,
 }
 
 class DescriptorQueue {
@@ -108,17 +115,17 @@ class DescriptorQueue {
   public void readHistoryFile(DescriptorHistory descriptorHistory) {
     String historyFileName = null;
     switch (descriptorHistory) {
-    case EXTRAINFO_HISTORY:
-      historyFileName = "extrainfo-history";
+    case RELAY_EXTRAINFO_HISTORY:
+      historyFileName = "relay-extrainfo-history";
+      break;
+    case BRIDGE_EXTRAINFO_HISTORY:
+      historyFileName = "bridge-extrainfo-history";
       break;
     case EXIT_LIST_HISTORY:
       historyFileName = "exit-list-history";
       break;
     case BRIDGE_POOLASSIGN_HISTORY:
       historyFileName = "bridge-poolassign-history";
-      break;
-    case WEIGHTS_RELAY_CONSENSUS_HISTORY:
-      historyFileName = "weights-relay-consensus-history";
       break;
     case RELAY_CONSENSUS_HISTORY:
       historyFileName = "relay-consensus-history";
@@ -230,38 +237,92 @@ public class DescriptorSource {
     this.inDir = inDir;
     this.statusDir = statusDir;
     this.descriptorQueues = new ArrayList<DescriptorQueue>();
+    this.descriptorListeners =
+        new HashMap<DescriptorType, Set<DescriptorListener>>();
   }
 
-  public DescriptorQueue getDescriptorQueue(
-      DescriptorType descriptorType) {
-    DescriptorQueue descriptorQueue = new DescriptorQueue(this.inDir,
-        this.statusDir);
-    descriptorQueue.addDirectory(descriptorType);
-    this.descriptorQueues.add(descriptorQueue);
-    return descriptorQueue;
-  }
-
-  public DescriptorQueue getDescriptorQueue(
-      DescriptorType[] descriptorTypes,
+  private DescriptorQueue getDescriptorQueue(
+      DescriptorType descriptorType,
       DescriptorHistory descriptorHistory) {
     DescriptorQueue descriptorQueue = new DescriptorQueue(this.inDir,
         this.statusDir);
-    for (DescriptorType descriptorType : descriptorTypes) {
-      descriptorQueue.addDirectory(descriptorType);
+    descriptorQueue.addDirectory(descriptorType);
+    if (descriptorHistory != null) {
+      descriptorQueue.readHistoryFile(descriptorHistory);
     }
-    descriptorQueue.readHistoryFile(descriptorHistory);
     this.descriptorQueues.add(descriptorQueue);
     return descriptorQueue;
   }
 
-  public DescriptorQueue getDescriptorQueue(DescriptorType descriptorType,
-      DescriptorHistory descriptorHistory) {
-    DescriptorQueue descriptorQueue = new DescriptorQueue(this.inDir,
-        this.statusDir);
-    descriptorQueue.addDirectory(descriptorType);
-    descriptorQueue.readHistoryFile(descriptorHistory);
-    this.descriptorQueues.add(descriptorQueue);
-    return descriptorQueue;
+  private Map<DescriptorType, Set<DescriptorListener>>
+      descriptorListeners;
+
+  public void registerListener(DescriptorListener listener,
+      DescriptorType descriptorType) {
+    if (!this.descriptorListeners.containsKey(descriptorType)) {
+      this.descriptorListeners.put(descriptorType,
+          new HashSet<DescriptorListener>());
+    }
+    this.descriptorListeners.get(descriptorType).add(listener);
+  }
+
+  public void readRelayNetworkConsensuses() {
+    this.readDescriptors(DescriptorType.RELAY_CONSENSUSES,
+        DescriptorHistory.RELAY_CONSENSUS_HISTORY, true);
+  }
+
+  public void readRelayServerDescriptors() {
+    // TODO Use parse history as soon as all listeners can handle it.
+    this.readDescriptors(DescriptorType.RELAY_SERVER_DESCRIPTORS, null,
+        true);
+  }
+
+  public void readRelayExtraInfos() {
+    this.readDescriptors(DescriptorType.RELAY_EXTRA_INFOS,
+        DescriptorHistory.RELAY_EXTRAINFO_HISTORY, true);
+  }
+
+  public void readExitLists() {
+    this.readDescriptors(DescriptorType.EXIT_LISTS,
+        DescriptorHistory.EXIT_LIST_HISTORY, true);
+  }
+
+  public void readBridgeNetworkStatuses() {
+    this.readDescriptors(DescriptorType.BRIDGE_STATUSES,
+        DescriptorHistory.BRIDGE_STATUS_HISTORY, false);
+  }
+
+  public void readBridgeServerDescriptors() {
+    // TODO Use parse history as soon as all listeners can handle it.
+    this.readDescriptors(DescriptorType.BRIDGE_SERVER_DESCRIPTORS, null,
+        false);
+  }
+
+  public void readBridgeExtraInfos() {
+    this.readDescriptors(DescriptorType.BRIDGE_EXTRA_INFOS,
+        DescriptorHistory.BRIDGE_EXTRAINFO_HISTORY, false);
+  }
+
+  public void readBridgePoolAssignments() {
+    this.readDescriptors(DescriptorType.BRIDGE_POOL_ASSIGNMENTS,
+        DescriptorHistory.BRIDGE_POOLASSIGN_HISTORY, false);
+  }
+
+  private void readDescriptors(DescriptorType descriptorType,
+      DescriptorHistory descriptorHistory, boolean relay) {
+    Set<DescriptorListener> descriptorListeners =
+        this.descriptorListeners.get(descriptorType);
+    if (descriptorListeners == null || descriptorListeners.isEmpty()) {
+      return;
+    }
+    DescriptorQueue descriptorQueue = this.getDescriptorQueue(
+        descriptorType, descriptorHistory);
+    Descriptor descriptor;
+    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+      for (DescriptorListener descriptorListener : descriptorListeners) {
+        descriptorListener.processDescriptor(descriptor, relay);
+      }
+    }
   }
 
   public void writeHistoryFiles() {

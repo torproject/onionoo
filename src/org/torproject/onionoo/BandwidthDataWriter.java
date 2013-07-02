@@ -36,7 +36,7 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  * last 3 days in the bandwidth document may not be equivalent to the last
  * 3 days as of publishing the document, but that's something clients can
  * work around. */
-public class BandwidthDataWriter {
+public class BandwidthDataWriter implements DescriptorListener {
 
   private DescriptorSource descriptorSource;
 
@@ -48,6 +48,7 @@ public class BandwidthDataWriter {
       DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
     this.documentStore = documentStore;
+    this.registerDescriptorListeners();
   }
 
   private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
@@ -57,25 +58,22 @@ public class BandwidthDataWriter {
     this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
   }
 
+  private void registerDescriptorListeners() {
+    this.descriptorSource.registerListener(this,
+        DescriptorType.RELAY_EXTRA_INFOS);
+    this.descriptorSource.registerListener(this,
+        DescriptorType.BRIDGE_EXTRA_INFOS);
+  }
+
+  public void processDescriptor(Descriptor descriptor, boolean relay) {
+    if (descriptor instanceof ExtraInfoDescriptor) {
+      this.parseDescriptor((ExtraInfoDescriptor) descriptor);
+    }
+  }
+
   public void setCurrentNodes(
       SortedMap<String, NodeStatus> currentNodes) {
     this.currentFingerprints.addAll(currentNodes.keySet());
-  }
-
-  public void readExtraInfoDescriptors() {
-    DescriptorQueue descriptorQueue =
-        this.descriptorSource.getDescriptorQueue(
-        new DescriptorType[] { DescriptorType.RELAY_EXTRA_INFOS,
-        DescriptorType.BRIDGE_EXTRA_INFOS },
-        DescriptorHistory.EXTRAINFO_HISTORY);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      if (descriptor instanceof ExtraInfoDescriptor) {
-        ExtraInfoDescriptor extraInfoDescriptor =
-            (ExtraInfoDescriptor) descriptor;
-        this.parseDescriptor(extraInfoDescriptor);
-      }
-    }
   }
 
   private void parseDescriptor(ExtraInfoDescriptor descriptor) {

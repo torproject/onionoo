@@ -30,30 +30,27 @@ public class Main {
     WeightsDataWriter wdw = new WeightsDataWriter(dso, ds);
     printStatusTime("Initialized weights data writer");
 
-    // TODO Instead of creating nine, partly overlapping descriptor
-    // queues, register for descriptor type and let DescriptorSource
-    // parse everything just once.
     printStatus("Reading descriptors.");
-    ndw.readRelayNetworkConsensuses();
-    printStatusTime("Read network status consensuses");
-    ndw.readBridgeNetworkStatuses();
-    printStatusTime("Read bridge network statuses");
-    ddw.readRelayServerDescriptors();
-    printStatusTime("Read relay server descriptors");
-    ddw.readExitLists();
-    printStatusTime("Read exit lists");
-    ddw.readBridgeServerDescriptors();
-    printStatusTime("Read bridge server descriptors");
-    ddw.readBridgePoolAssignments();
-    printStatusTime("Read bridge-pool assignments");
-    bdw.readExtraInfoDescriptors();
-    printStatusTime("Read extra-info descriptors");
-    wdw.readRelayServerDescriptors();
-    printStatusTime("Read relay server descriptors");
-    wdw.readRelayNetworkConsensuses();
+    dso.readRelayNetworkConsensuses();
     printStatusTime("Read relay network consensuses");
+    dso.readRelayServerDescriptors();
+    printStatusTime("Read relay server descriptors");
+    dso.readRelayExtraInfos();
+    printStatusTime("Read relay extra-info descriptors");
+    dso.readExitLists();
+    printStatusTime("Read exit lists");
+    dso.readBridgeNetworkStatuses();
+    printStatusTime("Read bridge network statuses");
+    dso.readBridgeServerDescriptors();
+    printStatusTime("Read bridge server descriptors");
+    dso.readBridgeExtraInfos();
+    printStatusTime("Read bridge extra-info descriptors");
+    dso.readBridgePoolAssignments();
+    printStatusTime("Read bridge-pool assignments");
 
     printStatus("Updating internal node list.");
+    ndw.readStatusSummary();
+    printStatusTime("Read status summary");
     ndw.lookUpCitiesAndASes();
     printStatusTime("Looked up cities and ASes");
     ndw.setRunningBits();
