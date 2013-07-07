@@ -145,11 +145,11 @@ public class NodeDataWriter implements DescriptorListener {
 
   public void setRunningBits() {
     for (NodeStatus node : this.knownNodes.values()) {
-      if (node.isRelay() &&
+      if (node.isRelay() && node.getRelayFlags().contains("Running") &&
           node.getLastSeenMillis() == this.relaysLastValidAfterMillis) {
         node.setRunning(true);
       }
-      if (!node.isRelay() &&
+      if (!node.isRelay() && node.getRelayFlags().contains("Running") &&
           node.getLastSeenMillis() == this.bridgesLastPublishedMillis) {
         node.setRunning(true);
       }
