@@ -158,8 +158,10 @@ public class NodeStatus extends Document {
           getTime();
       orPort = Integer.parseInt(parts[6]);
       dirPort = Integer.parseInt(parts[7]);
-      relayFlags = new TreeSet<String>(
-          Arrays.asList(parts[8].split(",")));
+      relayFlags = new TreeSet<String>();
+      if (parts[8].length() > 0) {
+        relayFlags.addAll(Arrays.asList(parts[8].split(",")));
+      }
       if (parts.length > 9) {
         consensusWeight = Long.parseLong(parts[9]);
       }
