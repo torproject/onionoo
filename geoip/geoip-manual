@@ -84,6 +84,11 @@
 "1370181888","1370182015","161"
 
 # From geoip-manual (country):
+# GB, because RIPE NCC says 85.237.192.0-85.237.223.255 is GB.
+# -KL 2013-07-08
+"1441652224","1441652479","77"
+
+# From geoip-manual (country):
 # BE, because next MaxMind entry 86.39.147.0-86.39.148.31 is BE, and RIR
 # delegation files say entire range 86.39.128.0-86.39.255.255 is BE.
 # -KL 2013-04-08
@@ -147,6 +152,11 @@
 # US, even though previous entry is MF, but because next entry is US and
 # RIR says entire range 199.101.192.0-199.101.199.255 is US.  -KL 2013-05-13
 "3345334272","3345334527","223"
+
+# From geoip-manual (country):
+# US, because ARIN says 199.255.208.0-199.255.215.255 is US.
+# -KL 2013-07-08
+"3355432192","3355432959","223"
 
 # US, because previous entry is US, next entry is not adjacent, and RIR
 # says 204.14.72.0-204.14.79.255 is US.  -KL 2013-05-13
