@@ -2,7 +2,6 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,6 +75,177 @@ public class DetailsDataWriter implements DescriptorListener {
     }
   }
 
+  private void processRelayServerDescriptor(
+      ServerDescriptor descriptor) {
+    String fingerprint = descriptor.getFingerprint();
+    DetailsStatus detailsStatus = this.documentStore.retrieve(
+        DetailsStatus.class, false, fingerprint);
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss");
+    dateTimeFormat.setLenient(false);
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    String publishedDateTime =
+        dateTimeFormat.format(descriptor.getPublishedMillis());
+    if (detailsStatus != null) {
+      String detailsString = detailsStatus.documentString;
+      String descPublishedLine = "\"desc_published\":\""
+          + publishedDateTime + "\",";
+      Scanner s = new Scanner(detailsString);
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        if (line.startsWith("\"desc_published\":\"")) {
+          if (descPublishedLine.compareTo(line) < 0) {
+            return;
+          } else {
+            break;
+          }
+        }
+      }
+      s.close();
+    }
+    StringBuilder sb = new StringBuilder();
+    String lastRestartedString = dateTimeFormat.format(
+        descriptor.getPublishedMillis() - descriptor.getUptime() * 1000L);
+    int bandwidthRate = descriptor.getBandwidthRate();
+    int bandwidthBurst = descriptor.getBandwidthBurst();
+    int observedBandwidth = descriptor.getBandwidthObserved();
+    int advertisedBandwidth = Math.min(bandwidthRate,
+        Math.min(bandwidthBurst, observedBandwidth));
+    sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
+        + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
+        + "\"bandwidth_rate\":" + bandwidthRate + ",\n"
+        + "\"bandwidth_burst\":" + bandwidthBurst + ",\n"
+        + "\"observed_bandwidth\":" + observedBandwidth + ",\n"
+        + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
+        + "\"exit_policy\":[");
+    int written = 0;
+    for (String exitPolicyLine : descriptor.getExitPolicyLines()) {
+      sb.append((written++ > 0 ? "," : "") + "\n  \"" + exitPolicyLine
+          + "\"");
+    }
+    sb.append("\n]");
+    if (descriptor.getContact() != null) {
+      sb.append(",\n\"contact\":\""
+          + escapeJSON(descriptor.getContact()) + "\"");
+    }
+    if (descriptor.getPlatform() != null) {
+      sb.append(",\n\"platform\":\""
+          + escapeJSON(descriptor.getPlatform()) + "\"");
+    }
+    if (descriptor.getFamilyEntries() != null) {
+      sb.append(",\n\"family\":[");
+      written = 0;
+      for (String familyEntry : descriptor.getFamilyEntries()) {
+        sb.append((written++ > 0 ? "," : "") + "\n  \"" + familyEntry
+            + "\"");
+      }
+      sb.append("\n]");
+    }
+    detailsStatus = new DetailsStatus();
+    detailsStatus.documentString = sb.toString();
+    this.documentStore.store(detailsStatus, fingerprint);
+  }
+
+  private void processBridgeServerDescriptor(
+      ServerDescriptor descriptor) {
+    String fingerprint = descriptor.getFingerprint();
+    DetailsStatus detailsStatus = this.documentStore.retrieve(
+        DetailsStatus.class, false, fingerprint);
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss");
+    dateTimeFormat.setLenient(false);
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    String publishedDateTime =
+        dateTimeFormat.format(descriptor.getPublishedMillis());
+    String poolAssignmentLine = null;
+    if (detailsStatus != null) {
+      String detailsString = detailsStatus.documentString;
+      String descPublishedLine = "\"desc_published\":\""
+          + publishedDateTime + "\",";
+      Scanner s = new Scanner(detailsString);
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        if (line.startsWith("\"pool_assignment\":")) {
+          poolAssignmentLine = line;
+        } else if (line.startsWith("\"desc_published\":") &&
+            descPublishedLine.compareTo(line) < 0) {
+          return;
+        }
+      }
+      s.close();
+    }
+    StringBuilder sb = new StringBuilder();
+    String lastRestartedString = dateTimeFormat.format(
+        descriptor.getPublishedMillis() - descriptor.getUptime() * 1000L);
+    int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
+        Math.min(descriptor.getBandwidthBurst(),
+        descriptor.getBandwidthObserved()));
+    sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
+        + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
+        + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
+        + "\"platform\":\"" + escapeJSON(descriptor.getPlatform())
+        + "\"");
+    if (poolAssignmentLine != null) {
+      sb.append(",\n" + poolAssignmentLine);
+    }
+    detailsStatus = new DetailsStatus();
+    detailsStatus.documentString = sb.toString();
+    this.documentStore.store(detailsStatus, fingerprint);
+  }
+
+  private void processBridgePoolAssignment(
+      BridgePoolAssignment bridgePoolAssignment) {
+    for (Map.Entry<String, String> e :
+        bridgePoolAssignment.getEntries().entrySet()) {
+      String fingerprint = e.getKey();
+      String details = e.getValue();
+      StringBuilder sb = new StringBuilder();
+      DetailsStatus detailsStatus = this.documentStore.retrieve(
+          DetailsStatus.class, false, fingerprint);
+      if (detailsStatus != null) {
+        String detailsString = detailsStatus.documentString;
+        Scanner s = new Scanner(detailsString);
+        int linesWritten = 0;
+        boolean endsWithComma = false;
+        while (s.hasNextLine()) {
+          String line = s.nextLine();
+          if (!line.startsWith("\"pool_assignment\":")) {
+            sb.append((linesWritten++ > 0 ? "\n" : "") + line);
+            endsWithComma = line.endsWith(",");
+          }
+        }
+        s.close();
+        if (sb.length() > 0) {
+          sb.append((endsWithComma ? "" : ",") + "\n");
+        }
+      }
+      sb.append("\"pool_assignment\":\"" + details + "\"");
+      detailsStatus = new DetailsStatus();
+      detailsStatus.documentString = sb.toString();
+      this.documentStore.store(detailsStatus, fingerprint);
+    }
+  }
+
+  private long now = System.currentTimeMillis();
+
+  private Map<String, Set<ExitListEntry>> exitListEntries =
+      new HashMap<String, Set<ExitListEntry>>();
+
+  private void processExitList(ExitList exitList) {
+    for (ExitListEntry exitListEntry : exitList.getExitListEntries()) {
+      if (exitListEntry.getScanMillis() <
+          this.now - 24L * 60L * 60L * 1000L) {
+        continue;
+      }
+      String fingerprint = exitListEntry.getFingerprint();
+      if (!this.exitListEntries.containsKey(fingerprint)) {
+        this.exitListEntries.put(fingerprint,
+            new HashSet<ExitListEntry>());
+      }
+      this.exitListEntries.get(fingerprint).add(exitListEntry);
+    }
+  }
+
   public void setCurrentNodes(
       SortedMap<String, NodeStatus> currentNodes) {
     this.relays = new TreeMap<String, NodeStatus>();
@@ -111,24 +281,6 @@ public class DetailsDataWriter implements DescriptorListener {
         relay.setHostName(lookupResults.get(relay.getAddress()));
         relay.setLastRdnsLookup(startedRdnsLookups);
       }
-    }
-  }
-
-  private Map<String, ServerDescriptor> relayServerDescriptors =
-      new HashMap<String, ServerDescriptor>();
-
-  private void processRelayServerDescriptor(
-      ServerDescriptor serverDescriptor) {
-    /* Don't remember which server descriptors we already parsed.  If we
-     * parse a server descriptor now and first learn about the relay in a
-     * later consensus, we'll never write the descriptor content anywhere.
-     * The result would be details files containing no descriptor parts
-     * until the relay publishes the next descriptor. */
-    String fingerprint = serverDescriptor.getFingerprint();
-    if (!this.relayServerDescriptors.containsKey(fingerprint) ||
-        this.relayServerDescriptors.get(fingerprint).getPublishedMillis()
-        < serverDescriptor.getPublishedMillis()) {
-      this.relayServerDescriptors.put(fingerprint, serverDescriptor);
     }
   }
 
@@ -178,15 +330,30 @@ public class DetailsDataWriter implements DescriptorListener {
       boolean isExit = relay.getRelayFlags().contains("Exit") &&
           !relay.getRelayFlags().contains("BadExit");
       boolean isGuard = relay.getRelayFlags().contains("Guard");
-      if (this.relayServerDescriptors.containsKey(fingerprint)) {
-        ServerDescriptor serverDescriptor =
-            this.relayServerDescriptors.get(fingerprint);
-        double advertisedBandwidth = (double) Math.min(Math.min(
-            serverDescriptor.getBandwidthBurst(),
-            serverDescriptor.getBandwidthObserved()),
-            serverDescriptor.getBandwidthRate());
-        advertisedBandwidths.put(fingerprint, advertisedBandwidth);
-        totalAdvertisedBandwidth += advertisedBandwidth;
+      DetailsStatus detailsStatus = this.documentStore.retrieve(
+          DetailsStatus.class, false, fingerprint);
+      if (detailsStatus != null) {
+        double advertisedBandwidth = -1.0;
+        String detailsString = detailsStatus.documentString;
+        Scanner s = new Scanner(detailsString);
+        while (s.hasNextLine()) {
+          String line = s.nextLine();
+          if (!line.startsWith("\"advertised_bandwidth\":")) {
+            continue;
+          }
+          try {
+            advertisedBandwidth = (double) Integer.parseInt(
+                line.split(":")[1].replaceAll(",", ""));
+          } catch (NumberFormatException ex) {
+            /* Handle below. */
+          }
+          break;
+        }
+        s.close();
+        if (advertisedBandwidth >= 0.0) {
+          advertisedBandwidths.put(fingerprint, advertisedBandwidth);
+          totalAdvertisedBandwidth += advertisedBandwidth;
+        }
       }
       double consensusWeight = (double) relay.getConsensusWeight();
       consensusWeights.put(fingerprint, consensusWeight);
@@ -246,57 +413,6 @@ public class DetailsDataWriter implements DescriptorListener {
     }
   }
 
-  private long now = System.currentTimeMillis();
-
-  private Map<String, Set<ExitListEntry>> exitListEntries =
-      new HashMap<String, Set<ExitListEntry>>();
-
-  private void processExitList(ExitList exitList) {
-    for (ExitListEntry exitListEntry : exitList.getExitListEntries()) {
-      if (exitListEntry.getScanMillis() <
-          this.now - 24L * 60L * 60L * 1000L) {
-        continue;
-      }
-      String fingerprint = exitListEntry.getFingerprint();
-      if (!this.exitListEntries.containsKey(fingerprint)) {
-        this.exitListEntries.put(fingerprint,
-            new HashSet<ExitListEntry>());
-      }
-      this.exitListEntries.get(fingerprint).add(exitListEntry);
-    }
-  }
-
-  private Map<String, ServerDescriptor> bridgeServerDescriptors =
-      new HashMap<String, ServerDescriptor>();
-
-  private void processBridgeServerDescriptor(
-      ServerDescriptor serverDescriptor) {
-    /* Don't remember which server descriptors we already parsed.  If we
-     * parse a server descriptor now and first learn about the relay in a
-     * later status, we'll never write the descriptor content anywhere.
-     * The result would be details files containing no descriptor parts
-     * until the bridge publishes the next descriptor. */
-    String fingerprint = serverDescriptor.getFingerprint();
-    if (!this.bridgeServerDescriptors.containsKey(fingerprint) ||
-        this.bridgeServerDescriptors.get(fingerprint).getPublishedMillis()
-        < serverDescriptor.getPublishedMillis()) {
-      this.bridgeServerDescriptors.put(fingerprint, serverDescriptor);
-    }
-  }
-
-  private Map<String, String> bridgePoolAssignments =
-      new HashMap<String, String>();
-
-  private void processBridgePoolAssignment(
-      BridgePoolAssignment bridgePoolAssignment) {
-    for (Map.Entry<String, String> e :
-        bridgePoolAssignment.getEntries().entrySet()) {
-      String fingerprint = e.getKey();
-      String details = e.getValue();
-      this.bridgePoolAssignments.put(fingerprint, details);
-    }
-  }
-
   public void writeOutDetails() {
     SortedSet<String> remainingDetailsFiles = new TreeSet<String>();
     remainingDetailsFiles.addAll(this.documentStore.list(
@@ -318,100 +434,8 @@ public class DetailsDataWriter implements DescriptorListener {
     for (Map.Entry<String, NodeStatus> relay : this.relays.entrySet()) {
       String fingerprint = relay.getKey();
 
-      /* Read details file for this relay if it exists. */
-      String descriptorParts = null;
-      long publishedMillis = -1L;
-      if (remainingDetailsFiles.contains(fingerprint)) {
-        remainingDetailsFiles.remove(fingerprint);
-        // TODO Use parsed details document here.
-        DetailsDocument detailsDocument = this.documentStore.retrieve(
-            DetailsDocument.class, false, fingerprint);
-        String documentString = detailsDocument.documentString;
-        if (documentString != null) {
-          try {
-            boolean copyDescriptorParts = false;
-            StringBuilder sb = new StringBuilder();
-            Scanner s = new Scanner(documentString);
-            while (s.hasNextLine()) {
-              String line = s.nextLine();
-              if (line.startsWith("\"desc_published\":")) {
-                String published = line.substring(
-                    "\"desc_published\":\"".length(),
-                    "\"desc_published\":\"1970-01-01 00:00:00".length());
-                publishedMillis = dateTimeFormat.parse(published).
-                    getTime();
-                copyDescriptorParts = true;
-              }
-              if (copyDescriptorParts) {
-                sb.append(line + "\n");
-              }
-            }
-            s.close();
-            if (sb.length() > 0) {
-              descriptorParts = sb.toString();
-            }
-          } catch (ParseException e) {
-            System.err.println("Could not parse timestamp in details.json "
-                + "file for '" + fingerprint + "'.  Ignoring.");
-            e.printStackTrace();
-            publishedMillis = -1L;
-            descriptorParts = null;
-          }
-        }
-      }
-
-      /* Generate new descriptor-specific part if we have a more recent
-       * descriptor or if the part we read didn't contain a last_restarted
-       * line. */
-      if (this.relayServerDescriptors.containsKey(fingerprint) &&
-          (this.relayServerDescriptors.get(fingerprint).
-          getPublishedMillis() > publishedMillis)) {
-        ServerDescriptor descriptor = this.relayServerDescriptors.get(
-            fingerprint);
-        StringBuilder sb = new StringBuilder();
-        String publishedDateTime = dateTimeFormat.format(
-            descriptor.getPublishedMillis());
-        String lastRestartedString = dateTimeFormat.format(
-            descriptor.getPublishedMillis()
-            - descriptor.getUptime() * 1000L);
-        int bandwidthRate = descriptor.getBandwidthRate();
-        int bandwidthBurst = descriptor.getBandwidthBurst();
-        int observedBandwidth = descriptor.getBandwidthObserved();
-        int advertisedBandwidth = Math.min(bandwidthRate,
-            Math.min(bandwidthBurst, observedBandwidth));
-        sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
-            + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
-            + "\"bandwidth_rate\":" + bandwidthRate + ",\n"
-            + "\"bandwidth_burst\":" + bandwidthBurst + ",\n"
-            + "\"observed_bandwidth\":" + observedBandwidth + ",\n"
-            + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
-            + "\"exit_policy\":[");
-        int written = 0;
-        for (String exitPolicyLine : descriptor.getExitPolicyLines()) {
-          sb.append((written++ > 0 ? "," : "") + "\n  \"" + exitPolicyLine
-              + "\"");
-        }
-        sb.append("\n]");
-        if (descriptor.getContact() != null) {
-          sb.append(",\n\"contact\":\""
-              + escapeJSON(descriptor.getContact()) + "\"");
-        }
-        if (descriptor.getPlatform() != null) {
-          sb.append(",\n\"platform\":\""
-              + escapeJSON(descriptor.getPlatform()) + "\"");
-        }
-        if (descriptor.getFamilyEntries() != null) {
-          sb.append(",\n\"family\":[");
-          written = 0;
-          for (String familyEntry : descriptor.getFamilyEntries()) {
-            sb.append((written++ > 0 ? "," : "") + "\n  \"" + familyEntry
-                + "\"");
-          }
-          sb.append("\n]");
-        }
-        sb.append("\n}\n");
-        descriptorParts = sb.toString();
-      }
+      /* Don't delete this details file later on. */
+      remainingDetailsFiles.remove(fingerprint);
 
       /* Generate network-status-specific part. */
       NodeStatus entry = relay.getValue();
@@ -564,12 +588,16 @@ public class DetailsDataWriter implements DescriptorListener {
         sb.append("]");
       }
 
-      /* Add descriptor parts. */
-      if (descriptorParts != null) {
-        sb.append(",\n" + descriptorParts);
-      } else {
-        sb.append("\n}\n");
+      /* Append descriptor-specific part from details status file. */
+      DetailsStatus detailsStatus = this.documentStore.retrieve(
+          DetailsStatus.class, false, fingerprint);
+      if (detailsStatus != null &&
+          detailsStatus.documentString.length() > 0) {
+        sb.append(",\n" + detailsStatus.documentString);
       }
+
+      /* Finish details string. */
+      sb.append("\n}\n");
 
       /* Write details file to disk. */
       DetailsDocument detailsDocument = new DetailsDocument();
@@ -586,88 +614,8 @@ public class DetailsDataWriter implements DescriptorListener {
     for (Map.Entry<String, NodeStatus> bridge : this.bridges.entrySet()) {
       String fingerprint = bridge.getKey();
 
-      /* Read details file for this bridge if it exists. */
-      String descriptorParts = null, bridgePoolAssignment = null;
-      long publishedMillis = -1L;
-      if (remainingDetailsFiles.contains(fingerprint)) {
-        remainingDetailsFiles.remove(fingerprint);
-        // TODO Use parsed details document here.
-        DetailsDocument detailsDocument = this.documentStore.retrieve(
-            DetailsDocument.class, false, fingerprint);
-        String documentString = detailsDocument.documentString;
-        if (documentString != null) {
-          try {
-          boolean copyDescriptorParts = false;
-            StringBuilder sb = new StringBuilder();
-            Scanner s = new Scanner(documentString);
-            while (s.hasNextLine()) {
-              String line = s.nextLine();
-              if (line.startsWith("\"desc_published\":")) {
-                String published = line.substring(
-                    "\"desc_published\":\"".length(),
-                    "\"desc_published\":\"1970-01-01 00:00:00".length());
-                publishedMillis = dateTimeFormat.parse(published).
-                    getTime();
-                copyDescriptorParts = true;
-              } else if (line.startsWith("\"pool_assignment\":")) {
-                bridgePoolAssignment = line;
-                copyDescriptorParts = false;
-              } else if (line.equals("}")) {
-                copyDescriptorParts = false;
-              }
-              if (copyDescriptorParts) {
-                sb.append(line + "\n");
-              }
-            }
-            s.close();
-            descriptorParts = sb.toString();
-            if (descriptorParts.endsWith(",\n")) {
-              descriptorParts = descriptorParts.substring(0,
-                  descriptorParts.length() - 2);
-            } else if (descriptorParts.endsWith("\n")) {
-              descriptorParts = descriptorParts.substring(0,
-                  descriptorParts.length() - 1);
-            }
-          } catch (ParseException e) {
-            System.err.println("Could not parse timestamp in "
-                + "details.json file for '" + fingerprint + "'.  "
-                + "Ignoring.");
-            e.printStackTrace();
-            publishedMillis = -1L;
-            descriptorParts = null;
-          }
-        }
-      }
-
-      /* Generate new descriptor-specific part if we have a more recent
-       * descriptor. */
-      if (this.bridgeServerDescriptors.containsKey(fingerprint) &&
-          this.bridgeServerDescriptors.get(fingerprint).
-          getPublishedMillis() > publishedMillis) {
-        ServerDescriptor descriptor = this.bridgeServerDescriptors.get(
-            fingerprint);
-        StringBuilder sb = new StringBuilder();
-        String publishedDateTime = dateTimeFormat.format(
-            descriptor.getPublishedMillis());
-        String lastRestartedString = dateTimeFormat.format(
-            descriptor.getPublishedMillis()
-            - descriptor.getUptime() * 1000L);
-        int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
-            Math.min(descriptor.getBandwidthBurst(),
-            descriptor.getBandwidthObserved()));
-        sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
-            + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
-            + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
-            + "\"platform\":\"" + escapeJSON(descriptor.getPlatform())
-            + "\"");
-        descriptorParts = sb.toString();
-      }
-
-      /* Look up bridge pool assignment. */
-      if (this.bridgePoolAssignments.containsKey(fingerprint)) {
-        bridgePoolAssignment = "\"pool_assignment\":\""
-            + this.bridgePoolAssignments.get(fingerprint) + "\"";
-      }
+      /* Don't delete this details file later on. */
+      remainingDetailsFiles.remove(fingerprint);
 
       /* Generate network-status-specific part. */
       NodeStatus entry = bridge.getValue();
@@ -705,13 +653,15 @@ public class DetailsDataWriter implements DescriptorListener {
         sb.append("]");
       }
 
-      /* Append descriptor and bridge pool assignment parts. */
-      if (descriptorParts != null && descriptorParts.length() != 0) {
-        sb.append(",\n" + descriptorParts);
+      /* Append descriptor-specific part from details status file. */
+      DetailsStatus detailsStatus = this.documentStore.retrieve(
+          DetailsStatus.class, false, fingerprint);
+      if (detailsStatus != null &&
+          detailsStatus.documentString.length() > 0) {
+        sb.append(",\n" + detailsStatus.documentString);
       }
-      if (bridgePoolAssignment != null) {
-        sb.append(",\n" + bridgePoolAssignment);
-      }
+
+      /* Finish details string. */
       sb.append("\n}\n");
 
       /* Write details file to disk. */

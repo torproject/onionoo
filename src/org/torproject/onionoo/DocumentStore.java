@@ -109,7 +109,10 @@ public class DocumentStore {
     SortedSet<String> fingerprints = new TreeSet<String>();
     File directory = null;
     String subdirectory = null;
-    if (documentType.equals(BandwidthStatus.class)) {
+    if (documentType.equals(DetailsStatus.class)) {
+      directory = this.statusDir;
+      subdirectory = "details";
+    } else if (documentType.equals(BandwidthStatus.class)) {
       directory = this.statusDir;
       subdirectory = "bandwidth";
     } else if (documentType.equals(WeightsStatus.class)) {
@@ -347,7 +350,12 @@ public class DocumentStore {
     }
     File directory = null;
     String fileName = null;
-    if (documentType.equals(BandwidthStatus.class)) {
+    if (documentType.equals(DetailsStatus.class)) {
+      directory = this.statusDir;
+      fileName = String.format("details/%s/%s/%s",
+          fingerprint.substring(0, 1), fingerprint.substring(1, 2),
+          fingerprint);
+    } else if (documentType.equals(BandwidthStatus.class)) {
       directory = this.statusDir;
       fileName = String.format("bandwidth/%s/%s/%s",
           fingerprint.substring(0, 1), fingerprint.substring(1, 2),
