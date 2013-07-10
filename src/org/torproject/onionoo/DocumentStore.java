@@ -2,9 +2,12 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -230,17 +233,22 @@ public class DocumentStore {
     }
     String documentString = null;
     try {
-      BufferedReader br = new BufferedReader(new FileReader(
-          documentFile));
-      StringBuilder sb = new StringBuilder();
-      String line;
-      while ((line = br.readLine()) != null) {
-        sb.append(line + "\n");
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      BufferedInputStream bis = new BufferedInputStream(
+          new FileInputStream(documentFile));
+      int len;
+      byte[] data = new byte[1024];
+      while ((len = bis.read(data, 0, 1024)) >= 0) {
+        baos.write(data, 0, len);
       }
-      br.close();
+      bis.close();
+      byte[] allData = baos.toByteArray();
+      if (allData.length == 0) {
+        return null;
+      }
+      documentString = new String(allData, "US-ASCII");
       this.retrievedFiles++;
-      this.retrievedBytes += sb.length();
-      documentString = sb.toString();
+      this.retrievedBytes += documentString.length();
     } catch (IOException e) {
       System.err.println("Could not read file '"
           + documentFile.getAbsolutePath() + "'.");
