@@ -285,6 +285,11 @@ public class WeightsDataWriter implements DescriptorListener {
                 + "Skipping this line.");
             continue;
           }
+          if (parts[4].equals("NaN")) {
+            /* Remove corrupt lines written on 2013-07-07 and the days
+             * after. */
+            continue;
+          }
           long validAfterMillis = dateTimeFormat.parse(parts[0]
               + " " + parts[1]).getTime();
           long freshUntilMillis = dateTimeFormat.parse(parts[2]
