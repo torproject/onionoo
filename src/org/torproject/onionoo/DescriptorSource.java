@@ -40,9 +40,11 @@ interface DescriptorListener {
 
 enum DescriptorHistory {
   RELAY_CONSENSUS_HISTORY,
+  RELAY_SERVER_HISTORY,
   RELAY_EXTRAINFO_HISTORY,
   EXIT_LIST_HISTORY,
   BRIDGE_STATUS_HISTORY,
+  BRIDGE_SERVER_HISTORY,
   BRIDGE_EXTRAINFO_HISTORY,
   BRIDGE_POOLASSIGN_HISTORY,
 }
@@ -132,6 +134,12 @@ class DescriptorQueue {
       break;
     case BRIDGE_STATUS_HISTORY:
       historyFileName = "bridge-status-history";
+      break;
+    case RELAY_SERVER_HISTORY:
+      historyFileName = "relay-server-history";
+      break;
+    case BRIDGE_SERVER_HISTORY:
+      historyFileName = "bridge-server-history";
       break;
     default:
       System.err.println("Unknown descriptor history.  Not excluding "
@@ -272,9 +280,8 @@ public class DescriptorSource {
   }
 
   public void readRelayServerDescriptors() {
-    // TODO Use parse history as soon as all listeners can handle it.
-    this.readDescriptors(DescriptorType.RELAY_SERVER_DESCRIPTORS, null,
-        true);
+    this.readDescriptors(DescriptorType.RELAY_SERVER_DESCRIPTORS,
+        DescriptorHistory.RELAY_SERVER_HISTORY, true);
   }
 
   public void readRelayExtraInfos() {
@@ -293,9 +300,8 @@ public class DescriptorSource {
   }
 
   public void readBridgeServerDescriptors() {
-    // TODO Use parse history as soon as all listeners can handle it.
-    this.readDescriptors(DescriptorType.BRIDGE_SERVER_DESCRIPTORS, null,
-        false);
+    this.readDescriptors(DescriptorType.BRIDGE_SERVER_DESCRIPTORS,
+        DescriptorHistory.BRIDGE_SERVER_HISTORY, false);
   }
 
   public void readBridgeExtraInfos() {
