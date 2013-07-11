@@ -92,6 +92,8 @@ public class Main {
     printStatus("Updating weights data.");
     wdw.setCurrentNodes(currentNodes);
     printStatusTime("Set current node fingerprints");
+    wdw.updateWeightsHistories();
+    printStatusTime("Updated weights histories");
     wdw.writeWeightsDataFiles();
     printStatusTime("Wrote weights data files");
     // TODO Evaluate overhead of not deleting obsolete weights files.  An
@@ -99,6 +101,8 @@ public class Main {
     // which allows us to run ndw and wdw in parallel in the future.
     wdw.deleteObsoleteWeightsDataFiles();
     printStatusTime("Deleted obsolete weights files");
+    wdw.updateAdvertisedBandwidths();
+    printStatusTime("Updated advertised bandwidths");
 
     printStatus("Shutting down.");
     dso.writeHistoryFiles();
