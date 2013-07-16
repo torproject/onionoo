@@ -944,11 +944,10 @@ public class ResourceServlet extends HttpServlet {
     fingerprint = fingerprint.substring(0, 40);
     DetailsDocument detailsDocument = this.documentStore.retrieve(
         DetailsDocument.class, false, fingerprint);
-    String documentString = detailsDocument.documentString;
-    StringBuilder sb = new StringBuilder();
-    String detailsLines = null;
-    if (documentString != null) {
-      Scanner s = new Scanner(documentString);
+    if (detailsDocument != null &&
+        detailsDocument.documentString != null) {
+      StringBuilder sb = new StringBuilder();
+      Scanner s = new Scanner(detailsDocument.documentString);
       sb.append("{");
       if (s.hasNextLine()) {
         /* Skip version line. */
@@ -964,13 +963,11 @@ public class ResourceServlet extends HttpServlet {
         }
       }
       s.close();
-      detailsLines = sb.toString();
+      String detailsLines = sb.toString();
       if (detailsLines.length() > 1) {
         detailsLines = detailsLines.substring(0,
             detailsLines.length() - 1);
       }
-    }
-    if (detailsLines != null) {
       return detailsLines;
     } else {
       // TODO We should probably log that we didn't find a details
@@ -993,8 +990,9 @@ public class ResourceServlet extends HttpServlet {
     fingerprint = fingerprint.substring(0, 40);
     BandwidthDocument bandwidthDocument = this.documentStore.retrieve(
         BandwidthDocument.class, false, fingerprint);
-    String bandwidthLines = bandwidthDocument.documentString;
-    if (bandwidthLines != null) {
+    if (bandwidthDocument != null &&
+        bandwidthDocument.documentString != null) {
+      String bandwidthLines = bandwidthDocument.documentString;
       bandwidthLines = bandwidthLines.substring(0,
           bandwidthLines.length() - 1);
       return bandwidthLines;
@@ -1016,8 +1014,9 @@ public class ResourceServlet extends HttpServlet {
     fingerprint = fingerprint.substring(0, 40);
     WeightsDocument weightsDocument = this.documentStore.retrieve(
         WeightsDocument.class, false, fingerprint);
-    String weightsLines = weightsDocument.documentString;
-    if (weightsLines != null) {
+    if (weightsDocument != null &&
+        weightsDocument.documentString != null) {
+      String weightsLines = weightsDocument.documentString;
       weightsLines = weightsLines.substring(0, weightsLines.length() - 1);
       return weightsLines;
     } else {
