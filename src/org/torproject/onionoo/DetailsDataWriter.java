@@ -426,6 +426,10 @@ public class DetailsDataWriter implements DescriptorListener {
     return StringEscapeUtils.escapeJavaScript(s).replaceAll("\\\\'", "'");
   }
 
+  private static String unescapeJSON(String s) {
+    return StringEscapeUtils.unescapeJavaScript(s.replaceAll("'", "\\'"));
+  }
+
   private void updateRelayDetailsFiles(
       SortedSet<String> remainingDetailsFiles) {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
@@ -588,12 +592,29 @@ public class DetailsDataWriter implements DescriptorListener {
         sb.append("]");
       }
 
-      /* Append descriptor-specific part from details status file. */
+      /* Append descriptor-specific part from details status file, and
+       * update contact in node status. */
       DetailsStatus detailsStatus = this.documentStore.retrieve(
           DetailsStatus.class, false, fingerprint);
       if (detailsStatus != null &&
           detailsStatus.documentString.length() > 0) {
         sb.append(",\n" + detailsStatus.documentString);
+        String contact = null;
+        Scanner s = new Scanner(detailsStatus.documentString);
+        while (s.hasNextLine()) {
+          String line = s.nextLine();
+          if (!line.startsWith("\"contact\":")) {
+            continue;
+          }
+          int start = "\"contact\":\"".length(), end = line.length() - 1;
+          if (line.endsWith(",")) {
+            end--;
+          }
+          contact = unescapeJSON(line.substring(start, end));
+          break;
+        }
+        s.close();
+        entry.setContact(contact);
       }
 
       /* Finish details string. */

@@ -55,13 +55,14 @@ public class NodeStatus extends Document {
   private String defaultPolicy;
   private String portList;
   private SortedMap<Long, Set<String>> lastAddresses;
+  private String contact;
   public NodeStatus(boolean isRelay, String nickname, String fingerprint,
       String address, SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostName, long lastRdnsLookup,
       String defaultPolicy, String portList, long firstSeenMillis,
-      long lastChangedAddresses, String aSNumber) {
+      long lastChangedAddresses, String aSNumber, String contact) {
     this.isRelay = isRelay;
     this.nickname = nickname;
     this.fingerprint = fingerprint;
@@ -106,13 +107,14 @@ public class NodeStatus extends Document {
     addresses.addAll(orAddressesAndPorts);
     this.lastAddresses.put(lastChangedAddresses, addresses);
     this.aSNumber = aSNumber;
+    this.contact = contact;
   }
 
   public static NodeStatus fromString(String documentString) {
     boolean isRelay = false;
     String nickname = null, fingerprint = null, address = null,
         countryCode = null, hostName = null, defaultPolicy = null,
-        portList = null, aSNumber = null;
+        portList = null, aSNumber = null, contact = null;
     SortedSet<String> orAddressesAndPorts = null, exitAddresses = null,
         relayFlags = null;
     long lastSeenMillis = -1L, consensusWeight = -1L,
@@ -123,7 +125,8 @@ public class NodeStatus extends Document {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
       dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      String[] parts = documentString.trim().split(" ");
+      String separator = documentString.contains("\t") ? "\t" : " ";
+      String[] parts = documentString.trim().split(separator);
       isRelay = parts[0].equals("r");
       if (parts.length < 9) {
         System.err.println("Too few space-separated values in line '"
@@ -193,6 +196,9 @@ public class NodeStatus extends Document {
       if (parts.length > 19) {
         aSNumber = parts[19];
       }
+      if (parts.length > 20) {
+        contact = parts[20];
+      }
     } catch (NumberFormatException e) {
       System.err.println("Number format exception while parsing node "
           + "status line '" + documentString + "': " + e.getMessage()
@@ -215,7 +221,7 @@ public class NodeStatus extends Document {
         fingerprint, address, orAddressesAndPorts, exitAddresses,
         lastSeenMillis, orPort, dirPort, relayFlags, consensusWeight,
         countryCode, hostName, lastRdnsLookup, defaultPolicy, portList,
-        firstSeenMillis, lastChangedAddresses, aSNumber);
+        firstSeenMillis, lastChangedAddresses, aSNumber, contact);
     return newNodeStatus;
   }
 
@@ -234,6 +240,7 @@ public class NodeStatus extends Document {
       this.defaultPolicy = newNodeStatus.defaultPolicy;
       this.portList = newNodeStatus.portList;
       this.aSNumber = newNodeStatus.aSNumber;
+      this.contact = newNodeStatus.contact;
     }
     if (this.isRelay && newNodeStatus.isRelay) {
       this.lastAddresses.putAll(newNodeStatus.lastAddresses);
@@ -244,13 +251,13 @@ public class NodeStatus extends Document {
 
   public String toString() {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
+        "yyyy-MM-dd\tHH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     StringBuilder sb = new StringBuilder();
     sb.append(this.isRelay ? "r" : "b");
-    sb.append(" " + this.nickname);
-    sb.append(" " + this.fingerprint);
-    sb.append(" " + this.address + ";");
+    sb.append("\t" + this.nickname);
+    sb.append("\t" + this.fingerprint);
+    sb.append("\t" + this.address + ";");
     int written = 0;
     for (String orAddressAndPort : this.orAddressesAndPorts) {
       sb.append((written++ > 0 ? "+" : "") + orAddressAndPort);
@@ -263,32 +270,34 @@ public class NodeStatus extends Document {
             + exitAddress);
       }
     }
-    sb.append(" " + dateTimeFormat.format(this.lastSeenMillis));
-    sb.append(" " + this.orPort);
-    sb.append(" " + this.dirPort + " ");
+    sb.append("\t" + dateTimeFormat.format(this.lastSeenMillis));
+    sb.append("\t" + this.orPort);
+    sb.append("\t" + this.dirPort + "\t");
     written = 0;
     for (String relayFlag : this.relayFlags) {
       sb.append((written++ > 0 ? "," : "") + relayFlag);
     }
     if (this.isRelay) {
-      sb.append(" " + String.valueOf(this.consensusWeight));
-      sb.append(" " + (this.countryCode != null ? this.countryCode : "??"));
-      sb.append(" " + (this.hostName != null ? this.hostName : "null"));
-      sb.append(" " + String.valueOf(this.lastRdnsLookup));
-      sb.append(" " + (this.defaultPolicy != null ? this.defaultPolicy
+      sb.append("\t" + String.valueOf(this.consensusWeight));
+      sb.append("\t"
+          + (this.countryCode != null ? this.countryCode : "??"));
+      sb.append("\t" + (this.hostName != null ? this.hostName : "null"));
+      sb.append("\t" + String.valueOf(this.lastRdnsLookup));
+      sb.append("\t" + (this.defaultPolicy != null ? this.defaultPolicy
           : "null"));
-      sb.append(" " + (this.portList != null ? this.portList : "null"));
+      sb.append("\t" + (this.portList != null ? this.portList : "null"));
     } else {
-      sb.append(" -1 ?? null -1 null null");
+      sb.append("\t-1\t??\tnull\t-1\tnull\tnull");
     }
-    sb.append(" " + dateTimeFormat.format(this.firstSeenMillis));
+    sb.append("\t" + dateTimeFormat.format(this.firstSeenMillis));
     if (this.isRelay) {
-      sb.append(" " + dateTimeFormat.format(
+      sb.append("\t" + dateTimeFormat.format(
           this.getLastChangedOrAddress()));
-      sb.append(" " + (this.aSNumber != null ? this.aSNumber : "null"));
+      sb.append("\t" + (this.aSNumber != null ? this.aSNumber : "null"));
     } else {
-      sb.append(" null null null");
+      sb.append("\tnull\tnull\tnull");
     }
+    sb.append("\t" + (this.contact != null ? this.contact : ""));
     return sb.toString();
   }
 
@@ -479,6 +488,25 @@ public class NodeStatus extends Document {
       }
     }
     return lastChangedAddressesMillis;
+  }
+  public void setContact(String contact) {
+    if (contact == null) {
+      this.contact = null;
+    } else {
+      contact = contact.toLowerCase();
+      StringBuilder sb = new StringBuilder();
+      for (char c : contact.toCharArray()) {
+        if (c >= 32 && c < 127) {
+          sb.append(c);
+        } else {
+          sb.append(" ");
+        }
+      }
+      this.contact = sb.toString();
+    }
+  }
+  public String getContact() {
+    return this.contact;
   }
 }
 

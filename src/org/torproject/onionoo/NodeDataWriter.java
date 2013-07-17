@@ -82,7 +82,7 @@ public class NodeDataWriter implements DescriptorListener {
           fingerprint, address, orAddressesAndPorts, null,
           validAfterMillis, orPort, dirPort, relayFlags, consensusWeight,
           null, null, -1L, defaultPolicy, portList, validAfterMillis,
-          validAfterMillis, null);
+          validAfterMillis, null, null);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
       } else {
@@ -112,7 +112,7 @@ public class NodeDataWriter implements DescriptorListener {
       NodeStatus newNodeStatus = new NodeStatus(false, nickname,
           fingerprint, address, orAddressesAndPorts, null,
           publishedMillis, orPort, dirPort, relayFlags, -1L, "??", null,
-          -1L, null, null, publishedMillis, -1L, null);
+          -1L, null, null, publishedMillis, -1L, null, null);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
       } else {

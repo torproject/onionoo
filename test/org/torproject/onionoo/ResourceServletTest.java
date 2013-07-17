@@ -110,36 +110,41 @@ public class ResourceServletTest {
         Map<String, String[]> parameterMap) {
       this.tempOutDir = tempOutDir;
       this.relays = new TreeMap<String, String>();
-      this.relays.put("000C5F55", "r TorkaZ "
-          + "000C5F55BD4814B917CC474BD537F1A3B33CCE2A "
-          + "62.216.201.221;;62.216.201.222+62.216.201.223 "
-          + "2013-04-19 05:00:00 9001 0 Running,Valid 20 de null -1 "
-          + "reject 1-65535 2013-04-18 05:00:00 2013-04-19 05:00:00 "
-          + "AS8767");
-      this.relays.put("001C13B3", "r Ferrari458 "
-          + "001C13B3A55A71B977CA65EC85539D79C653A3FC "
-          + "68.38.171.200;[2001:4f8:3:2e::51]:9001; "
-          + "2013-04-24 12:00:00 9001 9030 "
-          + "Fast,Named,Running,V2Dir,Valid 1140 us "
-          + "c-68-38-171-200.hsd1.pa.comcast.net 1366805763009 reject "
-          + "1-65535 2013-02-12 16:00:00 2013-02-26 18:00:00 AS7922");
-      this.relays.put("0025C136", "r TimMayTribute "
-          + "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B 89.69.68.246;; "
-          + "2013-04-22 20:00:00 9001 9030 "
-          + "Fast,Running,Unnamed,V2Dir,Valid 63 a1 null -1 reject "
-          + "1-65535 2013-04-16 18:00:00 2013-04-16 18:00:00 AS6830");
-      this.bridges.put("0000831B", "b ec2bridgercc7f31fe "
-          + "0000831B236DFF73D409AD17B40E2A728A53994F 10.199.7.176;; "
-          + "2013-04-21 18:07:03 443 0 Valid -1 ?? null -1 null null "
-          + "2013-04-20 15:37:04 null null null");
-      this.bridges.put("0002D9BD", "b Unnamed "
-          + "0002D9BDBBC230BD9C78FF502A16E0033EF87E0C 10.0.52.84;; "
-          + "2013-04-20 17:37:04 443 0 Valid -1 ?? null -1 null "
-          + "null 2013-04-14 07:07:05 null null null");
-      this.bridges.put("0010D49C", "b gummy "
-          + "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756 10.63.169.98;; "
-          + "2013-04-24 01:07:04 9001 0 Running,Valid -1 ?? null -1 null "
-          + "null 2013-01-16 21:07:04 null null null");
+      this.relays.put("000C5F55", "r\tTorkaZ\t"
+          + "000C5F55BD4814B917CC474BD537F1A3B33CCE2A\t"
+          + "62.216.201.221;;62.216.201.222+62.216.201.223\t"
+          + "2013-04-19\t05:00:00\t9001\t0\tRunning,Valid\t20\tde\tnull\t"
+          + "-1\treject\t1-65535\t2013-04-18\t05:00:00\t"
+          + "2013-04-19\t05:00:00\tAS8767\ttorkaz <klaus dot zufall at "
+          + "gmx dot de> <fb-token:np5_g_83jmf=>");
+      this.relays.put("001C13B3", "r\tFerrari458\t"
+          + "001C13B3A55A71B977CA65EC85539D79C653A3FC\t"
+          + "68.38.171.200;[2001:4f8:3:2e::51]:9001;\t"
+          + "2013-04-24\t12:00:00\t9001\t9030\t"
+          + "Fast,Named,Running,V2Dir,Valid\t1140\tus\t"
+          + "c-68-38-171-200.hsd1.pa.comcast.net\t1366805763009\treject\t"
+          + "1-65535\t2013-02-12\t16:00:00\t2013-02-26\t18:00:00\t"
+          + "AS7922\t");
+      this.relays.put("0025C136", "r\tTimMayTribute\t"
+          + "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B\t89.69.68.246;;\t"
+          + "2013-04-22\t20:00:00\t9001\t9030\t"
+          + "Fast,Running,Unnamed,V2Dir,Valid\t63\ta1\tnull\t-1\treject\t"
+          + "1-65535\t2013-04-16\t18:00:00\t2013-04-16\t18:00:00\t"
+          + "AS6830\t1024D/51E2A1C7 steven j. murdoch "
+          + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>");
+      this.bridges.put("0000831B", "b\tec2bridgercc7f31fe\t"
+          + "0000831B236DFF73D409AD17B40E2A728A53994F\t10.199.7.176;;\t"
+          + "2013-04-21\t18:07:03\t443\t0\tValid\t-1\t??\tnull\t-1\t"
+          + "null\tnull\t2013-04-20\t15:37:04\tnull\tnull\tnull\tnull");
+      this.bridges.put("0002D9BD", "b\tUnnamed\t"
+          + "0002D9BDBBC230BD9C78FF502A16E0033EF87E0C\t10.0.52.84;;\t"
+          + "2013-04-20\t17:37:04\t443\t0\tValid\t-1\t??\tnull\t-1\t"
+          + "null\tnull\t2013-04-14\t07:07:05\tnull\tnull\tnull\tnull");
+      this.bridges.put("0010D49C", "b\tgummy\t"
+          + "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756\t10.63.169.98;;\t"
+          + "2013-04-24\t01:07:04\t9001\t0\tRunning,Valid\t-1\t??\tnull\t"
+          + "-1\tnull\tnull\t2013-01-16\t21:07:04\tnull\tnull\tnull\t"
+          + "null");
       this.request = new TestingHttpServletRequestWrapper(requestURI,
           parameterMap);
       this.response = new TestingHttpServletResponseWrapper();
@@ -984,6 +989,48 @@ public class ResourceServletTest {
   public void testLastSeenDaysSixOrMore() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
         "/summary?last_seen_days=6-", 0, null, 0, null);
+  }
+
+  @Test()
+  public void testContactSteven() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?contact=Steven", 1, null, 0, null);
+  }
+
+  @Test()
+  public void testContactStevenMurdoch() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?contact=Steven Murdoch", 1, null, 0, null);
+  }
+
+  @Test()
+  public void testContactMurdochSteven() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?contact=Murdoch Steven", 1, null, 0, null);
+  }
+
+  @Test()
+  public void testContactStevenDotMurdoch() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?contact=Steven.Murdoch", 1, null, 0, null);
+  }
+
+  @Test()
+  public void testContactFbTokenFive() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?contact=<fb-token:5sR_K_zs2wM=>", 1, null, 0, null);
+  }
+
+  @Test()
+  public void testContactFbToken() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?contact=<fb-token:", 2, null, 0, null);
+  }
+
+  @Test()
+  public void testContactDash() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?contact=-", 2, null, 0, null);
   }
 
   @Test()

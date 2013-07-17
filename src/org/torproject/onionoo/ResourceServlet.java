@@ -59,7 +59,8 @@ public class ResourceServlet extends HttpServlet {
   private Map<String, String> relayFingerprintSummaryLines = null,
       bridgeFingerprintSummaryLines = null;
   private Map<String, Set<String>> relaysByCountryCode = null,
-      relaysByASNumber = null, relaysByFlag = null;
+      relaysByASNumber = null, relaysByFlag = null,
+      relaysByContact = null;
   private SortedMap<Integer, Set<String>> relaysByFirstSeenDays = null,
       bridgesByFirstSeenDays = null, relaysByLastSeenDays = null,
       bridgesByLastSeenDays = null;
@@ -90,7 +91,8 @@ public class ResourceServlet extends HttpServlet {
       Map<String, Set<String>>
           relaysByCountryCode = new HashMap<String, Set<String>>(),
           relaysByASNumber = new HashMap<String, Set<String>>(),
-          relaysByFlag = new HashMap<String, Set<String>>();
+          relaysByFlag = new HashMap<String, Set<String>>(),
+          relaysByContact = new HashMap<String, Set<String>>();
       SortedMap<Integer, Set<String>>
           relaysByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
           bridgesByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
@@ -182,6 +184,12 @@ public class ResourceServlet extends HttpServlet {
         relaysByLastSeenDays.get(daysSinceLastSeen).add(fingerprint);
         relaysByLastSeenDays.get(daysSinceLastSeen).add(
             hashedFingerprint);
+        String contact = entry.getContact();
+        if (!relaysByContact.containsKey(contact)) {
+          relaysByContact.put(contact, new HashSet<String>());
+        }
+        relaysByContact.get(contact).add(fingerprint);
+        relaysByContact.get(contact).add(hashedFingerprint);
       }
       Collections.sort(orderRelaysByConsensusWeight);
       relaysByConsensusWeight = new ArrayList<String>();
@@ -224,6 +232,7 @@ public class ResourceServlet extends HttpServlet {
       this.relaysByCountryCode = relaysByCountryCode;
       this.relaysByASNumber = relaysByASNumber;
       this.relaysByFlag = relaysByFlag;
+      this.relaysByContact = relaysByContact;
       this.relaysByFirstSeenDays = relaysByFirstSeenDays;
       this.relaysByLastSeenDays = relaysByLastSeenDays;
       this.bridgesByFirstSeenDays = bridgesByFirstSeenDays;
@@ -374,7 +383,7 @@ public class ResourceServlet extends HttpServlet {
      * parameters. */
     Set<String> knownParameters = new HashSet<String>(Arrays.asList((
         "type,running,search,lookup,country,as,flag,first_seen_days,"
-        + "last_seen_days,order,limit,offset").split(",")));
+        + "last_seen_days,contact,order,limit,offset").split(",")));
     for (String parameterKey : parameterMap.keySet()) {
       if (!knownParameters.contains(parameterKey)) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -484,6 +493,15 @@ public class ResourceServlet extends HttpServlet {
           days);
       this.filterNodesByDays(filteredBridges, this.bridgesByLastSeenDays,
           days);
+    }
+    if (parameterMap.containsKey("contact")) {
+      String[] contactParts = this.parseContactParameter(
+          parameterMap.get("contact"));
+      if (contactParts == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      this.filterByContact(filteredRelays, filteredBridges, contactParts);
     }
 
     /* Re-order and limit results. */
@@ -665,6 +683,15 @@ public class ResourceServlet extends HttpServlet {
       return null;
     }
     return new int[] { x, y };
+  }
+
+  private String[] parseContactParameter(String parameter) {
+    for (char c : parameter.toCharArray()) {
+      if (c < 32 || c >= 127) {
+        return null;
+      }
+    }
+    return parameter.split(" ");
   }
 
   private void filterByType(Map<String, String> filteredRelays,
@@ -872,6 +899,26 @@ public class ResourceServlet extends HttpServlet {
     for (String fingerprint : removeNodes) {
       filteredNodes.remove(fingerprint);
     }
+  }
+
+  private void filterByContact(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges, String[] contactParts) {
+    Set<String> removeRelays = new HashSet<String>();
+    for (Map.Entry<String, Set<String>> e :
+        this.relaysByContact.entrySet()) {
+      String contact = e.getKey();
+      for (String contactPart : contactParts) {
+        if (contact == null ||
+            !contact.contains(contactPart.toLowerCase())) {
+          removeRelays.addAll(e.getValue());
+          break;
+        }
+      }
+    }
+    for (String fingerprint : removeRelays) {
+      filteredRelays.remove(fingerprint);
+    }
+    filteredBridges.clear();
   }
 
   private void writeRelays(List<String> relays, PrintWriter pw,
