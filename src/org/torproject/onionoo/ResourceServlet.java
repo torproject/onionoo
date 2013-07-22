@@ -383,7 +383,8 @@ public class ResourceServlet extends HttpServlet {
      * parameters. */
     Set<String> knownParameters = new HashSet<String>(Arrays.asList((
         "type,running,search,lookup,country,as,flag,first_seen_days,"
-        + "last_seen_days,contact,order,limit,offset").split(",")));
+        + "last_seen_days,contact,order,limit,offset,fields").
+        split(",")));
     for (String parameterKey : parameterMap.keySet()) {
       if (!knownParameters.contains(parameterKey)) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -589,13 +590,24 @@ public class ResourceServlet extends HttpServlet {
       }
     }
 
+    /* Possibly include only a subset of fields in the response
+     * document. */
+    String[] fields = null;
+    if (parameterMap.containsKey("fields")) {
+      fields = this.parseFieldsParameter(parameterMap.get("fields"));
+      if (fields == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+    }
+
     /* Set response headers and write the response. */
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setContentType("application/json");
     response.setCharacterEncoding("utf-8");
     PrintWriter pw = response.getWriter();
-    this.writeRelays(orderedRelays, pw, resourceType);
-    this.writeBridges(orderedBridges, pw, resourceType);
+    this.writeRelays(orderedRelays, pw, resourceType, fields);
+    this.writeBridges(orderedBridges, pw, resourceType, fields);
     pw.flush();
     pw.close();
   }
@@ -692,6 +704,15 @@ public class ResourceServlet extends HttpServlet {
       }
     }
     return parameter.split(" ");
+  }
+
+  private static Pattern fieldsParameterPattern =
+      Pattern.compile("^[0-9a-zA-Z_,]*$");
+  private String[] parseFieldsParameter(String parameter) {
+    if (!fieldsParameterPattern.matcher(parameter).matches()) {
+      return null;
+    }
+    return parameter.split(",");
   }
 
   private void filterByType(Map<String, String> filteredRelays,
@@ -922,7 +943,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private void writeRelays(List<String> relays, PrintWriter pw,
-      String resourceType) {
+      String resourceType, String[] fields) {
     pw.write("{\"relays_published\":\"" + this.relaysPublishedString
         + "\",\n\"relays\":[");
     int written = 0;
@@ -931,7 +952,7 @@ public class ResourceServlet extends HttpServlet {
         /* TODO This is a workaround for a bug; line shouldn't be null. */
         continue;
       }
-      String lines = this.getFromSummaryLine(line, resourceType);
+      String lines = this.getFromSummaryLine(line, resourceType, fields);
       if (lines.length() > 0) {
         pw.print((written++ > 0 ? ",\n" : "\n") + lines);
       }
@@ -940,7 +961,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private void writeBridges(List<String> bridges, PrintWriter pw,
-      String resourceType) {
+      String resourceType, String[] fields) {
     pw.write("\"bridges_published\":\"" + this.bridgesPublishedString
         + "\",\n\"bridges\":[");
     int written = 0;
@@ -949,7 +970,7 @@ public class ResourceServlet extends HttpServlet {
         /* TODO This is a workaround for a bug; line shouldn't be null. */
         continue;
       }
-      String lines = this.getFromSummaryLine(line, resourceType);
+      String lines = this.getFromSummaryLine(line, resourceType, fields);
       if (lines.length() > 0) {
         pw.print((written++ > 0 ? ",\n" : "\n") + lines);
       }
@@ -958,11 +979,11 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private String getFromSummaryLine(String summaryLine,
-      String resourceType) {
+      String resourceType, String[] fields) {
     if (resourceType.equals("summary")) {
       return this.writeSummaryLine(summaryLine);
     } else if (resourceType.equals("details")) {
-      return this.writeDetailsLines(summaryLine);
+      return this.writeDetailsLines(summaryLine, fields);
     } else if (resourceType.equals("bandwidth")) {
       return this.writeBandwidthLines(summaryLine);
     } else if (resourceType.equals("weights")) {
@@ -977,7 +998,7 @@ public class ResourceServlet extends HttpServlet {
         summaryLine.length() - 1) : summaryLine);
   }
 
-  private String writeDetailsLines(String summaryLine) {
+  private String writeDetailsLines(String summaryLine, String[] fields) {
     String fingerprint = null;
     if (summaryLine.contains("\"f\":\"")) {
       fingerprint = summaryLine.substring(summaryLine.indexOf(
@@ -1000,12 +1021,27 @@ public class ResourceServlet extends HttpServlet {
         /* Skip version line. */
         s.nextLine();
       }
+      boolean includeLine = true;
       while (s.hasNextLine()) {
         String line = s.nextLine();
         if (line.equals("}")) {
           sb.append("}\n");
           break;
-        } else if (!line.startsWith("\"desc_published\":")) {
+        } else if (line.startsWith("\"desc_published\":")) {
+          continue;
+        } else if (fields != null) {
+          if (line.startsWith("\"")) {
+            includeLine = false;
+            for (String field : fields) {
+              if (line.startsWith("\"" + field + "\":")) {
+                sb.append(line + "\n");
+                includeLine = true;
+              }
+            }
+          } else if (includeLine) {
+            sb.append(line + "\n");
+          }
+        } else {
           sb.append(line + "\n");
         }
       }
@@ -1014,6 +1050,10 @@ public class ResourceServlet extends HttpServlet {
       if (detailsLines.length() > 1) {
         detailsLines = detailsLines.substring(0,
             detailsLines.length() - 1);
+      }
+      if (detailsLines.endsWith(",\n}")) {
+        detailsLines = detailsLines.substring(0,
+            detailsLines.length() - 3) + "\n}";
       }
       return detailsLines;
     } else {
