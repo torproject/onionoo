@@ -20,6 +20,27 @@ server.</li>
 <li><b>Caching:</b> Clients should make use of the <i>"Last-Modified"</i>
 header of responses and include that timestamp in a
 <i>"If-Modified-Since"</i> header of subsequent requests.</li>
+<li><b>Response codes:</b> Clients should handle response codes by
+distinguishing between client and server errors, and if there's a problem,
+informing their users about the kind of problem.
+The following response codes are used:
+<ul>
+<li><b>200 OK:</b> The request was processed successfully.</li>
+<li><b>304 Not Modified:</b> Server data has not changed since the
+<i>"If-Modified-Since"</i> header included in the request.</li>
+<li><b>400 Bad Request:</b> The request could not be processed either
+because the requested resource could not be found or because of bad
+syntax.
+This is most likely a client problem.</li>
+<li><b>500 Internal Server Error:</b> There is an unspecific problem with
+the server which the service operator may not yet be aware of.
+Please check if there's already a bug report for this problem, and if not,
+file one.</li>
+<li><b>503 Service Unavailable:</b> The server is temporarily down for
+maintenance, or there is a temporary problem with the server that the
+service operator is already aware of.
+Only file a bug report if this problem persists.</li>
+</ul>
 <li><b>Protocol changes:</b> There are plenty of reasons why we may have
 to change the protocol described here.
 Clients should be able to handle all valid JSON responses, ignoring
