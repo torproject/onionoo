@@ -35,12 +35,15 @@ public class ResourceServlet extends HttpServlet {
 
   private DocumentStore documentStore;
 
+  private boolean checkSummaryStale = false;
+
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
     boolean maintenanceMode =
         config.getInitParameter("maintenance") != null
         && config.getInitParameter("maintenance").equals("1");
     File outDir = new File(config.getInitParameter("outDir"));
+    this.checkSummaryStale = true;
     this.init(maintenanceMode, outDir);
   }
 
@@ -64,6 +67,7 @@ public class ResourceServlet extends HttpServlet {
   private SortedMap<Integer, Set<String>> relaysByFirstSeenDays = null,
       bridgesByFirstSeenDays = null, relaysByLastSeenDays = null,
       bridgesByLastSeenDays = null;
+  private static final long SUMMARY_MAX_AGE = 6L * 60L * 60L * 1000L;
   private void readSummaryFile() {
     long summaryFileLastModified = -1L;
     UpdateStatus updateStatus = this.documentStore.retrieve(
@@ -77,6 +81,15 @@ public class ResourceServlet extends HttpServlet {
       }
     }
     if (summaryFileLastModified < 0L) {
+      // TODO Does this actually solve anything?  Should we instead
+      // switch to a variant of the maintenance mode and re-check when
+      // the next requests comes in that happens x seconds after this one?
+      this.readSummaryFile = false;
+      return;
+    }
+    if (this.checkSummaryStale &&
+        summaryFileLastModified + SUMMARY_MAX_AGE
+        < System.currentTimeMillis()) {
       // TODO Does this actually solve anything?  Should we instead
       // switch to a variant of the maintenance mode and re-check when
       // the next requests comes in that happens x seconds after this one?
