@@ -75,18 +75,9 @@
 # US.  -KL 2012-11-27
 "1189672252","1189672447","223"
 
-# SE, because GeoLite Country February database says SE for entire range.
-# -KL 2013-02-21
-"1346571776","1346572287","190"
-
 # NL, because GeoLite Country February database says NL for previous and
 # next range.  -KL 2013-02-21
 "1370181888","1370182015","161"
-
-# From geoip-manual (country):
-# GB, because RIPE NCC says 85.237.192.0-85.237.223.255 is GB.
-# -KL 2013-07-08
-"1441652224","1441652479","77"
 
 # From geoip-manual (country):
 # BE, because next MaxMind entry 86.39.147.0-86.39.148.31 is BE, and RIR
@@ -113,6 +104,9 @@
 # -KL 2012-11-27
 "1542379008","1542379519","77"
 
+# US, because ARIN says 98.159.224.0-98.159.239.255 is US.  -KL 2013-08-12
+"1654648576","1654648831","223"
+
 # NL, even though previous entry is CY, but because next entry is NL and
 # RIR says entire range 176.56.160.0-176.56.191.255 is NL.  -KL 2013-05-13
 "2956504064","2956504319","161"
@@ -136,6 +130,9 @@
 # RIR says entire range 185.25.84.0-185.25.87.255 is GB.  -KL 2013-05-13
 "3105444864","3105445887","77"
 
+# US, because ARIN says 192.238.16.0-192.238.23.255 is US.  -KL 2013-08-12
+"3236827136","3236828159","223"
+
 # From geoip-manual (country):
 # EU, despite neither previous (RU) nor next (UA) MaxMind entry being EU,
 # but because RIR delegation files agree with both previous and next
@@ -156,7 +153,9 @@
 # From geoip-manual (country):
 # US, because ARIN says 199.255.208.0-199.255.215.255 is US.
 # -KL 2013-07-08
-"3355432192","3355432959","223"
+# Changed entry start from 199.255.213.0 to 199.255.208.0 on 2013-08-12.
+# -KL 2013-08-12
+"3355430912","3355432959","223"
 
 # US, because previous entry is US, next entry is not adjacent, and RIR
 # says 204.14.72.0-204.14.79.255 is US.  -KL 2013-05-13
