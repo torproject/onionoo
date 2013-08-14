@@ -4,8 +4,9 @@ package org.torproject.onionoo;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -118,8 +119,8 @@ public class LookupService {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
-      BufferedReader br = new BufferedReader(new FileReader(
-          geoLiteCityBlocksCsvFile));
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+          new FileInputStream(geoLiteCityBlocksCsvFile), "ISO-8859-1"));
       String line;
       long previousStartIpNum = -1L;
       while ((line = br.readLine()) != null) {
@@ -187,8 +188,8 @@ public class LookupService {
     try {
       Set<Long> blockNumbers = new HashSet<Long>(
           addressNumberBlocks.values());
-      BufferedReader br = new BufferedReader(new FileReader(
-          geoLiteCityLocationCsvFile));
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+          new FileInputStream(geoLiteCityLocationCsvFile), "ISO-8859-1"));
       String line;
       while ((line = br.readLine()) != null) {
         if (line.startsWith("C") || line.startsWith("l")) {
@@ -225,8 +226,8 @@ public class LookupService {
     /* Read country names to memory. */
     Map<String, String> countryNames = new HashMap<String, String>();
     try {
-      BufferedReader br = new BufferedReader(new FileReader(
-          iso3166CsvFile));
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+          new FileInputStream(iso3166CsvFile), "ISO-8859-1"));
       String line;
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 2);
@@ -248,8 +249,8 @@ public class LookupService {
     /* Read region names to memory. */
     Map<String, String> regionNames = new HashMap<String, String>();
     try {
-      BufferedReader br = new BufferedReader(new FileReader(
-          regionCsvFile));
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+          new FileInputStream(regionCsvFile), "ISO-8859-1"));
       String line;
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 3);
@@ -275,8 +276,8 @@ public class LookupService {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
-      BufferedReader br = new BufferedReader(new FileReader(
-          geoIPASNum2CsvFile));
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+          new FileInputStream(geoIPASNum2CsvFile), "ISO-8859-1"));
       String line;
       long previousStartIpNum = -1L;
       while ((line = br.readLine()) != null) {
