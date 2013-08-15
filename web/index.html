@@ -666,6 +666,9 @@ Parameter values are case-insensitive.
 matching (part of a) nickname, (possibly $-prefixed) beginning of a
 fingerprint, or beginning of an IP address, and bridges with (part of a)
 nickname or (possibly $-prefixed) beginning of a hashed fingerprint.
+Searches for beginnings of IP addresses are performed on textual
+representations of canonical IP address forms, so that searches using CIDR
+notation or non-canonical forms will return empty results.
 Searches are case-insensitive.
 If multiple search terms are given, separated by spaces, the intersection
 of all relays and bridges matching all search terms will be returned.

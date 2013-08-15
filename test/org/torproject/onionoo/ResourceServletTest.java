@@ -557,15 +557,20 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testSearchIpv6Slash64() {
-    /* TODO This request should return one bridge. */
+  public void testSearchIpv6Slash64NoTrailingBracket() {
+    ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
+        "/summary?search=[2001:4f8:3:2e::", 1,
+        new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchIpv6Slash64TrailingBracket() {
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
         "/summary?search=[2001:4f8:3:2e::]", 0, null, 0, null);
   }
 
   @Test()
   public void testSearchIpv6Uncompressed() {
-    /* TODO This request should return one bridge. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
         "/summary?search=[2001:04f8:0003:002e:0000:0000:0000:0051]", 0,
         null, 0, null);
@@ -580,24 +585,18 @@ public class ResourceServletTest {
 
   @Test()
   public void testSearchIpv6ThreeColons() {
-    /* TODO This request should fail with a 400 status code, because the
-     * given IPv6 address is invalid. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
         "/summary?search=[2001:4f8:3:2e:::51]", 0, null, 0, null);
   }
 
   @Test()
   public void testSearchIpv6FiveHex() {
-    /* TODO This request should fail with a 400 status code, because the
-     * given IPv6 address is invalid. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
         "/summary?search=[20014:f80:3:2e::51]", 0, null, 0, null);
   }
 
   @Test()
   public void testSearchIpv6NineGroups() {
-    /* TODO This request should fail with a 400 status code, because the
-     * given IPv6 address is invalid. */
     ResourceServletTestHelper.assertSummaryDocument(this.tempOutDir,
         "/summary?search=[1:2:3:4:5:6:7:8:9]", 0, null, 0, null);
   }
