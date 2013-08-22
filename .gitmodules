@@ -1,0 +1,3 @@
+[submodule "deps/metrics-lib"]
+	path = deps/metrics-lib
+	url = https://git.torproject.org/metrics-lib

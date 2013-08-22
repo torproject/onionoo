@@ -2,7 +2,6 @@
   <property name="sources" value="src"/>
   <property name="tests" value="test"/>
   <property name="classes" value="classes"/>
-  <property name="libs" value="lib"/>
   <property name="config" value="etc"/>
   <property name="webxmlfile" value="${config}/web.xml"/>
   <property name="contextxmltemplate"
@@ -14,8 +13,16 @@
   <property name="warfile" value="onionoo.war"/>
   <path id="classpath">
     <pathelement path="${classes}"/>
-    <fileset dir="${libs}">
-      <include name="*.jar"/>
+    <fileset dir="/usr/share/java">
+      <include name="commons-codec.jar"/>
+      <include name="commons-compress.jar"/>
+      <include name="commons-lang.jar"/>
+      <include name="gson.jar"/>
+      <include name="junit4.jar"/>
+      <include name="servlet-api-3.0.jar"/>
+    </fileset>
+    <fileset dir="deps/metrics-lib">
+      <include name="descriptor.jar"/>
     </fileset>
   </path>
   <target name="init">
@@ -23,8 +30,11 @@
     <copy file="${webxmltemplate}" tofile="${webxml}"/>
     <mkdir dir="${classes}"/>
   </target>
+  <target name="metrics-lib">
+    <ant dir="deps/metrics-lib"/>
+  </target>
   <target name="compile"
-          depends="init">
+          depends="metrics-lib, init">
     <javac destdir="${classes}"
            srcdir="${sources}"
            source="1.5"
@@ -63,8 +73,15 @@
     <war destfile="${warfile}"
          webxml="${webxmlfile}">
       <fileset dir="web"/>
-      <lib dir="${libs}"
-           excludes="servlet-api.jar"/>
+      <lib dir="deps/metrics-lib">
+        <include name="descriptor.jar"/>
+      </lib>
+      <lib dir="/usr/share/java">
+        <include name="commons-codec.jar"/>
+        <include name="commons-compress.jar"/>
+        <include name="commons-lang.jar"/>
+        <include name="gson.jar"/>
+      </lib>
       <classes dir="${classes}"/>
       <zipfileset dir="${config}"
                   prefix="WEB-INF/classes"
