@@ -13,7 +13,6 @@ geoip/Manual-GeoLiteCity-Blocks.csv
 geoip/iso3166.csv
 geoip/region.csv
 in/
-lib/
 log
 onionoo.war
 out/
