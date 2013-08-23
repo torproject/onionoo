@@ -110,8 +110,14 @@ class DescriptorQueue {
           + "to descriptor reader.");
       return;
     }
-    this.descriptorReader.addDirectory(new File(this.inDir,
-        directoryName));
+    File directory = new File(this.inDir, directoryName);
+    if (directory.exists() && directory.isDirectory()) {
+      this.descriptorReader.addDirectory(directory);
+    } else {
+      System.err.println("Directory " + directory.getAbsolutePath()
+          + " either does not exist or is not a directory.  Not adding "
+          + "to descriptor reader.");
+    }
   }
 
   public void readHistoryFile(DescriptorHistory descriptorHistory) {
@@ -147,7 +153,7 @@ class DescriptorQueue {
       return;
     }
     this.historyFile = new File(this.statusDir, historyFileName);
-    if (this.historyFile.exists()) {
+    if (this.historyFile.exists() && this.historyFile.isFile()) {
       SortedMap<String, Long> excludedFiles = new TreeMap<String, Long>();
       try {
         BufferedReader br = new BufferedReader(new FileReader(

@@ -455,6 +455,7 @@ public class DocumentStore {
     }
     String documentString = sb.toString();
     try {
+      summaryFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));
       bw.write(documentString);
       bw.close();
@@ -474,6 +475,7 @@ public class DocumentStore {
     File updateFile = new File(this.outDir, "update");
     String documentString = String.valueOf(System.currentTimeMillis());
     try {
+      updateFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(updateFile));
       bw.write(documentString);
       bw.close();
