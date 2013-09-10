@@ -3,31 +3,6 @@
 # directory to process this file when producing a new geoip file.  See
 # INSTALL for details.
 
-# GB, even though next entry is FR, but because previous entry is GB and
-# RIR says 31.6.0.0-31.6.63.255 is GB.
-"520493568","520494079","77"
-
-# From geoip-manual (country):
-# NL, because previous MaxMind entry 31.171.128.0-31.171.133.255 is NL,
-# and RIR delegation files say 31.171.128.0-31.171.135.255 is NL.
-# -KL 2012-11-27
-"531334656","531335167","161"
-
-# From geoip-manual (country):
-# EU, because next MaxMind entry 37.139.64.1-37.139.64.9 is EU, because
-# RIR delegation files say 37.139.64.0-37.139.71.255 is EU, and because it
-# just makes more sense for the next entry to start at .0 and not .1.
-# -KL 2012-11-27
-"629882880","629882880","3"
-
-# Previous and next entry are same city, set to previous entry.
-# -KL 2013-03-07
-"643875072","643875327","1262"
-
-# US, even though previous entry is CA, but because next entry is US and
-# RIR says entire range 38.0.0.0-38.255.255.255 is US.  -KL 2013-05-13
-"644059136","644059391","223"
-
 # GB, taken from GeoLite Country February database.  -KL 2013-02-21
 "772808704","772810751","77"
 
@@ -42,22 +17,6 @@
 # RIR delegation files say 46.166.128.0-46.166.191.255 is GB.
 # -KL 2012-11-27
 "782663680","782663935","77"
-
-# GB, because GeoLite Country February database has GB for both previous
-# and next entry.  -KL 2013-02-21
-"782665472","782666751","77"
-
-# From geoip-manual (country):
-# Removing, because RIR delegation files don't even have an entry for this
-# single-address range, and there's no previous or next range in MaxMind.
-# -KL 2013-03-07
-"1085926766","1085926766",""
-
-# From geoip-manual (country):
-# US, because next MaxMind entry 67.43.145.0-67.43.155.255 is US, and RIR
-# delegation files say 67.43.144.0-67.43.159.255 is US.
-# -KL 2012-11-27
-"1126928384","1126928639","223"
 
 # From geoip-manual (country):
 # US, because previous MaxMind entry 70.159.21.51-70.232.244.255 is US,
@@ -75,37 +34,11 @@
 # US.  -KL 2012-11-27
 "1189672252","1189672447","223"
 
-# NL, because GeoLite Country February database says NL for previous and
-# next range.  -KL 2013-02-21
-"1370181888","1370182015","161"
-
-# From geoip-manual (country):
-# BE, because next MaxMind entry 86.39.147.0-86.39.148.31 is BE, and RIR
-# delegation files say entire range 86.39.128.0-86.39.255.255 is BE.
-# -KL 2013-04-08
-"1445433856","1445434111","23"
-
 # From geoip-manual (country):
 # GB, despite neither previous (GE) nor next (LV) MaxMind entry being GB,
 # but because RIR delegation files agree with both previous and next
 # MaxMind entry and say GB for 91.228.0.0-91.228.3.255.  -KL 2012-11-27
 "1541668864","1541669887","77"
-
-# From geoip-manual (country):
-# GB, because next MaxMind entry 91.232.125.0-91.232.125.255 is GB, and
-# RIR delegation files say 91.232.124.0-91.232.125.255 is GB.
-# -KL 2012-11-27
-"1541962752","1541963007","77"
-
-# From geoip-manual (country):
-# GB, despite neither previous (RU) nor next (PL) MaxMind entry being GB,
-# but because RIR delegation files agree with both previous and next
-# MaxMind entry and say GB for 91.238.214.0-91.238.215.255.
-# -KL 2012-11-27
-"1542379008","1542379519","77"
-
-# US, because ARIN says 98.159.224.0-98.159.239.255 is US.  -KL 2013-08-12
-"1654648576","1654648831","223"
 
 # NL, even though previous entry is CY, but because next entry is NL and
 # RIR says entire range 176.56.160.0-176.56.191.255 is NL.  -KL 2013-05-13
@@ -115,36 +48,9 @@
 # RIR says entire range 176.56.160.0-176.56.191.255 is NL.  -KL 2013-05-13
 "2956504576","2956504831","161"
 
-# From geoip-manual (country):
-# US, because next MaxMind entry 176.67.84.0-176.67.84.79 is US, and RIR
-# delegation files say 176.67.80.0-176.67.87.255 is US.  -KL 2012-11-27
-"2957201408","2957202431","223"
-
-# From geoip-manual (country):
-# US, because previous MaxMind entry 176.67.84.192-176.67.85.255 is US,
-# and RIR delegation files say 176.67.80.0-176.67.87.255 is US.
-# -KL 2012-11-27
-"2957202944","2957203455","223"
-
 # GB, even though previous entry is NL and next entry is RU, but because
 # RIR says entire range 185.25.84.0-185.25.87.255 is GB.  -KL 2013-05-13
 "3105444864","3105445887","77"
-
-# US, because ARIN says 192.238.16.0-192.238.23.255 is US.  -KL 2013-08-12
-"3236827136","3236828159","223"
-
-# From geoip-manual (country):
-# EU, despite neither previous (RU) nor next (UA) MaxMind entry being EU,
-# but because RIR delegation files agree with both previous and next
-# MaxMind entry and say EU for 193.200.150.0-193.200.150.255.
-# -KL 2012-11-27
-"3251148288","3251148543","3"
-
-# From geoip-manual (country):
-# US, because previous MaxMind entry 199.96.68.0-199.96.87.127 is US, and
-# RIR delegation files say 199.96.80.0-199.96.87.255 is US.
-# -KL 2012-11-27
-"3344979840","3344979967","223"
 
 # US, even though previous entry is MF, but because next entry is US and
 # RIR says entire range 199.101.192.0-199.101.199.255 is US.  -KL 2013-05-13
@@ -164,11 +70,6 @@
 # US, even though previous entry is CA, but because next entry is US and
 # RIR says entire range 204.12.160.0-204.12.191.255 is US.  -KL 2013-05-13
 "3423379456","3423379967","223"
-
-# Previous and next entry are same city, set to previous entry.
-# -KL 2013-02-21
-# Extended to 207.158.40.0-207.158.41.255.  -KL 2013-05-13
-"3483248640","3483249151","17287"
 
 # From geoip-manual (country):
 # US, because previous MaxMind entry 209.58.176.144-209.59.31.255 is US,
