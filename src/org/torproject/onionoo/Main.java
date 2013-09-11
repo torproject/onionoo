@@ -11,6 +11,16 @@ public class Main {
   public static void main(String[] args) {
 
     printStatus("Initializing.");
+
+    LockFile lf = new LockFile(new File("lock"));
+    if (lf.acquireLock()) {
+      printStatusTime("Acquired lock");
+    } else {
+      printStatusTime("Could not acquire lock.  Is Onionoo already "
+          + "running?  Terminating");
+      return;
+    }
+
     DescriptorSource dso = new DescriptorSource(new File("in"),
         new File("status"));
     printStatusTime("Initialized descriptor source");
@@ -121,6 +131,14 @@ public class Main {
     printStatistics("GeoIP lookup service", ls.getStatsString());
     printStatistics("Reverse domain name resolver",
         rdnr.getStatsString());
+
+    printStatus("Releasing lock.");
+    if (lf.releaseLock()) {
+      printStatusTime("Released lock");
+    } else {
+      printStatusTime("Could not release lock.  The next execution "
+          + "may not start as expected");
+    }
 
     printStatus("Terminating.");
   }
