@@ -3,7 +3,6 @@
 package org.torproject.onionoo;
 
 import java.io.File;
-import java.util.SortedMap;
 
 /* Update search data and status data files. */
 public class Main {
@@ -30,10 +29,8 @@ public class Main {
     Logger.printStatusTime("Initialized Geoip lookup service");
     ReverseDomainNameResolver rdnr = new ReverseDomainNameResolver();
     Logger.printStatusTime("Initialized reverse domain name resolver");
-    NodeDataWriter ndw = new NodeDataWriter(dso, ls, ds);
+    NodeDataWriter ndw = new NodeDataWriter(dso, rdnr, ls, ds);
     Logger.printStatusTime("Initialized node data writer");
-    DetailsDataWriter ddw = new DetailsDataWriter(dso, rdnr, ds);
-    Logger.printStatusTime("Initialized details data writer");
     BandwidthDataWriter bdw = new BandwidthDataWriter(dso, ds);
     Logger.printStatusTime("Initialized bandwidth data writer");
     WeightsDataWriter wdw = new WeightsDataWriter(dso, ds);
@@ -60,32 +57,23 @@ public class Main {
     Logger.printStatus("Updating internal node list.");
     ndw.readStatusSummary();
     Logger.printStatusTime("Read status summary");
+    ndw.setCurrentNodes();
+    Logger.printStatusTime("Set current node fingerprints");
+    ndw.startReverseDomainNameLookups();
+    Logger.printStatusTime("Started reverse domain name lookups");
     ndw.lookUpCitiesAndASes();
     Logger.printStatusTime("Looked up cities and ASes");
     ndw.setRunningBits();
     Logger.printStatusTime("Set running bits");
+    ndw.calculatePathSelectionProbabilities();
+    Logger.printStatusTime("Calculated path selection probabilities");
+    ndw.finishReverseDomainNameLookups();
+    Logger.printStatusTime("Finished reverse domain name lookups");
     ndw.writeStatusSummary();
     Logger.printStatusTime("Wrote status summary");
     ndw.writeOutSummary();
     Logger.printStatusTime("Wrote out summary");
-    SortedMap<String, NodeStatus> currentNodes = ndw.getCurrentNodes();
-    SortedMap<String, Integer> lastBandwidthWeights =
-        ndw.getLastBandwidthWeights();
-
-    Logger.printStatus("Updating detail data.");
-    // TODO Instead of using ndw's currentNodes and lastBandwidthWeights,
-    // parse statuses once again, keeping separate parse history.  Allows
-    // us to run ndw and ddw in parallel in the future.  Alternatively,
-    // merge ndw and ddw, because they're doing similar things anyway.
-    ddw.setCurrentNodes(currentNodes);
-    Logger.printStatusTime("Set current node fingerprints");
-    ddw.startReverseDomainNameLookups();
-    Logger.printStatusTime("Started reverse domain name lookups");
-    ddw.calculatePathSelectionProbabilities(lastBandwidthWeights);
-    Logger.printStatusTime("Calculated path selection probabilities");
-    ddw.finishReverseDomainNameLookups();
-    Logger.printStatusTime("Finished reverse domain name lookups");
-    ddw.writeOutDetails();
+    ndw.writeOutDetails();
     Logger.printStatusTime("Wrote detail data files");
 
     Logger.printStatus("Updating bandwidth data.");
