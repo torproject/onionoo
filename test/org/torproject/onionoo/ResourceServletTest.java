@@ -40,7 +40,8 @@ public class ResourceServletTest {
         relays = new TreeMap<String, String>(),
         bridges = new TreeMap<String, String>();
 
-    private long lastModified = 1366806142000L; // 2013-04-24 12:22:22
+    // 2013-04-24 12:22:22
+    private static long lastModified = 1366806142000L;
 
     private boolean maintenanceMode = false;
 
@@ -174,13 +175,13 @@ public class ResourceServletTest {
       bw.close();
       File updateFile = new File(this.tempOutDir, "update");
       bw = new BufferedWriter(new FileWriter(updateFile));
-      bw.write(String.valueOf(this.lastModified));
+      bw.write(String.valueOf(lastModified++));
       bw.close();
     }
 
     private void makeRequest() throws IOException {
       ResourceServlet rs = new ResourceServlet();
-      rs.init(maintenanceMode, this.tempOutDir);
+      rs.init(maintenanceMode, this.tempOutDir, false);
       rs.doGet(this.request, this.response);
     }
 
