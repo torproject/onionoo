@@ -9,10 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExtraInfoDescriptor;
@@ -42,8 +40,6 @@ public class BandwidthDataWriter implements DescriptorListener {
 
   private DocumentStore documentStore;
 
-  private SortedSet<String> currentFingerprints = new TreeSet<String>();
-
   public BandwidthDataWriter(DescriptorSource descriptorSource,
       DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
@@ -69,11 +65,6 @@ public class BandwidthDataWriter implements DescriptorListener {
     if (descriptor instanceof ExtraInfoDescriptor) {
       this.parseDescriptor((ExtraInfoDescriptor) descriptor);
     }
-  }
-
-  public void setCurrentNodes(
-      SortedMap<String, NodeStatus> currentNodes) {
-    this.currentFingerprints.addAll(currentNodes.keySet());
   }
 
   private void parseDescriptor(ExtraInfoDescriptor descriptor) {
@@ -238,13 +229,6 @@ public class BandwidthDataWriter implements DescriptorListener {
   private void writeBandwidthDataFileToDisk(String fingerprint,
       SortedMap<Long, long[]> writeHistory,
       SortedMap<Long, long[]> readHistory) {
-    if ((writeHistory.isEmpty() || writeHistory.lastKey() < this.now
-        - 7L * 24L * 60L * 60L * 1000L) &&
-        (readHistory.isEmpty() || readHistory.lastKey() < this.now
-        - 7L * 24L * 60L * 60L * 1000L)) {
-      /* Don't write bandwidth data file to disk. */
-      return;
-    }
     String writeHistoryString = formatHistoryString(writeHistory);
     String readHistoryString = formatHistoryString(readHistory);
     StringBuilder sb = new StringBuilder();
@@ -371,19 +355,6 @@ public class BandwidthDataWriter implements DescriptorListener {
       result = result.substring(0, result.length() - 2) + "\n";
     }
     return result;
-  }
-
-  public void deleteObsoleteBandwidthFiles() {
-    SortedSet<String> obsoleteBandwidthFiles = this.documentStore.list(
-        BandwidthDocument.class, false);
-    for (String fingerprint : this.currentFingerprints) {
-      if (obsoleteBandwidthFiles.contains(fingerprint)) {
-        obsoleteBandwidthFiles.remove(fingerprint);
-      }
-    }
-    for (String fingerprint : obsoleteBandwidthFiles) {
-      this.documentStore.remove(BandwidthDocument.class, fingerprint);
-    }
   }
 }
 

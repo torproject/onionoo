@@ -31,8 +31,6 @@ public class WeightsDataWriter implements DescriptorListener {
 
   private DocumentStore documentStore;
 
-  private SortedSet<String> currentFingerprints = new TreeSet<String>();
-
   public WeightsDataWriter(DescriptorSource descriptorSource,
       DocumentStore documentStore) {
     this.descriptorSource = descriptorSource;
@@ -64,8 +62,9 @@ public class WeightsDataWriter implements DescriptorListener {
     this.consensuses.add(consensus);
   }
 
-  private Set<String> updateAdvertisedBandwidths =
-      new HashSet<String>();
+  private Set<String> updateWeightsStatuses = new HashSet<String>();
+
+  private Set<String> updateWeightsDocuments = new HashSet<String>();
 
   private Map<String, Set<String>> descriptorDigestsByFingerprint =
       new HashMap<String, Set<String>>();
@@ -83,18 +82,13 @@ public class WeightsDataWriter implements DescriptorListener {
         serverDescriptor.getBandwidthRate());
     this.advertisedBandwidths.put(digest, advertisedBandwidth);
     String fingerprint = serverDescriptor.getFingerprint();
-    this.updateAdvertisedBandwidths.add(fingerprint);
+    this.updateWeightsStatuses.add(fingerprint);
     if (!this.descriptorDigestsByFingerprint.containsKey(
         fingerprint)) {
       this.descriptorDigestsByFingerprint.put(fingerprint,
           new HashSet<String>());
     }
     this.descriptorDigestsByFingerprint.get(fingerprint).add(digest);
-  }
-
-  public void setCurrentNodes(
-      SortedMap<String, NodeStatus> currentNodes) {
-    this.currentFingerprints.addAll(currentNodes.keySet());
   }
 
   public void updateWeightsHistories() {
@@ -280,6 +274,8 @@ public class WeightsDataWriter implements DescriptorListener {
       history.put(interval, weights);
       history = this.compressHistory(history);
       this.writeHistoryToDisk(fingerprint, history);
+      this.updateWeightsDocuments.add(fingerprint);
+      this.updateWeightsStatuses.remove(fingerprint);
     }
   }
 
@@ -441,14 +437,9 @@ public class WeightsDataWriter implements DescriptorListener {
   }
 
   public void writeWeightsDataFiles() {
-    for (String fingerprint : this.currentFingerprints) {
+    for (String fingerprint : this.updateWeightsDocuments) {
       SortedMap<long[], double[]> history =
           this.readHistoryFromDisk(fingerprint);
-      if (history.isEmpty() || history.lastKey()[1] < this.now
-          - 7L * 24L * 60L * 60L * 1000L) {
-        /* Don't write weights data file to disk. */
-        continue;
-      }
       WeightsDocument weightsDocument = new WeightsDocument();
       weightsDocument.documentString = this.formatHistoryString(
           fingerprint, history);
@@ -605,22 +596,8 @@ public class WeightsDataWriter implements DescriptorListener {
     }
   }
 
-  public void deleteObsoleteWeightsDataFiles() {
-    SortedSet<String> obsoleteWeightsFiles;
-    obsoleteWeightsFiles = this.documentStore.list(WeightsDocument.class,
-        false);
-    for (String fingerprint : this.currentFingerprints) {
-      if (obsoleteWeightsFiles.contains(fingerprint)) {
-        obsoleteWeightsFiles.remove(fingerprint);
-      }
-    }
-    for (String fingerprint : obsoleteWeightsFiles) {
-      this.documentStore.remove(WeightsDocument.class, fingerprint);
-    }
-  }
-
-  public void updateAdvertisedBandwidths() {
-    for (String fingerprint : this.updateAdvertisedBandwidths) {
+  public void updateWeightsStatuses() {
+    for (String fingerprint : this.updateWeightsStatuses) {
       SortedMap<long[], double[]> history =
           this.readHistoryFromDisk(fingerprint);
       this.writeHistoryToDisk(fingerprint, history);

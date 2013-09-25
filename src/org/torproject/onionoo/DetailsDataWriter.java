@@ -414,12 +414,8 @@ public class DetailsDataWriter implements DescriptorListener {
   }
 
   public void writeOutDetails() {
-    SortedSet<String> remainingDetailsFiles = new TreeSet<String>();
-    remainingDetailsFiles.addAll(this.documentStore.list(
-        DetailsDocument.class, false));
-    this.updateRelayDetailsFiles(remainingDetailsFiles);
-    this.updateBridgeDetailsFiles(remainingDetailsFiles);
-    this.deleteDetailsFiles(remainingDetailsFiles);
+    this.updateRelayDetailsFiles();
+    this.updateBridgeDetailsFiles();
   }
 
   private static String escapeJSON(String s) {
@@ -430,16 +426,12 @@ public class DetailsDataWriter implements DescriptorListener {
     return StringEscapeUtils.unescapeJavaScript(s.replaceAll("'", "\\'"));
   }
 
-  private void updateRelayDetailsFiles(
-      SortedSet<String> remainingDetailsFiles) {
+  private void updateRelayDetailsFiles() {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     for (Map.Entry<String, NodeStatus> relay : this.relays.entrySet()) {
       String fingerprint = relay.getKey();
-
-      /* Don't delete this details file later on. */
-      remainingDetailsFiles.remove(fingerprint);
 
       /* Generate network-status-specific part. */
       NodeStatus entry = relay.getValue();
@@ -627,16 +619,12 @@ public class DetailsDataWriter implements DescriptorListener {
     }
   }
 
-  private void updateBridgeDetailsFiles(
-      SortedSet<String> remainingDetailsFiles) {
+  private void updateBridgeDetailsFiles() {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     for (Map.Entry<String, NodeStatus> bridge : this.bridges.entrySet()) {
       String fingerprint = bridge.getKey();
-
-      /* Don't delete this details file later on. */
-      remainingDetailsFiles.remove(fingerprint);
 
       /* Generate network-status-specific part. */
       NodeStatus entry = bridge.getValue();
@@ -689,13 +677,6 @@ public class DetailsDataWriter implements DescriptorListener {
       DetailsDocument detailsDocument = new DetailsDocument();
       detailsDocument.documentString = sb.toString();
       this.documentStore.store(detailsDocument, fingerprint);
-    }
-  }
-
-  private void deleteDetailsFiles(
-      SortedSet<String> remainingDetailsFiles) {
-    for (String fingerprint : remainingDetailsFiles) {
-      this.documentStore.remove(DetailsDocument.class, fingerprint);
     }
   }
 }

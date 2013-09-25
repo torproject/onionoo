@@ -90,29 +90,14 @@ public class Main {
     printStatusTime("Wrote detail data files");
 
     printStatus("Updating bandwidth data.");
-    bdw.setCurrentNodes(currentNodes);
-    printStatusTime("Set current node fingerprints");
-    // TODO Evaluate overhead of not deleting obsolete bandwidth files.
-    // An advantage would be that we don't need ndw's currentNodes
-    // anymore, which allows us to run ndw and bdw in parallel in the
-    // future.
-    bdw.deleteObsoleteBandwidthFiles();
-    printStatusTime("Deleted obsolete bandwidth files");
 
     printStatus("Updating weights data.");
-    wdw.setCurrentNodes(currentNodes);
-    printStatusTime("Set current node fingerprints");
     wdw.updateWeightsHistories();
     printStatusTime("Updated weights histories");
+    wdw.updateWeightsStatuses();
+    printStatusTime("Updated weights status files");
     wdw.writeWeightsDataFiles();
-    printStatusTime("Wrote weights data files");
-    // TODO Evaluate overhead of not deleting obsolete weights files.  An
-    // advantage would be that we don't need ndw's currentNodes anymore,
-    // which allows us to run ndw and wdw in parallel in the future.
-    wdw.deleteObsoleteWeightsDataFiles();
-    printStatusTime("Deleted obsolete weights files");
-    wdw.updateAdvertisedBandwidths();
-    printStatusTime("Updated advertised bandwidths");
+    printStatusTime("Wrote weights document files");
 
     printStatus("Shutting down.");
     dso.writeHistoryFiles();
