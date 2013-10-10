@@ -722,8 +722,7 @@ Note that relays and bridges that haven't been running in the past week
 are never included in results, so that setting x to 8 or higher will
 always lead to an empty result set.
 </td></tr>
-<tr><td><b><font color="blue">contact</font></b></td><td>Return only
-relays with the parameter value
+<tr><td><b>contact</b></td><td>Return only relays with the parameter value
 matching (part of) the contact line.
 If the parameter value contains spaces, only relays are returned which
 contain all space-separated parts in their contact line.
@@ -731,7 +730,6 @@ Only printable ASCII characters are permitted in the parameter value,
 some of which need to be percent-encoded (# as %23, % as %25, &#38; as
 %26, + as %2B, and / as %2F).
 Comparisons are case-insensitive.
-<font color="blue">Added on July 19, 2013.</font>
 </td></tr>
 </table>
 <p>Response documents can be reduced in size by requesting only a subset
@@ -741,15 +739,13 @@ of contained fields.</p>
 <col width="150">
 <col width="850">
 </colgroup>
-<tr><td><b><font color="blue">fields</font></b></td><td>Comma-separated
-list of fields that will be
+<tr><td><b>fields</b></td><td>Comma-separated list of fields that will be
 included in the result.
 So far, only top-level fields in relay or bridge objects of details
 documents can be specified, e.g., <b>nickname,hashed_fingerprint</b>.
 If the fields parameter is provided, all other fields which are not
 contained in the provided list will be removed from the result.
 Field names are case-insensitive.
-<font color="blue">Added on July 23, 2013.</font>
 </td></tr>
 </table>
 <p>Relay and/or bridge documents in the response can be ordered and
@@ -762,7 +758,7 @@ parameter value is considered.</p>
 <col width="850">
 </colgroup>
 <tr><td><b>order</b></td><td>Re-order results by a comma-separated list
-of fields in ascending or descening order.
+of fields in ascending or descending order.
 Results are first ordered by the first list element, then by the second,
 and so on.
 Possible fields for ordering are: <b>consensus_weight</b>.
