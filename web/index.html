@@ -1,108 +1,214 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-<style>
-body { background-color: white; font-family: Arial, Helvetica, sans-serif;
-  font-size: 1em; font-style: normal; color: #000000; padding-top: 0px;
-  background-color: white; margin: 0px auto 0 auto; width: 85%;
-  padding: 15px 0 10px 10px; text-indent: 0pt; direction: ltr;
-  text-align: left; }
-h2 { font-size: 1.4em; font-weight: bold; }
-h3 { font-size: 1.2em; font-weight: bold; }
-li { margin: .2em .2em .2em 1em; }
-a.anchor { font-size: 1em; color: black; font-weight: bold;
-  text-decoration: none; }
-</style>
 <title>Onionoo &mdash; a Tor network status protocol</title>
+<style type="text/css">
+body { font-family: "Open Sans","lucida grande","Segoe UI",arial,verdana,
+  "lucida sans unicode",tahoma,sans-serif; background: #fafafa;
+  font-size: 13px; line-height: 22px; color: #222; }
+h1 { font-size: 20px; font-weight: normal; text-align: center; }
+h3 { color: #7D4698; }
+a { color: #7D4698; text-decoration: none; font-weight: bold; }
+ul { list-style: none; padding: 0; margin: 0; }
+p { margin: 0; padding: 0; }
+a[name] { padding: 0; margin: 0; }
+.box { max-width: 850px; width: 100%; margin: 0 auto 30px auto;
+  padding-bottom: 30px; background: white; border: 1px solid #eee; }
+.box > * { margin-left: 30px; margin-right: 30px; }
+.box h3 a { visibility: hidden; }
+.box:hover h3 a { visibility: visible; }
+.api-request { border-bottom: 1px solid #eee; }
+.request-url, .request-type, .request-response { padding: 8px 10px;
+  vertical-align: middle }
+.request-type { color: #57145F; display: inline-block; }
+.request-url { color: #333; font-size: 18px; }
+.request-response { float: right; color: #666; }
+.api-urls>li:last-child { border-bottom: 0; }
+.required-true, .required-false, .typeof { display: inline-block;
+  vertical-align: middle; padding: 5px 10px; }
+.required-true { color: #1d7508; }
+.required-false { color: #aaa; }
+.properties { margin-top: 10px; margin-bottom: 10px;
+  border: 1px solid #eee; }
+.properties li { padding: 5px 0; }
+.properties li ul { border: 1px solid #eee; margin: 10px 10px 10px 40px;
+  background: white; }
+.properties .properties { margin-left: 10px; }
+.properties li:nth-child(even) { background: #fafafa; }
+.properties p { padding: 10px 15px; }
+.properties b { padding: 5px 10px; display: inline-block;
+  vertical-align: middle; }
+.api-urls{ margin-top: 30px; margin-bottom: 30px; }
+</style>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <link href="favicon.ico" type="image/x-icon" rel="shortcut icon">
 </head>
 <body>
+
+<div class="box">
 <h3>Onionoo protocol overview</h3>
-<p>The Onionoo service is designed as a RESTful web service.
+
+    <h4>Table of contents</h4>
+    <ul>
+        <li><a href="#general">General</a></li>
+        <li><a href="#methods">Methods</a></li>
+        <li><a href="#summary">Summary documents</a></li>
+        <li><a href="#details">Details documents</a></li>
+        <li><a href="#bandwidth">Bandwidth documents</a></li>
+        <li><a href="#weights">Weights documents</a></li>
+    </ul>
+
+</div>
+<div class="box">
+
+<a name="general"></a>
+<h3>General <a href="#general">#</a></h3>
+
+<p>
+The Onionoo service is designed as a RESTful web service.
 Onionoo clients send HTTP GET requests to the Onionoo server which
-responds with JSON-formatted replies.</p>
-<p>Onionoo clients and their developers should follow a few rules:</p>
-<ul>
-<li><b>Compression:</b> Clients should include an <i>"Accept-Encoding:
-gzip"</i> header in their requests and handle gzip-compressed responses.
+responds with JSON-formatted replies.
+Onionoo clients and their developers should follow a few rules:
+</p>
+
+<h4>Compression</h4>
+<p>
+Clients should include an <strong>"Accept-Encoding:
+gzip"</strong> header in their requests and handle gzip-compressed
+responses.
 Only requests starting at a certain size will be compressed by the
-server.</li>
-<li><b>Caching:</b> Clients should make use of the <i>"Last-Modified"</i>
+server.
+</p>
+
+<h4>Caching</h4>
+<p>Clients should make use of the <strong>"Last-Modified"</strong>
 header of responses and include that timestamp in a
-<i>"If-Modified-Since"</i> header of subsequent requests.</li>
-<li><b>Response codes:</b> Clients should handle response codes by
+<strong>"If-Modified-Since"</strong> header of subsequent requests.
+</p>
+
+<h4>Response codes</h4>
+<p>
+Clients should handle response codes by
 distinguishing between client and server errors, and if there's a problem,
 informing their users about the kind of problem.
 The following response codes are used:
-<ul>
-<li><b>200 OK:</b> The request was processed successfully.</li>
-<li><b>304 Not Modified:</b> Server data has not changed since the
-<i>"If-Modified-Since"</i> header included in the request.</li>
-<li><b>400 Bad Request:</b> The request could not be processed either
+</p>
+
+<ul class="properties">
+
+<li>
+<b>200 OK</b>
+<p>
+The request was processed successfully.
+</p>
+</li>
+
+<li>
+<b>304 Not Modified</b>
+<p>
+Server data has not changed since the
+<strong>"If-Modified-Since"</strong> header included in the request.
+</p>
+</li>
+
+<li>
+<b>400 Bad Request</b>
+<p>
+The request could not be processed either
 because the requested resource could not be found or because of bad
 syntax.
-This is most likely a client problem.</li>
-<li><b>500 Internal Server Error:</b> There is an unspecific problem with
+This is most likely a client problem.
+</p>
+</li>
+
+<li>
+<b>500 Internal Server Error</b>
+<p>
+There is an unspecific problem with
 the server which the service operator may not yet be aware of.
 Please check if there's already a bug report for this problem, and if not,
-file one.</li>
-<li><b>503 Service Unavailable:</b> The server is temporarily down for
+file one.
+</p>
+</li>
+
+<li>
+<b>503 Service Unavailable</b>
+<p>
+The server is temporarily down for
 maintenance, or there is a temporary problem with the server that the
 service operator is already aware of.
-Only file a bug report if this problem persists.</li>
+Only file a bug report if this problem persists.
+</p>
+</li>
+
 </ul>
-<li><b>Protocol changes:</b> There are plenty of reasons why we may have
+
+<h4>Protocol changes</h4>
+<p>
+There are plenty of reasons why we may have
 to change the protocol described here.
 Clients should be able to handle all valid JSON responses, ignoring
 unknown fields and not breaking horribly in case of missing fields.
 Protocol changes will be announced here by writing deprecated API parts in
-<b><font color="red">red</font></b> and new parts in
-<b><font color="blue">blue</font></b>.
+<strong><font color="red">red</font></strong> and new parts in
+<strong><font color="blue">blue</font></strong>.
 Deprecated parts will be removed one month after their announcement.
 Let us <a href="mailto:karsten.loesing@gmx.net">know</a> that you're
 developing a client, and we're going to inform you of upcoming protocol
 changes.
-</li>
-</ul>
+</p>
+
 <p>The Onionoo API is described by resource types and available methods
 below.</p>
-<br>
+
+</div> <!-- box -->
+
+<div class="box">
+
 <a name="methods"></a>
-<h3><a href="#methods" class="anchor">Methods</a></h3>
-<p>The following methods each return a single document containing zero or
-more relay and/or bridge documents.</p>
-<table border="0" cellpadding="4" cellspacing="0" summary="">
-<colgroup>
-<col width="150">
-<col width="850">
-</colgroup>
-<tr>
-<td><b>GET summary</b></td>
-<td>Return summaries of all relays and bridges that are currently running
-or that have been running in the past week.
-</td>
-</tr>
-<tr>
-<td><b>GET details</b></td>
-<td>Return details of all relays and bridges that are currently running
-or that have been running in the past week.
-</td>
-</tr>
-<tr>
-<td><b>GET bandwidth</b></td>
-<td>Return bandwidth documents of all relays and bridges that are
-currently running or that have been running in the past week.
-</td>
-</tr>
-<tr>
-<td><b>GET weights</b></td>
-<td>Return weights documents of all relays and bridges that are currently
-running or that have been running in the past week.
-</td>
-</tr>
-</table>
-<p>Each of the methods above can be parameterized to select only a subset
+<h3>Methods <a href="#methods">#</a></h3>
+
+<p>
+The following methods each return a single document containing zero or
+more objects of relays and/or bridges that are currently running or that
+have been running in the past week.
+</p>
+
+<ul class="api-urls">
+
+<li class="api-request">
+<span class="request-type">GET</span>
+<span class="request-url">https://onionoo.torproject.org/summary</span>
+<span class="request-response">returns a <a href="#summary">summary
+document</a></span>
+</li>
+
+<li class="api-request">
+<span class="request-type">GET</span>
+<span class="request-url">https://onionoo.torproject.org/details</span>
+<span class="request-response">returns a <a href="#details">details
+document</a></span>
+</li>
+
+<li class="api-request">
+<span class="request-type">GET</span>
+<span class="request-url">https://onionoo.torproject.org/bandwidth</span>
+<span class="request-response">returns a <a href="#bandwidth">bandwidth
+document</a></span>
+</li>
+
+<li class="api-request">
+<span class="request-type">GET</span>
+<span class="request-url">https://onionoo.torproject.org/weights</span>
+<span class="request-response">returns a <a href="#weights">weights
+document</a></span>
+</li>
+
+</ul>
+
+<h4>Parameters</h4>
+<p>
+Each of the methods above can be parameterized to select only a subset
 of relay and/or bridge documents to be included in the response.
 If multiple parameters are specified, they are combined using a logical
 AND operation, meaning that only the intersection of relays and bridges
@@ -110,22 +216,34 @@ matching all parameters is returned.
 If the same parameter is specified more than once, only the first
 parameter value is considered.
 </p>
-<table border="0" cellpadding="4" cellspacing="0" summary="">
-<colgroup>
-<col width="150">
-<col width="850">
-</colgroup>
-<tr><td><b>type</b></td><td>Return only relay (parameter value
-<b>relay</b>) or only bridge documents (parameter value
-<b>bridge</b>).
+
+<ul class="properties">
+
+<li>
+<b>type</b>
+<p>
+Return only relay (parameter value
+<strong>relay</strong>) or only bridge documents (parameter value
+<strong>bridge</strong>).
 Parameter values are case-insensitive.
-</td></tr>
-<tr><td><b>running</b></td><td>Return only running (parameter value
-<b>true</b>) or only non-running relays and/or bridges (paramter value
-<b>false</b>).
+</p>
+</li>
+
+<li>
+<b>running</b>
+<p>
+Return only running (parameter value
+<strong>true</strong>) or only non-running relays and/or bridges
+(paramter value
+<strong>false</strong>).
 Parameter values are case-insensitive.
-</td></tr>
-<tr><td><b>search</b></td><td>Return only relays with the parameter value
+</p>
+</li>
+
+<li>
+<b>search</b>
+<p>
+Return only relays with the parameter value
 matching (part of a) nickname, (possibly $-prefixed) beginning of a
 fingerprint, or beginning of an IP address, and bridges with (part of a)
 nickname or (possibly $-prefixed) beginning of a hashed fingerprint.
@@ -138,8 +256,13 @@ of all relays and bridges matching all search terms will be returned.
 Full fingerprints should always be hashed using SHA-1, regardless of
 searching for a relay or a bridge, in order to not accidentally leak
 non-hashed bridge fingerprints in the URL.
-</td></tr>
-<tr><td><b>lookup</b></td><td>Return only the relay with the parameter
+</p>
+</li>
+
+<li>
+<b>lookup</b>
+<p>
+Return only the relay with the parameter
 value matching the fingerprint or the bridge with the parameter value
 matching the hashed fingerprint.
 Fingerprints should always be hashed using SHA-1, regardless of looking up
@@ -148,34 +271,55 @@ fingerprints in the URL.
 Lookups only work for full fingerprints or hashed fingerprints consisting
 of 40 hex characters.
 Lookups are case-insensitive.
-</td></tr>
-<tr><td><b>country</b></td><td>Return only relays which are located in the
+</p>
+</li>
+
+<li>
+<b>country</b>
+<p>
+Return only relays which are located in the
 given country as identified by a two-letter country code.
 Filtering by country code is case-insensitive.
-</td></tr>
-<tr><td><b>as</b></td>
-<td>Return only relays which are located in the
+</p>
+</li>
+
+<li>
+<b>as</b>
+<p>
+Return only relays which are located in the
 given autonomous system (AS) as identified by the AS number (with or
 without preceding "AS" part).
 Filtering by AS number is case-insensitive.
-</td></tr>
-<tr><td><b>flag</b></td>
-<td>Return only relays which have the
+</p>
+</li>
+
+<li>
+<b>flag</b>
+<p>
+Return only relays which have the
 given relay flag assigned by the directory authorities.
 Note that if the flag parameter is specified more than once, only the
 first parameter value will be considered.
 Filtering by flag is case-insensitive.
-</td></tr>
-<tr><td><b>first_seen_days</b></td>
-<td>Return only relays or bridges which
+</p>
+</li>
+
+<li>
+<b>first_seen_days</b>
+<p>
+Return only relays or bridges which
 have first been seen during the given range of days ago.
 A parameter value "x-y" with x &gt;= y returns relays or bridges that have
 first been seen at least x and at most y days ago.
 Accepted short forms are "x", "x-", and "-y" which are interpreted as
 "x-x", "x-infinity", and "0-y".
-</td></tr>
-<tr><td><b>last_seen_days</b></td>
-<td>Return only relays or bridges which
+</p>
+</li>
+
+<li>
+<b>last_seen_days</b>
+<p>
+Return only relays or bridges which
 have last been seen during the given range of days ago.
 A parameter value "x-y" with x &gt;= y returns relays or bridges that have
 last been seen at least x and at most y days ago.
@@ -184,8 +328,13 @@ Accepted short forms are "x", "x-", and "-y" which are interpreted as
 Note that relays and bridges that haven't been running in the past week
 are never included in results, so that setting x to 8 or higher will
 always lead to an empty result set.
-</td></tr>
-<tr><td><b>contact</b></td><td>Return only relays with the parameter value
+</p>
+</li>
+
+<li>
+<b>contact</b>
+<p>
+Return only relays with the parameter value
 matching (part of) the contact line.
 If the parameter value contains spaces, only relays are returned which
 contain all space-separated parts in their contact line.
@@ -193,600 +342,1334 @@ Only printable ASCII characters are permitted in the parameter value,
 some of which need to be percent-encoded (# as %23, % as %25, &#38; as
 %26, + as %2B, and / as %2F).
 Comparisons are case-insensitive.
-</td></tr>
-</table>
-<p>Response documents can be reduced in size by requesting only a subset
-of contained fields.</p>
-<table border="0" cellpadding="4" cellspacing="0" summary="">
-<colgroup>
-<col width="150">
-<col width="850">
-</colgroup>
-<tr><td><b>fields</b></td><td>Comma-separated list of fields that will be
+</p>
+</li>
+
+</ul>
+
+<p>
+Response documents can be reduced in size by requesting only a subset
+of contained fields.
+</p>
+
+<ul class="properties">
+
+<li>
+<b>fields</b>
+<p>
+Comma-separated list of fields that will be
 included in the result.
 So far, only top-level fields in relay or bridge objects of details
-documents can be specified, e.g., <b>nickname,hashed_fingerprint</b>.
+documents can be specified, e.g.,
+<strong>nickname,hashed_fingerprint</strong>.
 If the fields parameter is provided, all other fields which are not
 contained in the provided list will be removed from the result.
 Field names are case-insensitive.
-</td></tr>
-</table>
-<p>Relay and/or bridge documents in the response can be ordered and
+</p>
+</li>
+
+<p>
+Relay and/or bridge documents in the response can be ordered and
 limited by providing further parameters.
 If the same parameter is specified more than once, only the first
-parameter value is considered.</p>
-<table border="0" cellpadding="4" cellspacing="0" summary="">
-<colgroup>
-<col width="150">
-<col width="850">
-</colgroup>
-<tr><td><b>order</b></td><td>Re-order results by a comma-separated list
+parameter value is considered.
+</p>
+
+<ul class="properties">
+
+<li>
+<b>order</b>
+<p>
+Re-order results by a comma-separated list
 of fields in ascending or descending order.
 Results are first ordered by the first list element, then by the second,
 and so on.
-Possible fields for ordering are: <b>consensus_weight</b>.
+Possible fields for ordering are: <strong>consensus_weight</strong>.
 Field names are case-insensitive.
 Ascending order is the default; descending order is selected by prepending
-fields with a minus sign (<b>-</b>).
+fields with a minus sign (<strong>-</strong>).
 Relays or bridges which don't have any value for a field to be ordered by
 are always appended to the end, regardless or sorting order.
 The ordering is defined independent of the requested document type and
 does not require the ordering field to be contained in the document.
-If no <b>order</b> parameter is given, ordering of results is
+If no <strong>order</strong> parameter is given, ordering of results is
 undefined.
-</td></tr>
-<tr><td><b>offset</b></td><td>Skip the given number of relays and/or
+</p>
+</li>
+
+<li>
+<b>offset</b>
+<p>
+Skip the given number of relays and/or
 bridges.
 Relays are skipped first, then bridges.
-Non-positive <b>offset</b> values are treated as zero and don't change the
+Non-positive <strong>offset</strong> values are treated as zero and don't
+change the
 result.
-</td></tr>
-<tr><td><b>limit</b></td><td>Limit result to the given number of
+</p>
+</li>
+
+<li>
+<b>limit</b>
+<p>
+Limit result to the given number of
 relays and/or bridges.
 Relays are kept first, then bridges.
-Non-positive <b>limit</b> values are treated as zero and lead to an empty
+Non-positive <strong>limit</strong> values are treated as zero and lead
+to an empty
 result.
-When used together with <b>offset</b>, the offsetting step precedes the
+When used together with <strong>offset</strong>, the offsetting step
+precedes the
 limiting step.
-</td></tr>
-</table>
-<br>
+</p>
+</li>
+
+</div> <!-- box -->
+
+<div class="box">
 <a name="summary"></a>
-<h3><a href="#summary" class="anchor">Summary documents</a></h3>
+<h3>Summary documents <a href="#summary">#</a>
+<span class="request-response">
+<a href="summary?limit=4">example request</a>
+</span>
+</h3>
+
 <p>Summary documents contain short summaries of relays with nicknames,
 fingerprints, IP addresses, and running information as well as bridges
 with hashed fingerprints and running information.
-Summary documents contain the following fields:
-<ul>
-<li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known relay network status consensus started being valid.
+Summary documents contain the following fields:</p>
+
+<ul class="properties">
+
+<li>
+<b>relays_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when the last known relay network
+status consensus started being valid.
 Indicates how recent the relay summaries in this document are.
-Required field.</li>
-<li><b>"relays":</b> Array of objects representing relay summaries.
-Required field.
+</p>
+</li>
+
+<li>
+<b>relays</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing relay summaries.
 Each array object contains the following key-value pairs:
-<ul>
-<li><b>"n":</b> Relay nickname consisting of 1&ndash;19 alphanumerical
-characters.
-Optional field.
-Omitted if the relay nickname is <i>"Unnamed"</i>.</li>
-<li><b>"f":</b> Relay fingerprint consisting of 40 upper-case hexadecimal
-characters.
-Required field.</li>
-<li><b>"a":</b> Array of IPv4 or IPv6 addresses where the relay accepts
+</p>
+
+<ul class="properties">
+
+<li>
+<b>n</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Relay nickname consisting of 1&ndash;19 alphanumerical characters.
+Omitted if the relay nickname is <strong>"Unnamed"</strong>.
+</p>
+</li>
+
+<li>
+<b>f</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Relay fingerprint consisting of 40 upper-case hexadecimal characters.
+</p>
+</li>
+
+<li>
+<b>a</b>
+<code class="typeof">array of strings</code>
+<span class="required-true">required</span>
+<p>
+Array of IPv4 or IPv6 addresses where the relay accepts
 onion-routing connections or which the relay used to exit to the Internet
 in the past 24 hours.
 The first address is the primary onion-routing address that the relay used
 to register in the network, subsequent addresses are in arbitrary order.
 IPv6 hex characters are all lower-case.
-Required field.</li>
-<li><b>"r":</b> Boolean field saying whether this relay was listed as
+</p>
+</li>
+
+<li>
+<b>r</b>
+<code class="typeof">boolean</code>
+<span class="required-true">required</span>
+<p>
+Boolean field saying whether this relay was listed as
 running in the last relay network status consensus.
-Required field.</li>
+</p>
+</li>
+
 </ul>
 </li>
-<li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last known bridge network status was published.
 Indicates how recent the bridge summaries in this document are.
-Required field.</li>
-<li><b>"bridges":</b> Array of objects representing bridge summaries.
-Required field.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing bridge summaries.
 Each array object contains the following key-value pairs:
-<ul>
-<li><b>"n":</b> Bridge nickname consisting of 1&ndash;19 alphanumerical
-characters.
-Optional field.
-Omitted if the bridge nickname is <i>"Unnamed"</i>.</li>
-<li><b>"h":</b> SHA-1 hash of the bridge fingerprint consisting of 40
+</p>
+
+<ul class="properties">
+
+<li>
+<b>n</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Bridge nickname consisting of 1&ndash;19 alphanumerical characters.
+Omitted if the bridge nickname is <strong>"Unnamed"</strong>.
+</p>
+</li>
+
+<li>
+<b>h</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+SHA-1 hash of the bridge fingerprint consisting of 40
 upper-case hexadecimal characters.
-Required field.</li>
-<li><b>"r":</b> Boolean field saying whether this bridge was listed as
+</p>
+</li>
+
+<li>
+<b>r</b>
+<code class="typeof">boolean</code>
+<span class="required-true">required</span>
+<p>
+Boolean field saying whether this bridge was listed as
 running in the last bridge network status.
-Required field.</li>
+</p>
+</li>
+
 </ul>
+
+</li>
+
 </ul>
-<br>
+
+</div> <!-- box -->
+
+<div class="box">
 <a name="details"></a>
-<h3><a href="#details" class="anchor">Detail documents</a></h3>
-<p>Detail documents contain all known details of relays and bridges that
+<h3>Details documents <a href="#details">#</a>
+<span class="request-response">
+<a href="details?limit=4">example request</a>
+</span>
+</h3>
+
+<p>
+Details documents contain all known details of relays and bridges that
 have been running in the past week.
-Detail documents are based on the network statuses published by the Tor
+Details documents are based on the network statuses published by the Tor
 directories and the server descriptors published by relays and bridges.
-Detail documents contain the following fields:
-<ul>
-<li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+Details documents contain the following fields:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>relays_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last known relay network status consensus started being valid.
 Indicates how recent the relay details in this document are.
-Required field.</li>
-<li><b>"relays":</b> Array of objects representing relay details.
-Required field.
+</p>
+</li>
+
+<li>
+<b>relays</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing relay details.
 Each array object contains the following key-value pairs:
-<ul>
-<li><b>"nickname":</b> Relay nickname consisting of 1&ndash;19
-alphanumerical characters.
-Optional field.
-Omitted if the relay nickname is <i>"Unnamed"</i>.</li>
-<li><b>"fingerprint":</b> Relay fingerprint consisting of 40 upper-case
+</p>
+
+<ul class="properties">
+
+<li>
+<b>nickname</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Relay nickname consisting of 1&ndash;19 alphanumerical characters.
+Omitted if the relay nickname is <strong>"Unnamed"</strong>.
+</p>
+</li>
+
+<li>
+<b>fingerprint</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Relay fingerprint consisting of 40 upper-case
 hexadecimal characters.
-Required field.</li>
-<li><b>"or_addresses":</b> Array of IPv4 or IPv6 addresses and TCP ports
+</p>
+</li>
+
+<li>
+<b>or_addresses</b>
+<code class="typeof">array of strings</code>
+<span class="required-true">required</span>
+<p>
+Array of IPv4 or IPv6 addresses and TCP ports
 or port lists where the relay accepts onion-routing connections.
 The first address is the primary onion-routing address that the relay used
 to register in the network, subsequent addresses are in arbitrary order.
 IPv6 hex characters are all lower-case.
-Required field.</li>
-<li><b>"exit_addresses":</b> Array of IPv4 or IPv6 addresses that the
+</p>
+</li>
+
+<li>
+<b>exit_addresses</b>
+<code class="typeof">array of strings</code>
+<span class="required-false">optional</span>
+<p>
+Array of IPv4 or IPv6 addresses that the
 relay used to exit to the Internet in the past 24 hours.
 IPv6 hex characters are all lower-case.
 Only those addresses are listed that are different from onion-routing
 addresses.
-Optional field.
-Omitted if array is empty.</li>
-<li><b>"dir_address":</b> IPv4 address and TCP port where the relay
+Omitted if array is empty.
+</p>
+</li>
+
+<li>
+<b>dir_address</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+IPv4 address and TCP port where the relay
 accepts directory connections.
-Optional field.
-Omitted if the relay does not accept directory connections.</li>
-<li><b>"last_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
+Omitted if the relay does not accept directory connections.
+</p>
+</li>
+
+<li>
+<b>last_seen</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 relay was last seen in a network status consensus.
-Required field.</li>
-<li><b>"last_changed_address_or_port":</b>
+</p>
+</li>
+
+<li>
+<b>last_changed_address_or_port</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
 UTC timestamp (YYYY-MM-DD
 hh:mm:ss) when this relay last stopped announcing an IPv4 or IPv6 address
 or TCP port where it previously accepted onion-routing or directory
 connections.
 This timestamp can serve as indicator whether this relay would be a
 suitable fallback directory.
-Required field.</li>
-<li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
+</p>
+</li>
+
+<li>
+<b>first_seen</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 relay was first seen in a network status consensus.
-Required field.</li>
-<li><b>"running":</b> Boolean field saying whether this relay was listed as
+</p>
+</li>
+
+<li>
+<b>running</b>
+<code class="typeof">boolean</code>
+<span class="required-true">required</span>
+<p>
+Boolean field saying whether this relay was listed as
 running in the last relay network status consensus.
-Required field.</li>
-<li><b>"flags":</b> Array of relay flags that the directory authorities
+</p>
+</li>
+
+<li>
+<b>flags</b>
+<code class="typeof">array of strings</code>
+<span class="required-false">optional</span>
+<p>
+Array of relay flags that the directory authorities
 assigned to this relay.
-Optional field.
-Omitted if empty.</li>
-<li><b>"country":</b> Two-letter lower-case country code as found in a
+Omitted if empty.
+</p>
+</li>
+
+<li>
+<b>country</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Two-letter lower-case country code as found in a
 GeoIP database by resolving the relay's first onion-routing IP address.
-Optional field.
 Omitted if the relay IP address could not be found in the GeoIP
-database.</li>
-<li><b>"country_name":</b> Country name as found in a GeoIP database by
+database.
+</p>
+</li>
+
+<li>
+<b>country_name</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Country name as found in a GeoIP database by
 resolving the relay's first onion-routing IP address.
-Optional field.
 Omitted if the relay IP address could not be found in the GeoIP
-database, or if the GeoIP database did not contain a country name.</li>
-<li><b>"region_name":</b> Region name as found in a GeoIP database by
+database, or if the GeoIP database did not contain a country name.
+</p>
+</li>
+
+<li>
+<b>region_name</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Region name as found in a GeoIP database by
 resolving the relay's first onion-routing IP address.
-Optional field.
 Omitted if the relay IP address could not be found in the GeoIP
-database, or if the GeoIP database did not contain a region name.</li>
-<li><b>"city_name":</b> City name as found in a
+database, or if the GeoIP database did not contain a region name.
+</p>
+</li>
+
+<li>
+<b>city_name</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+City name as found in a
 GeoIP database by resolving the relay's first onion-routing IP address.
-Optional field.
 Omitted if the relay IP address could not be found in the GeoIP
-database, or if the GeoIP database did not contain a city name.</li>
-<li><b>"latitude":</b> Latitude as found in a GeoIP database by resolving
+database, or if the GeoIP database did not contain a city name.
+</p>
+</li>
+
+<li>
+<b>latitude</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Latitude as found in a GeoIP database by resolving
 the relay's first onion-routing IP address.
-Optional field.
 Omitted if the relay IP address could not be found in the GeoIP
-database.</li>
-<li><b>"longitude":</b> Longitude as found in a GeoIP database by
+database.
+</p>
+</li>
+
+<li>
+<b>longitude</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Longitude as found in a GeoIP database by
 resolving the relay's first onion-routing IP address.
-Optional field.
 Omitted if the relay IP address could not be found in the GeoIP
-database.</li>
-<li><b>"as_number":</b> AS number as found in an AS database by
+database.
+</p>
+</li>
+
+<li>
+<b>as_number</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+AS number as found in an AS database by
 resolving the relay's first onion-routing IP address.
-Optional field.
 Omitted if the relay IP address could not be found in the AS
-database.</li>
-<li><b>"as_name":</b> AS name as found in an AS database by resolving the
+database.
+</p>
+</li>
+
+<li>
+<b>as_name</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+AS name as found in an AS database by resolving the
 relay's first onion-routing IP address.
-Optional field.
 Omitted if the relay IP address could not be found in the AS
-database.</li>
-<li><b>"consensus_weight":</b> Weight assigned to this relay by the
+database.
+</p>
+</li>
+
+<li>
+<b>consensus_weight</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Weight assigned to this relay by the
 directory authorities that clients use in their path selection algorithm.
 The unit is arbitrary; currently it's kilobytes per second, but that might
 change in the future.
-Required field.</li>
-<li><b>"host_name":</b> Host name as found in a reverse DNS lookup of the
+</p>
+</li>
+
+<li>
+<b>host_name</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Host name as found in a reverse DNS lookup of the
 relay IP address.
 This field is updated at most once in 12 hours, unless the relay IP
 address changes.
-Optional field.
 Omitted if the relay IP address was not looked up or if no lookup request
-was successful yet.</li>
-<li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
+was successful yet.
+</p>
+</li>
+
+<li>
+<b>last_restarted</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 relay was last (re-)started.
-Optional field.
 Missing if router descriptor containing this information cannot be
-found.</li>
-<li><b>"bandwidth_rate":</b> Average bandwidth
+found.
+</p>
+</li>
+
+<li>
+<b>bandwidth_rate</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Average bandwidth
 in bytes per second that this relay is willing to sustain over long
 periods.
-Optional field.
 Missing if router descriptor containing this information cannot be
-found.</li>
-<li><b>"bandwidth_burst":</b> Bandwidth in bytes
+found.
+</p>
+</li>
+
+<li>
+<b>bandwidth_burst</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Bandwidth in bytes
 per second that this relay is willing to sustain in very short intervals.
-Optional field.
 Missing if router descriptor containing this information cannot be
-found.</li>
-<li><b>"observed_bandwidth":</b> Bandwidth
+found.
+</p>
+</li>
+
+<li>
+<b>observed_bandwidth</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Bandwidth
 estimate in bytes per second of the capacity this relay can handle.
 The relay remembers the maximum bandwidth sustained output over any ten
 second period in the past day, and another sustained input.
 The "observed_bandwidth" value is the lesser of these two numbers.
-Optional field.
 Missing if router descriptor containing this information cannot be
-found.</li>
-<li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
+found.
+</p>
+</li>
+
+<li>
+<b>advertised_bandwidth</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Bandwidth in bytes per second that this
 relay is willing and capable to provide.
-Optional field.
 Missing if router descriptor containing this information cannot be
-found.</li>
-<li><b>"exit_policy":</b> Array of exit-policy lines.
-Optional field.
+found.
+</p>
+</li>
+
+<li>
+<b>exit_policy</b>
+<code class="typeof">array of strings</code>
+<span class="required-false">optional</span>
+<p>
+Array of exit-policy lines.
 Missing if router descriptor containing this information cannot be
-found.</li>
-<li><b>"exit_policy_summary":</b> Summary
+found.
+</p>
+</li>
+
+<li>
+<b>exit_policy_summary</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+Summary
 version of the relay's exit policy containing a dictionary with either an
 "accept" or a "reject" element.
 If there is an "accept" ("reject") element, the relay accepts (rejects)
 all TCP ports or port ranges in the given list for most IP addresses and
 rejects (accepts) all other ports.
-Optional field.</li>
-<li><b>"contact":</b> Contact address of the relay operator.
+</p>
+</li>
+
+<li>
+<b>contact</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Contact address of the relay operator.
 Omitted if empty or if descriptor containing this information cannot be
-found.</li>
-<li><b>"platform":</b> Platform string containing operating system and Tor
+found.
+</p>
+</li>
+
+<li>
+<b>platform</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Platform string containing operating system and Tor
 version details.
-Optional field.
 Omitted if empty or if descriptor containing this information cannot be
-found.</li>
-<li><b>"family":</b> Array of fingerprints or nicknames of relays in the
+found.
+</p>
+</li>
+
+<li>
+<b>family</b>
+<code class="typeof">array of strings</code>
+<span class="required-false">optional</span>
+<p>
+Array of fingerprints or nicknames of relays in the
 same family as this relay.
-Optional field.
 Omitted if empty or if descriptor containing this information cannot be
-found.</li>
-<li><b>"advertised_bandwidth_fraction":</b>
+found.
+</p>
+</li>
+
+<li>
+<b>advertised_bandwidth_fraction</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
 Relative advertised bandwidth of this relay compared to the total
 advertised bandwidth in the network.
 If there were no bandwidth authorities, this fraction would be a very
 rough approximation of the probability of this relay to be selected by
 clients.
-Optional field.
 Omitted if the relay is not running, or router descriptor containing this
-information cannot be found.</li>
-<li><b>"consensus_weight_fraction":</b>
+information cannot be found.
+</p>
+</li>
+
+<li>
+<b>consensus_weight_fraction</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
 Fraction of this relay's consensus weight compared to the sum of all
 consensus weights in the network.
 This fraction is a very rough approximation of the probability of this
 relay to be selected by clients.
-Optional field.
-Omitted if the relay is not running.</li>
-<li><b>"guard_probability":</b>
+Omitted if the relay is not running.
+</p>
+</li>
+
+<li>
+<b>guard_probability</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
 Probability of this relay to be selected for the guard position.
 This probability is calculated based on consensus weights, relay flags,
 and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
-Optional field.
 Omitted if the relay is not running, or the consensus does not contain
-bandwidth weights.</li>
-<li><b>"middle_probability":</b>
+bandwidth weights.
+</p>
+</li>
+
+<li>
+<b>middle_probability</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
 Probability of this relay to be selected for the middle position.
 This probability is calculated based on consensus weights, relay flags,
 and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
-Optional field.
 Omitted if the relay is not running, or the consensus does not contain
-bandwidth weights.</li>
-<li><b>"exit_probability":</b>
+bandwidth weights.
+</p>
+</li>
+
+<li>
+<b>exit_probability</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
 Probability of this relay to be selected for the exit position.
 This probability is calculated based on consensus weights, relay flags,
 and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
-Optional field.
 Omitted if the relay is not running, or the consensus does not contain
-bandwidth weights.</li>
-</ul>
+bandwidth weights.
+</p>
 </li>
-<li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+
+</ul>
+
+</li>
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last known bridge network status was published.
 Indicates how recent the bridge details in this document are.
-Required field.</li>
-<li><b>"bridges":</b> Array of objects representing bridge summaries.
-Required field.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing bridge summaries.
 Each array object contains the following key-value pairs:
-<ul>
-<li><b>"nickname":</b> Bridge nickname consisting of 1&ndash;19
+</p>
+
+<ul class="properties">
+
+<li>
+<b>nickname</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Bridge nickname consisting of 1&ndash;19
 alphanumerical characters.
-Optional field.
-Omitted if the bridge nickname is <i>"Unnamed"</i>.</li>
-<li><b>"hashed_fingerprint":</b> SHA-1 hash of the bridge fingerprint
+Omitted if the bridge nickname is <strong>"Unnamed"</strong>.
+</p>
+</li>
+
+<li>
+<b>hashed_fingerprint</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+SHA-1 hash of the bridge fingerprint
 consisting of 40 upper-case hexadecimal characters.
-Required field.</li>
-<li><b>"or_addresses":</b> Array of sanitized IPv4 or IPv6 addresses and
+</p>
+</li>
+
+<li>
+<b>or_addresses</b>
+<code class="typeof">array of strings</code>
+<span class="required-true">required</span>
+<p>
+Array of sanitized IPv4 or IPv6 addresses and
 TCP ports or port lists where the bridge accepts onion-routing
 connections.
 The first address is the primary onion-routing address that the bridge
 used to register in the network, subsequent addresses are in arbitrary
 order.
 IPv6 hex characters are all lower-case.
-Sanitized IP addresses are always in <i>10/8</i> or
-<i>[fd9f:2e19:3bcf/48]</i> IP networks and are only useful to learn which
+Sanitized IP addresses are always in <strong>10/8</strong> or
+<strong>[fd9f:2e19:3bcf/48]</strong> IP networks and are only useful to
+learn which
 IP version the bridge uses and to detect whether the bridge changed its
 address.
 Sanitized IP addresses always change on the 1st of every month at 00:00:00
 UTC, regardless of the bridge actually changing its IP address.
 TCP ports are not sanitized.
-Required field.</li>
-<li><b>"last_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
+</p>
+</li>
+
+<li>
+<b>last_seen</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 bridge was last seen in a bridge network status.
-Required field.</li>
-<li><b>"first_seen":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
+</p>
+</li>
+
+<li>
+<b>first_seen</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when this
 bridge was first seen in a bridge network status.
-Required field.</li>
-<li><b>"running":</b> Boolean field saying whether this bridge was listed
+</p>
+</li>
+
+<li>
+<b>running</b>
+<code class="typeof">boolean</code>
+<span class="required-true">required</span>
+<p>
+Boolean field saying whether this bridge was listed
 as running in the last bridge network status.
-Required field.</li>
-<li><b>"flags":</b> Array of relay flags that the bridge authority
+</p>
+</li>
+
+<li>
+<b>flags</b>
+<code class="typeof">array of strings</code>
+<span class="required-false">optional</span>
+<p>
+Array of relay flags that the bridge authority
 assigned to this bridge.
-Optional field.
-Omitted if empty.</li>
-<li><b>"last_restarted":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
+Omitted if empty.
+</p>
+</li>
+
+<li>
+<b>last_restarted</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when the
 bridge was last (re-)started.
-Optional field.
 Missing if router descriptor containing this information cannot be
-found.</li>
-<li><b>"advertised_bandwidth":</b> Bandwidth in bytes per second that this
+found.
+</p>
+</li>
+
+<li>
+<b>advertised_bandwidth</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Bandwidth in bytes per second that this
 bridge is willing and capable to provide.
-Optional field.
 Missing if router descriptor containing this information cannot be
-found.</li>
-<li><b>"platform":</b> Platform string containing operating system and Tor
+found.
+</p>
+</li>
+
+<li>
+<b>platform</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Platform string containing operating system and Tor
 version details.
-Optional field.
 Omitted if not provided by the bridge or if descriptor containing this
-information cannot be found.</li>
-<li><b>"pool_assignment":</b> Information of the pool that BridgeDB
+information cannot be found.
+</p>
+</li>
+
+<li>
+<b>pool_assignment</b>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+Information of the pool that BridgeDB
 assigned this bridge to, including further assignment information if
 available.
-Optional field.</li>
-</ul>
+</p>
 </li>
+
 </ul>
-<br>
+
+</li>
+
+</ul>
+
+</div> <!-- box -->
+
+<div class="box">
 <a name="bandwidth"></a>
-<h3><a href="#bandwidth" class="anchor">Bandwidth documents</a></h3>
-<p>Bandwidth documents contain aggregate statistics of a relay's or
+<h3>Bandwidth documents <a href="#bandwidth">#</a>
+<span class="request-response">
+<a href="bandwidth?limit=4">example request</a>
+</span>
+</h3>
+
+<p>
+Bandwidth documents contain aggregate statistics of a relay's or
 bridge's consumed bandwidth for different time intervals.
 Bandwidth documents are available for all relays and bridges that have
 been running in the past week.
 Bandwidth documents contain the following fields:
-<ul>
-<li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+</p>
+
+<ul class="properties">
+
+<li>
+<b>relays_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last known relay network status consensus started being valid.
 Indicates how recent the relay bandwidth documents in this document are.
-Required field.</li>
-<li><b>"relays":</b> Array of objects representing relay bandwidth
+</p>
+</li>
+
+<li>
+<b>relays</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing relay bandwidth
 documents.
-Required field.
 Each array object contains the following key-value pairs:
-<ul>
-<li><b>"fingerprint":</b> Relay fingerprint consisting of 40 upper-case
+</p>
+
+<ul class="properties">
+
+<li>
+<b>fingerprint</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Relay fingerprint consisting of 40 upper-case
 hexadecimal characters.
-Required field.</li>
-<li><b>"write_history":</b> Object containing bandwidth history objects
+</p>
+</li>
+
+<li>
+<b>write_history</b>
+<code class="typeof">object</code>
+<span class="required-true">required</span>
+<p>
+Object containing bandwidth history objects
 for different time periods.
-Required field.
 Keys are string representation of the time period covered by the bandwidth
 history object.
-Keys are fixed strings <i>"3_days"</i>, <i>"1_week"</i>, <i>"1_month"</i>,
-<i>"3_months"</i>, <i>"1_year"</i>, and <i>"5_years"</i>.
+Keys are fixed strings <strong>"3_days"</strong>,
+<strong>"1_week"</strong>, <strong>"1_month"</strong>,
+<strong>"3_months"</strong>, <strong>"1_year"</strong>, and
+<strong>"5_years"</strong>.
 Keys refer to the last known bandwidth history of a relay, not to the time
 when the bandwidth document was published.
 A bandwidth history object is only contained if the time period it covers
 is not already contained in another bandwidth history object with shorter
 time period and higher data resolution.
 Each bandwidth history object contains the following key-value pairs:
-<ul>
-<li><b>"first":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
+</p>
+
+<ul class="properties">
+
+<li>
+<b>first</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
 data point in the bandwidth history.
-Required field.</li>
-<li><b>"last":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
+</p>
+</li>
+
+<li>
+<b>last</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
 data point in the bandwidth history.
-Required field.</li>
-<li><b>"interval":</b> Time interval between two data points in seconds.
-Required field.</li>
-<li><b>"factor":</b> Factor by which subsequent bandwidth values need to
+</p>
+</li>
+
+<li>
+<b>interval</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Time interval between two data points in seconds.
+</p>
+</li>
+
+<li>
+<b>factor</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Factor by which subsequent bandwidth values need to
 be multiplied to get a unit of bytes per second.
 The idea is that contained bandwidth values are normalized to a range from
 0 to 999 to reduce document size while still providing sufficient detail
 for both slow and fast relays.
-Required field.</li>
-<li><b>"count":</b> Number of provided data points, included mostly for
+</p>
+</li>
+
+<li>
+<b>count</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of provided data points, included mostly for
 debugging purposes.
 Can also be derived from the number of elements in the subsequent array.
-Optional field.</li>
-<li><b>"values":</b> Array of normalized bandwidth values in bytes per
+</p>
+</li>
+
+<li>
+<b>values</b>
+<code class="typeof">array of numbers</code>
+<span class="required-true">required</span>
+<p>
+Array of normalized bandwidth values in bytes per
 second.
 May contain null values if the relay did not provide any bandwidth data or
 only data for less than 20% of a given time period.
 Only includes non-null values for series of at least two subsequent data
 points to enable drawing of line graphs.
-Required field.</li>
-</ul>
+</p>
 </li>
-<li><b>"read_history":</b> Object containing bandwidth history objects
+
+</ul>
+
+</li>
+
+<li>
+<b>read_history</b>
+<code class="typeof">object</code>
+<span class="required-true">required</span>
+<p>
+Object containing bandwidth history objects
 for different time periods.
-Required field.
 The specification of bandwidth history objects is similar to those in the
-<i>write_history</i> field.</li>
-</ul>
+<strong>write_history</strong> field.
+</p>
 </li>
-<li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+
+</ul>
+
+</li>
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last known bridge network status was published.
 Indicates how recent the bridge bandwidth documents in this document are.
-Required field.</li>
-<li><b>"bridges":</b> Array of objects representing bridge bandwidth
-documents.
-Required field.
-Each array object contains the following key-value pairs:
-<ul>
-<li><b>"fingerprint":</b> SHA-1 hash of the bridge fingerprint consisting
-of 40 upper-case hexadecimal characters.
-Required field.</li>
-<li><b>"write_history":</b> Object containing bandwidth history objects
-for different time periods.
-Required field.
-The specification of bandwidth history objects is similar to those in the
-<i>write_history</i> field of <i>relays</i>.</li>
-<li><b>"read_history":</b> Object containing bandwidth history objects
-for different time periods.
-Required field.
-The specification of bandwidth history objects is similar to those in the
-<i>write_history</i> field of <i>relays</i>.</li>
-</ul>
+</p>
 </li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing bridge bandwidth
+documents.
+Each array object contains the following key-value pairs:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>fingerprint</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+SHA-1 hash of the bridge fingerprint consisting
+of 40 upper-case hexadecimal characters.
+</p>
+</li>
+
+<li>
+<b>write_history</b>
+<code class="typeof">object</code>
+<span class="required-true">required</span>
+<p>
+Object containing bandwidth history objects
+for different time periods.
+The specification of bandwidth history objects is similar to those in the
+<strong>write_history</strong> field of <strong>relays</strong>.
+</p>
+</li>
+
+<li>
+<b>read_history</b>
+<code class="typeof">object</code>
+<span class="required-true">required</span>
+<p>
+Object containing bandwidth history objects
+for different time periods.
+The specification of bandwidth history objects is similar to those in the
+<strong>write_history</strong> field of <strong>relays</strong>.
+</p>
+</li>
+
 </ul>
-<br>
+
+</li>
+
+</ul>
+
+</div> <!-- box -->
+
+<div class="box">
 <a name="weights"></a>
-<h3><a href="#weights" class="anchor">Weights documents</a></h3>
-<p>Weights documents contain aggregate statistics of a relay's probability
+<h3>Weights documents <a href="#weights">#</a>
+<span class="request-response">
+<a href="weights?limit=4">example request</a>
+</span>
+</h3>
+
+<p>
+Weights documents contain aggregate statistics of a relay's probability
 to be selected by clients for building paths.
 Weights documents contain different time intervals and are available for
 all relays that have been running in the past week.
 Weights documents contain the following fields:
-<ul>
-<li><b>"relays_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+</p>
+
+<ul class="properties">
+
+<li>
+<b>relays_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last known relay network status consensus started being valid.
 Indicates how recent the relay weights documents in this document are.
-Required field.</li>
-<li><b>"relays":</b> Array of objects representing relay weights
+</p>
+</li>
+
+<li>
+<b>relays</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing relay weights
 documents.
-Required field.
 Each array object contains the following key-value pairs:
-<ul>
-<li><b>"fingerprint":</b> Relay fingerprint consisting of 40 upper-case
+</p>
+
+<ul class="properties">
+
+<li>
+<b>fingerprint</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Relay fingerprint consisting of 40 upper-case
 hexadecimal characters.
-Required field.</li>
-<li><b>"advertised_bandwidth_fraction":</b> History object containing
+</p>
+</li>
+
+<li>
+<b>advertised_bandwidth_fraction</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+History object containing
 relative advertised bandwidth of this relay compared to the total
 advertised bandwidth in the network.
 If there were no bandwidth authorities, this fraction would be a very
 rough approximation of the probability of this relay to be selected by
 clients.
-Optional field.
 Keys are string representation of the time period covered by the weights
 history object.
-Keys are fixed strings <i>"1_week"</i>, <i>"1_month"</i>,
-<i>"3_months"</i>, <i>"1_year"</i>, and <i>"5_years"</i>.
+Keys are fixed strings <strong>"1_week"</strong>,
+<strong>"1_month"</strong>, <strong>"3_months"</strong>,
+<strong>"1_year"</strong>, and <strong>"5_years"</strong>.
 Keys refer to the last known weights history of a relay, not to the time
 when the weights document was published.
 A weights history object is only contained if the time period it covers
 is not already contained in another weights history object with shorter
 time period and higher data resolution.
 Each weights history object contains the following key-value pairs:
-<ul>
-<li><b>"first":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
+</p>
+
+<ul class="properties">
+
+<li>
+<b>first</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
 data point in the weights history.
-Required field.</li>
-<li><b>"last":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
+</p>
+</li>
+
+<li>
+<b>last</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
 data point in the weights history.
-Required field.</li>
-<li><b>"interval":</b> Time interval between two data points in seconds.
-Required field.</li>
-<li><b>"factor":</b> Factor by which subsequent weights values need to
+</p>
+</li>
+
+<li>
+<b>interval</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Time interval between two data points in seconds.
+</p>
+</li>
+
+<li>
+<b>factor</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Factor by which subsequent weights values need to
 be multiplied to get the path-selection probability.
 The idea is that contained weights values are normalized to a range from 0
 to 999 to reduce document size while still providing sufficient detail for
 both slow and fast relays.
-Required field.</li>
-<li><b>"count":</b> Number of provided data points, included mostly for
+</p>
+</li>
+
+<li>
+<b>count</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of provided data points, included mostly for
 debugging purposes.
 Can also be derived from the number of elements in the subsequent array.
-Optional field.</li>
-<li><b>"values":</b> Array of normalized weights values.
+</p>
+</li>
+
+<li>
+<b>values</b>
+<code class="typeof">array of numbers</code>
+<span class="required-true">required</span>
+<p>
+Array of normalized weights values.
 May contain null values if the relay was running less than 20% of a given
 time period.
 Only includes non-null values for series of at least two subsequent data
 points to enable drawing of line graphs.
-Required field.</li>
-</ul>
+</p>
 </li>
-<li><b>"consensus_weight_fraction":</b> History object containing the
+
+</ul>
+
+</li>
+<li>
+<b>consensus_weight_fraction</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+History object containing the
 fraction of this relay's consensus weight compared to the sum of all
 consensus weights in the network.
 This fraction is a very rough approximation of the probability of this
 relay to be selected by clients.
-Optional field.
 The specification of this history object is similar to that in the
-<i>advertised_bandwidth_fraction</i> field above.</li>
-<li><b>"guard_probability":</b> History object containing the probability
+<strong>advertised_bandwidth_fraction</strong> field above.
+</p>
+</li>
+
+<li>
+<b>guard_probability</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+History object containing the probability
 of this relay to be selected for the guard position.
 This probability is calculated based on consensus weights, relay flags,
 and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
-Optional field.
 The specification of this history object is similar to that in the
-<i>advertised_bandwidth_fraction</i> field above.</li>
-<li><b>"middle_probability":</b> History object containing the probability
+<strong>advertised_bandwidth_fraction</strong> field above.
+</p>
+</li>
+
+<li>
+<b>middle_probability</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+History object containing the probability
 of this relay to be selected for the middle position.
 This probability is calculated based on consensus weights, relay flags,
 and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
-Optional field.
 The specification of this history object is similar to that in the
-<i>advertised_bandwidth_fraction</i> field above.</li>
-<li><b>"exit_probability":</b> History object containing the probability
+<strong>advertised_bandwidth_fraction</strong> field above.
+</p>
+</li>
+
+<li>
+<b>exit_probability</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+History object containing the probability
 of this relay to be selected for the exit position.
 This probability is calculated based on consensus weights, relay flags,
 and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
-Optional field.
 The specification of this history object is similar to that in the
-<i>advertised_bandwidth_fraction</i> field above.</li>
-</ul>
+<strong>advertised_bandwidth_fraction</strong> field above.
+</p>
 </li>
-<li><b>"bridges_published":</b> UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+
+</ul>
+
+</li>
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last known bridge network status was published.
 Only included for compatibility reasons with the other document types.
-Required field.</li>
-<li><b>"bridges":</b> Empty array of objects that would represent bridge
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Empty array of objects that would represent bridge
 weights documents.
 Only included for compatibility reasons with the other document types.
-Required field.</li>
+</p>
+</li>
+
 </ul>
+
+</div> <!-- box -->
+
 </body>
 </html>
 
