@@ -61,7 +61,10 @@
 # -KL 2013-07-08
 # Changed entry start from 199.255.213.0 to 199.255.208.0 on 2013-08-12.
 # -KL 2013-08-12
-"3355430912","3355432959","223"
+# Split up into 199.255.208.0-199.255.209.127 and
+# 199.255.210.0-199.255.215.255 on 2013-10-11. -KL 2013-10-11
+"3355430912","3355431295","223"
+"3355431424","3355432959","223"
 
 # US, because previous entry is US, next entry is not adjacent, and RIR
 # says 204.14.72.0-204.14.79.255 is US.  -KL 2013-05-13
@@ -70,12 +73,6 @@
 # US, even though previous entry is CA, but because next entry is US and
 # RIR says entire range 204.12.160.0-204.12.191.255 is US.  -KL 2013-05-13
 "3423379456","3423379967","223"
-
-# From geoip-manual (country):
-# US, because previous MaxMind entry 209.58.176.144-209.59.31.255 is US,
-# and RIR delegation files say 209.59.32.0-209.59.63.255 is US.
-# -KL 2012-11-27
-"3510312960","3510321151","223"
 
 # RU, even though next entry is SE and even though RIR says
 # 217.15.160.0-217.15.175.255 is EU (which isn't really a country), but
