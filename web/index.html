@@ -7,7 +7,7 @@ body { font-family: "Open Sans","lucida grande","Segoe UI",arial,verdana,
   "lucida sans unicode",tahoma,sans-serif; background: #fafafa;
   font-size: 13px; line-height: 22px; color: #222; }
 h1 { font-size: 20px; font-weight: normal; text-align: center; }
-h3 { color: #7D4698; }
+h3 { color: #7D4698; position: relative }
 a { color: #7D4698; text-decoration: none; font-weight: bold; }
 ul { list-style: none; padding: 0; margin: 0; }
 p { margin: 0; padding: 0; }
@@ -17,12 +17,13 @@ a[name] { padding: 0; margin: 0; }
 .box > * { margin-left: 30px; margin-right: 30px; }
 .box h3 a { visibility: hidden; }
 .box:hover h3 a { visibility: visible; }
-.api-request { border-bottom: 1px solid #eee; }
+.api-request { border-bottom: 1px solid #eee; position: relative }
 .request-url, .request-type, .request-response { padding: 8px 10px;
   vertical-align: middle }
 .request-type { color: #57145F; display: inline-block; }
 .request-url { color: #333; font-size: 18px; }
-.request-response { float: right; color: #666; }
+.request-response { position: absolute; color: #666; right: 0; }
+h3 .request-response { padding: 0 !important; }
 .api-urls>li:last-child { border-bottom: 0; }
 .required-true, .required-false, .typeof { display: inline-block;
   vertical-align: middle; padding: 5px 10px; }
