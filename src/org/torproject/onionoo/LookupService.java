@@ -402,15 +402,10 @@ public class LookupService {
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + formatDecimalNumber(addressesLookedUp)
+    sb.append("    " + Logger.formatDecimalNumber(addressesLookedUp)
         + " addresses looked up\n");
-    sb.append("    " + formatDecimalNumber(addressesResolved)
+    sb.append("    " + Logger.formatDecimalNumber(addressesResolved)
         + " addresses resolved\n");
     return sb.toString();
-  }
-
-  //TODO This method should go into a utility class.
-  private static String formatDecimalNumber(long decimalNumber) {
-    return String.format("%,d", decimalNumber);
   }
 }

@@ -150,29 +150,18 @@ public class ReverseDomainNameResolver {
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + formatDecimalNumber(rdnsLookupMillis.size())
+    sb.append("    " + Logger.formatDecimalNumber(rdnsLookupMillis.size())
         + " lookups performed\n");
     if (rdnsLookupMillis.size() > 0) {
       Collections.sort(rdnsLookupMillis);
-      sb.append("    " + formatMillis(rdnsLookupMillis.get(0))
+      sb.append("    " + Logger.formatMillis(rdnsLookupMillis.get(0))
           + " minimum lookup time\n");
-      sb.append("    " + formatMillis(rdnsLookupMillis.get(
+      sb.append("    " + Logger.formatMillis(rdnsLookupMillis.get(
           rdnsLookupMillis.size() / 2)) + " median lookup time\n");
-      sb.append("    " + formatMillis(rdnsLookupMillis.get(
+      sb.append("    " + Logger.formatMillis(rdnsLookupMillis.get(
           rdnsLookupMillis.size() - 1)) + " maximum lookup time\n");
     }
     return sb.toString();
-  }
-
-  //TODO This method should go into a utility class.
-  private static String formatDecimalNumber(long decimalNumber) {
-    return String.format("%,d", decimalNumber);
-  }
-
-  // TODO This method should go into a utility class.
-  private static String formatMillis(long millis) {
-    return String.format("%02d:%02d.%03d minutes",
-        millis / (1000L * 60L), (millis / 1000L) % 60L, millis % 1000L);
   }
 }
 

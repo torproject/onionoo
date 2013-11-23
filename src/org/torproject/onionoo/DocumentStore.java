@@ -490,35 +490,20 @@ public class DocumentStore {
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + formatDecimalNumber(listOperations)
+    sb.append("    " + Logger.formatDecimalNumber(listOperations)
         + " list operations performed\n");
-    sb.append("    " + formatDecimalNumber(listedFiles)
+    sb.append("    " + Logger.formatDecimalNumber(listedFiles)
         + " files listed\n");
-    sb.append("    " + formatDecimalNumber(storedFiles)
+    sb.append("    " + Logger.formatDecimalNumber(storedFiles)
         + " files stored\n");
-    sb.append("    " + formatBytes(storedBytes) + " stored\n");
-    sb.append("    " + formatDecimalNumber(retrievedFiles)
+    sb.append("    " + Logger.formatBytes(storedBytes) + " stored\n");
+    sb.append("    " + Logger.formatDecimalNumber(retrievedFiles)
         + " files retrieved\n");
-    sb.append("    " + formatBytes(retrievedBytes) + " retrieved\n");
-    sb.append("    " + formatDecimalNumber(removedFiles)
+    sb.append("    " + Logger.formatBytes(retrievedBytes)
+        + " retrieved\n");
+    sb.append("    " + Logger.formatDecimalNumber(removedFiles)
         + " files removed\n");
     return sb.toString();
-  }
-
-  //TODO This method should go into a utility class.
-  private static String formatDecimalNumber(long decimalNumber) {
-    return String.format("%,d", decimalNumber);
-  }
-
-  // TODO This method should go into a utility class.
-  private static String formatBytes(long bytes) {
-    if (bytes < 1024) {
-      return bytes + " B";
-    } else {
-      int exp = (int) (Math.log(bytes) / Math.log(1024));
-      return String.format("%.1f %siB", bytes / Math.pow(1024, exp),
-          "KMGTPE".charAt(exp-1));
-    }
   }
 }
 

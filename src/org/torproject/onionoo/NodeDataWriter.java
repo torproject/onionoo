@@ -224,16 +224,11 @@ public class NodeDataWriter implements DescriptorListener {
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + formatDecimalNumber(relayConsensusesProcessed)
-        + " relay consensuses processed\n");
-    sb.append("    " + formatDecimalNumber(bridgeStatusesProcessed)
+    sb.append("    " + Logger.formatDecimalNumber(
+        relayConsensusesProcessed) + " relay consensuses processed\n");
+    sb.append("    " + Logger.formatDecimalNumber(bridgeStatusesProcessed)
         + " bridge statuses processed\n");
     return sb.toString();
-  }
-
-  //TODO This method should go into a utility class.
-  private static String formatDecimalNumber(long decimalNumber) {
-    return String.format("%,d", decimalNumber);
   }
 }
 

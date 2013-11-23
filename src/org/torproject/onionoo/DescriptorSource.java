@@ -355,25 +355,14 @@ public class DescriptorSource {
       descriptors += descriptorQueue.returnedDescriptors;
       bytes += descriptorQueue.returnedBytes;
     }
-    sb.append("    " + String.format("%,d", historySizeBefore)
+    sb.append("    " + Logger.formatDecimalNumber(historySizeBefore)
         + " descriptors excluded from this execution\n");
-    sb.append("    " + String.format("%,d", descriptors)
+    sb.append("    " + Logger.formatDecimalNumber(descriptors)
         + " descriptors provided\n");
-    sb.append("    " + formatBytes(bytes) + " provided\n");
-    sb.append("    " + String.format("%,d", historySizeAfter)
+    sb.append("    " + Logger.formatBytes(bytes) + " provided\n");
+    sb.append("    " + Logger.formatDecimalNumber(historySizeAfter)
         + " descriptors excluded from next execution\n");
     return sb.toString();
-  }
-
-  // TODO This method should go into a utility class.
-  private static String formatBytes(long bytes) {
-    if (bytes < 1024) {
-      return bytes + " B";
-    } else {
-      int exp = (int) (Math.log(bytes) / Math.log(1024));
-      return String.format("%.1f %siB", bytes / Math.pow(1024, exp),
-          "KMGTPE".charAt(exp-1));
-    }
   }
 }
 
