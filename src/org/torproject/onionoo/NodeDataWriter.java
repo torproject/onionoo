@@ -33,7 +33,7 @@ import org.torproject.onionoo.LookupService.LookupResult;
  * The parts of details files coming from server descriptors always come
  * from the last known descriptor of a relay or bridge, not from the
  * descriptor that was last referenced in a network status. */
-public class NodeDataWriter implements DescriptorListener {
+public class NodeDataWriter implements DataWriter, DescriptorListener {
 
   private DescriptorSource descriptorSource;
 
@@ -89,12 +89,12 @@ public class NodeDataWriter implements DescriptorListener {
 
   public void processDescriptor(Descriptor descriptor, boolean relay) {
     if (descriptor instanceof RelayNetworkStatusConsensus) {
-      updateRelayNetworkStatusConsensus(
+      this.updateRelayNetworkStatusConsensus(
           (RelayNetworkStatusConsensus) descriptor);
     } else if (descriptor instanceof ServerDescriptor && relay) {
       this.processRelayServerDescriptor((ServerDescriptor) descriptor);
     } else if (descriptor instanceof BridgeNetworkStatus) {
-      updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
+      this.updateBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
     } else if (descriptor instanceof ServerDescriptor && !relay) {
       this.processBridgeServerDescriptor((ServerDescriptor) descriptor);
     } else if (descriptor instanceof BridgePoolAssignment) {
@@ -102,6 +102,32 @@ public class NodeDataWriter implements DescriptorListener {
     } else if (descriptor instanceof ExitList) {
       this.processExitList((ExitList) descriptor);
     }
+  }
+
+  public void updateStatuses() {
+    this.readStatusSummary();
+    Logger.printStatusTime("Read status summary");
+    this.setCurrentNodes();
+    Logger.printStatusTime("Set current node fingerprints");
+    this.startReverseDomainNameLookups();
+    Logger.printStatusTime("Started reverse domain name lookups");
+    this.lookUpCitiesAndASes();
+    Logger.printStatusTime("Looked up cities and ASes");
+    this.setRunningBits();
+    Logger.printStatusTime("Set running bits");
+    this.calculatePathSelectionProbabilities();
+    Logger.printStatusTime("Calculated path selection probabilities");
+    this.finishReverseDomainNameLookups();
+    Logger.printStatusTime("Finished reverse domain name lookups");
+    this.writeStatusSummary();
+    Logger.printStatusTime("Wrote status summary");
+    this.writeOutSummary();
+    Logger.printStatusTime("Wrote out summary");
+  }
+
+  public void updateDocuments() {
+    this.writeOutDetails();
+    Logger.printStatusTime("Wrote detail data files");
   }
 
   private void updateRelayNetworkStatusConsensus(
@@ -167,7 +193,7 @@ public class NodeDataWriter implements DescriptorListener {
     this.bridgeStatusesProcessed++;
   }
 
-  public void readStatusSummary() {
+  private void readStatusSummary() {
     SortedSet<String> fingerprints = this.documentStore.list(
         NodeStatus.class, true);
     for (String fingerprint : fingerprints) {
@@ -188,7 +214,7 @@ public class NodeDataWriter implements DescriptorListener {
     }
   }
 
-  public void setRunningBits() {
+  private void setRunningBits() {
     for (NodeStatus node : this.knownNodes.values()) {
       if (node.isRelay() && node.getRelayFlags().contains("Running") &&
           node.getLastSeenMillis() == this.relaysLastValidAfterMillis) {
@@ -201,7 +227,7 @@ public class NodeDataWriter implements DescriptorListener {
     }
   }
 
-  public void lookUpCitiesAndASes() {
+  private void lookUpCitiesAndASes() {
     SortedSet<String> addressStrings = new TreeSet<String>();
     for (NodeStatus node : this.knownNodes.values()) {
       if (node.isRelay()) {
@@ -234,11 +260,11 @@ public class NodeDataWriter implements DescriptorListener {
     }
   }
 
-  public void writeStatusSummary() {
+  private void writeStatusSummary() {
     this.writeSummary(true);
   }
 
-  public void writeOutSummary() {
+  private void writeOutSummary() {
     this.writeSummary(false);
   }
 
@@ -250,7 +276,7 @@ public class NodeDataWriter implements DescriptorListener {
     }
   }
 
-  public SortedMap<String, NodeStatus> getCurrentNodes() {
+  private SortedMap<String, NodeStatus> getCurrentNodes() {
     long cutoff = Math.max(this.relaysLastValidAfterMillis,
         this.bridgesLastPublishedMillis) - 7L * 24L * 60L * 60L * 1000L;
     SortedMap<String, NodeStatus> currentNodes =
@@ -432,7 +458,7 @@ public class NodeDataWriter implements DescriptorListener {
     }
   }
 
-  public void setCurrentNodes() {
+  private void setCurrentNodes() {
     SortedMap<String, NodeStatus> currentNodes = this.getCurrentNodes();
     this.relays = new TreeMap<String, NodeStatus>();
     this.bridges = new TreeMap<String, NodeStatus>();
@@ -445,7 +471,7 @@ public class NodeDataWriter implements DescriptorListener {
     }
   }
 
-  public void startReverseDomainNameLookups() {
+  private void startReverseDomainNameLookups() {
     Map<String, Long> addressLastLookupTimes =
         new HashMap<String, Long>();
     for (NodeStatus relay : relays.values()) {
@@ -456,7 +482,7 @@ public class NodeDataWriter implements DescriptorListener {
     this.reverseDomainNameResolver.startReverseDomainNameLookups();
   }
 
-  public void finishReverseDomainNameLookups() {
+  private void finishReverseDomainNameLookups() {
     this.reverseDomainNameResolver.finishReverseDomainNameLookups();
     Map<String, String> lookupResults =
         this.reverseDomainNameResolver.getLookupResults();
@@ -470,7 +496,7 @@ public class NodeDataWriter implements DescriptorListener {
     }
   }
 
-  public void calculatePathSelectionProbabilities() {
+  private void calculatePathSelectionProbabilities() {
     boolean consensusContainsBandwidthWeights = false;
     double wgg = 0.0, wgd = 0.0, wmg = 0.0, wmm = 0.0, wme = 0.0,
         wmd = 0.0, wee = 0.0, wed = 0.0;
@@ -598,7 +624,7 @@ public class NodeDataWriter implements DescriptorListener {
     }
   }
 
-  public void writeOutDetails() {
+  private void writeOutDetails() {
     this.updateRelayDetailsFiles();
     this.updateBridgeDetailsFiles();
   }

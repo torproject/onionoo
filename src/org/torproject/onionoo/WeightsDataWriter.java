@@ -25,7 +25,7 @@ import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
 
-public class WeightsDataWriter implements DescriptorListener {
+public class WeightsDataWriter implements DataWriter, DescriptorListener {
 
   private DescriptorSource descriptorSource;
 
@@ -55,6 +55,18 @@ public class WeightsDataWriter implements DescriptorListener {
       this.processRelayNetworkConsensus(
           (RelayNetworkStatusConsensus) descriptor);
     }
+  }
+
+  public void updateStatuses() {
+    this.updateWeightsHistories();
+    Logger.printStatusTime("Updated weights histories");
+    this.updateWeightsStatuses();
+    Logger.printStatusTime("Updated weights status files");
+  }
+
+  public void updateDocuments() {
+    this.writeWeightsDataFiles();
+    Logger.printStatusTime("Wrote weights document files");
   }
 
   private Set<RelayNetworkStatusConsensus> consensuses =
@@ -94,7 +106,7 @@ public class WeightsDataWriter implements DescriptorListener {
     this.descriptorDigestsByFingerprint.get(fingerprint).add(digest);
   }
 
-  public void updateWeightsHistories() {
+  private void updateWeightsHistories() {
     for (RelayNetworkStatusConsensus consensus : this.consensuses) {
       long validAfterMillis = consensus.getValidAfterMillis(),
           freshUntilMillis = consensus.getFreshUntilMillis();
@@ -438,7 +450,7 @@ public class WeightsDataWriter implements DescriptorListener {
     this.documentStore.store(weightsStatus, fingerprint);
   }
 
-  public void writeWeightsDataFiles() {
+  private void writeWeightsDataFiles() {
     for (String fingerprint : this.updateWeightsDocuments) {
       SortedMap<long[], double[]> history =
           this.readHistoryFromDisk(fingerprint);
@@ -598,12 +610,17 @@ public class WeightsDataWriter implements DescriptorListener {
     }
   }
 
-  public void updateWeightsStatuses() {
+  private void updateWeightsStatuses() {
     for (String fingerprint : this.updateWeightsStatuses) {
       SortedMap<long[], double[]> history =
           this.readHistoryFromDisk(fingerprint);
       this.writeHistoryToDisk(fingerprint, history);
     }
+  }
+
+  public String getStatsString() {
+    /* TODO Add statistics string. */
+    return null;
   }
 }
 

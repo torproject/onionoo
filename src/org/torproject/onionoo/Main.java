@@ -36,6 +36,7 @@ public class Main {
     Logger.printStatusTime("Initialized bandwidth data writer");
     WeightsDataWriter wdw = new WeightsDataWriter(dso, ds, t);
     Logger.printStatusTime("Initialized weights data writer");
+    DataWriter[] dws = new DataWriter[] { ndw, bdw, wdw };
 
     Logger.printStatus("Reading descriptors.");
     dso.readRelayNetworkConsensuses();
@@ -55,37 +56,15 @@ public class Main {
     dso.readBridgePoolAssignments();
     Logger.printStatusTime("Read bridge-pool assignments");
 
-    Logger.printStatus("Updating internal node list.");
-    ndw.readStatusSummary();
-    Logger.printStatusTime("Read status summary");
-    ndw.setCurrentNodes();
-    Logger.printStatusTime("Set current node fingerprints");
-    ndw.startReverseDomainNameLookups();
-    Logger.printStatusTime("Started reverse domain name lookups");
-    ndw.lookUpCitiesAndASes();
-    Logger.printStatusTime("Looked up cities and ASes");
-    ndw.setRunningBits();
-    Logger.printStatusTime("Set running bits");
-    ndw.calculatePathSelectionProbabilities();
-    Logger.printStatusTime("Calculated path selection probabilities");
-    ndw.finishReverseDomainNameLookups();
-    Logger.printStatusTime("Finished reverse domain name lookups");
-    ndw.writeStatusSummary();
-    Logger.printStatusTime("Wrote status summary");
-    ndw.writeOutSummary();
-    Logger.printStatusTime("Wrote out summary");
-    ndw.writeOutDetails();
-    Logger.printStatusTime("Wrote detail data files");
+    Logger.printStatus("Updating internal status files.");
+    for (DataWriter dw : dws) {
+      dw.updateStatuses();
+    }
 
-    Logger.printStatus("Updating bandwidth data.");
-
-    Logger.printStatus("Updating weights data.");
-    wdw.updateWeightsHistories();
-    Logger.printStatusTime("Updated weights histories");
-    wdw.updateWeightsStatuses();
-    Logger.printStatusTime("Updated weights status files");
-    wdw.writeWeightsDataFiles();
-    Logger.printStatusTime("Wrote weights document files");
+    Logger.printStatus("Updating document files.");
+    for (DataWriter dw : dws) {
+      dw.updateDocuments();
+    }
 
     Logger.printStatus("Shutting down.");
     dso.writeHistoryFiles();
@@ -94,11 +73,13 @@ public class Main {
     Logger.printStatusTime("Flushed document cache");
 
     Logger.printStatus("Gathering statistics.");
-    Logger.printStatistics("Node data writer", ndw.getStatsString());
-    /* TODO Add statistics to remaining *Writers. */
-    //printStatistics("Details data writer", ddw.getStatsString());
-    //printStatistics("Bandwidth data writer", bdw.getStatsString());
-    //printStatistics("Weights data writer", wdw.getStatsString());
+    for (DataWriter dw : dws) {
+      String statsString = dw.getStatsString();
+      if (statsString != null) {
+        Logger.printStatistics(dw.getClass().getSimpleName(),
+            statsString);
+      }
+    }
     Logger.printStatistics("Descriptor source", dso.getStatsString());
     Logger.printStatistics("Document store", ds.getStatsString());
     Logger.printStatistics("GeoIP lookup service", ls.getStatsString());
