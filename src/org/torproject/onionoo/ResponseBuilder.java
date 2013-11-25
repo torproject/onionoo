@@ -21,7 +21,7 @@ public class ResponseBuilder {
 
   private static long summaryFileLastModified = -1L;
   private static DocumentStore documentStore;
-  private static boolean checkSummaryStale = false;
+  private static Time time;
   private static boolean successfullyReadSummaryFile = false;
   private static String relaysPublishedString, bridgesPublishedString;
   private static List<String> relaysByConsensusWeight = null;
@@ -36,9 +36,9 @@ public class ResponseBuilder {
   private static final long SUMMARY_MAX_AGE = 6L * 60L * 60L * 1000L;
 
   public static void initialize(DocumentStore documentStoreParam,
-      boolean checkSummaryStaleParam) {
+      Time timeParam) {
     documentStore = documentStoreParam;
-    checkSummaryStale = checkSummaryStaleParam;
+    time = timeParam;
     readSummaryFile();
   }
 
@@ -66,8 +66,8 @@ public class ResponseBuilder {
       successfullyReadSummaryFile = false;
       return;
     }
-    if (checkSummaryStale && newSummaryFileLastModified + SUMMARY_MAX_AGE
-        < System.currentTimeMillis()) {
+    if (newSummaryFileLastModified + SUMMARY_MAX_AGE
+        < time.currentTimeMillis()) {
       // TODO Does this actually solve anything?  Should we instead
       // switch to a variant of the maintenance mode and re-check when
       // the next requests comes in that happens x seconds after this one?

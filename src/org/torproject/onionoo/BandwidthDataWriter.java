@@ -40,18 +40,19 @@ public class BandwidthDataWriter implements DescriptorListener {
 
   private DocumentStore documentStore;
 
-  public BandwidthDataWriter(DescriptorSource descriptorSource,
-      DocumentStore documentStore) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
-    this.registerDescriptorListeners();
-  }
+  private long now;
 
   private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
       "yyyy-MM-dd HH:mm:ss");
-  public BandwidthDataWriter() {
+
+  public BandwidthDataWriter(DescriptorSource descriptorSource,
+      DocumentStore documentStore, Time time) {
+    this.descriptorSource = descriptorSource;
+    this.documentStore = documentStore;
+    this.now = time.currentTimeMillis();
     this.dateTimeFormat.setLenient(false);
     this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    this.registerDescriptorListeners();
   }
 
   private void registerDescriptorListeners() {
@@ -163,7 +164,6 @@ public class BandwidthDataWriter implements DescriptorListener {
     }
   }
 
-  private long now = System.currentTimeMillis();
   private void compressHistory(
       SortedMap<Long, long[]> history) {
     SortedMap<Long, long[]> uncompressedHistory =

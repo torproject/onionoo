@@ -24,21 +24,24 @@ public class ResourceServlet extends HttpServlet {
 
   private boolean maintenanceMode = false;
 
+  /* Called by servlet container, not by test class. */
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
     boolean maintenanceMode =
         config.getInitParameter("maintenance") != null
         && config.getInitParameter("maintenance").equals("1");
     File outDir = new File(config.getInitParameter("outDir"));
-    this.init(maintenanceMode, outDir, true);
+    this.init(maintenanceMode, outDir, new Time());
   }
 
+  /* Called (indirectly) by servlet container and (directly) by test
+   * class. */
   protected void init(boolean maintenanceMode, File outDir,
-      boolean checkSummaryStale) {
+      Time time) {
     this.maintenanceMode = maintenanceMode;
     if (!maintenanceMode) {
-      ResponseBuilder.initialize(new DocumentStore(outDir),
-          checkSummaryStale);
+      ResponseBuilder.initialize(new DocumentStore(outDir, time),
+          time);
     }
   }
 

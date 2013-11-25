@@ -43,6 +43,16 @@ public class ResourceServletTest {
     // 2013-04-24 12:22:22
     private static long lastModified = 1366806142000L;
 
+    private static long currentTimeMillis = 1366806142000L;
+
+    private class TestingTime extends Time {
+      public long currentTimeMillis() {
+        return currentTimeMillis;
+      }
+    }
+
+    private Time testingTime = new TestingTime();
+
     private boolean maintenanceMode = false;
 
     private class TestingHttpServletRequestWrapper
@@ -181,7 +191,7 @@ public class ResourceServletTest {
 
     private void makeRequest() throws IOException {
       ResourceServlet rs = new ResourceServlet();
-      rs.init(maintenanceMode, this.tempOutDir, false);
+      rs.init(maintenanceMode, this.tempOutDir, this.testingTime);
       rs.doGet(this.request, this.response);
     }
 

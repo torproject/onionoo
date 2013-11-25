@@ -11,8 +11,11 @@ public class LockFile {
 
   private File lockFile;
 
-  public LockFile(File lockFile) {
+  private Time time;
+
+  public LockFile(File lockFile, Time time) {
     this.lockFile = lockFile;
+    this.time = time;
   }
 
   public boolean acquireLock() {
@@ -25,7 +28,7 @@ public class LockFile {
       }
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.lockFile));
-      bw.append("" + System.currentTimeMillis() + "\n");
+      bw.append("" + this.time.currentTimeMillis() + "\n");
       bw.close();
       return true;
     } catch (IOException e) {

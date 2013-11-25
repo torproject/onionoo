@@ -43,6 +43,8 @@ public class NodeDataWriter implements DescriptorListener {
 
   private DocumentStore documentStore;
 
+  private long now;
+
   private SortedMap<String, NodeStatus> knownNodes =
       new TreeMap<String, NodeStatus>();
 
@@ -60,11 +62,13 @@ public class NodeDataWriter implements DescriptorListener {
 
   public NodeDataWriter(DescriptorSource descriptorSource,
       ReverseDomainNameResolver reverseDomainNameResolver,
-      LookupService lookupService, DocumentStore documentStore) {
+      LookupService lookupService, DocumentStore documentStore,
+      Time time) {
     this.descriptorSource = descriptorSource;
     this.reverseDomainNameResolver = reverseDomainNameResolver;
     this.lookupService = lookupService;
     this.documentStore = documentStore;
+    this.now = time.currentTimeMillis();
     this.registerDescriptorListeners();
   }
 
@@ -409,8 +413,6 @@ public class NodeDataWriter implements DescriptorListener {
       this.documentStore.store(detailsStatus, fingerprint);
     }
   }
-
-  private long now = System.currentTimeMillis();
 
   private Map<String, Set<ExitListEntry>> exitListEntries =
       new HashMap<String, Set<ExitListEntry>>();

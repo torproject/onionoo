@@ -33,6 +33,8 @@ public class DocumentStore {
 
   private File outDir;
 
+  private Time time;
+
   boolean listedArchivedNodeStatuses = false,
       listedCurrentNodeStatuses = false;
 
@@ -46,13 +48,14 @@ public class DocumentStore {
    * operations depend on which NodeStatus documents were listed. */
   private SortedMap<String, NodeStatus> cachedNodeStatuses;
 
-  public DocumentStore(File outDir) {
-    this.outDir = outDir;
+  public DocumentStore(File outDir, Time time) {
+    this(null, outDir, time);
   }
 
-  public DocumentStore(File statusDir, File outDir) {
+  public DocumentStore(File statusDir, File outDir, Time time) {
     this.statusDir = statusDir;
     this.outDir = outDir;
+    this.time = time;
   }
 
   public <T extends Document> SortedSet<String> list(
@@ -473,7 +476,7 @@ public class DocumentStore {
       return;
     }
     File updateFile = new File(this.outDir, "update");
-    String documentString = String.valueOf(System.currentTimeMillis());
+    String documentString = String.valueOf(this.time.currentTimeMillis());
     try {
       updateFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(updateFile));

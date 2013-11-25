@@ -16,7 +16,7 @@ public class ReverseDomainNameResolver {
 
   private class RdnsLookupWorker extends Thread {
     public void run() {
-      while (System.currentTimeMillis() - RDNS_LOOKUP_MAX_DURATION_MILLIS
+      while (time.currentTimeMillis() - RDNS_LOOKUP_MAX_DURATION_MILLIS
           <= startedRdnsLookups) {
         String rdnsLookupJob = null;
         synchronized (rdnsLookupJobs) {
@@ -63,7 +63,7 @@ public class ReverseDomainNameResolver {
       this.address = address;
     }
     public void run() {
-      this.lookupStartedMillis = System.currentTimeMillis();
+      this.lookupStartedMillis = time.currentTimeMillis();
       try {
         String result = InetAddress.getByName(this.address).getHostName();
         synchronized (this) {
@@ -72,7 +72,7 @@ public class ReverseDomainNameResolver {
       } catch (UnknownHostException e) {
         /* We'll try again the next time. */
       }
-      this.lookupCompletedMillis = System.currentTimeMillis();
+      this.lookupCompletedMillis = time.currentTimeMillis();
       this.parent.interrupt();
     }
     public synchronized String getHostName() {
@@ -81,6 +81,12 @@ public class ReverseDomainNameResolver {
     public synchronized long getLookupMillis() {
       return this.lookupCompletedMillis - this.lookupStartedMillis;
     }
+  }
+
+  private Time time;
+
+  public ReverseDomainNameResolver(Time time) {
+    this.time = time;
   }
 
   private static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS = 10L * 1000L;
@@ -107,7 +113,7 @@ public class ReverseDomainNameResolver {
   }
 
   public void startReverseDomainNameLookups() {
-    this.startedRdnsLookups = System.currentTimeMillis();
+    this.startedRdnsLookups = this.time.currentTimeMillis();
     this.rdnsLookupJobs = new HashSet<String>();
     for (Map.Entry<String, Long> e :
         this.addressLastLookupTimes.entrySet()) {

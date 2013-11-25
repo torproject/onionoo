@@ -5,6 +5,21 @@ package org.torproject.onionoo;
 import java.util.Date;
 
 public class Logger {
+
+  private static Time time;
+
+  public static void setTime(Time timeParam) {
+    time = timeParam;
+  }
+
+  private static long currentTimeMillis() {
+    if (time == null) {
+      return System.currentTimeMillis();
+    } else {
+      return time.currentTimeMillis();
+    }
+  }
+
   public static String formatDecimalNumber(long decimalNumber) {
     return String.format("%,d", decimalNumber);
   }
@@ -24,12 +39,11 @@ public class Logger {
     }
   }
 
-  private static long printedLastStatusMessage =
-      System.currentTimeMillis();
+  private static long printedLastStatusMessage = -1L;
 
   public static void printStatus(String message) {
     System.out.println(new Date() + ": " + message);
-    printedLastStatusMessage = System.currentTimeMillis();
+    printedLastStatusMessage = currentTimeMillis();
   }
 
   public static void printStatistics(String component, String message) {
@@ -37,8 +51,9 @@ public class Logger {
   }
 
   public static void printStatusTime(String message) {
-    long now = System.currentTimeMillis();
-    long millis = now - printedLastStatusMessage;
+    long now = currentTimeMillis();
+    long millis = printedLastStatusMessage < 0 ? 0 :
+        now - printedLastStatusMessage;
     System.out.println("  " + message + " (" + Logger.formatMillis(millis)
         + ").");
     printedLastStatusMessage = now;

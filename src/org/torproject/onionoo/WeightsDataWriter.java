@@ -31,10 +31,13 @@ public class WeightsDataWriter implements DescriptorListener {
 
   private DocumentStore documentStore;
 
+  private long now;
+
   public WeightsDataWriter(DescriptorSource descriptorSource,
-      DocumentStore documentStore) {
+      DocumentStore documentStore, Time time) {
     this.descriptorSource = descriptorSource;
     this.documentStore = documentStore;
+    this.now = time.currentTimeMillis();
     this.registerDescriptorListeners();
   }
 
@@ -350,7 +353,6 @@ public class WeightsDataWriter implements DescriptorListener {
     return history;
   }
 
-  private long now = System.currentTimeMillis();
   private SortedMap<long[], double[]> compressHistory(
       SortedMap<long[], double[]> history) {
     SortedMap<long[], double[]> compressedHistory =

@@ -8,9 +8,10 @@ import java.io.File;
 public class Main {
   public static void main(String[] args) {
 
+    Time t = new Time();
+    LockFile lf = new LockFile(new File("lock"), t);
+    Logger.setTime(t);
     Logger.printStatus("Initializing.");
-
-    LockFile lf = new LockFile(new File("lock"));
     if (lf.acquireLock()) {
       Logger.printStatusTime("Acquired lock");
     } else {
@@ -23,17 +24,17 @@ public class Main {
         new File("status"));
     Logger.printStatusTime("Initialized descriptor source");
     DocumentStore ds = new DocumentStore(new File("status"),
-        new File("out"));
+        new File("out"), t);
     Logger.printStatusTime("Initialized document store");
     LookupService ls = new LookupService(new File("geoip"));
     Logger.printStatusTime("Initialized Geoip lookup service");
-    ReverseDomainNameResolver rdnr = new ReverseDomainNameResolver();
+    ReverseDomainNameResolver rdnr = new ReverseDomainNameResolver(t);
     Logger.printStatusTime("Initialized reverse domain name resolver");
-    NodeDataWriter ndw = new NodeDataWriter(dso, rdnr, ls, ds);
+    NodeDataWriter ndw = new NodeDataWriter(dso, rdnr, ls, ds, t);
     Logger.printStatusTime("Initialized node data writer");
-    BandwidthDataWriter bdw = new BandwidthDataWriter(dso, ds);
+    BandwidthDataWriter bdw = new BandwidthDataWriter(dso, ds, t);
     Logger.printStatusTime("Initialized bandwidth data writer");
-    WeightsDataWriter wdw = new WeightsDataWriter(dso, ds);
+    WeightsDataWriter wdw = new WeightsDataWriter(dso, ds, t);
     Logger.printStatusTime("Initialized weights data writer");
 
     Logger.printStatus("Reading descriptors.");
