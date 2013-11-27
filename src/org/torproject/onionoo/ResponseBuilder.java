@@ -337,8 +337,6 @@ public class ResponseBuilder {
         relayFingerprintSummaryLines);
     Map<String, String> filteredBridges = new HashMap<String, String>(
         bridgeFingerprintSummaryLines);
-    System.out.println(filteredRelays.size() + " relays left, "
-        + filteredBridges.size() + " bridges left.");
     filterByType(filteredRelays, filteredBridges);
     filterByRunning(filteredRelays, filteredBridges);
     filterBySearchTerms(filteredRelays, filteredBridges);
@@ -349,8 +347,6 @@ public class ResponseBuilder {
     filterNodesByFirstSeenDays(filteredRelays, filteredBridges);
     filterNodesByLastSeenDays(filteredRelays, filteredBridges);
     filterByContact(filteredRelays, filteredBridges);
-    System.out.println(filteredRelays.size() + " relays left, "
-        + filteredBridges.size() + " bridges left.");
 
     /* Re-order and limit results. */
     List<String> orderedRelays = new ArrayList<String>();
