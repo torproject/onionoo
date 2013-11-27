@@ -8,9 +8,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -22,9 +19,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.torproject.onionoo.ResourceServlet.HttpServletRequestWrapper;
 import org.torproject.onionoo.ResourceServlet.HttpServletResponseWrapper;
 
@@ -33,6 +28,8 @@ import com.google.gson.Gson;
 public class ResourceServletTest {
 
   private SortedMap<String, String> relays, bridges;
+
+  private DummyDocumentStore documentStore;
 
   // 2013-04-24 12:22:22
   private static long lastModified = 1366806142000L;
@@ -155,7 +152,7 @@ public class ResourceServletTest {
   private void runTest(String requestURI,
       Map<String, String[]> parameterMap) {
     try {
-      this.writeSummaryFile();
+      this.createDummyDocumentStore();
       this.makeRequest(requestURI, parameterMap);
       this.parseResponse();
     } catch (IOException e) {
@@ -163,28 +160,25 @@ public class ResourceServletTest {
     }
   }
 
-  /* TODO Instead of writing out/summary and out/update to a temp
-   * directory, we could also write our own DocumentStore instance. */
-  private void writeSummaryFile() throws IOException {
-    File summaryFile = new File(this.tempOutDir, "summary");
-    BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));
-    for (String relay : this.relays.values()) {
-      bw.write(relay + "\n");
+  private void createDummyDocumentStore() {
+    /* TODO Incrementing static lastModified is necessary for
+     * ResponseBuilder to read state from the newly created DocumentStore.
+     * Otherwise, ResponseBuilder would use data from the previous test
+     * run.  This is bad design and should be fixed. */
+    this.documentStore = new DummyDocumentStore(lastModified++,
+        this.testingTime);
+    for (String relay : relays.values()) {
+      documentStore.addNodeStatus(relay);
     }
-    for (String bridge : this.bridges.values()) {
-      bw.write(bridge + "\n");
+    for (String bridge : bridges.values()) {
+      documentStore.addNodeStatus(bridge);
     }
-    bw.close();
-    File updateFile = new File(this.tempOutDir, "update");
-    bw = new BufferedWriter(new FileWriter(updateFile));
-    bw.write(String.valueOf(lastModified++));
-    bw.close();
   }
 
   private void makeRequest(String requestURI,
       Map<String, String[]> parameterMap) throws IOException {
     ResourceServlet rs = new ResourceServlet();
-    rs.init(maintenanceMode, this.tempOutDir, this.testingTime);
+    rs.init(maintenanceMode, this.documentStore, this.testingTime);
     this.request = new TestingHttpServletRequestWrapper(requestURI,
        parameterMap);
     this.response = new TestingHttpServletResponseWrapper();
@@ -259,16 +253,6 @@ public class ResourceServletTest {
       }
     }
     return parameters;
-  }
-
-  @Rule
-  public TemporaryFolder tempFolder = new TemporaryFolder();
-
-  private File tempOutDir;
-
-  @Before
-  public void createTempOutDir() throws IOException {
-    this.tempOutDir = this.tempFolder.newFolder("out");
   }
 
   private static class SummaryDocument {
