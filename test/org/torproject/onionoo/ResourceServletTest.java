@@ -25,6 +25,9 @@ import org.torproject.onionoo.ResourceServlet.HttpServletResponseWrapper;
 
 import com.google.gson.Gson;
 
+/* TODO This test class could (should?) be split into ResponseBuilderTest
+ * which tests ResponseBuilder and a much shorter ResourceServletTest
+ * which tests servlet specifics. */
 public class ResourceServletTest {
 
   private SortedMap<String, String> relays, bridges;
