@@ -355,6 +355,20 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
       }
       sb.append("\n]");
     }
+    if (descriptor.getIpv6DefaultPolicy() != null &&
+        (descriptor.getIpv6DefaultPolicy().equals("accept") ||
+        descriptor.getIpv6DefaultPolicy().equals("reject")) &&
+        descriptor.getIpv6PortList() != null) {
+      sb.append(",\n\"exit_policy_v6_summary\":{\""
+          + descriptor.getIpv6DefaultPolicy() + "\":[");
+      int portsWritten = 0;
+      for (String portOrPortRange :
+          descriptor.getIpv6PortList().split(",")) {
+        sb.append((portsWritten++ > 0 ? "," : "") + "\"" + portOrPortRange
+            + "\"");
+      }
+      sb.append("]}");
+    }
     detailsStatus = new DetailsStatus();
     detailsStatus.documentString = sb.toString();
     this.documentStore.store(detailsStatus, fingerprint);

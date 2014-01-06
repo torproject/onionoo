@@ -935,6 +935,21 @@ rejects (accepts) all other ports.
 </li>
 
 <li>
+<font color="blue"><b>exit_policy_v6_summary</b></font>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+Summary version of the relay's IPv6 exit policy containing a dictionary
+with either an "accept" or a "reject" element.
+If there is an "accept" ("reject") element, the relay accepts (rejects)
+all TCP ports or port ranges in the given list for most IP addresses and
+rejects (accepts) all other ports.
+Missing if the relay rejects all connections to IPv6 addresses.
+<font color="blue">Added on January 6, 2013.</font>
+</p>
+</li>
+
+<li>
 <b>contact</b>
 <code class="typeof">string</code>
 <span class="required-false">optional</span>
