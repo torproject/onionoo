@@ -56,13 +56,15 @@ public class NodeStatus extends Document {
   private String portList;
   private SortedMap<Long, Set<String>> lastAddresses;
   private String contact;
+  private Boolean recommendedVersion;
   public NodeStatus(boolean isRelay, String nickname, String fingerprint,
       String address, SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
       int dirPort, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, String hostName, long lastRdnsLookup,
       String defaultPolicy, String portList, long firstSeenMillis,
-      long lastChangedAddresses, String aSNumber, String contact) {
+      long lastChangedAddresses, String aSNumber, String contact,
+      Boolean recommendedVersion) {
     this.isRelay = isRelay;
     this.nickname = nickname;
     this.fingerprint = fingerprint;
@@ -108,6 +110,7 @@ public class NodeStatus extends Document {
     this.lastAddresses.put(lastChangedAddresses, addresses);
     this.aSNumber = aSNumber;
     this.contact = contact;
+    this.recommendedVersion = recommendedVersion;
   }
 
   public static NodeStatus fromString(String documentString) {
@@ -121,6 +124,7 @@ public class NodeStatus extends Document {
         lastRdnsLookup = -1L, firstSeenMillis = -1L,
         lastChangedAddresses = -1L;
     int orPort = -1, dirPort = -1;
+    Boolean recommendedVersion = null;
     try {
       SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
           "yyyy-MM-dd HH:mm:ss");
@@ -199,6 +203,10 @@ public class NodeStatus extends Document {
       if (parts.length > 20) {
         contact = parts[20];
       }
+      if (parts.length > 21) {
+        recommendedVersion = parts[21].equals("null") ? null :
+            parts[21].equals("true");
+      }
     } catch (NumberFormatException e) {
       System.err.println("Number format exception while parsing node "
           + "status line '" + documentString + "': " + e.getMessage()
@@ -221,7 +229,8 @@ public class NodeStatus extends Document {
         fingerprint, address, orAddressesAndPorts, exitAddresses,
         lastSeenMillis, orPort, dirPort, relayFlags, consensusWeight,
         countryCode, hostName, lastRdnsLookup, defaultPolicy, portList,
-        firstSeenMillis, lastChangedAddresses, aSNumber, contact);
+        firstSeenMillis, lastChangedAddresses, aSNumber, contact,
+        recommendedVersion);
     return newNodeStatus;
   }
 
@@ -241,6 +250,7 @@ public class NodeStatus extends Document {
       this.portList = newNodeStatus.portList;
       this.aSNumber = newNodeStatus.aSNumber;
       this.contact = newNodeStatus.contact;
+      this.recommendedVersion = newNodeStatus.recommendedVersion;
     }
     if (this.isRelay && newNodeStatus.isRelay) {
       this.lastAddresses.putAll(newNodeStatus.lastAddresses);
@@ -298,6 +308,8 @@ public class NodeStatus extends Document {
       sb.append("\tnull\tnull\tnull");
     }
     sb.append("\t" + (this.contact != null ? this.contact : ""));
+    sb.append("\t" + (this.recommendedVersion == null ? "null" :
+        this.recommendedVersion ? "true" : "false"));
     return sb.toString();
   }
 
@@ -507,6 +519,9 @@ public class NodeStatus extends Document {
   }
   public String getContact() {
     return this.contact;
+  }
+  public Boolean getRecommendedVersion() {
+    return this.recommendedVersion;
   }
 }
 

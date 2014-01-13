@@ -136,6 +136,14 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
     if (validAfterMillis > this.relaysLastValidAfterMillis) {
       this.relaysLastValidAfterMillis = validAfterMillis;
     }
+    Set<String> recommendedVersions = null;
+    if (consensus.getRecommendedServerVersions() != null) {
+      recommendedVersions = new HashSet<String>();
+      for (String recommendedVersion :
+          consensus.getRecommendedServerVersions()) {
+        recommendedVersions.add("Tor " + recommendedVersion);
+      }
+    }
     for (NetworkStatusEntry entry :
         consensus.getStatusEntries().values()) {
       String nickname = entry.getNickname();
@@ -149,11 +157,14 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
       long consensusWeight = entry.getBandwidth();
       String defaultPolicy = entry.getDefaultPolicy();
       String portList = entry.getPortList();
+      Boolean recommendedVersion = (recommendedVersions == null ||
+          entry.getVersion() == null) ? null :
+          recommendedVersions.contains(entry.getVersion());
       NodeStatus newNodeStatus = new NodeStatus(true, nickname,
           fingerprint, address, orAddressesAndPorts, null,
           validAfterMillis, orPort, dirPort, relayFlags, consensusWeight,
           null, null, -1L, defaultPolicy, portList, validAfterMillis,
-          validAfterMillis, null, null);
+          validAfterMillis, null, null, recommendedVersion);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
       } else {
@@ -183,7 +194,7 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
       NodeStatus newNodeStatus = new NodeStatus(false, nickname,
           fingerprint, address, orAddressesAndPorts, null,
           publishedMillis, orPort, dirPort, relayFlags, -1L, "??", null,
-          -1L, null, null, publishedMillis, -1L, null, null);
+          -1L, null, null, publishedMillis, -1L, null, null, null);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
       } else {
@@ -697,6 +708,7 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
       double exitProbability = entry.getExitProbability();
       String defaultPolicy = entry.getDefaultPolicy();
       String portList = entry.getPortList();
+      Boolean recommendedVersion = entry.getRecommendedVersion();
       StringBuilder sb = new StringBuilder();
       sb.append("{\"version\":1,\n"
           + "\"nickname\":\"" + nickname + "\",\n"
@@ -789,6 +801,10 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
               + "\"" + portOrPortRange + "\"");
         }
         sb.append("]}");
+      }
+      if (recommendedVersion != null) {
+        sb.append(",\n\"recommended_version\":" + (recommendedVersion ?
+            "true" : "false"));
       }
 
       /* Add exit addresses if at least one of them is distinct from the

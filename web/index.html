@@ -945,7 +945,7 @@ If there is an "accept" ("reject") element, the relay accepts (rejects)
 all TCP ports or port ranges in the given list for most IP addresses and
 rejects (accepts) all other ports.
 Missing if the relay rejects all connections to IPv6 addresses.
-<font color="blue">Added on January 6, 2013.</font>
+<font color="blue">Added on January 6, 2014.</font>
 </p>
 </li>
 
@@ -969,6 +969,19 @@ Platform string containing operating system and Tor
 version details.
 Omitted if empty or if descriptor containing this information cannot be
 found.
+</p>
+</li>
+
+<li>
+<font color="blue"><b>recommended_version</b></font>
+<code class="typeof">boolean</code>
+<span class="required-false">optional</span>
+<p>
+Boolean field saying whether the Tor software version of this relay is
+recommended by the directory authorities or not.
+Omitted if either the directory authorities did not recommend versions, or
+the relay did not report which version it runs.
+<font color="blue">Added on January 13, 2014.</font>
 </p>
 </li>
 
