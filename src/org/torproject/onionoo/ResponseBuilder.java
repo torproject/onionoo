@@ -779,6 +779,11 @@ public class ResponseBuilder {
           break;
         } else if (line.startsWith("\"desc_published\":")) {
           continue;
+        } else if (line.startsWith("\"hibernating\":True")) {
+          /* TODO This workaround saves us from bulk-editing all details
+           * files in out/details/ and status/details/.  May take this out
+           * when all/most of those files with invalid JSON are gone. */
+          sb.append(line.replaceAll("T", "t") + "\n");
         } else if (this.fields != null) {
           if (line.startsWith("\"")) {
             includeLine = false;
