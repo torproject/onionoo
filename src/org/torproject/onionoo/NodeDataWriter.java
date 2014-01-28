@@ -380,6 +380,9 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
       }
       sb.append("]}");
     }
+    if (descriptor.isHibernating()) {
+      sb.append(",\n\"hibernating\":True");
+    }
     detailsStatus = new DetailsStatus();
     detailsStatus.documentString = sb.toString();
     this.documentStore.store(detailsStatus, fingerprint);
