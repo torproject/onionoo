@@ -381,7 +381,7 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
       sb.append("]}");
     }
     if (descriptor.isHibernating()) {
-      sb.append(",\n\"hibernating\":True");
+      sb.append(",\n\"hibernating\":true");
     }
     detailsStatus = new DetailsStatus();
     detailsStatus.documentString = sb.toString();
