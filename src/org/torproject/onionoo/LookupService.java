@@ -125,6 +125,13 @@ public class LookupService {
         try {
           String startAddressString = parts[0].substring(7); /* ::ffff: */
           long startIpNum = this.parseAddressString(startAddressString);
+          if (startIpNum < 0L) {
+            System.err.println("Illegal IP address in '" + line
+                + "' in " + geoLite2CityBlocksCsvFile.getAbsolutePath()
+                + ".");
+            br.close();
+            return lookupResults;
+          }
           int networkMaskLength = Integer.parseInt(parts[1]);
           if (networkMaskLength < 96 || networkMaskLength > 128) {
             System.err.println("Illegal network mask in '" + line
@@ -132,6 +139,9 @@ public class LookupService {
                 + ".");
             br.close();
             return lookupResults;
+          }
+          if (parts[2].length() == 0 && parts[3].length() == 0) {
+            continue;
           }
           long endIpNum = startIpNum + (1 << (128 - networkMaskLength))
               - 1;
