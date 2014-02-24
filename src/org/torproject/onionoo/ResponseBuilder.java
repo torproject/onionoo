@@ -28,7 +28,7 @@ public class ResponseBuilder {
   private static Map<String, String> relayFingerprintSummaryLines = null,
       bridgeFingerprintSummaryLines = null;
   private static Map<String, Set<String>> relaysByCountryCode = null,
-      relaysByASNumber = null, relaysByFlag = null,
+      relaysByASNumber = null, relaysByFlag = null, bridgesByFlag = null,
       relaysByContact = null;
   private static SortedMap<Integer, Set<String>>
       relaysByFirstSeenDays = null, bridgesByFirstSeenDays = null,
@@ -84,6 +84,7 @@ public class ResponseBuilder {
           newRelaysByCountryCode = new HashMap<String, Set<String>>(),
           newRelaysByASNumber = new HashMap<String, Set<String>>(),
           newRelaysByFlag = new HashMap<String, Set<String>>(),
+          newBridgesByFlag = new HashMap<String, Set<String>>(),
           newRelaysByContact = new HashMap<String, Set<String>>();
       SortedMap<Integer, Set<String>>
           newRelaysByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
@@ -200,6 +201,15 @@ public class ResponseBuilder {
         newBridgeFingerprintSummaryLines.put(hashedFingerprint, line);
         newBridgeFingerprintSummaryLines.put(hashedHashedFingerprint,
             line);
+        for (String flag : entry.getRelayFlags()) {
+          String flagLowerCase = flag.toLowerCase();
+          if (!newBridgesByFlag.containsKey(flagLowerCase)) {
+            newBridgesByFlag.put(flagLowerCase, new HashSet<String>());
+          }
+          newBridgesByFlag.get(flagLowerCase).add(hashedFingerprint);
+          newBridgesByFlag.get(flagLowerCase).add(
+              hashedHashedFingerprint);
+        }
         int daysSinceFirstSeen = (int) ((newSummaryFileLastModified
             - entry.getFirstSeenMillis()) / 86400000L);
         if (!newBridgesByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
@@ -227,6 +237,7 @@ public class ResponseBuilder {
       relaysByCountryCode = newRelaysByCountryCode;
       relaysByASNumber = newRelaysByASNumber;
       relaysByFlag = newRelaysByFlag;
+      bridgesByFlag = newBridgesByFlag;
       relaysByContact = newRelaysByContact;
       relaysByFirstSeenDays = newRelaysByFirstSeenDays;
       relaysByLastSeenDays = newRelaysByLastSeenDays;
@@ -569,7 +580,21 @@ public class ResponseBuilder {
         filteredRelays.remove(fingerprint);
       }
     }
-    filteredBridges.clear();
+    if (!this.bridgesByFlag.containsKey(flag)) {
+      filteredBridges.clear();
+    } else {
+      Set<String> bridgesWithFlag = bridgesByFlag.get(flag);
+      Set<String> removeBridges = new HashSet<String>();
+      for (Map.Entry<String, String> e : filteredBridges.entrySet()) {
+        String fingerprint = e.getKey();
+        if (!bridgesWithFlag.contains(fingerprint)) {
+          removeBridges.add(fingerprint);
+        }
+      }
+      for (String fingerprint : removeBridges) {
+        filteredBridges.remove(fingerprint);
+      }
+    }
   }
 
   private void filterNodesByFirstSeenDays(

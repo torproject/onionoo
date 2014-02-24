@@ -819,13 +819,13 @@ public class ResourceServletTest {
   @Test()
   public void testFlagRunning() {
     this.assertSummaryDocument(
-        "/summary?flag=Running", 3, null, 0, null);
+        "/summary?flag=Running", 3, null, 1, null);
   }
 
   @Test()
   public void testFlagValid() {
     this.assertSummaryDocument(
-        "/summary?flag=Valid", 3, null, 0, null);
+        "/summary?flag=Valid", 3, null, 3, null);
   }
 
   @Test()
