@@ -151,10 +151,10 @@ public class LookupService {
                 parts[3];
             long blockNumber = Long.parseLong(blockString);
             addressNumberBlocks.put(addressNumber, blockNumber);
-            String latitude = parts[6];
-            String longitude = parts[7];
-            addressNumberLatLong.put(addressNumber,
-                new String[] { latitude, longitude });
+            if (parts[6].length() > 0 && parts[7].length() > 0) {
+              addressNumberLatLong.put(addressNumber,
+                  new String[] { parts[6], parts[7] });
+            }
           }
         } catch (NumberFormatException e) {
           System.err.println("Number format exception while parsing line "
