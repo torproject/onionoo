@@ -36,7 +36,9 @@ public class Main {
     Logger.printStatusTime("Initialized bandwidth data writer");
     WeightsDataWriter wdw = new WeightsDataWriter(dso, ds, t);
     Logger.printStatusTime("Initialized weights data writer");
-    DataWriter[] dws = new DataWriter[] { ndw, bdw, wdw };
+    ClientsDataWriter cdw = new ClientsDataWriter(dso, ds, t);
+    Logger.printStatusTime("Initialized clients data writer");
+    DataWriter[] dws = new DataWriter[] { ndw, bdw, wdw, cdw };
 
     Logger.printStatus("Reading descriptors.");
     dso.readRelayNetworkConsensuses();

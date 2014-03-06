@@ -57,6 +57,7 @@ h3 .request-response { padding: 0 !important; }
         <li><a href="#details">Details documents</a></li>
         <li><a href="#bandwidth">Bandwidth documents</a></li>
         <li><a href="#weights">Weights documents</a></li>
+        <li><a href="#clients">Clients documents</a></li>
     </ul>
 
 </div>
@@ -202,6 +203,13 @@ document</a></span>
 <span class="request-type">GET</span>
 <span class="request-url">https://onionoo.torproject.org/weights</span>
 <span class="request-response">returns a <a href="#weights">weights
+document</a></span>
+</li>
+
+<li class="api-request">
+<span class="request-type">GET</span>
+<span class="request-url">https://onionoo.torproject.org/clients</span>
+<span class="request-response">returns a <a href="#clients">clients
 document</a></span>
 </li>
 
@@ -1713,6 +1721,234 @@ Empty array of objects that would represent bridge
 weights documents.
 Only included for compatibility reasons with the other document types.
 </p>
+</li>
+
+</ul>
+
+</div> <!-- box -->
+
+<div class="box">
+<a name="clients"></a>
+<h3>Clients documents <a href="#clients">#</a>
+<span class="request-response">
+<a href="clients?limit=4">example request</a>
+</span>
+</h3>
+
+<p>
+<font color="blue">Added on March 10, 2014.</font>
+Clients documents contain estimates of the average number of clients
+connecting to a bridge every day.
+There are no clients documents available for relays, just for bridges.
+Clients documents contain different time intervals and are available for
+all bridges that have been running in the past week.
+Clients documents contain the following fields:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>relays_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known relay network status consensus started being valid.
+Only included for compatibility reasons with the other document types.
+</p>
+</li>
+
+<li>
+<b>relays</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Empty array of objects that would represent relay clients documents.
+Only included for compatibility reasons with the other document types.
+</p>
+</li>
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known bridge network status was published.
+Indicates how recent the bridge clients documents in this document are.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing bridge clients documents.
+Each array object contains the following key-value pairs:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>fingerprint</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+SHA-1 hash of the bridge fingerprint consisting
+of 40 upper-case hexadecimal characters.
+</p>
+</li>
+
+<li>
+<b>average_clients</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+History object containing the average number of clients connecting to
+this bridge.
+Keys are string representation of the time period covered by the clients
+history object.
+Keys are fixed strings <strong>"1_week"</strong>,
+<strong>"1_month"</strong>, <strong>"3_months"</strong>,
+<strong>"1_year"</strong>, and <strong>"5_years"</strong>.
+Keys refer to the last known clients history of a bridge, not to the time
+when the clients document was published.
+A clients history object is only contained if the time period it covers
+is not already contained in another clients history object with shorter
+time period and higher data resolution.
+Each clients history object contains the following key-value pairs:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>first</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
+data point in the clients history.
+</p>
+</li>
+
+<li>
+<b>last</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
+data point in the clients history.
+</p>
+</li>
+
+<li>
+<b>interval</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Time interval between two data points in seconds.
+</p>
+</li>
+
+<li>
+<b>factor</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Factor by which subsequent clients values need to
+be multiplied to get the average number of clients.
+The idea is that contained clients values are normalized to a range from 0
+to 999 to reduce document size while still providing sufficient detail for
+both heavily used and mostly unused bridges.
+</p>
+</li>
+
+<li>
+<b>count</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of provided data points, included mostly for
+debugging purposes.
+Can also be derived from the number of elements in the subsequent array.
+</p>
+</li>
+
+<li>
+<b>values</b>
+<code class="typeof">array of numbers</code>
+<span class="required-true">required</span>
+<p>
+Array of normalized clients values.
+May contain null values if the bridge did not report client statistics for
+at least 50% of a given time period.
+Contains at least two subsequent non-null values to enable drawing of line
+graphs.
+</p>
+</li>
+
+<li>
+<b>countries</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+Object containing fractions of clients by country in the considered time
+period.
+Keys are two-letter lower-case country codes as found in a GeoIP database.
+Values are numbers between 0 and 1 standing for the fraction of clients by
+country.
+A country is only included if at least 1% of clients came from this
+country.
+Omitted if the bridge did not report client statistics by country.
+<font color="red"><strong>BETA:</strong> This field breaks compatibility
+with the history objects contained in other documents pretty badly.
+It might be removed in the future without notice.</font>
+</p>
+</li>
+
+<li>
+<b>transports</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+Object containing fractions of clients by transport in the considered time
+period.
+Keys are transport names, or <strong>"&lt;OR&gt;"</strong> for the default
+onion-routing transport protocol.
+Values are numbers between 0 and 1 standing for the fraction of clients by
+transport.
+Omitted if the bridge did not report client statistics by transport.
+<font color="red"><strong>BETA:</strong> This field breaks compatibility
+with the history objects contained in other documents pretty badly.
+It might be removed in the future without notice.</font>
+</p>
+</li>
+
+<li>
+<b>versions</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+Object containing fractions of clients by IP version in the considered
+time period.
+Keys are either <strong>"v4"</strong> for IPv4 or <strong>"v6"</strong>
+for IPv6.
+Values are numbers between 0 and 1 standing for the fraction of clients by
+version.
+Omitted if the bridge did not report client statistics by IP version.
+<font color="red"><strong>BETA:</strong> This field breaks compatibility
+with the history objects contained in other documents pretty badly.
+It might be removed in the future without notice.</font>
+</p>
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+
 </li>
 
 </ul>

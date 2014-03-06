@@ -121,6 +121,9 @@ public class DocumentStore {
     } else if (documentType.equals(WeightsStatus.class)) {
       directory = this.statusDir;
       subdirectory = "weights";
+    } else if (documentType.equals(ClientsStatus.class)) {
+      directory = this.statusDir;
+      subdirectory = "clients";
     } else if (documentType.equals(DetailsDocument.class)) {
       directory = this.outDir;
       subdirectory = "details";
@@ -130,6 +133,9 @@ public class DocumentStore {
     } else if (documentType.equals(WeightsDocument.class)) {
       directory = this.outDir;
       subdirectory = "weights";
+    } else if (documentType.equals(ClientsDocument.class)) {
+      directory = this.outDir;
+      subdirectory = "clients";
     }
     if (directory != null && subdirectory != null) {
       Stack<File> files = new Stack<File>();
@@ -179,7 +185,8 @@ public class DocumentStore {
       documentString = document.documentString;
     } else if (document instanceof DetailsDocument ||
           document instanceof BandwidthDocument ||
-          document instanceof WeightsDocument) {
+          document instanceof WeightsDocument ||
+          document instanceof ClientsDocument) {
       Gson gson = new Gson();
       documentString = gson.toJson(this);
     } else {
@@ -267,7 +274,8 @@ public class DocumentStore {
           documentString);
     } else if (documentType.equals(DetailsDocument.class) ||
         documentType.equals(BandwidthDocument.class) ||
-        documentType.equals(WeightsDocument.class)) {
+        documentType.equals(WeightsDocument.class) ||
+        documentType.equals(ClientsDocument.class)) {
       return this.retrieveParsedDocumentFile(documentType,
           documentString);
     } else {
@@ -368,6 +376,11 @@ public class DocumentStore {
       fileName = String.format("weights/%s/%s/%s",
           fingerprint.substring(0, 1), fingerprint.substring(1, 2),
           fingerprint);
+    } else if (documentType.equals(ClientsStatus.class)) {
+      directory = this.statusDir;
+      fileName = String.format("clients/%s/%s/%s",
+          fingerprint.substring(0, 1), fingerprint.substring(1, 2),
+          fingerprint);
     } else if (documentType.equals(UpdateStatus.class)) {
       directory = this.outDir;
       fileName = "update";
@@ -385,6 +398,9 @@ public class DocumentStore {
     } else if (documentType.equals(WeightsDocument.class)) {
       directory = this.outDir;
       fileName = String.format("weights/%s", fingerprint);
+    } else if (documentType.equals(ClientsDocument.class)) {
+      directory = this.outDir;
+      fileName = String.format("clients/%s", fingerprint);
     }
     if (directory != null && fileName != null) {
       documentFile = new File(directory, fileName);

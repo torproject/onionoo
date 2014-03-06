@@ -348,6 +348,7 @@ public class ResponseBuilder {
         relayFingerprintSummaryLines);
     Map<String, String> filteredBridges = new HashMap<String, String>(
         bridgeFingerprintSummaryLines);
+    filterByResourceType(filteredRelays, filteredBridges);
     filterByType(filteredRelays, filteredBridges);
     filterByRunning(filteredRelays, filteredBridges);
     filterBySearchTerms(filteredRelays, filteredBridges);
@@ -369,6 +370,16 @@ public class ResponseBuilder {
     /* Write the response. */
     writeRelays(orderedRelays, pw);
     writeBridges(orderedBridges, pw);
+  }
+
+  private void filterByResourceType(Map<String, String> filteredRelays,
+      Map<String, String> filteredBridges) {
+    if (this.resourceType.equals("clients")) {
+      filteredRelays.clear();
+    }
+    if (this.resourceType.equals("weights")) {
+      filteredBridges.clear();
+    }
   }
 
   private void filterByType(Map<String, String> filteredRelays,
@@ -580,7 +591,7 @@ public class ResponseBuilder {
         filteredRelays.remove(fingerprint);
       }
     }
-    if (!this.bridgesByFlag.containsKey(flag)) {
+    if (!bridgesByFlag.containsKey(flag)) {
       filteredBridges.clear();
     } else {
       Set<String> bridgesWithFlag = bridgesByFlag.get(flag);
@@ -763,6 +774,8 @@ public class ResponseBuilder {
       return this.writeBandwidthLines(summaryLine);
     } else if (this.resourceType.equals("weights")) {
       return this.writeWeightsLines(summaryLine);
+    } else if (this.resourceType.equals("clients")) {
+      return this.writeClientsLines(summaryLine);
     } else {
       return "";
     }
@@ -888,6 +901,29 @@ public class ResponseBuilder {
       return weightsLines;
     } else {
       // TODO We should probably log that we didn't find a weights
+      // document that we expected to exist.
+      return "";
+    }
+  }
+
+  private String writeClientsLines(String summaryLine) {
+    String fingerprint = null;
+    if (summaryLine.contains("\"h\":\"")) {
+      fingerprint = summaryLine.substring(summaryLine.indexOf(
+         "\"h\":\"") + "\"h\":\"".length());
+    } else {
+      return "";
+    }
+    fingerprint = fingerprint.substring(0, 40);
+    ClientsDocument clientsDocument = documentStore.retrieve(
+        ClientsDocument.class, false, fingerprint);
+    if (clientsDocument != null &&
+        clientsDocument.documentString != null) {
+      String clientsLines = clientsDocument.documentString;
+      clientsLines = clientsLines.substring(0, clientsLines.length() - 1);
+      return clientsLines;
+    } else {
+      // TODO We should probably log that we didn't find a clients
       // document that we expected to exist.
       return "";
     }
