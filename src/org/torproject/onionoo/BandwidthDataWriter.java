@@ -196,8 +196,8 @@ public class BandwidthDataWriter implements DataWriter,
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
       }
       if (lastEndMillis == startMillis &&
-          (lastEndMillis / intervalLengthMillis) ==
-          (endMillis / intervalLengthMillis)) {
+          ((lastEndMillis - 1L) / intervalLengthMillis) ==
+          ((endMillis - 1L) / intervalLengthMillis)) {
         lastEndMillis = endMillis;
         lastBandwidth += bandwidth;
       } else {

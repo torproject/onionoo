@@ -387,8 +387,8 @@ public class WeightsDataWriter implements DataWriter, DescriptorListener {
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
       }
       if (lastEndMillis == startMillis &&
-          (lastEndMillis / intervalLengthMillis) ==
-          (endMillis / intervalLengthMillis)) {
+          ((lastEndMillis - 1L) / intervalLengthMillis) ==
+          ((endMillis - 1L) / intervalLengthMillis)) {
         double lastIntervalInHours = (double) ((lastEndMillis
             - lastStartMillis) / 60L * 60L * 1000L);
         double currentIntervalInHours = (double) ((endMillis
