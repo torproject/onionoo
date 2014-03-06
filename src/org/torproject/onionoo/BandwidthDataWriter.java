@@ -179,6 +179,9 @@ public class BandwidthDataWriter implements DataWriter,
         new TreeMap<Long, long[]>(history);
     history.clear();
     long lastStartMillis = 0L, lastEndMillis = 0L, lastBandwidth = 0L;
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    String lastMonthString = "1970-01";
     for (long[] v : uncompressedHistory.values()) {
       long startMillis = v[0], endMillis = v[1], bandwidth = v[2];
       long intervalLengthMillis;
@@ -195,9 +198,11 @@ public class BandwidthDataWriter implements DataWriter,
       } else {
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
       }
+      String monthString = dateTimeFormat.format(startMillis);
       if (lastEndMillis == startMillis &&
           ((lastEndMillis - 1L) / intervalLengthMillis) ==
-          ((endMillis - 1L) / intervalLengthMillis)) {
+          ((endMillis - 1L) / intervalLengthMillis) &&
+          lastMonthString.equals(monthString)) {
         lastEndMillis = endMillis;
         lastBandwidth += bandwidth;
       } else {
@@ -209,6 +214,7 @@ public class BandwidthDataWriter implements DataWriter,
         lastEndMillis = endMillis;
         lastBandwidth = bandwidth;
       }
+      lastMonthString = monthString;
     }
     if (lastStartMillis > 0L) {
       history.put(lastStartMillis, new long[] { lastStartMillis,

@@ -356,6 +356,9 @@ public class ClientsDataWriter implements DataWriter, DescriptorListener {
     SortedSet<ResponseHistory> compressedHistory =
         new TreeSet<ResponseHistory>();
     ResponseHistory lastResponses = null;
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    String lastMonthString = "1970-01";
     for (ResponseHistory responses : history) {
       long intervalLengthMillis;
       if (this.now - responses.endMillis <=
@@ -367,10 +370,12 @@ public class ClientsDataWriter implements DataWriter, DescriptorListener {
       } else {
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
       }
+      String monthString = dateTimeFormat.format(responses.startMillis);
       if (lastResponses != null &&
           lastResponses.endMillis == responses.startMillis &&
           ((lastResponses.endMillis - 1L) / intervalLengthMillis) ==
-          ((responses.endMillis - 1L) / intervalLengthMillis)) {
+          ((responses.endMillis - 1L) / intervalLengthMillis) &&
+          lastMonthString.equals(monthString)) {
         lastResponses.addResponses(responses);
       } else {
         if (lastResponses != null) {
@@ -378,6 +383,7 @@ public class ClientsDataWriter implements DataWriter, DescriptorListener {
         }
         lastResponses = responses;
       }
+      lastMonthString = monthString;
     }
     if (lastResponses != null) {
       compressedHistory.add(lastResponses);

@@ -371,6 +371,9 @@ public class WeightsDataWriter implements DataWriter, DescriptorListener {
         new TreeMap<long[], double[]>(history.comparator());
     long lastStartMillis = 0L, lastEndMillis = 0L;
     double[] lastWeights = null;
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    String lastMonthString = "1970-01";
     for (Map.Entry<long[], double[]> e : history.entrySet()) {
       long startMillis = e.getKey()[0], endMillis = e.getKey()[1];
       double[] weights = e.getValue();
@@ -386,9 +389,11 @@ public class WeightsDataWriter implements DataWriter, DescriptorListener {
       } else {
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
       }
+      String monthString = dateTimeFormat.format(startMillis);
       if (lastEndMillis == startMillis &&
           ((lastEndMillis - 1L) / intervalLengthMillis) ==
-          ((endMillis - 1L) / intervalLengthMillis)) {
+          ((endMillis - 1L) / intervalLengthMillis) &&
+          lastMonthString.equals(monthString)) {
         double lastIntervalInHours = (double) ((lastEndMillis
             - lastStartMillis) / 60L * 60L * 1000L);
         double currentIntervalInHours = (double) ((endMillis
@@ -410,6 +415,7 @@ public class WeightsDataWriter implements DataWriter, DescriptorListener {
         lastEndMillis = endMillis;
         lastWeights = weights;
       }
+      lastMonthString = monthString;
     }
     if (lastStartMillis > 0L) {
       compressedHistory.put(new long[] { lastStartMillis, lastEndMillis },
