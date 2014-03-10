@@ -38,7 +38,9 @@ public class Main {
     Logger.printStatusTime("Initialized weights data writer");
     ClientsDataWriter cdw = new ClientsDataWriter(dso, ds, t);
     Logger.printStatusTime("Initialized clients data writer");
-    DataWriter[] dws = new DataWriter[] { ndw, bdw, wdw, cdw };
+    UptimeDataWriter udw = new UptimeDataWriter(dso, ds, t);
+    Logger.printStatusTime("Initialized uptime data writer");
+    DataWriter[] dws = new DataWriter[] { ndw, bdw, wdw, cdw, udw };
 
     Logger.printStatus("Reading descriptors.");
     dso.readRelayNetworkConsensuses();

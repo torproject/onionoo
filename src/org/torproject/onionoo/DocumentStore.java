@@ -124,6 +124,9 @@ public class DocumentStore {
     } else if (documentType.equals(ClientsStatus.class)) {
       directory = this.statusDir;
       subdirectory = "clients";
+    } else if (documentType.equals(UptimeStatus.class)) {
+      directory = this.statusDir;
+      subdirectory = "uptimes";
     } else if (documentType.equals(DetailsDocument.class)) {
       directory = this.outDir;
       subdirectory = "details";
@@ -136,6 +139,9 @@ public class DocumentStore {
     } else if (documentType.equals(ClientsDocument.class)) {
       directory = this.outDir;
       subdirectory = "clients";
+    } else if (documentType.equals(UptimeDocument.class)) {
+      directory = this.outDir;
+      subdirectory = "uptimes";
     }
     if (directory != null && subdirectory != null) {
       Stack<File> files = new Stack<File>();
@@ -186,7 +192,8 @@ public class DocumentStore {
     } else if (document instanceof DetailsDocument ||
           document instanceof BandwidthDocument ||
           document instanceof WeightsDocument ||
-          document instanceof ClientsDocument) {
+          document instanceof ClientsDocument ||
+          document instanceof UptimeDocument) {
       Gson gson = new Gson();
       documentString = gson.toJson(this);
     } else {
@@ -275,7 +282,8 @@ public class DocumentStore {
     } else if (documentType.equals(DetailsDocument.class) ||
         documentType.equals(BandwidthDocument.class) ||
         documentType.equals(WeightsDocument.class) ||
-        documentType.equals(ClientsDocument.class)) {
+        documentType.equals(ClientsDocument.class) ||
+        documentType.equals(UptimeDocument.class)) {
       return this.retrieveParsedDocumentFile(documentType,
           documentString);
     } else {
@@ -351,12 +359,11 @@ public class DocumentStore {
   private <T extends Document> File getDocumentFile(Class<T> documentType,
       String fingerprint) {
     File documentFile = null;
-    if (fingerprint == null &&
-        !documentType.equals(UpdateStatus.class)) {
+    if (fingerprint == null && !documentType.equals(UpdateStatus.class) &&
+        !documentType.equals(UptimeStatus.class)) {
       // TODO Instead of using the update file workaround, add new method
       // lastModified(Class<T> documentType) that serves a similar
-      // purpose.  Once that's implemented, make fingerprint mandatory for
-      // all methods.
+      // purpose.
       return null;
     }
     File directory = null;
@@ -381,6 +388,15 @@ public class DocumentStore {
       fileName = String.format("clients/%s/%s/%s",
           fingerprint.substring(0, 1), fingerprint.substring(1, 2),
           fingerprint);
+    } else if (documentType.equals(UptimeStatus.class)) {
+      directory = this.statusDir;
+      if (fingerprint == null) {
+        fileName = "uptime";
+      } else {
+        fileName = String.format("uptimes/%s/%s/%s",
+            fingerprint.substring(0, 1), fingerprint.substring(1, 2),
+            fingerprint);
+      }
     } else if (documentType.equals(UpdateStatus.class)) {
       directory = this.outDir;
       fileName = "update";
@@ -401,6 +417,9 @@ public class DocumentStore {
     } else if (documentType.equals(ClientsDocument.class)) {
       directory = this.outDir;
       fileName = String.format("clients/%s", fingerprint);
+    } else if (documentType.equals(UptimeDocument.class)) {
+      directory = this.outDir;
+      fileName = String.format("uptimes/%s", fingerprint);
     }
     if (directory != null && fileName != null) {
       documentFile = new File(directory, fileName);

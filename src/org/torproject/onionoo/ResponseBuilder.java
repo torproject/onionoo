@@ -776,6 +776,8 @@ public class ResponseBuilder {
       return this.writeWeightsLines(summaryLine);
     } else if (this.resourceType.equals("clients")) {
       return this.writeClientsLines(summaryLine);
+    } else if (this.resourceType.equals("uptime")) {
+      return this.writeUptimeLines(summaryLine);
     } else {
       return "";
     }
@@ -924,6 +926,32 @@ public class ResponseBuilder {
       return clientsLines;
     } else {
       // TODO We should probably log that we didn't find a clients
+      // document that we expected to exist.
+      return "";
+    }
+  }
+
+  private String writeUptimeLines(String summaryLine) {
+    String fingerprint = null;
+    if (summaryLine.contains("\"f\":\"")) {
+      fingerprint = summaryLine.substring(summaryLine.indexOf(
+         "\"f\":\"") + "\"f\":\"".length());
+    } else if (summaryLine.contains("\"h\":\"")) {
+      fingerprint = summaryLine.substring(summaryLine.indexOf(
+         "\"h\":\"") + "\"h\":\"".length());
+    } else {
+      return "";
+    }
+    fingerprint = fingerprint.substring(0, 40);
+    UptimeDocument uptimeDocument = documentStore.retrieve(
+        UptimeDocument.class, false, fingerprint);
+    if (uptimeDocument != null &&
+        uptimeDocument.documentString != null) {
+      String uptimeLines = uptimeDocument.documentString;
+      uptimeLines = uptimeLines.substring(0, uptimeLines.length() - 1);
+      return uptimeLines;
+    } else {
+      // TODO We should probably log that we didn't find an uptime
       // document that we expected to exist.
       return "";
     }

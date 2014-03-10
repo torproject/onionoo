@@ -58,6 +58,7 @@ h3 .request-response { padding: 0 !important; }
         <li><a href="#bandwidth">Bandwidth documents</a></li>
         <li><a href="#weights">Weights documents</a></li>
         <li><a href="#clients">Clients documents</a></li>
+        <li><a href="#uptime">Uptime documents</a></li>
     </ul>
 
 </div>
@@ -1948,6 +1949,197 @@ It might be removed in the future without notice.</font>
 </li>
 
 </ul>
+
+</li>
+
+</ul>
+
+</div> <!-- box -->
+
+<div class="box">
+<a name="uptime"></a>
+<h3>Uptime documents <a href="#uptime">#</a>
+<span class="request-response">
+<a href="uptime?limit=4">example request</a>
+</span>
+</h3>
+
+<p>
+<font color="blue">Added on March 10, 2014.</font>
+Uptime documents contain fractional uptimes of relays and bridges.
+Uptime documents contain different time intervals and are available for
+all relays and bridges that have been running in the past week.
+Uptime documents contain the following fields:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>relays_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known relay network status consensus started being valid.
+Indicates how recent the relay uptime documents in this document are.
+</p>
+</li>
+
+<li>
+<b>relays</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing relay uptime documents.
+Each array object contains the following key-value pairs:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>fingerprint</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Relay fingerprint consisting of 40 upper-case
+hexadecimal characters.
+</p>
+</li>
+
+<li>
+<b>uptime</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+History object containing the fractional uptime of this relay.
+Keys are string representation of the time period covered by the uptime
+history object.
+Keys are fixed strings <strong>"1_week"</strong>,
+<strong>"1_month"</strong>, <strong>"3_months"</strong>,
+<strong>"1_year"</strong>, and <strong>"5_years"</strong>.
+Keys refer to the last known uptime history of a relay, not to the time
+when the uptime document was published.
+An uptime history object is only contained if the time period it covers
+is not already contained in another uptime history object with shorter
+time period and higher data resolution.
+Each uptime history object contains the following key-value pairs:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>first</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
+data point in the uptime history.
+</p>
+</li>
+
+<li>
+<b>last</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
+data point in the uptime history.
+</p>
+</li>
+
+<li>
+<b>interval</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Time interval between two data points in seconds.
+</p>
+</li>
+
+<li>
+<b>factor</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Factor by which subsequent uptime values need to
+be multiplied to get the fractional uptime.
+This is only done for compatibility reasons with the other document types.
+</p>
+</li>
+
+<li>
+<b>count</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of provided data points, included mostly for debugging purposes.
+Can also be derived from the number of elements in the subsequent array.
+</p>
+</li>
+
+<li>
+<b>values</b>
+<code class="typeof">array of numbers</code>
+<span class="required-true">required</span>
+<p>
+Array of normalized uptime values.
+May contain null values if less than 20% of network statuses have been
+processed for a given time period.
+Contains at least two subsequent non-null values to enable drawing of line
+graphs.
+</p>
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+
+</li>
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known bridge network status was published.
+Indicates how recent the bridge uptime documents in this document are.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of objects representing bridge uptime documents.
+Each array object contains the following key-value pairs:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>fingerprint</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+SHA-1 hash of the bridge fingerprint consisting
+of 40 upper-case hexadecimal characters.
+</p>
+</li>
+
+<li>
+<b>uptime</b>
+<code class="typeof">object</code>
+<span class="required-true">required</span>
+<p>
+Object containing uptime history objects for different time periods.
+The specification of uptime history objects is similar to those in the
+<strong>uptime</strong> field of <strong>relays</strong>.
+</p>
+</li>
 
 </li>
 

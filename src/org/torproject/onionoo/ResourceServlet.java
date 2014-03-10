@@ -130,6 +130,8 @@ public class ResourceServlet extends HttpServlet {
       resourceType = "weights";
     } else if (uri.startsWith("/clients")) {
       resourceType = "clients";
+    } else if (uri.startsWith("/uptime")) {
+      resourceType = "uptime";
     } else {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       return;
