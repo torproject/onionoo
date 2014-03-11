@@ -55,6 +55,7 @@ h3 .request-response { padding: 0 !important; }
         <li><a href="#methods">Methods</a></li>
         <li><a href="#summary">Summary documents</a></li>
         <li><a href="#details">Details documents</a></li>
+        <li><a href="#history">History objects</a></li>
         <li><a href="#bandwidth">Bandwidth documents</a></li>
         <li><a href="#weights">Weights documents</a></li>
         <li><a href="#clients">Clients documents</a></li>
@@ -211,6 +212,13 @@ document</a></span>
 <span class="request-type">GET</span>
 <span class="request-url">https://onionoo.torproject.org/clients</span>
 <span class="request-response">returns a <a href="#clients">clients
+document</a></span>
+</li>
+
+<li class="api-request">
+<span class="request-type">GET</span>
+<span class="request-url">https://onionoo.torproject.org/uptime</span>
+<span class="request-response">returns a <a href="#uptime">uptime
 document</a></span>
 </li>
 
@@ -471,8 +479,36 @@ Indicates how recent the relay summaries in this document are.
 <code class="typeof">array of objects</code>
 <span class="required-true">required</span>
 <p>
-Array of objects representing relay summaries.
-Each array object contains the following key-value pairs:
+Array of relay summary objects as specified below.
+</p>
+</li>
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known bridge network status was published.
+Indicates how recent the bridge summaries in this document are.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of bridge summary objects as specified below.
+</p>
+</li>
+
+</ul>
+
+<h4>Relay summary objects</h4>
+
+<p>
+Relay summary objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -521,26 +557,11 @@ running in the last relay network status consensus.
 </li>
 
 </ul>
-</li>
 
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Indicates how recent the bridge summaries in this document are.
-</p>
-</li>
+<h4>Bridge summary objects</h4>
 
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
 <p>
-Array of objects representing bridge summaries.
-Each array object contains the following key-value pairs:
+Bridge summary objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -573,10 +594,6 @@ upper-case hexadecimal characters.
 Boolean field saying whether this bridge was listed as
 running in the last bridge network status.
 </p>
-</li>
-
-</ul>
-
 </li>
 
 </ul>
@@ -617,8 +634,37 @@ Indicates how recent the relay details in this document are.
 <code class="typeof">array of objects</code>
 <span class="required-true">required</span>
 <p>
-Array of objects representing relay details.
-Each array object contains the following key-value pairs:
+Array of relay details objects as specified below.
+</p>
+</li>
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known bridge network status was published.
+Indicates how recent the bridge details in this document are.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of bridge details objects as specified below.
+</p>
+
+</li>
+
+</ul>
+
+<h4>Relay details objects</h4>
+
+<p>
+Relay details objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -1101,25 +1147,10 @@ bandwidth weights.
 
 </ul>
 
-</li>
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Indicates how recent the bridge details in this document are.
-</p>
-</li>
+<h4>Bridge details objects</h4>
 
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
 <p>
-Array of objects representing bridge summaries.
-Each array object contains the following key-value pairs:
+Bridge details objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -1258,6 +1289,86 @@ available.
 
 </ul>
 
+</div> <!-- box -->
+
+<div class="box">
+<a name="history"></a>
+<h3>History objects <a href="#history">#</a></h3>
+
+<p>
+History objects are no documents by themselves, but are contained in
+subsequent documents.
+<p>
+
+<h4>Graph history objects</h4>
+
+<p>
+Graph history objects contain the following fields:
+</p>
+
+<ul class="properties">
+
+<li>
+<b>first</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data point, or more
+specifically the interval midpoint of the first interval.
+</p>
+</li>
+
+<li>
+<b>last</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data point, or more
+specifically the interval midpoint of the last interval.
+</p>
+</li>
+
+<li>
+<b>interval</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Time interval between two data points in seconds.
+</p>
+</li>
+
+<li>
+<b>factor</b>
+<code class="typeof">number</code>
+<span class="required-true">required</span>
+<p>
+Factor by which subsequent data values need to be multiplied to obtain
+original values.
+The idea is to reduce document size while still providing sufficient
+detail for very different data scales.
+</p>
+</li>
+
+<li>
+<b>count</b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of provided data points, included mostly for debugging purposes.
+Can also be derived from the number of elements in the subsequent array.
+</p>
+</li>
+
+<li>
+<b>values</b>
+<code class="typeof">array of numbers</code>
+<span class="required-true">required</span>
+<p>
+Array of normalized values between 0 and 999.
+May contain null values.
+Contains at least two subsequent non-null values to enable drawing of line
+graphs.
+</p>
 </li>
 
 </ul>
@@ -1298,9 +1409,36 @@ Indicates how recent the relay bandwidth documents in this document are.
 <code class="typeof">array of objects</code>
 <span class="required-true">required</span>
 <p>
-Array of objects representing relay bandwidth
-documents.
-Each array object contains the following key-value pairs:
+Array of relay bandwidth objects as specified below.
+</p>
+</li>
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known bridge network status was published.
+Indicates how recent the bridge bandwidth documents in this document are.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of bridge bandwidth objects as specified below.
+</p>
+</li>
+
+</ul>
+
+<h4>Relay bandwidth objects</h4>
+
+<p>
+Relay bandwidth objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -1320,9 +1458,9 @@ hexadecimal characters.
 <code class="typeof">object</code>
 <span class="required-true">required</span>
 <p>
-Object containing bandwidth history objects
-for different time periods.
-Keys are string representation of the time period covered by the bandwidth
+Object containing graph history objects with written bytes for different
+time periods.
+Keys are string representation of the time period covered by the graph
 history object.
 Keys are fixed strings <strong>"3_days"</strong>,
 <strong>"1_week"</strong>, <strong>"1_month"</strong>,
@@ -1330,83 +1468,14 @@ Keys are fixed strings <strong>"3_days"</strong>,
 <strong>"5_years"</strong>.
 Keys refer to the last known bandwidth history of a relay, not to the time
 when the bandwidth document was published.
-A bandwidth history object is only contained if the time period it covers
-is not already contained in another bandwidth history object with shorter
-time period and higher data resolution.
-Each bandwidth history object contains the following key-value pairs:
+A graph history object is only contained if the time period it covers is
+not already contained in another graph history object with shorter time
+period and higher data resolution.
+The unit is bytes per second.
+Contained graph history objects may contain null values if the relay did
+not provide any bandwidth data or only data for less than 20% of a given
+time period.
 </p>
-
-<ul class="properties">
-
-<li>
-<b>first</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
-data point in the bandwidth history.
-</p>
-</li>
-
-<li>
-<b>last</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
-data point in the bandwidth history.
-</p>
-</li>
-
-<li>
-<b>interval</b>
-<code class="typeof">number</code>
-<span class="required-true">required</span>
-<p>
-Time interval between two data points in seconds.
-</p>
-</li>
-
-<li>
-<b>factor</b>
-<code class="typeof">number</code>
-<span class="required-true">required</span>
-<p>
-Factor by which subsequent bandwidth values need to
-be multiplied to get a unit of bytes per second.
-The idea is that contained bandwidth values are normalized to a range from
-0 to 999 to reduce document size while still providing sufficient detail
-for both slow and fast relays.
-</p>
-</li>
-
-<li>
-<b>count</b>
-<code class="typeof">number</code>
-<span class="required-false">optional</span>
-<p>
-Number of provided data points, included mostly for
-debugging purposes.
-Can also be derived from the number of elements in the subsequent array.
-</p>
-</li>
-
-<li>
-<b>values</b>
-<code class="typeof">array of numbers</code>
-<span class="required-true">required</span>
-<p>
-Array of normalized bandwidth values in bytes per
-second.
-May contain null values if the relay did not provide any bandwidth data or
-only data for less than 20% of a given time period.
-Contains at least two subsequent non-null values to enable drawing of line
-graphs.
-</p>
-</li>
-
-</ul>
-
 </li>
 
 <li>
@@ -1414,35 +1483,19 @@ graphs.
 <code class="typeof">object</code>
 <span class="required-true">required</span>
 <p>
-Object containing bandwidth history objects
-for different time periods.
-The specification of bandwidth history objects is similar to those in the
+Object containing graph history objects with read bytes for different time
+periods.
+The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field.
 </p>
 </li>
 
 </ul>
 
-</li>
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Indicates how recent the bridge bandwidth documents in this document are.
-</p>
-</li>
+<h4>Bridge bandwidth objects</h4>
 
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
 <p>
-Array of objects representing bridge bandwidth
-documents.
-Each array object contains the following key-value pairs:
+Bridge bandwidth objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -1462,9 +1515,9 @@ of 40 upper-case hexadecimal characters.
 <code class="typeof">object</code>
 <span class="required-true">required</span>
 <p>
-Object containing bandwidth history objects
-for different time periods.
-The specification of bandwidth history objects is similar to those in the
+Object containing graph history objects with written bytes for different
+time periods.
+The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field of <strong>relays</strong>.
 </p>
 </li>
@@ -1474,15 +1527,11 @@ The specification of bandwidth history objects is similar to those in the
 <code class="typeof">object</code>
 <span class="required-true">required</span>
 <p>
-Object containing bandwidth history objects
-for different time periods.
-The specification of bandwidth history objects is similar to those in the
+Object containing graph history objects with read bytes for different time
+periods.
+The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field of <strong>relays</strong>.
 </p>
-</li>
-
-</ul>
-
 </li>
 
 </ul>
@@ -1523,9 +1572,37 @@ Indicates how recent the relay weights documents in this document are.
 <code class="typeof">array of objects</code>
 <span class="required-true">required</span>
 <p>
-Array of objects representing relay weights
-documents.
-Each array object contains the following key-value pairs:
+Array of relay weights objects as specified below.
+</p>
+</li>
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known bridge network status was published.
+Only included for compatibility reasons with the other document types.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Empty array of objects that would represent bridge weights documents.
+Only included for compatibility reasons with the other document types.
+</p>
+</li>
+
+</ul>
+
+<h4>Relay weights objects</h4>
+
+<p>
+Relay weights objects contain the following key-value pairs: 
 </p>
 
 <ul class="properties">
@@ -1545,96 +1622,27 @@ hexadecimal characters.
 <code class="typeof">object</code>
 <span class="required-false">optional</span>
 <p>
-History object containing
-relative advertised bandwidth of this relay compared to the total
-advertised bandwidth in the network.
+Object containing graph history objects with relative advertised bandwidth
+of this relay compared to the total advertised bandwidth in the network.
 If there were no bandwidth authorities, this fraction would be a very
 rough approximation of the probability of this relay to be selected by
 clients.
-Keys are string representation of the time period covered by the weights
+Keys are string representation of the time period covered by the graph
 history object.
 Keys are fixed strings <strong>"1_week"</strong>,
 <strong>"1_month"</strong>, <strong>"3_months"</strong>,
 <strong>"1_year"</strong>, and <strong>"5_years"</strong>.
 Keys refer to the last known weights history of a relay, not to the time
 when the weights document was published.
-A weights history object is only contained if the time period it covers
-is not already contained in another weights history object with shorter
-time period and higher data resolution.
-Each weights history object contains the following key-value pairs:
-</p>
-
-<ul class="properties">
-
-<li>
-<b>first</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
-data point in the weights history.
+A graph history object is only contained if the time period it covers is
+not already contained in another graph history object with shorter time
+period and higher data resolution.
+The unit is path-selection probability.
+Contained graph history objects may contain null values if the relay was
+running less than 20% of a given time period.
 </p>
 </li>
 
-<li>
-<b>last</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
-data point in the weights history.
-</p>
-</li>
-
-<li>
-<b>interval</b>
-<code class="typeof">number</code>
-<span class="required-true">required</span>
-<p>
-Time interval between two data points in seconds.
-</p>
-</li>
-
-<li>
-<b>factor</b>
-<code class="typeof">number</code>
-<span class="required-true">required</span>
-<p>
-Factor by which subsequent weights values need to
-be multiplied to get the path-selection probability.
-The idea is that contained weights values are normalized to a range from 0
-to 999 to reduce document size while still providing sufficient detail for
-both slow and fast relays.
-</p>
-</li>
-
-<li>
-<b>count</b>
-<code class="typeof">number</code>
-<span class="required-false">optional</span>
-<p>
-Number of provided data points, included mostly for
-debugging purposes.
-Can also be derived from the number of elements in the subsequent array.
-</p>
-</li>
-
-<li>
-<b>values</b>
-<code class="typeof">array of numbers</code>
-<span class="required-true">required</span>
-<p>
-Array of normalized weights values.
-May contain null values if the relay was running less than 20% of a given
-time period.
-Contains at least two subsequent non-null values to enable drawing of line
-graphs.
-</p>
-</li>
-
-</ul>
-
-</li>
 <li>
 <b>consensus_weight_fraction</b>
 <code class="typeof">object</code>
@@ -1700,32 +1708,6 @@ The specification of this history object is similar to that in the
 
 </ul>
 
-</li>
-
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Only included for compatibility reasons with the other document types.
-</p>
-</li>
-
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Empty array of objects that would represent bridge
-weights documents.
-Only included for compatibility reasons with the other document types.
-</p>
-</li>
-
-</ul>
-
 </div> <!-- box -->
 
 <div class="box">
@@ -1785,8 +1767,17 @@ Indicates how recent the bridge clients documents in this document are.
 <code class="typeof">array of objects</code>
 <span class="required-true">required</span>
 <p>
-Array of objects representing bridge clients documents.
-Each array object contains the following key-value pairs:
+Array of bridge clients objects as specified below.
+</p>
+
+</li>
+
+</ul>
+
+<h4>Bridge clients objects</h4>
+
+<p>
+Bridge clients objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -1806,88 +1797,26 @@ of 40 upper-case hexadecimal characters.
 <code class="typeof">object</code>
 <span class="required-false">optional</span>
 <p>
-History object containing the average number of clients connecting to
-this bridge.
-Keys are string representation of the time period covered by the clients
+Object containing graph history objects with the average number of clients
+connecting to this bridge.
+Keys are string representation of the time period covered by the graph
 history object.
 Keys are fixed strings <strong>"1_week"</strong>,
 <strong>"1_month"</strong>, <strong>"3_months"</strong>,
 <strong>"1_year"</strong>, and <strong>"5_years"</strong>.
 Keys refer to the last known clients history of a bridge, not to the time
 when the clients document was published.
-A clients history object is only contained if the time period it covers
-is not already contained in another clients history object with shorter
+A graph history object is only contained if the time period it covers
+is not already contained in another clients graph object with shorter
 time period and higher data resolution.
-Each clients history object contains the following key-value pairs:
+The unit is number of clients.
+Contained graph history objects may contain null values if the bridge did
+not report client statistics for at least 50% of a given time period.
+Each graph history object contains the following additional key-value
+pairs:
 </p>
 
 <ul class="properties">
-
-<li>
-<b>first</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
-data point in the clients history.
-</p>
-</li>
-
-<li>
-<b>last</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
-data point in the clients history.
-</p>
-</li>
-
-<li>
-<b>interval</b>
-<code class="typeof">number</code>
-<span class="required-true">required</span>
-<p>
-Time interval between two data points in seconds.
-</p>
-</li>
-
-<li>
-<b>factor</b>
-<code class="typeof">number</code>
-<span class="required-true">required</span>
-<p>
-Factor by which subsequent clients values need to
-be multiplied to get the average number of clients.
-The idea is that contained clients values are normalized to a range from 0
-to 999 to reduce document size while still providing sufficient detail for
-both heavily used and mostly unused bridges.
-</p>
-</li>
-
-<li>
-<b>count</b>
-<code class="typeof">number</code>
-<span class="required-false">optional</span>
-<p>
-Number of provided data points, included mostly for
-debugging purposes.
-Can also be derived from the number of elements in the subsequent array.
-</p>
-</li>
-
-<li>
-<b>values</b>
-<code class="typeof">array of numbers</code>
-<span class="required-true">required</span>
-<p>
-Array of normalized clients values.
-May contain null values if the bridge did not report client statistics for
-at least 50% of a given time period.
-Contains at least two subsequent non-null values to enable drawing of line
-graphs.
-</p>
-</li>
 
 <li>
 <b>countries</b>
@@ -1950,10 +1879,6 @@ It might be removed in the future without notice.</font>
 
 </ul>
 
-</li>
-
-</ul>
-
 </div> <!-- box -->
 
 <div class="box">
@@ -1990,8 +1915,36 @@ Indicates how recent the relay uptime documents in this document are.
 <code class="typeof">array of objects</code>
 <span class="required-true">required</span>
 <p>
-Array of objects representing relay uptime documents.
-Each array object contains the following key-value pairs:
+Array of relay uptime objects as specified below.
+</p>
+</li>
+
+<li>
+<b>bridges_published</b>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+UTC timestamp (YYYY-MM-DD hh:mm:ss) when
+the last known bridge network status was published.
+Indicates how recent the bridge uptime documents in this document are.
+</p>
+</li>
+
+<li>
+<b>bridges</b>
+<code class="typeof">array of objects</code>
+<span class="required-true">required</span>
+<p>
+Array of bridge uptime objects as specified below.
+</p>
+</li>
+
+</ul>
+
+<h4>Relay uptime objects</h4>
+
+<p>
+Relay uptime objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -2011,111 +1964,30 @@ hexadecimal characters.
 <code class="typeof">object</code>
 <span class="required-false">optional</span>
 <p>
-History object containing the fractional uptime of this relay.
-Keys are string representation of the time period covered by the uptime
+Object containing graph history objects with the fractional uptime of this
+relay.
+Keys are string representation of the time period covered by the graph
 history object.
 Keys are fixed strings <strong>"1_week"</strong>,
 <strong>"1_month"</strong>, <strong>"3_months"</strong>,
 <strong>"1_year"</strong>, and <strong>"5_years"</strong>.
 Keys refer to the last known uptime history of a relay, not to the time
 when the uptime document was published.
-An uptime history object is only contained if the time period it covers
-is not already contained in another uptime history object with shorter
-time period and higher data resolution.
-Each uptime history object contains the following key-value pairs:
-</p>
-
-<ul class="properties">
-
-<li>
-<b>first</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) of the first data
-data point in the uptime history.
-</p>
-</li>
-
-<li>
-<b>last</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) of the last data
-data point in the uptime history.
-</p>
-</li>
-
-<li>
-<b>interval</b>
-<code class="typeof">number</code>
-<span class="required-true">required</span>
-<p>
-Time interval between two data points in seconds.
-</p>
-</li>
-
-<li>
-<b>factor</b>
-<code class="typeof">number</code>
-<span class="required-true">required</span>
-<p>
-Factor by which subsequent uptime values need to
-be multiplied to get the fractional uptime.
-This is only done for compatibility reasons with the other document types.
-</p>
-</li>
-
-<li>
-<b>count</b>
-<code class="typeof">number</code>
-<span class="required-false">optional</span>
-<p>
-Number of provided data points, included mostly for debugging purposes.
-Can also be derived from the number of elements in the subsequent array.
-</p>
-</li>
-
-<li>
-<b>values</b>
-<code class="typeof">array of numbers</code>
-<span class="required-true">required</span>
-<p>
-Array of normalized uptime values.
-May contain null values if less than 20% of network statuses have been
-processed for a given time period.
-Contains at least two subsequent non-null values to enable drawing of line
-graphs.
+A graph history object is only contained if the time period it covers is
+not already contained in another graph history object with shorter time
+period and higher data resolution.
+The unit is fractional uptime from 0 to 1.
+Contained graph history objects may contain null values if less than 20%
+of network statuses have been processed for a given time period.
 </p>
 </li>
 
 </ul>
 
-</li>
+<h4>Bridge uptime objects</h4>
 
-</ul>
-
-</li>
-
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
 <p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Indicates how recent the bridge uptime documents in this document are.
-</p>
-</li>
-
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of objects representing bridge uptime documents.
-Each array object contains the following key-value pairs:
+Bridge uptime objects contain the following key-value pairs:
 </p>
 
 <ul class="properties">
@@ -2139,8 +2011,6 @@ Object containing uptime history objects for different time periods.
 The specification of uptime history objects is similar to those in the
 <strong>uptime</strong> field of <strong>relays</strong>.
 </p>
-</li>
-
 </li>
 
 </ul>
