@@ -33,7 +33,8 @@ import org.torproject.onionoo.LookupService.LookupResult;
  * The parts of details files coming from server descriptors always come
  * from the last known descriptor of a relay or bridge, not from the
  * descriptor that was last referenced in a network status. */
-public class NodeDataWriter implements DataWriter, DescriptorListener {
+public class NodeDataWriter implements DataWriter, DescriptorListener,
+    FingerprintListener {
 
   private DescriptorSource descriptorSource;
 
@@ -70,21 +71,38 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
     this.documentStore = documentStore;
     this.now = time.currentTimeMillis();
     this.registerDescriptorListeners();
+    this.registerFingerprintListeners();
   }
 
   private void registerDescriptorListeners() {
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.RELAY_CONSENSUSES);
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.RELAY_SERVER_DESCRIPTORS);
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.BRIDGE_STATUSES);
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.EXIT_LISTS);
+  }
+
+  private void registerFingerprintListeners() {
+    /* TODO Not used yet.
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.RELAY_CONSENSUSES);
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.RELAY_SERVER_DESCRIPTORS);
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.BRIDGE_STATUSES);
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.EXIT_LISTS);*/
   }
 
   public void processDescriptor(Descriptor descriptor, boolean relay) {
@@ -102,6 +120,11 @@ public class NodeDataWriter implements DataWriter, DescriptorListener {
     } else if (descriptor instanceof ExitList) {
       this.processExitList((ExitList) descriptor);
     }
+  }
+
+  public void processFingerprints(SortedSet<String> fingerprints,
+      boolean relay) {
+    /* TODO Not used yet. */
   }
 
   public void updateStatuses() {

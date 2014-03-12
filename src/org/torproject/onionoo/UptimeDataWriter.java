@@ -20,7 +20,8 @@ import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 
-public class UptimeDataWriter implements DataWriter, DescriptorListener {
+public class UptimeDataWriter implements DataWriter, DescriptorListener,
+    FingerprintListener {
 
   private DescriptorSource descriptorSource;
 
@@ -34,12 +35,20 @@ public class UptimeDataWriter implements DataWriter, DescriptorListener {
     this.documentStore = documentStore;
     this.now = time.currentTimeMillis();
     this.registerDescriptorListeners();
+    this.registerFingerprintListeners();
   }
 
   private void registerDescriptorListeners() {
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.RELAY_CONSENSUSES);
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
+        DescriptorType.BRIDGE_STATUSES);
+  }
+
+  public void registerFingerprintListeners() {
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.RELAY_CONSENSUSES);
+    this.descriptorSource.registerFingerprintListener(this,
         DescriptorType.BRIDGE_STATUSES);
   }
 
@@ -284,6 +293,18 @@ public class UptimeDataWriter implements DataWriter, DescriptorListener {
     }
   }
 
+  private SortedSet<String> newRelayFingerprints = new TreeSet<String>(),
+      newBridgeFingerprints = new TreeSet<String>();
+
+  public void processFingerprints(SortedSet<String> fingerprints,
+      boolean relay) {
+    if (relay) {
+      this.newRelayFingerprints.addAll(fingerprints);
+    } else {
+      this.newBridgeFingerprints.addAll(fingerprints);
+    }
+  }
+
   public void updateDocuments() {
     SortedSet<UptimeHistory>
         knownRelayStatuses = new TreeSet<UptimeHistory>(),
@@ -296,10 +317,10 @@ public class UptimeDataWriter implements DataWriter, DescriptorListener {
         knownBridgeStatuses.add(status);
       }
     }
-    for (String fingerprint : this.newRunningRelays.keySet()) {
+    for (String fingerprint : this.newRelayFingerprints) {
       this.updateDocument(true, fingerprint, knownRelayStatuses);
     }
-    for (String fingerprint : this.newRunningBridges.keySet()) {
+    for (String fingerprint : this.newBridgeFingerprints) {
       this.updateDocument(false, fingerprint, knownBridgeStatuses);
     }
     Logger.printStatusTime("Wrote uptime document files");

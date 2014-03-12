@@ -16,12 +16,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
+import org.torproject.descriptor.BridgeNetworkStatus;
+import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.DescriptorFile;
 import org.torproject.descriptor.DescriptorReader;
 import org.torproject.descriptor.DescriptorSourceFactory;
+import org.torproject.descriptor.ExitList;
+import org.torproject.descriptor.ExitListEntry;
+import org.torproject.descriptor.ExtraInfoDescriptor;
+import org.torproject.descriptor.RelayNetworkStatusConsensus;
+import org.torproject.descriptor.ServerDescriptor;
 
 enum DescriptorType {
   RELAY_CONSENSUSES,
@@ -36,6 +45,11 @@ enum DescriptorType {
 
 interface DescriptorListener {
   abstract void processDescriptor(Descriptor descriptor, boolean relay);
+}
+
+interface FingerprintListener {
+  abstract void processFingerprints(SortedSet<String> fingerprints,
+      boolean relay);
 }
 
 enum DescriptorHistory {
@@ -253,6 +267,8 @@ public class DescriptorSource {
     this.descriptorQueues = new ArrayList<DescriptorQueue>();
     this.descriptorListeners =
         new HashMap<DescriptorType, Set<DescriptorListener>>();
+    this.fingerprintListeners =
+        new HashMap<DescriptorType, Set<FingerprintListener>>();
   }
 
   private DescriptorQueue getDescriptorQueue(
@@ -271,13 +287,25 @@ public class DescriptorSource {
   private Map<DescriptorType, Set<DescriptorListener>>
       descriptorListeners;
 
-  public void registerListener(DescriptorListener listener,
+  private Map<DescriptorType, Set<FingerprintListener>>
+      fingerprintListeners;
+
+  public void registerDescriptorListener(DescriptorListener listener,
       DescriptorType descriptorType) {
     if (!this.descriptorListeners.containsKey(descriptorType)) {
       this.descriptorListeners.put(descriptorType,
           new HashSet<DescriptorListener>());
     }
     this.descriptorListeners.get(descriptorType).add(listener);
+  }
+
+  public void registerFingerprintListener(FingerprintListener listener,
+      DescriptorType descriptorType) {
+    if (!this.fingerprintListeners.containsKey(descriptorType)) {
+      this.fingerprintListeners.put(descriptorType,
+          new HashSet<FingerprintListener>());
+    }
+    this.fingerprintListeners.get(descriptorType).add(listener);
   }
 
   public void readRelayNetworkConsensuses() {
@@ -322,17 +350,63 @@ public class DescriptorSource {
 
   private void readDescriptors(DescriptorType descriptorType,
       DescriptorHistory descriptorHistory, boolean relay) {
-    Set<DescriptorListener> descriptorListeners =
-        this.descriptorListeners.get(descriptorType);
-    if (descriptorListeners == null || descriptorListeners.isEmpty()) {
+    if (!this.descriptorListeners.containsKey(descriptorType) &&
+        !this.fingerprintListeners.containsKey(descriptorType)) {
       return;
     }
+    Set<DescriptorListener> descriptorListeners =
+        this.descriptorListeners.get(descriptorType);
+    Set<FingerprintListener> fingerprintListeners =
+        this.fingerprintListeners.get(descriptorType);
     DescriptorQueue descriptorQueue = this.getDescriptorQueue(
         descriptorType, descriptorHistory);
     Descriptor descriptor;
     while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
       for (DescriptorListener descriptorListener : descriptorListeners) {
         descriptorListener.processDescriptor(descriptor, relay);
+      }
+      SortedSet<String> fingerprints = new TreeSet<String>();
+      if (descriptorType == DescriptorType.RELAY_CONSENSUSES &&
+          descriptor instanceof RelayNetworkStatusConsensus) {
+        fingerprints.addAll(((RelayNetworkStatusConsensus) descriptor).
+            getStatusEntries().keySet());
+      } else if (descriptorType
+          == DescriptorType.RELAY_SERVER_DESCRIPTORS &&
+          descriptor instanceof ServerDescriptor) {
+        fingerprints.add(((ServerDescriptor) descriptor).
+            getFingerprint());
+      } else if (descriptorType == DescriptorType.RELAY_EXTRA_INFOS &&
+          descriptor instanceof ExtraInfoDescriptor) {
+        fingerprints.add(((ExtraInfoDescriptor) descriptor).
+            getFingerprint());
+      } else if (descriptorType == DescriptorType.EXIT_LISTS &&
+          descriptor instanceof ExitList) {
+        for (ExitListEntry entry :
+            ((ExitList) descriptor).getExitListEntries()) {
+          fingerprints.add(entry.getFingerprint());
+        }
+      } else if (descriptorType == DescriptorType.BRIDGE_STATUSES &&
+          descriptor instanceof BridgeNetworkStatus) {
+        fingerprints.addAll(((BridgeNetworkStatus) descriptor).
+            getStatusEntries().keySet());
+      } else if (descriptorType ==
+          DescriptorType.BRIDGE_SERVER_DESCRIPTORS &&
+          descriptor instanceof ServerDescriptor) {
+        fingerprints.add(((ServerDescriptor) descriptor).
+            getFingerprint());
+      } else if (descriptorType == DescriptorType.BRIDGE_EXTRA_INFOS &&
+          descriptor instanceof ExtraInfoDescriptor) {
+        fingerprints.add(((ExtraInfoDescriptor) descriptor).
+            getFingerprint());
+      } else if (descriptorType ==
+          DescriptorType.BRIDGE_POOL_ASSIGNMENTS &&
+          descriptor instanceof BridgePoolAssignment) {
+        fingerprints.addAll(((BridgePoolAssignment) descriptor).
+            getEntries().keySet());
+      }
+      for (FingerprintListener fingerprintListener :
+          fingerprintListeners) {
+        fingerprintListener.processFingerprints(fingerprints, relay);
       }
     }
   }

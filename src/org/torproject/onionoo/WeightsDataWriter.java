@@ -25,7 +25,8 @@ import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
 
-public class WeightsDataWriter implements DataWriter, DescriptorListener {
+public class WeightsDataWriter implements DataWriter, DescriptorListener,
+    FingerprintListener {
 
   private DescriptorSource descriptorSource;
 
@@ -39,12 +40,20 @@ public class WeightsDataWriter implements DataWriter, DescriptorListener {
     this.documentStore = documentStore;
     this.now = time.currentTimeMillis();
     this.registerDescriptorListeners();
+    this.registerFingerprintListeners();
   }
 
   private void registerDescriptorListeners() {
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.RELAY_CONSENSUSES);
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
+        DescriptorType.RELAY_SERVER_DESCRIPTORS);
+  }
+
+  private void registerFingerprintListeners() {
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.RELAY_CONSENSUSES);
+    this.descriptorSource.registerFingerprintListener(this,
         DescriptorType.RELAY_SERVER_DESCRIPTORS);
   }
 
@@ -289,7 +298,6 @@ public class WeightsDataWriter implements DataWriter, DescriptorListener {
       history.put(interval, weights);
       history = this.compressHistory(history);
       this.writeHistoryToDisk(fingerprint, history);
-      this.updateWeightsDocuments.add(fingerprint);
       this.updateWeightsStatuses.remove(fingerprint);
     }
   }
@@ -454,6 +462,13 @@ public class WeightsDataWriter implements DataWriter, DescriptorListener {
     WeightsStatus weightsStatus = new WeightsStatus();
     weightsStatus.documentString = sb.toString();
     this.documentStore.store(weightsStatus, fingerprint);
+  }
+
+  public void processFingerprints(SortedSet<String> fingerprints,
+      boolean relay) {
+    if (relay) {
+      this.updateWeightsDocuments.addAll(fingerprints);
+    }
   }
 
   private void writeWeightsDataFiles() {

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
@@ -35,7 +36,7 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  * 3 days as of publishing the document, but that's something clients can
  * work around. */
 public class BandwidthDataWriter implements DataWriter,
-    DescriptorListener {
+    DescriptorListener, FingerprintListener {
 
   private DescriptorSource descriptorSource;
 
@@ -54,19 +55,33 @@ public class BandwidthDataWriter implements DataWriter,
     this.dateTimeFormat.setLenient(false);
     this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.registerDescriptorListeners();
+    this.registerFingerprintListeners();
   }
 
   private void registerDescriptorListeners() {
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.RELAY_EXTRA_INFOS);
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.BRIDGE_EXTRA_INFOS);
+  }
+
+  private void registerFingerprintListeners() {
+    /* TODO Not used yet.
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.RELAY_EXTRA_INFOS);
+    this.descriptorSource.registerFingerprintListener(this,
+        DescriptorType.BRIDGE_EXTRA_INFOS);*/
   }
 
   public void processDescriptor(Descriptor descriptor, boolean relay) {
     if (descriptor instanceof ExtraInfoDescriptor) {
       this.parseDescriptor((ExtraInfoDescriptor) descriptor);
     }
+  }
+
+  public void processFingerprints(SortedSet<String> fingerprints,
+      boolean relay) {
+    /* TODO Not used yet. */
   }
 
   public void updateStatuses() {

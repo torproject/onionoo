@@ -51,7 +51,8 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  *   "transports":{"obfs2":0.4581},
  *   "versions":{"v4":1.0000}}
  */
-public class ClientsDataWriter implements DataWriter, DescriptorListener {
+public class ClientsDataWriter implements DataWriter, DescriptorListener,
+    FingerprintListener {
 
   private static class ResponseHistory
       implements Comparable<ResponseHistory> {
@@ -206,10 +207,16 @@ public class ClientsDataWriter implements DataWriter, DescriptorListener {
     this.documentStore = documentStore;
     this.now = time.currentTimeMillis();
     this.registerDescriptorListeners();
+    this.registerFingerprintListeners();
   }
 
   private void registerDescriptorListeners() {
-    this.descriptorSource.registerListener(this,
+    this.descriptorSource.registerDescriptorListener(this,
+        DescriptorType.BRIDGE_EXTRA_INFOS);
+  }
+
+  private void registerFingerprintListeners() {
+    this.descriptorSource.registerFingerprintListener(this,
         DescriptorType.BRIDGE_EXTRA_INFOS);
   }
 
@@ -402,8 +409,17 @@ public class ClientsDataWriter implements DataWriter, DescriptorListener {
     this.documentStore.store(clientsStatus, hashedFingerprint);
   }
 
+  public void processFingerprints(SortedSet<String> fingerprints,
+      boolean relay) {
+    if (!relay) {
+      this.updateDocuments.addAll(fingerprints);
+    }
+  }
+
+  private SortedSet<String> updateDocuments = new TreeSet<String>();
+
   public void updateDocuments() {
-    for (String hashedFingerprint : this.newResponses.keySet()) {
+    for (String hashedFingerprint : this.updateDocuments) {
       SortedSet<ResponseHistory> history =
           this.readHistory(hashedFingerprint);
       ClientsDocument clientsDocument = new ClientsDocument();
@@ -631,7 +647,7 @@ public class ClientsDataWriter implements DataWriter, DescriptorListener {
         + Logger.formatDecimalNumber(this.newResponses.size())
         + " client status files updated\n");
     sb.append("    "
-        + Logger.formatDecimalNumber(this.newResponses.size())
+        + Logger.formatDecimalNumber(this.updateDocuments.size())
         + " client document files updated\n");
     return sb.toString();
   }
