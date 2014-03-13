@@ -33,8 +33,8 @@ import org.torproject.onionoo.LookupService.LookupResult;
  * The parts of details files coming from server descriptors always come
  * from the last known descriptor of a relay or bridge, not from the
  * descriptor that was last referenced in a network status. */
-public class NodeDataWriter implements DataWriter, DescriptorListener,
-    FingerprintListener {
+public class NodeDataWriter implements DescriptorListener, StatusUpdater,
+    FingerprintListener, DocumentWriter {
 
   private DescriptorSource descriptorSource;
 
@@ -148,7 +148,7 @@ public class NodeDataWriter implements DataWriter, DescriptorListener,
     Logger.printStatusTime("Wrote out summary");
   }
 
-  public void updateDocuments() {
+  public void writeDocuments() {
     this.writeOutDetails();
     Logger.printStatusTime("Wrote detail data files");
   }

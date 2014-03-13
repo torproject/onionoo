@@ -40,7 +40,9 @@ public class Main {
     Logger.printStatusTime("Initialized clients data writer");
     UptimeDataWriter udw = new UptimeDataWriter(dso, ds, t);
     Logger.printStatusTime("Initialized uptime data writer");
-    DataWriter[] dws = new DataWriter[] { ndw, bdw, wdw, cdw, udw };
+    StatusUpdater[] sus = new StatusUpdater[] { ndw, bdw, wdw, cdw, udw };
+    DocumentWriter[] dws = new DocumentWriter[] { ndw, bdw, wdw, cdw,
+        udw };
 
     Logger.printStatus("Reading descriptors.");
     dso.readRelayNetworkConsensuses();
@@ -61,13 +63,13 @@ public class Main {
     Logger.printStatusTime("Read bridge-pool assignments");
 
     Logger.printStatus("Updating internal status files.");
-    for (DataWriter dw : dws) {
-      dw.updateStatuses();
+    for (StatusUpdater su : sus) {
+      su.updateStatuses();
     }
 
     Logger.printStatus("Updating document files.");
-    for (DataWriter dw : dws) {
-      dw.updateDocuments();
+    for (DocumentWriter dw : dws) {
+      dw.writeDocuments();
     }
 
     Logger.printStatus("Shutting down.");
@@ -77,13 +79,15 @@ public class Main {
     Logger.printStatusTime("Flushed document cache");
 
     Logger.printStatus("Gathering statistics.");
-    for (DataWriter dw : dws) {
-      String statsString = dw.getStatsString();
+    for (StatusUpdater su : sus) {
+      String statsString = su.getStatsString();
       if (statsString != null) {
-        Logger.printStatistics(dw.getClass().getSimpleName(),
+        Logger.printStatistics(su.getClass().getSimpleName(),
             statsString);
       }
     }
+    /* TODO Print status updater statistics once all data writers have
+     * been separated. */
     Logger.printStatistics("Descriptor source", dso.getStatsString());
     Logger.printStatistics("Document store", ds.getStatsString());
     Logger.printStatistics("GeoIP lookup service", ls.getStatsString());

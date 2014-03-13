@@ -35,8 +35,8 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  * last 3 days in the bandwidth document may not be equivalent to the last
  * 3 days as of publishing the document, but that's something clients can
  * work around. */
-public class BandwidthDataWriter implements DataWriter,
-    DescriptorListener, FingerprintListener {
+public class BandwidthDataWriter implements DescriptorListener,
+    StatusUpdater, FingerprintListener, DocumentWriter {
 
   private DescriptorSource descriptorSource;
 
@@ -88,7 +88,7 @@ public class BandwidthDataWriter implements DataWriter,
     /* Status files are already updated while processing descriptors. */
   }
 
-  public void updateDocuments() {
+  public void writeDocuments() {
     /* Document files are already updated while processing descriptors. */
   }
 

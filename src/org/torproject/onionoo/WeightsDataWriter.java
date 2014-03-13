@@ -25,8 +25,8 @@ import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
 
-public class WeightsDataWriter implements DataWriter, DescriptorListener,
-    FingerprintListener {
+public class WeightsDataWriter implements DescriptorListener,
+    StatusUpdater, FingerprintListener, DocumentWriter {
 
   private DescriptorSource descriptorSource;
 
@@ -73,7 +73,7 @@ public class WeightsDataWriter implements DataWriter, DescriptorListener,
     Logger.printStatusTime("Updated weights status files");
   }
 
-  public void updateDocuments() {
+  public void writeDocuments() {
     this.writeWeightsDataFiles();
     Logger.printStatusTime("Wrote weights document files");
   }

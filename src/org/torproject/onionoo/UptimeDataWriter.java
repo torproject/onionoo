@@ -20,8 +20,8 @@ import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 
-public class UptimeDataWriter implements DataWriter, DescriptorListener,
-    FingerprintListener {
+public class UptimeDataWriter implements DescriptorListener,
+    StatusUpdater, FingerprintListener, DocumentWriter {
 
   private DescriptorSource descriptorSource;
 
@@ -305,7 +305,7 @@ public class UptimeDataWriter implements DataWriter, DescriptorListener,
     }
   }
 
-  public void updateDocuments() {
+  public void writeDocuments() {
     SortedSet<UptimeHistory>
         knownRelayStatuses = new TreeSet<UptimeHistory>(),
         knownBridgeStatuses = new TreeSet<UptimeHistory>();

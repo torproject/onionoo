@@ -51,8 +51,8 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
  *   "transports":{"obfs2":0.4581},
  *   "versions":{"v4":1.0000}}
  */
-public class ClientsDataWriter implements DataWriter, DescriptorListener,
-    FingerprintListener {
+public class ClientsDataWriter implements DescriptorListener,
+    StatusUpdater, FingerprintListener, DocumentWriter {
 
   private static class ResponseHistory
       implements Comparable<ResponseHistory> {
@@ -418,7 +418,7 @@ public class ClientsDataWriter implements DataWriter, DescriptorListener,
 
   private SortedSet<String> updateDocuments = new TreeSet<String>();
 
-  public void updateDocuments() {
+  public void writeDocuments() {
     for (String hashedFingerprint : this.updateDocuments) {
       SortedSet<ResponseHistory> history =
           this.readHistory(hashedFingerprint);
