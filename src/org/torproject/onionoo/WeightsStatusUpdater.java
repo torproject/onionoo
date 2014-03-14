@@ -3,11 +3,9 @@
 package org.torproject.onionoo;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -66,6 +64,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
 
   private void processRelayNetworkConsensus(
       RelayNetworkStatusConsensus consensus) {
+    // TODO This does not scale for bulk imports.
     this.consensuses.add(consensus);
   }
 
@@ -107,62 +106,24 @@ public class WeightsStatusUpdater implements DescriptorListener,
     }
   }
 
-  // TODO Use 4 workers once threading problems are solved.
-  private static final int HISTORY_UPDATER_WORKERS_NUM = 1;
   private void updateWeightsHistory(long validAfterMillis,
       long freshUntilMillis,
       SortedMap<String, double[]> pathSelectionWeights) {
-    List<HistoryUpdateWorker> historyUpdateWorkers =
-        new ArrayList<HistoryUpdateWorker>();
-    for (int i = 0; i < HISTORY_UPDATER_WORKERS_NUM; i++) {
-      HistoryUpdateWorker historyUpdateWorker =
-          new HistoryUpdateWorker(validAfterMillis, freshUntilMillis,
-          pathSelectionWeights, this);
-      historyUpdateWorkers.add(historyUpdateWorker);
-      historyUpdateWorker.setDaemon(true);
-      historyUpdateWorker.start();
-    }
-    for (HistoryUpdateWorker historyUpdateWorker : historyUpdateWorkers) {
-      try {
-        historyUpdateWorker.join();
-      } catch (InterruptedException e) {
-        /* This is not something that we can take care of.  Just leave the
-         * worker thread alone. */
+    String fingerprint = null;
+    double[] weights = null;
+    do {
+      fingerprint = null;
+      synchronized (pathSelectionWeights) {
+        if (!pathSelectionWeights.isEmpty()) {
+          fingerprint = pathSelectionWeights.firstKey();
+          weights = pathSelectionWeights.remove(fingerprint);
+        }
       }
-    }
-  }
-
-  private class HistoryUpdateWorker extends Thread {
-    private long validAfterMillis;
-    private long freshUntilMillis;
-    private SortedMap<String, double[]> pathSelectionWeights;
-    private WeightsStatusUpdater parent;
-    public HistoryUpdateWorker(long validAfterMillis,
-        long freshUntilMillis,
-        SortedMap<String, double[]> pathSelectionWeights,
-        WeightsStatusUpdater parent) {
-      this.validAfterMillis = validAfterMillis;
-      this.freshUntilMillis = freshUntilMillis;
-      this.pathSelectionWeights = pathSelectionWeights;
-      this.parent = parent;
-    }
-    public void run() {
-      String fingerprint = null;
-      double[] weights = null;
-      do {
-        fingerprint = null;
-        synchronized (pathSelectionWeights) {
-          if (!pathSelectionWeights.isEmpty()) {
-            fingerprint = pathSelectionWeights.firstKey();
-            weights = pathSelectionWeights.remove(fingerprint);
-          }
-        }
-        if (fingerprint != null) {
-          this.parent.addToHistory(fingerprint, this.validAfterMillis,
-              this.freshUntilMillis, weights);
-        }
-      } while (fingerprint != null);
-    }
+      if (fingerprint != null) {
+        this.addToHistory(fingerprint, validAfterMillis,
+            freshUntilMillis, weights);
+      }
+    } while (fingerprint != null);
   }
 
   private SortedMap<String, double[]> calculatePathSelectionProbabilities(
