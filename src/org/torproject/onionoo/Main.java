@@ -30,7 +30,8 @@ public class Main {
     Logger.printStatusTime("Initialized Geoip lookup service");
     ReverseDomainNameResolver rdnr = new ReverseDomainNameResolver(t);
     Logger.printStatusTime("Initialized reverse domain name resolver");
-    NodeDataWriter ndw = new NodeDataWriter(dso, rdnr, ls, ds, t);
+    NodeDetailsStatusUpdater ndsu = new NodeDetailsStatusUpdater(dso,
+        rdnr, ls, ds, t);
     Logger.printStatusTime("Initialized node data writer");
     BandwidthStatusUpdater bsu = new BandwidthStatusUpdater(dso, ds, t);
     Logger.printStatusTime("Initialized bandwidth status updater");
@@ -40,8 +41,11 @@ public class Main {
     Logger.printStatusTime("Initialized clients status updater");
     UptimeStatusUpdater usu = new UptimeStatusUpdater(dso, ds);
     Logger.printStatusTime("Initialized uptime status updater");
-    StatusUpdater[] sus = new StatusUpdater[] { ndw, bsu, wsu, csu, usu };
+    StatusUpdater[] sus = new StatusUpdater[] { ndsu, bsu, wsu, csu,
+        usu };
 
+    DetailsDocumentWriter ddw = new DetailsDocumentWriter(dso, ds, t);
+    Logger.printStatusTime("Initialized details document writer");
     BandwidthDocumentWriter bdw = new BandwidthDocumentWriter(dso, ds, t);
     Logger.printStatusTime("Initialized bandwidth document writer");
     WeightsDocumentWriter wdw = new WeightsDocumentWriter(dso, ds, t);
@@ -50,7 +54,7 @@ public class Main {
     Logger.printStatusTime("Initialized clients document writer");
     UptimeDocumentWriter udw = new UptimeDocumentWriter(dso, ds, t);
     Logger.printStatusTime("Initialized uptime document writer");
-    DocumentWriter[] dws = new DocumentWriter[] { ndw, bdw, wdw, cdw,
+    DocumentWriter[] dws = new DocumentWriter[] { ddw, bdw, wdw, cdw,
         udw };
 
     Logger.printStatus("Reading descriptors.");
@@ -95,10 +99,7 @@ public class Main {
             statsString);
       }
     }
-    /* TODO Print status updater statistics for *all* status updaters once
-     * all data writers have been separated. */
-    for (DocumentWriter dw : new DocumentWriter[] { bdw, wdw, cdw,
-        udw }) {
+    for (DocumentWriter dw : dws) {
       String statsString = dw.getStatsString();
       if (statsString != null) {
         Logger.printStatistics(dw.getClass().getSimpleName(),
