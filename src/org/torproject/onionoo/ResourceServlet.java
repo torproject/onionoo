@@ -388,7 +388,8 @@ public class ResourceServlet extends HttpServlet {
     int x = 0, y = Integer.MAX_VALUE;
     try {
       if (!parameter.contains("-")) {
-        x = y = Integer.parseInt(parameter);
+        x = Integer.parseInt(parameter);
+        y = x;
       } else {
         String[] parts = parameter.split("-", 2);
         if (parts[0].length() > 0) {
