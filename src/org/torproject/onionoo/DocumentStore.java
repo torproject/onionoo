@@ -430,11 +430,6 @@ public class DocumentStore {
     } else if (documentType.equals(UpdateStatus.class)) {
       directory = this.outDir;
       fileName = "update";
-    // TODO Taken out, because storing/retrieving summary documents is not
-    // supported yet.
-    //} else if (documentType.equals(SummaryDocument.class)) {
-    //  directory = this.outDir;
-    //  fileName = "summary";
     } else if (documentType.equals(DetailsDocument.class)) {
       directory = this.outDir;
       fileName = String.format("details/%s", fingerprint);
