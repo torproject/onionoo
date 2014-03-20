@@ -305,7 +305,8 @@ public class ResponseBuilder {
     this.running = running;
   }
   public void setSearch(String[] search) {
-    this.search = search;
+    this.search = new String[search.length];
+    System.arraycopy(search, 0, this.search, 0, search.length);
   }
   public void setLookup(String lookup) {
     this.lookup = lookup;
@@ -320,19 +321,26 @@ public class ResponseBuilder {
     this.flag = flag;
   }
   public void setFirstSeenDays(int[] firstSeenDays) {
-    this.firstSeenDays = firstSeenDays;
+    this.firstSeenDays = new int[firstSeenDays.length];
+    System.arraycopy(firstSeenDays, 0, this.firstSeenDays, 0,
+        firstSeenDays.length);
   }
   public void setLastSeenDays(int[] lastSeenDays) {
-    this.lastSeenDays = lastSeenDays;
+    this.lastSeenDays = new int[lastSeenDays.length];
+    System.arraycopy(lastSeenDays, 0, this.lastSeenDays, 0,
+        lastSeenDays.length);
   }
   public void setContact(String[] contact) {
-    this.contact = contact;
+    this.contact = new String[contact.length];
+    System.arraycopy(contact, 0, this.contact, 0, contact.length);
   }
   public void setFields(String[] fields) {
-    this.fields = fields;
+    this.fields = new String[fields.length];
+    System.arraycopy(fields, 0, this.fields, 0, fields.length);
   }
   public void setOrder(String[] order) {
-    this.order = order;
+    this.order = new String[order.length];
+    System.arraycopy(order, 0, this.order, 0, order.length);
   }
   public void setOffset(String offset) {
     this.offset = offset;
