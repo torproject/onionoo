@@ -508,9 +508,8 @@ public class NodeStatus extends Document {
     if (contact == null) {
       this.contact = null;
     } else {
-      contact = contact.toLowerCase();
       StringBuilder sb = new StringBuilder();
-      for (char c : contact.toCharArray()) {
+      for (char c : contact.toLowerCase().toCharArray()) {
         if (c >= 32 && c < 127) {
           sb.append(c);
         } else {
