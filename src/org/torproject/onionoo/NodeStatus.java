@@ -338,7 +338,7 @@ public class NodeStatus extends Document {
       System.exit(1);
     } else if (orAddressAndPort.length() > 0) {
       String orAddress = orAddressAndPort.substring(0,
-          orAddressAndPort.lastIndexOf(":"));
+          orAddressAndPort.lastIndexOf(':'));
       if (this.exitAddresses.contains(orAddress)) {
         this.exitAddresses.remove(orAddress);
       }
