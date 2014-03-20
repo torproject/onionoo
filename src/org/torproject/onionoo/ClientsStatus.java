@@ -165,6 +165,10 @@ class ClientsHistory implements Comparable<ClientsHistory> {
     return other instanceof ClientsHistory &&
         this.startMillis == ((ClientsHistory) other).startMillis;
   }
+
+  public int hashCode() {
+    return (int) this.startMillis;
+  }
 }
 
 class ClientsStatus extends Document {

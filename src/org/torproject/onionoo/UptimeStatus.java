@@ -89,6 +89,10 @@ class UptimeHistory
         this.relay == ((UptimeHistory) other).relay &&
         this.startMillis == ((UptimeHistory) other).startMillis;
   }
+
+  public int hashCode() {
+    return (int) this.startMillis + (this.relay ? 1 : 0);
+  }
 }
 
 class UptimeStatus extends Document {
