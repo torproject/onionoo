@@ -25,7 +25,7 @@ public class UptimeDocumentWriter implements FingerprintListener,
     this.registerFingerprintListeners();
   }
 
-  public void registerFingerprintListeners() {
+  private void registerFingerprintListeners() {
     this.descriptorSource.registerFingerprintListener(this,
         DescriptorType.RELAY_CONSENSUSES);
     this.descriptorSource.registerFingerprintListener(this,
