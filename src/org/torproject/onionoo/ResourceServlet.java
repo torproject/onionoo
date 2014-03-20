@@ -42,7 +42,8 @@ public class ResourceServlet extends HttpServlet {
       DocumentStore documentStore, Time time) {
     this.maintenanceMode = maintenanceMode;
     if (!maintenanceMode) {
-      ResponseBuilder.initialize(documentStore, time);
+      RequestHandler.initialize(documentStore, time);
+      ResponseBuilder.initialize(documentStore);
     }
   }
 
@@ -50,7 +51,7 @@ public class ResourceServlet extends HttpServlet {
     if (this.maintenanceMode) {
       return super.getLastModified(request);
     } else {
-      return ResponseBuilder.getLastModified();
+      return RequestHandler.getLastModified();
     }
   }
 
@@ -109,12 +110,11 @@ public class ResourceServlet extends HttpServlet {
       return;
     }
 
-    if (!ResponseBuilder.update()) {
+    if (!RequestHandler.update()) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
 
-    ResponseBuilder rb = new ResponseBuilder();
     String uri = request.getRequestURI();
     if (uri.startsWith("/onionoo/")) {
       uri = uri.substring("/onionoo".length());
@@ -136,7 +136,8 @@ public class ResourceServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
-    rb.setResourceType(resourceType);
+    RequestHandler rh = new RequestHandler();
+    rh.setResourceType(resourceType);
 
     /* Extract parameters either from the old-style URI or from request
      * parameters. */
@@ -170,7 +171,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setType(relaysRequested ? "relay" : "bridge");
+      rh.setType(relaysRequested ? "relay" : "bridge");
     }
     if (parameterMap.containsKey("running")) {
       String runningParameterValue =
@@ -182,7 +183,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setRunning(runningRequested ? "true" : "false");
+      rh.setRunning(runningRequested ? "true" : "false");
     }
     if (parameterMap.containsKey("search")) {
       String[] searchTerms = this.parseSearchParameters(
@@ -191,7 +192,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setSearch(searchTerms);
+      rh.setSearch(searchTerms);
     }
     if (parameterMap.containsKey("lookup")) {
       String fingerprintParameter = this.parseFingerprintParameter(
@@ -201,7 +202,7 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       String fingerprint = fingerprintParameter.toUpperCase();
-      rb.setLookup(fingerprint);
+      rh.setLookup(fingerprint);
     }
     if (parameterMap.containsKey("country")) {
       String countryCodeParameter = this.parseCountryCodeParameter(
@@ -210,7 +211,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setCountry(countryCodeParameter);
+      rh.setCountry(countryCodeParameter);
     }
     if (parameterMap.containsKey("as")) {
       String aSNumberParameter = this.parseASNumberParameter(
@@ -219,7 +220,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setAs(aSNumberParameter);
+      rh.setAs(aSNumberParameter);
     }
     if (parameterMap.containsKey("flag")) {
       String flagParameter = this.parseFlagParameter(
@@ -228,7 +229,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setFlag(flagParameter);
+      rh.setFlag(flagParameter);
     }
     if (parameterMap.containsKey("first_seen_days")) {
       int[] days = this.parseDaysParameter(
@@ -237,7 +238,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setFirstSeenDays(days);
+      rh.setFirstSeenDays(days);
     }
     if (parameterMap.containsKey("last_seen_days")) {
       int[] days = this.parseDaysParameter(
@@ -246,7 +247,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setLastSeenDays(days);
+      rh.setLastSeenDays(days);
     }
     if (parameterMap.containsKey("contact")) {
       String[] contactParts = this.parseContactParameter(
@@ -255,10 +256,8 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setContact(contactParts);
+      rh.setContact(contactParts);
     }
-
-    /* Re-order and limit results. */
     if (parameterMap.containsKey("order")) {
       String orderParameter = parameterMap.get("order").toLowerCase();
       String orderByField = orderParameter;
@@ -269,7 +268,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setOrder(new String[] { orderParameter });
+      rh.setOrder(new String[] { orderParameter });
     }
     if (parameterMap.containsKey("offset")) {
       String offsetParameter = parameterMap.get("offset");
@@ -283,7 +282,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setOffset(offsetParameter);
+      rh.setOffset(offsetParameter);
     }
     if (parameterMap.containsKey("limit")) {
       String limitParameter = parameterMap.get("limit");
@@ -297,11 +296,16 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rb.setLimit(limitParameter);
+      rh.setLimit(limitParameter);
     }
+    rh.handleRequest();
 
-    /* Possibly include only a subset of fields in the response
-     * document. */
+    ResponseBuilder rb = new ResponseBuilder();
+    rb.setResourceType(resourceType);
+    rb.setRelaysPublishedString(rh.getRelaysPublishedString());
+    rb.setBridgesPublishedString(rh.getBridgesPublishedString());
+    rb.setOrderedRelays(rh.getOrderedRelays());
+    rb.setOrderedBridges(rh.getOrderedBridges());
     String[] fields = null;
     if (parameterMap.containsKey("fields")) {
       fields = this.parseFieldsParameter(parameterMap.get("fields"));
@@ -312,7 +316,6 @@ public class ResourceServlet extends HttpServlet {
       rb.setFields(fields);
     }
 
-    /* Set response headers and write the response. */
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setContentType("application/json");
     response.setCharacterEncoding("utf-8");
