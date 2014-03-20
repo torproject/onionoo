@@ -70,7 +70,7 @@ public class NodeStatus extends Document {
           this.fingerprint.toCharArray())).toUpperCase();
     } catch (DecoderException e) {
       throw new IllegalArgumentException("Fingerprint '" + fingerprint
-          + "' is not a valid fingerprint.");
+          + "' is not a valid fingerprint.", e);
     }
     this.address = address;
     this.exitAddresses = new TreeSet<String>();
