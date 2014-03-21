@@ -37,16 +37,6 @@ public class ResourceServletTest {
 
   private long currentTimeMillis = 1366806142000L;
 
-  private class TestingTime extends Time {
-    private long currentTimeMillis;
-    public TestingTime(long currentTimeMillis) {
-      this.currentTimeMillis = currentTimeMillis;
-    }
-    public long currentTimeMillis() {
-      return this.currentTimeMillis;
-    }
-  }
-
   private boolean maintenanceMode = false;
 
   private class TestingHttpServletRequestWrapper
@@ -165,7 +155,7 @@ public class ResourceServletTest {
   }
 
   private void createDummyTime() {
-    Time dummyTime = new TestingTime(this.currentTimeMillis);
+    Time dummyTime = new DummyTime(this.currentTimeMillis);
     ApplicationFactory.setTime(dummyTime);
   }
 
