@@ -31,19 +31,18 @@ public class ResourceServlet extends HttpServlet {
         config.getInitParameter("maintenance") != null
         && config.getInitParameter("maintenance").equals("1");
     File outDir = new File(config.getInitParameter("outDir"));
-    Time time = new Time();
-    DocumentStore documentStore = new DocumentStore(outDir, time);
-    this.init(maintenanceMode, documentStore, time);
+    DocumentStore documentStore = ApplicationFactory.getDocumentStore();
+    documentStore.setOutDir(outDir);
+    this.init(maintenanceMode);
   }
 
   /* Called (indirectly) by servlet container and (directly) by test
    * class. */
-  protected void init(boolean maintenanceMode,
-      DocumentStore documentStore, Time time) {
+  protected void init(boolean maintenanceMode) {
     this.maintenanceMode = maintenanceMode;
     if (!maintenanceMode) {
-      RequestHandler.initialize(documentStore, time);
-      ResponseBuilder.initialize(documentStore);
+      RequestHandler.initialize();
+      ResponseBuilder.initialize();
     }
   }
 

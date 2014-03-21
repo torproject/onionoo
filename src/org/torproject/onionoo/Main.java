@@ -12,9 +12,8 @@ public class Main {
 
   public static void main(String[] args) {
 
-    Time t = new Time();
-    LockFile lf = new LockFile(new File("lock"), t);
-    Logger.setTime(t);
+    LockFile lf = new LockFile();
+    Logger.setTime();
     Logger.printStatus("Initializing.");
     if (lf.acquireLock()) {
       Logger.printStatusTime("Acquired lock");
@@ -24,39 +23,37 @@ public class Main {
       return;
     }
 
-    DescriptorSource dso = new DescriptorSource(new File("in"),
-        new File("status"));
+    DescriptorSource dso = ApplicationFactory.getDescriptorSource();
     Logger.printStatusTime("Initialized descriptor source");
-    DocumentStore ds = new DocumentStore(new File("status"),
-        new File("out"), t);
+    DocumentStore ds = ApplicationFactory.getDocumentStore();
     Logger.printStatusTime("Initialized document store");
     LookupService ls = new LookupService(new File("geoip"));
     Logger.printStatusTime("Initialized Geoip lookup service");
-    ReverseDomainNameResolver rdnr = new ReverseDomainNameResolver(t);
+    ReverseDomainNameResolver rdnr = new ReverseDomainNameResolver();
     Logger.printStatusTime("Initialized reverse domain name resolver");
-    NodeDetailsStatusUpdater ndsu = new NodeDetailsStatusUpdater(dso,
-        rdnr, ls, ds, t);
+    NodeDetailsStatusUpdater ndsu = new NodeDetailsStatusUpdater(rdnr,
+        ls);
     Logger.printStatusTime("Initialized node data writer");
-    BandwidthStatusUpdater bsu = new BandwidthStatusUpdater(dso, ds, t);
+    BandwidthStatusUpdater bsu = new BandwidthStatusUpdater();
     Logger.printStatusTime("Initialized bandwidth status updater");
-    WeightsStatusUpdater wsu = new WeightsStatusUpdater(dso, ds, t);
+    WeightsStatusUpdater wsu = new WeightsStatusUpdater();
     Logger.printStatusTime("Initialized weights status updater");
-    ClientsStatusUpdater csu = new ClientsStatusUpdater(dso, ds, t);
+    ClientsStatusUpdater csu = new ClientsStatusUpdater();
     Logger.printStatusTime("Initialized clients status updater");
-    UptimeStatusUpdater usu = new UptimeStatusUpdater(dso, ds);
+    UptimeStatusUpdater usu = new UptimeStatusUpdater();
     Logger.printStatusTime("Initialized uptime status updater");
     StatusUpdater[] sus = new StatusUpdater[] { ndsu, bsu, wsu, csu,
         usu };
 
-    DetailsDocumentWriter ddw = new DetailsDocumentWriter(dso, ds, t);
+    DetailsDocumentWriter ddw = new DetailsDocumentWriter();
     Logger.printStatusTime("Initialized details document writer");
-    BandwidthDocumentWriter bdw = new BandwidthDocumentWriter(dso, ds, t);
+    BandwidthDocumentWriter bdw = new BandwidthDocumentWriter();
     Logger.printStatusTime("Initialized bandwidth document writer");
-    WeightsDocumentWriter wdw = new WeightsDocumentWriter(dso, ds, t);
+    WeightsDocumentWriter wdw = new WeightsDocumentWriter();
     Logger.printStatusTime("Initialized weights document writer");
-    ClientsDocumentWriter cdw = new ClientsDocumentWriter(dso, ds, t);
+    ClientsDocumentWriter cdw = new ClientsDocumentWriter();
     Logger.printStatusTime("Initialized clients document writer");
-    UptimeDocumentWriter udw = new UptimeDocumentWriter(dso, ds, t);
+    UptimeDocumentWriter udw = new UptimeDocumentWriter();
     Logger.printStatusTime("Initialized uptime document writer");
     DocumentWriter[] dws = new DocumentWriter[] { ddw, bdw, wdw, cdw,
         udw };

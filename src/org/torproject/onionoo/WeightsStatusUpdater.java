@@ -26,11 +26,10 @@ public class WeightsStatusUpdater implements DescriptorListener,
 
   private long now;
 
-  public WeightsStatusUpdater(DescriptorSource descriptorSource,
-      DocumentStore documentStore, Time time) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
-    this.now = time.currentTimeMillis();
+  public WeightsStatusUpdater() {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.now = ApplicationFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

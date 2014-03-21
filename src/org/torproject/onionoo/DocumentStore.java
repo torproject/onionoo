@@ -29,11 +29,18 @@ import com.google.gson.JsonParseException;
 // TODO Also look into simple key-value stores instead of real databases.
 public class DocumentStore {
 
-  private File statusDir;
+  private final File statusDir = new File("status");
 
-  private File outDir;
+  private File outDir = new File("out");
+  public void setOutDir(File outDir) {
+    this.outDir = outDir;
+  }
 
   private Time time;
+
+  public DocumentStore() {
+    this.time = ApplicationFactory.getTime();
+  }
 
   private boolean listedArchivedNodeStatuses = false,
       listedCurrentNodeStatuses = false;
@@ -47,16 +54,6 @@ public class DocumentStore {
    * either including or excluding archived node statuses.  Later retrieve
    * operations depend on which NodeStatus documents were listed. */
   private SortedMap<String, NodeStatus> cachedNodeStatuses;
-
-  public DocumentStore(File outDir, Time time) {
-    this(null, outDir, time);
-  }
-
-  public DocumentStore(File statusDir, File outDir, Time time) {
-    this.statusDir = statusDir;
-    this.outDir = outDir;
-    this.time = time;
-  }
 
   public <T extends Document> SortedSet<String> list(
       Class<T> documentType, boolean includeArchive) {

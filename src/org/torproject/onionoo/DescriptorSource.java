@@ -267,15 +267,13 @@ class DescriptorQueue {
 
 public class DescriptorSource {
 
-  private File inDir;
+  private final File inDir = new File("in");
 
-  private File statusDir;
+  private final File statusDir = new File("status");
 
   private List<DescriptorQueue> descriptorQueues;
 
-  public DescriptorSource(File inDir, File statusDir) {
-    this.inDir = inDir;
-    this.statusDir = statusDir;
+  public DescriptorSource() {
     this.descriptorQueues = new ArrayList<DescriptorQueue>();
     this.descriptorListeners =
         new HashMap<DescriptorType, Set<DescriptorListener>>();

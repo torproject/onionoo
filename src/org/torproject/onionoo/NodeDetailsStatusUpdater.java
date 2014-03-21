@@ -49,15 +49,14 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   private int relayConsensusesProcessed = 0, bridgeStatusesProcessed = 0;
 
-  public NodeDetailsStatusUpdater(DescriptorSource descriptorSource,
+  public NodeDetailsStatusUpdater(
       ReverseDomainNameResolver reverseDomainNameResolver,
-      LookupService lookupService, DocumentStore documentStore,
-      Time time) {
-    this.descriptorSource = descriptorSource;
+      LookupService lookupService) {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
     this.reverseDomainNameResolver = reverseDomainNameResolver;
     this.lookupService = lookupService;
-    this.documentStore = documentStore;
-    this.now = time.currentTimeMillis();
+    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.now = ApplicationFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

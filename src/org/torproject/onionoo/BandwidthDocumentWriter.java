@@ -19,11 +19,10 @@ public class BandwidthDocumentWriter implements FingerprintListener,
 
   private long now;
 
-  public BandwidthDocumentWriter(DescriptorSource descriptorSource,
-      DocumentStore documentStore, Time time) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
-    this.now = time.currentTimeMillis();
+  public BandwidthDocumentWriter() {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.now = ApplicationFactory.getTime().currentTimeMillis();
     this.registerFingerprintListeners();
   }
 

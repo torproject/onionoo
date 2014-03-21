@@ -38,11 +38,10 @@ public class ClientsStatusUpdater implements DescriptorListener,
 
   private long now;
 
-  public ClientsStatusUpdater(DescriptorSource descriptorSource,
-      DocumentStore documentStore, Time time) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
-    this.now = time.currentTimeMillis();
+  public ClientsStatusUpdater() {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.now = ApplicationFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

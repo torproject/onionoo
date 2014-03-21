@@ -85,8 +85,8 @@ public class ReverseDomainNameResolver {
 
   private Time time;
 
-  public ReverseDomainNameResolver(Time time) {
-    this.time = time;
+  public ReverseDomainNameResolver() {
+    this.time = ApplicationFactory.getTime();
   }
 
   private static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS =

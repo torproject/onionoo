@@ -11,8 +11,8 @@ public class Logger {
 
   private static Time time;
 
-  public static void setTime(Time timeParam) {
-    time = timeParam;
+  public static void setTime() {
+    time = ApplicationFactory.getTime();
   }
 
   private static long currentTimeMillis() {

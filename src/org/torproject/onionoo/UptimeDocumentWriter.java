@@ -17,11 +17,10 @@ public class UptimeDocumentWriter implements FingerprintListener,
 
   private long now;
 
-  public UptimeDocumentWriter(DescriptorSource descriptorSource,
-      DocumentStore documentStore, Time time) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
-    this.now = time.currentTimeMillis();
+  public UptimeDocumentWriter() {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.now = ApplicationFactory.getTime().currentTimeMillis();
     this.registerFingerprintListeners();
   }
 

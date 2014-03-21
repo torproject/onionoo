@@ -31,10 +31,9 @@ public class RequestHandler {
       relaysByLastSeenDays = null, bridgesByLastSeenDays = null;
   private static final long SUMMARY_MAX_AGE = DateTimeHelper.SIX_HOURS;
 
-  public static void initialize(DocumentStore documentStoreParam,
-      Time timeParam) {
-    documentStore = documentStoreParam;
-    time = timeParam;
+  public static void initialize() {
+    documentStore = ApplicationFactory.getDocumentStore();
+    time = ApplicationFactory.getTime();
     readSummaryFile();
   }
 

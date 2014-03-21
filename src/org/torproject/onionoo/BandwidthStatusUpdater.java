@@ -17,11 +17,10 @@ public class BandwidthStatusUpdater implements DescriptorListener,
 
   private long now;
 
-  public BandwidthStatusUpdater(DescriptorSource descriptorSource,
-      DocumentStore documentStore, Time time) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
-    this.now = time.currentTimeMillis();
+  public BandwidthStatusUpdater() {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.now = ApplicationFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

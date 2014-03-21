@@ -9,16 +9,10 @@ import java.io.IOException;
 
 public class LockFile {
 
-  private File lockFile;
-
-  private Time time;
-
-  public LockFile(File lockFile, Time time) {
-    this.lockFile = lockFile;
-    this.time = time;
-  }
+  private final File lockFile = new File("lock");
 
   public boolean acquireLock() {
+    Time time = ApplicationFactory.getTime();
     try {
       if (this.lockFile.exists()) {
         return false;
@@ -28,7 +22,7 @@ public class LockFile {
       }
       BufferedWriter bw = new BufferedWriter(new FileWriter(
           this.lockFile));
-      bw.append("" + this.time.currentTimeMillis() + "\n");
+      bw.append("" + time.currentTimeMillis() + "\n");
       bw.close();
       return true;
     } catch (IOException e) {

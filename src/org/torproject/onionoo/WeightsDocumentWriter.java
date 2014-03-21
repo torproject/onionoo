@@ -20,11 +20,10 @@ public class WeightsDocumentWriter implements FingerprintListener,
 
   private long now;
 
-  public WeightsDocumentWriter(DescriptorSource descriptorSource,
-      DocumentStore documentStore, Time time) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
-    this.now = time.currentTimeMillis();
+  public WeightsDocumentWriter() {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.now = ApplicationFactory.getTime().currentTimeMillis();
     this.registerFingerprintListeners();
   }
 

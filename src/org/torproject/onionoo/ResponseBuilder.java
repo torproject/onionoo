@@ -11,8 +11,8 @@ public class ResponseBuilder {
 
   private static DocumentStore documentStore;
 
-  public static void initialize(DocumentStore documentStoreParam) {
-    documentStore = documentStoreParam;
+  public static void initialize() {
+    documentStore = ApplicationFactory.getDocumentStore();
   }
 
   private String resourceType;

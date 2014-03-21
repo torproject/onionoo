@@ -1,6 +1,5 @@
 package org.torproject.onionoo;
 
-import java.io.File;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -10,8 +9,7 @@ public class DummyDocumentStore extends DocumentStore {
 
   private long lastModified;
 
-  public DummyDocumentStore(long lastModified, Time time) {
-    super((File) null, time);
+  public DummyDocumentStore(long lastModified) {
     this.lastModified = lastModified;
   }
 

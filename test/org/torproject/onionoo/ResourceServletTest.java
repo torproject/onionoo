@@ -32,20 +32,20 @@ public class ResourceServletTest {
 
   private SortedMap<String, String> relays, bridges;
 
-  private DummyDocumentStore documentStore;
-
   // 2013-04-24 12:22:22
   private static long lastModified = 1366806142000L;
 
   private long currentTimeMillis = 1366806142000L;
 
   private class TestingTime extends Time {
+    private long currentTimeMillis;
+    public TestingTime(long currentTimeMillis) {
+      this.currentTimeMillis = currentTimeMillis;
+    }
     public long currentTimeMillis() {
-      return currentTimeMillis;
+      return this.currentTimeMillis;
     }
   }
-
-  private Time testingTime = new TestingTime();
 
   private boolean maintenanceMode = false;
 
@@ -155,6 +155,7 @@ public class ResourceServletTest {
   private void runTest(String requestURI,
       Map<String, String[]> parameterMap) {
     try {
+      this.createDummyTime();
       this.createDummyDocumentStore();
       this.makeRequest(requestURI, parameterMap);
       this.parseResponse();
@@ -163,25 +164,31 @@ public class ResourceServletTest {
     }
   }
 
+  private void createDummyTime() {
+    Time dummyTime = new TestingTime(this.currentTimeMillis);
+    ApplicationFactory.setTime(dummyTime);
+  }
+
   private void createDummyDocumentStore() {
     /* TODO Incrementing static lastModified is necessary for
      * ResponseBuilder to read state from the newly created DocumentStore.
      * Otherwise, ResponseBuilder would use data from the previous test
      * run.  This is bad design and should be fixed. */
-    this.documentStore = new DummyDocumentStore(lastModified++,
-        this.testingTime);
+    DummyDocumentStore documentStore = new DummyDocumentStore(
+        lastModified++);
     for (String relay : relays.values()) {
       documentStore.addNodeStatus(relay);
     }
     for (String bridge : bridges.values()) {
       documentStore.addNodeStatus(bridge);
     }
+    ApplicationFactory.setDocumentStore(documentStore);
   }
 
   private void makeRequest(String requestURI,
       Map<String, String[]> parameterMap) throws IOException {
     ResourceServlet rs = new ResourceServlet();
-    rs.init(maintenanceMode, this.documentStore, this.testingTime);
+    rs.init(this.maintenanceMode);
     this.request = new TestingHttpServletRequestWrapper(requestURI,
        parameterMap);
     this.response = new TestingHttpServletResponseWrapper();

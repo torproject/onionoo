@@ -20,10 +20,9 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private DocumentStore documentStore;
 
-  public UptimeStatusUpdater(DescriptorSource descriptorSource,
-      DocumentStore documentStore) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
+  public UptimeStatusUpdater() {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
     this.registerDescriptorListeners();
   }
 

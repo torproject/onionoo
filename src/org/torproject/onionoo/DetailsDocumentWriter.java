@@ -24,11 +24,10 @@ public class DetailsDocumentWriter implements DescriptorListener,
 
   private long now;
 
-  public DetailsDocumentWriter(DescriptorSource descriptorSource,
-      DocumentStore documentStore, Time time) {
-    this.descriptorSource = descriptorSource;
-    this.documentStore = documentStore;
-    this.now = time.currentTimeMillis();
+  public DetailsDocumentWriter() {
+    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.now = ApplicationFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
     this.registerFingerprintListeners();
   }
