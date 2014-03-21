@@ -51,19 +51,19 @@ class LookupResult {
     return this.cityName;
   }
 
-  private String latitude;
-  public void setLatitude(String latitude) {
+  private Float latitude;
+  public void setLatitude(Float latitude) {
     this.latitude = latitude;
   }
-  public String getLatitude() {
+  public Float getLatitude() {
     return this.latitude;
   }
 
-  private String longitude;
-  public void setLongitude(String longitude) {
+  private Float longitude;
+  public void setLongitude(Float longitude) {
     this.longitude = longitude;
   }
-  public String getLongitude() {
+  public Float getLongitude() {
     return this.longitude;
   }
 
@@ -169,8 +169,8 @@ public class LookupService {
     /* Obtain a map from IP address numbers to blocks and to latitudes and
        longitudes. */
     Map<Long, Long> addressNumberBlocks = new HashMap<Long, Long>();
-    Map<Long, String[]> addressNumberLatLong =
-        new HashMap<Long, String[]>();
+    Map<Long, Float[]> addressNumberLatLong =
+        new HashMap<Long, Float[]>();
     try {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
@@ -220,7 +220,8 @@ public class LookupService {
             addressNumberBlocks.put(addressNumber, blockNumber);
             if (parts[6].length() > 0 && parts[7].length() > 0) {
               addressNumberLatLong.put(addressNumber,
-                  new String[] { parts[6], parts[7] });
+                  new Float[] { Float.parseFloat(parts[6]),
+                  Float.parseFloat(parts[7]) });
             }
           }
         } catch (NumberFormatException e) {
@@ -374,7 +375,7 @@ public class LookupService {
         }
       }
       if (addressNumberLatLong.containsKey(addressNumber)) {
-        String[] latLong = addressNumberLatLong.get(addressNumber);
+        Float[] latLong = addressNumberLatLong.get(addressNumber);
         lookupResult.setLatitude(latLong[0]);
         lookupResult.setLongitude(latLong[1]);
       }

@@ -80,19 +80,19 @@ public class NodeStatus extends Document {
     return new TreeSet<String>(this.exitAddresses);
   }
 
-  private String latitude;
-  public void setLatitude(String latitude) {
+  private Float latitude;
+  public void setLatitude(Float latitude) {
     this.latitude = latitude;
   }
-  public String getLatitude() {
+  public Float getLatitude() {
     return this.latitude;
   }
 
-  private String longitude;
-  public void setLongitude(String longitude) {
+  private Float longitude;
+  public void setLongitude(Float longitude) {
     this.longitude = longitude;
   }
-  public String getLongitude() {
+  public Float getLongitude() {
     return this.longitude;
   }
 

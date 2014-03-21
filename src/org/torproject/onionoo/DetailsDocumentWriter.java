@@ -127,8 +127,8 @@ public class DetailsDocumentWriter implements DescriptorListener,
       String running = entry.getRunning() ? "true" : "false";
       int dirPort = entry.getDirPort();
       String countryCode = entry.getCountryCode();
-      String latitude = entry.getLatitude();
-      String longitude = entry.getLongitude();
+      Float latitude = entry.getLatitude();
+      Float longitude = entry.getLongitude();
       String countryName = entry.getCountryName();
       String regionName = entry.getRegionName();
       String cityName = entry.getCityName();
@@ -173,10 +173,10 @@ public class DetailsDocumentWriter implements DescriptorListener,
         sb.append(",\n\"country\":\"" + countryCode + "\"");
       }
       if (latitude != null) {
-        sb.append(",\n\"latitude\":" + latitude);
+        sb.append(String.format(",\n\"latitude\":%.4f", latitude));
       }
       if (longitude != null) {
-        sb.append(",\n\"longitude\":" + longitude);
+        sb.append(String.format(",\n\"longitude\":%.4f", longitude));
       }
       if (countryName != null) {
         sb.append(",\n\"country_name\":\""

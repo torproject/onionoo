@@ -98,7 +98,7 @@ public class LookupServiceTest {
       List<String> geoLite2CityLocationsLines,
       List<String> geoipASNum2Lines, String addressString,
       String countryCode, String countryName, String regionName,
-      String cityName, String latitude, String longitude, String aSNumber,
+      String cityName, Float latitude, Float longitude, String aSNumber,
       String aSName) {
     this.addressStrings.add(addressString);
     this.populateLines();
@@ -151,14 +151,14 @@ public class LookupServiceTest {
           this.lookupResults.get(addressString).getLatitude() == null);
     } else {
       assertEquals(latitude,
-          this.lookupResults.get(addressString).getLatitude());
+          this.lookupResults.get(addressString).getLatitude(), 0.01);
     }
     if (longitude == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
           this.lookupResults.get(addressString).getLongitude() == null);
     } else {
       assertEquals(longitude,
-          this.lookupResults.get(addressString).getLongitude());
+          this.lookupResults.get(addressString).getLongitude(), 0.01);
     }
     if (aSNumber == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
@@ -189,22 +189,22 @@ public class LookupServiceTest {
   @Test()
   public void testLookup8888() {
     this.assertLookupResult(null, null, null, "8.8.8.8", "us",
-        "United States", "California", "Mountain View", "37.3860",
-        "-122.0838", "AS15169", "Google Inc.");
+        "United States", "California", "Mountain View", 37.3860f,
+        -122.0838f, "AS15169", "Google Inc.");
   }
 
   @Test()
   public void testLookup8880() {
     this.assertLookupResult(null, null, null, "8.8.8.0", "us",
-        "United States", "California", "Mountain View", "37.3860",
-        "-122.0838", "AS15169", "Google Inc.");
+        "United States", "California", "Mountain View", 37.3860f,
+        -122.0838f, "AS15169", "Google Inc.");
   }
 
   @Test()
   public void testLookup888255() {
     this.assertLookupResult(null, null, null, "8.8.8.255", "us",
-        "United States", "California", "Mountain View", "37.3860",
-        "-122.0838", "AS15169", "Google Inc.");
+        "United States", "California", "Mountain View", 37.3860f,
+        -122.0838f, "AS15169", "Google Inc.");
   }
 
   @Test()
@@ -253,7 +253,7 @@ public class LookupServiceTest {
     geoLite2CityLocationsLines.add("6252001,NA,\"North America\",US,"
         + "\"United States\",,,,,");
     this.assertLookupResult(null, geoLite2CityLocationsLines, null,
-        "8.8.8.8", null, null, null, null, "37.3860", "-122.0838",
+        "8.8.8.8", null, null, null, null, 37.3860f, -122.0838f,
         "AS15169", "Google Inc.");
   }
 
@@ -347,8 +347,8 @@ public class LookupServiceTest {
     geoipASNum2Lines.add("134744320,134750463,\"AS3356 Level 3 "
         + "Communications\"");
     this.assertLookupResult(null, null, geoipASNum2Lines, "8.8.8.8", "us",
-        "United States", "California", "Mountain View", "37.3860",
-        "-122.0838", null, null);
+        "United States", "California", "Mountain View", 37.3860f,
+        -122.0838f, null, null);
   }
 
   @Test()
