@@ -95,12 +95,29 @@ class UptimeHistory
 
 class UptimeStatus extends Document {
 
+  private transient String fingerprint;
+
+  private transient boolean isDirty = false;
+
   private SortedSet<UptimeHistory> history = new TreeSet<UptimeHistory>();
   public void setHistory(SortedSet<UptimeHistory> history) {
     this.history = history;
   }
   public SortedSet<UptimeHistory> getHistory() {
     return this.history;
+  }
+
+  public static UptimeStatus loadOrCreate(String fingerprint) {
+    UptimeStatus uptimeStatus = (fingerprint == null) ?
+        ApplicationFactory.getDocumentStore().retrieve(
+            UptimeStatus.class, true) :
+        ApplicationFactory.getDocumentStore().retrieve(
+            UptimeStatus.class, true, fingerprint);
+    if (uptimeStatus == null) {
+      uptimeStatus = new UptimeStatus();
+    }
+    uptimeStatus.fingerprint = fingerprint;
+    return uptimeStatus;
   }
 
   public void fromDocumentString(String documentString) {
@@ -138,10 +155,24 @@ class UptimeStatus extends Document {
         }
       }
       this.history.add(interval);
+      this.isDirty = true;
     }
   }
 
-  public void compressHistory() {
+  public void storeIfChanged() {
+    if (this.isDirty) {
+      this.compressHistory();
+      if (fingerprint == null) {
+        ApplicationFactory.getDocumentStore().store(this);
+      } else {
+        ApplicationFactory.getDocumentStore().store(this,
+            this.fingerprint);
+      }
+      this.isDirty = false;
+    }
+  }
+
+  private void compressHistory() {
     SortedSet<UptimeHistory> compressedHistory =
         new TreeSet<UptimeHistory>();
     UptimeHistory lastInterval = null;

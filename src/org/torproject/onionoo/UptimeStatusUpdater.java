@@ -18,11 +18,8 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private DescriptorSource descriptorSource;
 
-  private DocumentStore documentStore;
-
   public UptimeStatusUpdater() {
     this.descriptorSource = ApplicationFactory.getDescriptorSource();
-    this.documentStore = ApplicationFactory.getDocumentStore();
     this.registerDescriptorListeners();
   }
 
@@ -108,19 +105,9 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private void updateStatus(boolean relay, String fingerprint,
       SortedSet<Long> newUptimeHours) {
-    UptimeStatus uptimeStatus = fingerprint == null ?
-        documentStore.retrieve(UptimeStatus.class, true) :
-        documentStore.retrieve(UptimeStatus.class, true, fingerprint);
-    if (uptimeStatus == null) {
-      uptimeStatus = new UptimeStatus();
-    }
+    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(fingerprint);
     uptimeStatus.addToHistory(relay, newUptimeHours);
-    uptimeStatus.compressHistory();
-    if (fingerprint == null) {
-      this.documentStore.store(uptimeStatus);
-    } else {
-      this.documentStore.store(uptimeStatus, fingerprint);
-    }
+    uptimeStatus.storeIfChanged();
   }
 
   public String getStatsString() {
