@@ -318,42 +318,21 @@ public class DescriptorSource {
     this.fingerprintListeners.get(descriptorType).add(listener);
   }
 
-  public void readRelayNetworkConsensuses() {
+  public void readDescriptors() {
     this.readDescriptors(DescriptorType.RELAY_CONSENSUSES,
         DescriptorHistory.RELAY_CONSENSUS_HISTORY, true);
-  }
-
-  public void readRelayServerDescriptors() {
     this.readDescriptors(DescriptorType.RELAY_SERVER_DESCRIPTORS,
         DescriptorHistory.RELAY_SERVER_HISTORY, true);
-  }
-
-  public void readRelayExtraInfos() {
     this.readDescriptors(DescriptorType.RELAY_EXTRA_INFOS,
         DescriptorHistory.RELAY_EXTRAINFO_HISTORY, true);
-  }
-
-  public void readExitLists() {
     this.readDescriptors(DescriptorType.EXIT_LISTS,
         DescriptorHistory.EXIT_LIST_HISTORY, true);
-  }
-
-  public void readBridgeNetworkStatuses() {
     this.readDescriptors(DescriptorType.BRIDGE_STATUSES,
         DescriptorHistory.BRIDGE_STATUS_HISTORY, false);
-  }
-
-  public void readBridgeServerDescriptors() {
     this.readDescriptors(DescriptorType.BRIDGE_SERVER_DESCRIPTORS,
         DescriptorHistory.BRIDGE_SERVER_HISTORY, false);
-  }
-
-  public void readBridgeExtraInfos() {
     this.readDescriptors(DescriptorType.BRIDGE_EXTRA_INFOS,
         DescriptorHistory.BRIDGE_EXTRAINFO_HISTORY, false);
-  }
-
-  public void readBridgePoolAssignments() {
     this.readDescriptors(DescriptorType.BRIDGE_POOL_ASSIGNMENTS,
         DescriptorHistory.BRIDGE_POOLASSIGN_HISTORY, false);
   }
@@ -418,6 +397,32 @@ public class DescriptorSource {
           fingerprintListeners) {
         fingerprintListener.processFingerprints(fingerprints, relay);
       }
+    }
+    switch (descriptorType) {
+    case RELAY_CONSENSUSES:
+      Logger.printStatusTime("Read relay network consensuses");
+      break;
+    case RELAY_SERVER_DESCRIPTORS:
+      Logger.printStatusTime("Read relay server descriptors");
+      break;
+    case RELAY_EXTRA_INFOS:
+      Logger.printStatusTime("Read relay extra-info descriptors");
+      break;
+    case EXIT_LISTS:
+      Logger.printStatusTime("Read exit lists");
+      break;
+    case BRIDGE_STATUSES:
+      Logger.printStatusTime("Read bridge network statuses");
+      break;
+    case BRIDGE_SERVER_DESCRIPTORS:
+      Logger.printStatusTime("Read bridge server descriptors");
+      break;
+    case BRIDGE_EXTRA_INFOS:
+      Logger.printStatusTime("Read bridge extra-info descriptors");
+      break;
+    case BRIDGE_POOL_ASSIGNMENTS:
+      Logger.printStatusTime("Read bridge-pool assignments");
+      break;
     }
   }
 

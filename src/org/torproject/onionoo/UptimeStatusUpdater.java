@@ -100,7 +100,6 @@ public class UptimeStatusUpdater implements DescriptorListener,
       this.updateStatus(false, e.getKey(), e.getValue());
     }
     this.updateStatus(false, null, this.newBridgeStatuses);
-    Logger.printStatusTime("Updated uptime status files");
   }
 
   private void updateStatus(boolean relay, String fingerprint,

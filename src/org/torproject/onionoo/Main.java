@@ -59,26 +59,13 @@ public class Main {
         udw };
 
     Logger.printStatus("Reading descriptors.");
-    dso.readRelayNetworkConsensuses();
-    Logger.printStatusTime("Read relay network consensuses");
-    dso.readRelayServerDescriptors();
-    Logger.printStatusTime("Read relay server descriptors");
-    dso.readRelayExtraInfos();
-    Logger.printStatusTime("Read relay extra-info descriptors");
-    dso.readExitLists();
-    Logger.printStatusTime("Read exit lists");
-    dso.readBridgeNetworkStatuses();
-    Logger.printStatusTime("Read bridge network statuses");
-    dso.readBridgeServerDescriptors();
-    Logger.printStatusTime("Read bridge server descriptors");
-    dso.readBridgeExtraInfos();
-    Logger.printStatusTime("Read bridge extra-info descriptors");
-    dso.readBridgePoolAssignments();
-    Logger.printStatusTime("Read bridge-pool assignments");
+    dso.readDescriptors();
 
     Logger.printStatus("Updating internal status files.");
     for (StatusUpdater su : sus) {
       su.updateStatuses();
+      Logger.printStatusTime(su.getClass().getSimpleName()
+          + " updated status files");
     }
 
     Logger.printStatus("Updating document files.");

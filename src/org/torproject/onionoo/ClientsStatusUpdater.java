@@ -149,7 +149,6 @@ public class ClientsStatusUpdater implements DescriptorListener,
       this.compressHistory(clientsStatus);
       this.documentStore.store(clientsStatus, hashedFingerprint);
     }
-    Logger.printStatusTime("Updated clients status files");
   }
 
   private void addToHistory(ClientsStatus clientsStatus,

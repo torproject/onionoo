@@ -30,6 +30,12 @@ public class DummyDocumentStore extends DocumentStore {
         fingerprint == null ? FINGERPRINT_NULL : fingerprint, document);
   }
 
+  public <T extends Document> T getDocument(Class<T> documentType,
+      String fingerprint) {
+    return documentType.cast(this.getStoredDocumentsByClass(documentType).
+        get(fingerprint == null ? FINGERPRINT_NULL : fingerprint));
+  }
+
   public void flushDocumentCache() {
     /* Nothing to do. */
   }
