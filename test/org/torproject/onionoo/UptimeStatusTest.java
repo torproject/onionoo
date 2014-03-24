@@ -43,8 +43,9 @@ public class UptimeStatusTest {
         new Long[] { DateTimeHelper.parse("2013-12-20 00:00:00") })));
     uptimeStatus.storeIfChanged();
     assertEquals("History must contain single entry.", 1,
-        uptimeStatus.getHistory().size());
-    UptimeHistory newUptimeHistory = uptimeStatus.getHistory().first();
+        uptimeStatus.getRelayHistory().size());
+    UptimeHistory newUptimeHistory =
+        uptimeStatus.getRelayHistory().first();
     assertEquals("History not for relay.", true,
         newUptimeHistory.isRelay());
     assertEquals("History start millis not same as provided.",
@@ -66,8 +67,9 @@ public class UptimeStatusTest {
         DateTimeHelper.parse("2013-12-20 01:00:00") })));
     uptimeStatus.storeIfChanged();
     assertEquals("History must contain single entry.", 1,
-        uptimeStatus.getHistory().size());
-    UptimeHistory newUptimeHistory = uptimeStatus.getHistory().first();
+        uptimeStatus.getRelayHistory().size());
+    UptimeHistory newUptimeHistory =
+        uptimeStatus.getRelayHistory().first();
     assertEquals("History not for relay.", true,
         newUptimeHistory.isRelay());
     assertEquals("History start millis not same as provided.",
@@ -100,11 +102,12 @@ public class UptimeStatusTest {
         new Long[] { DateTimeHelper.parse("2013-09-09 02:00:00"),
         DateTimeHelper.parse("2013-12-20 00:00:00") })));
     assertEquals("Uncompressed history must contain five entries.", 5,
-        uptimeStatus.getHistory().size());
+        uptimeStatus.getRelayHistory().size());
     uptimeStatus.storeIfChanged();
     assertEquals("Compressed history must contain one entry.", 1,
-        uptimeStatus.getHistory().size());
-    UptimeHistory newUptimeHistory = uptimeStatus.getHistory().first();
+        uptimeStatus.getRelayHistory().size());
+    UptimeHistory newUptimeHistory =
+        uptimeStatus.getRelayHistory().first();
     assertEquals("History not for relay.", true,
         newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
@@ -148,8 +151,9 @@ public class UptimeStatusTest {
         DateTimeHelper.parse("2013-07-22 17:00:00")})));
     uptimeStatus.storeIfChanged();
     assertEquals("Compressed history must still contain three entries.",
-        3, uptimeStatus.getHistory().size());
-    UptimeHistory newUptimeHistory = uptimeStatus.getHistory().first();
+        3, uptimeStatus.getRelayHistory().size());
+    UptimeHistory newUptimeHistory =
+        uptimeStatus.getRelayHistory().first();
     assertEquals("History not for relay.", true,
         newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
@@ -169,8 +173,9 @@ public class UptimeStatusTest {
         DateTimeHelper.parse("2013-09-09 02:00:00")})));
     uptimeStatus.storeIfChanged();
     assertEquals("Compressed history must now contain two entries.",
-        2, uptimeStatus.getHistory().size());
-    UptimeHistory newUptimeHistory = uptimeStatus.getHistory().first();
+        2, uptimeStatus.getRelayHistory().size());
+    UptimeHistory newUptimeHistory =
+        uptimeStatus.getRelayHistory().first();
     assertEquals("History not for relay.", true,
         newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
@@ -202,9 +207,10 @@ public class UptimeStatusTest {
         new Long[] { DateTimeHelper.parse("2013-07-22 16:00:00"),
         DateTimeHelper.parse("2014-03-21 20:00:00")})));
     uptimeStatus.storeIfChanged();
-    assertEquals("Compressed history must still contain two entries.",
-        2, uptimeStatus.getHistory().size());
-    UptimeHistory newUptimeHistory = uptimeStatus.getHistory().first();
+    assertEquals("Compressed relay history must still contain one entry.",
+        1, uptimeStatus.getRelayHistory().size());
+    UptimeHistory newUptimeHistory =
+        uptimeStatus.getRelayHistory().first();
     assertEquals("History not for relay.", true,
         newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
@@ -223,9 +229,10 @@ public class UptimeStatusTest {
         new Long[] { DateTimeHelper.parse("2013-07-22 16:00:00"),
         DateTimeHelper.parse("2014-03-21 20:00:00")})));
     uptimeStatus.storeIfChanged();
-    assertEquals("Compressed history must still contain two entries.",
-        2, uptimeStatus.getHistory().size());
-    UptimeHistory newUptimeHistory = uptimeStatus.getHistory().last();
+    assertEquals("Compressed bridge history must still contain one "
+        + "entry.", 1, uptimeStatus.getBridgeHistory().size());
+    UptimeHistory newUptimeHistory =
+        uptimeStatus.getBridgeHistory().last();
     assertEquals("History not for bridge.", false,
         newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",

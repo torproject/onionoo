@@ -99,12 +99,22 @@ class UptimeStatus extends Document {
 
   private transient boolean isDirty = false;
 
-  private SortedSet<UptimeHistory> history = new TreeSet<UptimeHistory>();
-  public void setHistory(SortedSet<UptimeHistory> history) {
-    this.history = history;
+  private SortedSet<UptimeHistory> relayHistory =
+      new TreeSet<UptimeHistory>();
+  public void setRelayHistory(SortedSet<UptimeHistory> relayHistory) {
+    this.relayHistory = relayHistory;
   }
-  public SortedSet<UptimeHistory> getHistory() {
-    return this.history;
+  public SortedSet<UptimeHistory> getRelayHistory() {
+    return this.relayHistory;
+  }
+
+  private SortedSet<UptimeHistory> bridgeHistory =
+      new TreeSet<UptimeHistory>();
+  public void setBridgeHistory(SortedSet<UptimeHistory> bridgeHistory) {
+    this.bridgeHistory = bridgeHistory;
+  }
+  public SortedSet<UptimeHistory> getBridgeHistory() {
+    return this.bridgeHistory;
   }
 
   public static UptimeStatus loadOrCreate(String fingerprint) {
@@ -126,7 +136,11 @@ class UptimeStatus extends Document {
       String line = s.nextLine();
       UptimeHistory parsedLine = UptimeHistory.fromString(line);
       if (parsedLine != null) {
-        this.history.add(parsedLine);
+        if (parsedLine.isRelay()) {
+          this.relayHistory.add(parsedLine);
+        } else {
+          this.bridgeHistory.add(parsedLine);
+        }
       } else {
         System.err.println("Could not parse uptime history line '"
             + line + "'.  Skipping.");
@@ -137,31 +151,34 @@ class UptimeStatus extends Document {
 
   public void addToHistory(boolean relay, SortedSet<Long> newIntervals) {
     for (long startMillis : newIntervals) {
+      SortedSet<UptimeHistory> history = relay ? this.relayHistory
+          : this.bridgeHistory;
       UptimeHistory interval = new UptimeHistory(relay, startMillis, 1);
-      if (!this.history.headSet(interval).isEmpty()) {
-        UptimeHistory prev = this.history.headSet(interval).last();
+      if (!history.headSet(interval).isEmpty()) {
+        UptimeHistory prev = history.headSet(interval).last();
         if (prev.isRelay() == interval.isRelay() &&
             prev.getStartMillis() + DateTimeHelper.ONE_HOUR
             * prev.getUptimeHours() > interval.getStartMillis()) {
           continue;
         }
       }
-      if (!this.history.tailSet(interval).isEmpty()) {
-        UptimeHistory next = this.history.tailSet(interval).first();
+      if (!history.tailSet(interval).isEmpty()) {
+        UptimeHistory next = history.tailSet(interval).first();
         if (next.isRelay() == interval.isRelay() &&
             next.getStartMillis() < interval.getStartMillis()
             + DateTimeHelper.ONE_HOUR) {
           continue;
         }
       }
-      this.history.add(interval);
+      history.add(interval);
       this.isDirty = true;
     }
   }
 
   public void storeIfChanged() {
     if (this.isDirty) {
-      this.compressHistory();
+      this.compressHistory(this.relayHistory);
+      this.compressHistory(this.bridgeHistory);
       if (fingerprint == null) {
         ApplicationFactory.getDocumentStore().store(this);
       } else {
@@ -172,11 +189,12 @@ class UptimeStatus extends Document {
     }
   }
 
-  private void compressHistory() {
-    SortedSet<UptimeHistory> compressedHistory =
-        new TreeSet<UptimeHistory>();
+  private void compressHistory(SortedSet<UptimeHistory> history) {
+    SortedSet<UptimeHistory> uncompressedHistory =
+        new TreeSet<UptimeHistory>(history);
+    history.clear();
     UptimeHistory lastInterval = null;
-    for (UptimeHistory interval : history) {
+    for (UptimeHistory interval : uncompressedHistory) {
       if (lastInterval != null &&
           lastInterval.getStartMillis() + DateTimeHelper.ONE_HOUR
           * lastInterval.getUptimeHours() == interval.getStartMillis() &&
@@ -184,20 +202,22 @@ class UptimeStatus extends Document {
         lastInterval.addUptime(interval);
       } else {
         if (lastInterval != null) {
-          compressedHistory.add(lastInterval);
+          history.add(lastInterval);
         }
         lastInterval = interval;
       }
     }
     if (lastInterval != null) {
-      compressedHistory.add(lastInterval);
+      history.add(lastInterval);
     }
-    this.history = compressedHistory;
   }
 
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
-    for (UptimeHistory interval : this.history) {
+    for (UptimeHistory interval : this.relayHistory) {
+      sb.append(interval.toString() + "\n");
+    }
+    for (UptimeHistory interval : this.bridgeHistory) {
       sb.append(interval.toString() + "\n");
     }
     return sb.toString();

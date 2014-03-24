@@ -44,27 +44,18 @@ public class UptimeDocumentWriter implements FingerprintListener,
   }
 
   public void writeDocuments() {
-    SortedSet<UptimeHistory>
-        knownRelayStatuses = new TreeSet<UptimeHistory>(),
-        knownBridgeStatuses = new TreeSet<UptimeHistory>();
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true);
     if (uptimeStatus == null) {
       return;
     }
-    SortedSet<UptimeHistory> knownStatuses = uptimeStatus.getHistory();
-    for (UptimeHistory status : knownStatuses) {
-      if (status.isRelay()) {
-        knownRelayStatuses.add(status);
-      } else {
-        knownBridgeStatuses.add(status);
-      }
-    }
     for (String fingerprint : this.newRelayFingerprints) {
-      this.updateDocument(true, fingerprint, knownRelayStatuses);
+      this.updateDocument(true, fingerprint,
+          uptimeStatus.getRelayHistory());
     }
     for (String fingerprint : this.newBridgeFingerprints) {
-      this.updateDocument(false, fingerprint, knownBridgeStatuses);
+      this.updateDocument(false, fingerprint,
+          uptimeStatus.getBridgeHistory());
     }
     Logger.printStatusTime("Wrote uptime document files");
   }
@@ -76,7 +67,9 @@ public class UptimeDocumentWriter implements FingerprintListener,
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true, fingerprint);
     if (uptimeStatus != null) {
-      SortedSet<UptimeHistory> history = uptimeStatus.getHistory();
+      SortedSet<UptimeHistory> history = relay
+          ? uptimeStatus.getRelayHistory()
+          : uptimeStatus.getBridgeHistory();
       UptimeDocument uptimeDocument = new UptimeDocument();
       uptimeDocument.setDocumentString(this.formatHistoryString(relay,
           fingerprint, history, knownStatuses));

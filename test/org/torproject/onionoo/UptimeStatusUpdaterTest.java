@@ -64,9 +64,9 @@ public class UptimeStatusUpdaterTest {
         null }) {
       UptimeStatus status = this.documentStore.getDocument(
           UptimeStatus.class, fingerprint);
-      UptimeHistory history = status.getHistory().first();
+      UptimeHistory history = status.getRelayHistory().first();
       assertEquals("History must contain one entry.", 1,
-          status.getHistory().size());
+          status.getRelayHistory().size());
       assertEquals("History not for relay.", true, history.isRelay());
       assertEquals("History start millis not as expected.",
           VALID_AFTER_SAMPLE, history.getStartMillis());
@@ -99,9 +99,9 @@ public class UptimeStatusUpdaterTest {
         2, this.documentStore.getPerformedStoreOperations());
     UptimeStatus status = this.documentStore.getDocument(
         UptimeStatus.class, ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
-    assertEquals("History must contain two entries.", 2,
-        status.getHistory().size());
-    UptimeHistory history = status.getHistory().first();
+    assertEquals("Relay history must contain one entry", 1,
+        status.getRelayHistory().size());
+    UptimeHistory history = status.getRelayHistory().first();
     assertEquals("History not for relay.", true, history.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 17:00:00"),
@@ -139,9 +139,9 @@ public class UptimeStatusUpdaterTest {
         null }) {
       UptimeStatus status = this.documentStore.getDocument(
           UptimeStatus.class, fingerprint);
-      UptimeHistory history = status.getHistory().first();
-      assertEquals("History must contain one entry.", 1,
-          status.getHistory().size());
+      UptimeHistory history = status.getBridgeHistory().first();
+      assertEquals("Bridge history must contain one entry.", 1,
+          status.getBridgeHistory().size());
       assertEquals("History not for bridge.", false, history.isRelay());
       assertEquals("History start millis not as expected.",
           DateTimeHelper.parse("2014-03-21 20:00:00"),
@@ -162,10 +162,10 @@ public class UptimeStatusUpdaterTest {
         2, this.documentStore.getPerformedStoreOperations());
     UptimeStatus status = this.documentStore.getDocument(
         UptimeStatus.class, ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
-    assertEquals("History must contain two entries.", 2,
-        status.getHistory().size());
-    UptimeHistory history = status.getHistory().last();
-    assertEquals("History not for relay.", false, history.isRelay());
+    assertEquals("Bridge history must contain one entry.", 1,
+        status.getBridgeHistory().size());
+    UptimeHistory history = status.getBridgeHistory().last();
+    assertEquals("History not for bridge.", false, history.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 17:00:00"),
         history.getStartMillis());
