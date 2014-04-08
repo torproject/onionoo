@@ -36,12 +36,14 @@ public class Main {
     Logger.printStatusTime("Initialized bandwidth data writer");
     WeightsDataWriter wdw = new WeightsDataWriter(dso, ds, t);
     Logger.printStatusTime("Initialized weights data writer");
-    ClientsDataWriter cdw = new ClientsDataWriter(dso, ds, t);
-    Logger.printStatusTime("Initialized clients data writer");
+    ClientsStatusUpdater csu = new ClientsStatusUpdater(dso, ds, t);
+    Logger.printStatusTime("Initialized clients status updater");
     UptimeStatusUpdater usu = new UptimeStatusUpdater(dso, ds);
     Logger.printStatusTime("Initialized uptime status updater");
-    StatusUpdater[] sus = new StatusUpdater[] { ndw, bdw, wdw, cdw, usu };
+    StatusUpdater[] sus = new StatusUpdater[] { ndw, bdw, wdw, csu, usu };
 
+    ClientsDocumentWriter cdw = new ClientsDocumentWriter(dso, ds, t);
+    Logger.printStatusTime("Initialized clients document writer");
     UptimeDocumentWriter udw = new UptimeDocumentWriter(dso, ds, t);
     Logger.printStatusTime("Initialized uptime document writer");
     DocumentWriter[] dws = new DocumentWriter[] { ndw, bdw, wdw, cdw,
@@ -91,7 +93,7 @@ public class Main {
     }
     /* TODO Print status updater statistics for *all* status updaters once
      * all data writers have been separated. */
-    for (DocumentWriter dw : new DocumentWriter[] { udw }) {
+    for (DocumentWriter dw : new DocumentWriter[] { cdw, udw }) {
       String statsString = dw.getStatsString();
       if (statsString != null) {
         Logger.printStatistics(dw.getClass().getSimpleName(),
