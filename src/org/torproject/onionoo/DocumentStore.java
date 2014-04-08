@@ -195,7 +195,7 @@ public class DocumentStore {
           document instanceof ClientsDocument ||
           document instanceof UptimeDocument) {
       Gson gson = new Gson();
-      documentString = gson.toJson(this);
+      documentString = gson.toJson(document);
     } else if (document instanceof BandwidthStatus ||
         document instanceof WeightsStatus ||
         document instanceof ClientsStatus ||
