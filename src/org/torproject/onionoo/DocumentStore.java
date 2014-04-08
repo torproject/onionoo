@@ -484,7 +484,7 @@ public class DocumentStore {
           maxLastSeenMillis = node.getLastSeenMillis();
         }
       }
-      cutoff = maxLastSeenMillis - 7L * 24L * 60L * 60L * 1000L;
+      cutoff = maxLastSeenMillis - DateTimeHelper.ONE_WEEK;
     }
     for (Map.Entry<String, NodeStatus> e :
         this.cachedNodeStatuses.entrySet()) {

@@ -92,18 +92,18 @@ public class ClientsDocumentWriter implements FingerprintListener,
       "5_years" };
 
   private long[] graphIntervals = new long[] {
-      7L * 24L * 60L * 60L * 1000L,
-      31L * 24L * 60L * 60L * 1000L,
-      92L * 24L * 60L * 60L * 1000L,
-      366L * 24L * 60L * 60L * 1000L,
-      5L * 366L * 24L * 60L * 60L * 1000L };
+      DateTimeHelper.ONE_WEEK,
+      DateTimeHelper.ROUGHLY_ONE_MONTH,
+      DateTimeHelper.ROUGHLY_THREE_MONTHS,
+      DateTimeHelper.ROUGHLY_ONE_YEAR,
+      DateTimeHelper.ROUGHLY_FIVE_YEARS };
 
   private long[] dataPointIntervals = new long[] {
-      24L * 60L * 60L * 1000L,
-      24L * 60L * 60L * 1000L,
-      24L * 60L * 60L * 1000L,
-      2L * 24L * 60L * 60L * 1000L,
-      10L * 24L * 60L * 60L * 1000L };
+      DateTimeHelper.ONE_DAY,
+      DateTimeHelper.ONE_DAY,
+      DateTimeHelper.ONE_DAY,
+      DateTimeHelper.TWO_DAYS,
+      DateTimeHelper.TEN_DAYS };
 
   private String formatHistoryString(String hashedFingerprint,
       SortedSet<ClientsHistory> history) {
@@ -123,9 +123,6 @@ public class ClientsDocumentWriter implements FingerprintListener,
     sb.append("\n}\n");
     return sb.toString();
   }
-
-  private static final long ONE_HOUR_MILLIS = 60L * 60L * 1000L,
-      ONE_DAY_MILLIS = 24L * ONE_HOUR_MILLIS;
 
   private String formatTimeline(int graphIntervalIndex,
       SortedSet<ClientsHistory> history) {
@@ -149,7 +146,7 @@ public class ClientsDocumentWriter implements FingerprintListener,
       while ((intervalStartMillis / dataPointInterval) !=
           (hist.endMillis / dataPointInterval)) {
         dataPoints.add(millis * 2L < dataPointInterval
-            ? -1.0 : responses * ((double) ONE_DAY_MILLIS)
+            ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)
             / (((double) millis) * 10.0));
         responses = 0.0;
         millis = 0L;
@@ -184,7 +181,7 @@ public class ClientsDocumentWriter implements FingerprintListener,
       millis += (hist.endMillis - hist.startMillis);
     }
     dataPoints.add(millis * 2L < dataPointInterval
-        ? -1.0 : responses * ((double) ONE_DAY_MILLIS)
+        ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)
         / (((double) millis) * 10.0));
     double maxValue = 0.0;
     int firstNonNullIndex = -1, lastNonNullIndex = -1;
@@ -222,7 +219,8 @@ public class ClientsDocumentWriter implements FingerprintListener,
     sb.append("\"" + graphName + "\":{"
         + "\"first\":\"" + DateTimeHelper.format(firstDataPointMillis)
         + "\",\"last\":\"" + DateTimeHelper.format(lastDataPointMillis)
-        + "\",\"interval\":" + String.valueOf(dataPointInterval / 1000L)
+        + "\",\"interval\":" + String.valueOf(dataPointInterval
+        / DateTimeHelper.ONE_SECOND)
         + ",\"factor\":" + String.format(Locale.US, "%.9f", factor)
         + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
     int dataPointsWritten = 0, previousNonNullIndex = -2;

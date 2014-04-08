@@ -29,7 +29,9 @@ public class Logger {
 
   public static String formatMillis(long millis) {
     return String.format("%02d:%02d.%03d minutes",
-        millis / (1000L * 60L), (millis / 1000L) % 60L, millis % 1000L);
+        millis / DateTimeHelper.ONE_MINUTE,
+        (millis % DateTimeHelper.ONE_MINUTE) / DateTimeHelper.ONE_SECOND,
+        millis % DateTimeHelper.ONE_SECOND);
   }
 
   public static String formatBytes(long bytes) {

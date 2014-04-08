@@ -32,8 +32,6 @@ public class UptimeDocumentWriter implements FingerprintListener,
         DescriptorType.BRIDGE_STATUSES);
   }
 
-  private static final long ONE_HOUR_MILLIS = 60L * 60L * 1000L;
-
   private SortedSet<String> newRelayFingerprints = new TreeSet<String>(),
       newBridgeFingerprints = new TreeSet<String>();
 
@@ -96,18 +94,18 @@ public class UptimeDocumentWriter implements FingerprintListener,
       "5_years" };
 
   private long[] graphIntervals = new long[] {
-      7L * 24L * 60L * 60L * 1000L,
-      31L * 24L * 60L * 60L * 1000L,
-      92L * 24L * 60L * 60L * 1000L,
-      366L * 24L * 60L * 60L * 1000L,
-      5L * 366L * 24L * 60L * 60L * 1000L };
+      DateTimeHelper.ONE_WEEK,
+      DateTimeHelper.ROUGHLY_ONE_MONTH,
+      DateTimeHelper.ROUGHLY_THREE_MONTHS,
+      DateTimeHelper.ROUGHLY_ONE_YEAR,
+      DateTimeHelper.ROUGHLY_FIVE_YEARS };
 
   private long[] dataPointIntervals = new long[] {
-      60L * 60L * 1000L,
-      4L * 60L * 60L * 1000L,
-      12L * 60L * 60L * 1000L,
-      2L * 24L * 60L * 60L * 1000L,
-      10L * 24L * 60L * 60L * 1000L };
+      DateTimeHelper.ONE_HOUR,
+      DateTimeHelper.FOUR_HOURS,
+      DateTimeHelper.TWELVE_HOURS,
+      DateTimeHelper.TWO_DAYS,
+      DateTimeHelper.TEN_DAYS };
 
   private String formatHistoryString(boolean relay, String fingerprint,
       SortedSet<UptimeHistory> history,
@@ -138,7 +136,7 @@ public class UptimeDocumentWriter implements FingerprintListener,
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
     int dataPointIntervalHours = (int) (dataPointInterval
-        / ONE_HOUR_MILLIS);
+        / DateTimeHelper.ONE_HOUR);
     List<Integer> statusDataPoints = new ArrayList<Integer>();
     long intervalStartMillis = ((this.now - graphInterval)
         / dataPointInterval) * dataPointInterval;
@@ -147,7 +145,7 @@ public class UptimeDocumentWriter implements FingerprintListener,
       if (hist.relay != relay) {
         continue;
       }
-      long histEndMillis = hist.startMillis + ONE_HOUR_MILLIS
+      long histEndMillis = hist.startMillis + DateTimeHelper.ONE_HOUR
           * hist.uptimeHours;
       if (histEndMillis < intervalStartMillis) {
         continue;
@@ -162,14 +160,14 @@ public class UptimeDocumentWriter implements FingerprintListener,
       while (histEndMillis >= intervalStartMillis + dataPointInterval) {
         statusHours += (int) ((intervalStartMillis + dataPointInterval
             - Math.max(hist.startMillis, intervalStartMillis))
-            / ONE_HOUR_MILLIS);
+            / DateTimeHelper.ONE_HOUR);
         statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
             ? statusHours : -1);
         statusHours = 0;
         intervalStartMillis += dataPointInterval;
       }
       statusHours += (int) ((histEndMillis - Math.max(hist.startMillis,
-          intervalStartMillis)) / ONE_HOUR_MILLIS);
+          intervalStartMillis)) / DateTimeHelper.ONE_HOUR);
     }
     statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
         ? statusHours : -1);
@@ -185,7 +183,7 @@ public class UptimeDocumentWriter implements FingerprintListener,
       if (firstStatusStartMillis < 0L) {
         firstStatusStartMillis = hist.startMillis;
       }
-      long histEndMillis = hist.startMillis + ONE_HOUR_MILLIS
+      long histEndMillis = hist.startMillis + DateTimeHelper.ONE_HOUR
           * hist.uptimeHours;
       if (histEndMillis < intervalStartMillis) {
         continue;
@@ -204,13 +202,13 @@ public class UptimeDocumentWriter implements FingerprintListener,
       while (histEndMillis >= intervalStartMillis + dataPointInterval) {
         uptimeHours += (int) ((intervalStartMillis + dataPointInterval
             - Math.max(hist.startMillis, intervalStartMillis))
-            / ONE_HOUR_MILLIS);
+            / DateTimeHelper.ONE_HOUR);
         uptimeDataPoints.add(uptimeHours);
         uptimeHours = 0;
         intervalStartMillis += dataPointInterval;
       }
       uptimeHours += (int) ((histEndMillis - Math.max(hist.startMillis,
-          intervalStartMillis)) / ONE_HOUR_MILLIS);
+          intervalStartMillis)) / DateTimeHelper.ONE_HOUR);
     }
     uptimeDataPoints.add(uptimeHours);
     List<Double> dataPoints = new ArrayList<Double>();
@@ -258,7 +256,8 @@ public class UptimeDocumentWriter implements FingerprintListener,
     sb.append("\"" + graphName + "\":{"
         + "\"first\":\"" + DateTimeHelper.format(firstDataPointMillis)
         + "\",\"last\":\"" + DateTimeHelper.format(lastDataPointMillis)
-        + "\",\"interval\":" + String.valueOf(dataPointInterval / 1000L)
+        + "\",\"interval\":" + String.valueOf(dataPointInterval
+        / DateTimeHelper.ONE_SECOND)
         + ",\"factor\":" + String.format(Locale.US, "%.9f", factor)
         + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
     int dataPointsWritten = 0, previousNonNullIndex = -2;

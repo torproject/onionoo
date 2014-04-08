@@ -58,9 +58,6 @@ public class ClientsStatusUpdater implements DescriptorListener,
     }
   }
 
-  private static final long ONE_HOUR_MILLIS = 60L * 60L * 1000L,
-      ONE_DAY_MILLIS = 24L * ONE_HOUR_MILLIS;
-
   private SortedMap<String, SortedSet<ClientsHistory>> newResponses =
       new TreeMap<String, SortedSet<ClientsHistory>>();
 
@@ -68,10 +65,11 @@ public class ClientsStatusUpdater implements DescriptorListener,
       ExtraInfoDescriptor descriptor) {
     long dirreqStatsEndMillis = descriptor.getDirreqStatsEndMillis();
     long dirreqStatsIntervalLengthMillis =
-        descriptor.getDirreqStatsIntervalLength() * 1000L;
+        descriptor.getDirreqStatsIntervalLength()
+        * DateTimeHelper.ONE_SECOND;
     SortedMap<String, Integer> responses = descriptor.getDirreqV3Resp();
     if (dirreqStatsEndMillis < 0L ||
-        dirreqStatsIntervalLengthMillis != ONE_DAY_MILLIS ||
+        dirreqStatsIntervalLengthMillis != DateTimeHelper.ONE_DAY ||
         responses == null || !responses.containsKey("ok")) {
       return;
     }
@@ -82,8 +80,8 @@ public class ClientsStatusUpdater implements DescriptorListener,
     String hashedFingerprint = descriptor.getFingerprint().toUpperCase();
     long dirreqStatsStartMillis = dirreqStatsEndMillis
         - dirreqStatsIntervalLengthMillis;
-    long utcBreakMillis = (dirreqStatsEndMillis / ONE_DAY_MILLIS)
-        * ONE_DAY_MILLIS;
+    long utcBreakMillis = (dirreqStatsEndMillis / DateTimeHelper.ONE_DAY)
+        * DateTimeHelper.ONE_DAY;
     for (int i = 0; i < 2; i++) {
       long startMillis = i == 0 ? dirreqStatsStartMillis : utcBreakMillis;
       long endMillis = i == 0 ? utcBreakMillis : dirreqStatsEndMillis;
@@ -92,7 +90,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
       }
       double totalResponses = okResponses
           * ((double) (endMillis - startMillis))
-          / ((double) ONE_DAY_MILLIS);
+          / ((double) DateTimeHelper.ONE_DAY);
       SortedMap<String, Double> responsesByCountry =
           this.weightResponsesWithUniqueIps(totalResponses,
           descriptor.getBridgeIps(), "??");
@@ -179,13 +177,13 @@ public class ClientsStatusUpdater implements DescriptorListener,
     for (ClientsHistory responses : history) {
       long intervalLengthMillis;
       if (this.now - responses.endMillis <=
-          92L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 24L * 60L * 60L * 1000L;
+          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+        intervalLengthMillis = DateTimeHelper.ONE_DAY;
       } else if (this.now - responses.endMillis <=
-          366L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 2L * 24L * 60L * 60L * 1000L;
+          DateTimeHelper.ROUGHLY_ONE_YEAR) {
+        intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {
-        intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
+        intervalLengthMillis = DateTimeHelper.TEN_DAYS;
       }
       String monthString = DateTimeHelper.format(responses.startMillis,
           DateTimeHelper.ISO_YEARMONTH_FORMAT);

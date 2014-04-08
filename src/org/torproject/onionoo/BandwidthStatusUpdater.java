@@ -74,7 +74,8 @@ public class BandwidthStatusUpdater implements DescriptorListener,
           + "'.  Skipping.");
       return;
     }
-    long intervalMillis = Long.parseLong(parts[3].substring(1)) * 1000L;
+    long intervalMillis = Long.parseLong(parts[3].substring(1))
+        * DateTimeHelper.ONE_SECOND;
     String[] values = parts[5].split(",");
     for (int i = values.length - 1; i >= 0; i--) {
       long bandwidthValue = Long.parseLong(values[i]);
@@ -96,18 +97,21 @@ public class BandwidthStatusUpdater implements DescriptorListener,
     for (long[] v : uncompressedHistory.values()) {
       long startMillis = v[0], endMillis = v[1], bandwidth = v[2];
       long intervalLengthMillis;
-      if (this.now - endMillis <= 72L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 15L * 60L * 1000L;
-      } else if (this.now - endMillis <= 7L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 60L * 60L * 1000L;
-      } else if (this.now - endMillis <= 31L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 4L * 60L * 60L * 1000L;
-      } else if (this.now - endMillis <= 92L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 12L * 60L * 60L * 1000L;
-      } else if (this.now - endMillis <= 366L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 2L * 24L * 60L * 60L * 1000L;
+      if (this.now - endMillis <= DateTimeHelper.THREE_DAYS) {
+        intervalLengthMillis = DateTimeHelper.FIFTEEN_MINUTES;
+      } else if (this.now - endMillis <= DateTimeHelper.ONE_WEEK) {
+        intervalLengthMillis = DateTimeHelper.ONE_HOUR;
+      } else if (this.now - endMillis <=
+          DateTimeHelper.ROUGHLY_ONE_MONTH) {
+        intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
+      } else if (this.now - endMillis <=
+          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+        intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
+      } else if (this.now - endMillis <=
+          DateTimeHelper.ROUGHLY_ONE_YEAR) {
+        intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {
-        intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
+        intervalLengthMillis = DateTimeHelper.TEN_DAYS;
       }
       String monthString = DateTimeHelper.format(startMillis,
           DateTimeHelper.ISO_YEARMONTH_FORMAT);

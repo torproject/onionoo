@@ -80,18 +80,18 @@ public class WeightsDocumentWriter implements FingerprintListener,
       "5_years" };
 
   private long[] graphIntervals = new long[] {
-      7L * 24L * 60L * 60L * 1000L,
-      31L * 24L * 60L * 60L * 1000L,
-      92L * 24L * 60L * 60L * 1000L,
-      366L * 24L * 60L * 60L * 1000L,
-      5L * 366L * 24L * 60L * 60L * 1000L };
+      DateTimeHelper.ONE_WEEK,
+      DateTimeHelper.ROUGHLY_ONE_MONTH,
+      DateTimeHelper.ROUGHLY_THREE_MONTHS,
+      DateTimeHelper.ROUGHLY_ONE_YEAR,
+      DateTimeHelper.ROUGHLY_FIVE_YEARS };
 
   private long[] dataPointIntervals = new long[] {
-      60L * 60L * 1000L,
-      4L * 60L * 60L * 1000L,
-      12L * 60L * 60L * 1000L,
-      2L * 24L * 60L * 60L * 1000L,
-      10L * 24L * 60L * 60L * 1000L };
+      DateTimeHelper.ONE_HOUR,
+      DateTimeHelper.FOUR_HOURS,
+      DateTimeHelper.TWELVE_HOURS,
+      DateTimeHelper.TWO_DAYS,
+      DateTimeHelper.TEN_DAYS };
 
   private String formatHistoryString(String fingerprint,
       SortedMap<long[], double[]> history) {
@@ -184,7 +184,8 @@ public class WeightsDocumentWriter implements FingerprintListener,
     sb.append("\"" + graphName + "\":{"
         + "\"first\":\"" + DateTimeHelper.format(firstDataPointMillis)
         + "\",\"last\":\"" + DateTimeHelper.format(lastDataPointMillis)
-        + "\",\"interval\":" + String.valueOf(dataPointInterval / 1000L)
+        + "\",\"interval\":" + String.valueOf(dataPointInterval
+        / DateTimeHelper.ONE_SECOND)
         + ",\"factor\":" + String.format(Locale.US, "%.9f", factor)
         + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
     int dataPointsWritten = 0, previousNonNullIndex = -2;

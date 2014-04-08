@@ -31,7 +31,7 @@ public class ResponseBuilder {
   private static SortedMap<Integer, Set<String>>
       relaysByFirstSeenDays = null, bridgesByFirstSeenDays = null,
       relaysByLastSeenDays = null, bridgesByLastSeenDays = null;
-  private static final long SUMMARY_MAX_AGE = 6L * 60L * 60L * 1000L;
+  private static final long SUMMARY_MAX_AGE = DateTimeHelper.SIX_HOURS;
 
   public static void initialize(DocumentStore documentStoreParam,
       Time timeParam) {

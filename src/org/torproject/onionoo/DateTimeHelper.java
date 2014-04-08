@@ -14,6 +14,25 @@ public class DateTimeHelper {
   private DateTimeHelper() {
   }
 
+  public static final long ONE_SECOND = 1000L,
+      TEN_SECONDS = 10L * ONE_SECOND,
+      ONE_MINUTE = 60L * ONE_SECOND,
+      FIVE_MINUTES = 5L * ONE_MINUTE,
+      FIFTEEN_MINUTES = 15L * ONE_MINUTE,
+      ONE_HOUR = 60L * ONE_MINUTE,
+      FOUR_HOURS = 4L * ONE_HOUR,
+      SIX_HOURS = 6L * ONE_HOUR,
+      TWELVE_HOURS = 12L * ONE_HOUR,
+      ONE_DAY = 24L * ONE_HOUR,
+      TWO_DAYS = 2L * ONE_DAY,
+      THREE_DAYS = 3L * ONE_DAY,
+      ONE_WEEK = 7L * ONE_DAY,
+      TEN_DAYS = 10L * ONE_DAY,
+      ROUGHLY_ONE_MONTH = 31L * ONE_DAY,
+      ROUGHLY_THREE_MONTHS = 92L * ONE_DAY,
+      ROUGHLY_ONE_YEAR = 366L * ONE_DAY,
+      ROUGHLY_FIVE_YEARS = 5L * ROUGHLY_ONE_YEAR;
+
   public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
   public static final String ISO_DATETIME_TAB_FORMAT =

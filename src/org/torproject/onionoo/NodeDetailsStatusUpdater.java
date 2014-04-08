@@ -308,7 +308,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
     StringBuilder sb = new StringBuilder();
     String lastRestartedString = DateTimeHelper.format(
-        descriptor.getPublishedMillis() - descriptor.getUptime() * 1000L);
+        descriptor.getPublishedMillis() - descriptor.getUptime()
+        * DateTimeHelper.ONE_SECOND);
     int bandwidthRate = descriptor.getBandwidthRate();
     int bandwidthBurst = descriptor.getBandwidthBurst();
     int observedBandwidth = descriptor.getBandwidthObserved();
@@ -392,7 +393,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
     StringBuilder sb = new StringBuilder();
     String lastRestartedString = DateTimeHelper.format(
-        descriptor.getPublishedMillis() - descriptor.getUptime() * 1000L);
+        descriptor.getPublishedMillis() - descriptor.getUptime()
+        * DateTimeHelper.ONE_SECOND);
     int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
         Math.min(descriptor.getBandwidthBurst(),
         descriptor.getBandwidthObserved()));

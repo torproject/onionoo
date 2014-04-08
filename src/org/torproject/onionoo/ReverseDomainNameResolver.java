@@ -89,11 +89,12 @@ public class ReverseDomainNameResolver {
     this.time = time;
   }
 
-  private static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS = 10L * 1000L;
-  private static final long RDNS_LOOKUP_MAX_DURATION_MILLIS = 5L * 60L
-      * 1000L;
-  private static final long RDNS_LOOKUP_MAX_AGE_MILLIS = 12L * 60L * 60L
-      * 1000L;
+  private static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS =
+      DateTimeHelper.TEN_SECONDS;
+  private static final long RDNS_LOOKUP_MAX_DURATION_MILLIS =
+      DateTimeHelper.FIVE_MINUTES;
+  private static final long RDNS_LOOKUP_MAX_AGE_MILLIS =
+      DateTimeHelper.TWELVE_HOURS;
   private static final int RDNS_LOOKUP_WORKERS_NUM = 5;
 
   private Map<String, Long> addressLastLookupTimes;

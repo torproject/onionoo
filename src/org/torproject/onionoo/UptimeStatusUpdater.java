@@ -50,8 +50,6 @@ public class UptimeStatusUpdater implements DescriptorListener,
       newRunningRelays = new TreeMap<String, SortedSet<Long>>(),
       newRunningBridges = new TreeMap<String, SortedSet<Long>>();
 
-  private static final long ONE_HOUR_MILLIS = 60L * 60L * 1000L;
-
   private void processRelayNetworkStatusConsensus(
       RelayNetworkStatusConsensus consensus) {
     SortedSet<String> fingerprints = new TreeSet<String>();
@@ -63,7 +61,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
     }
     if (!fingerprints.isEmpty()) {
       long dateHourMillis = (consensus.getValidAfterMillis()
-          / ONE_HOUR_MILLIS) * ONE_HOUR_MILLIS;
+          / DateTimeHelper.ONE_HOUR) * DateTimeHelper.ONE_HOUR;
       for (String fingerprint : fingerprints) {
         if (!this.newRunningRelays.containsKey(fingerprint)) {
           this.newRunningRelays.put(fingerprint, new TreeSet<Long>());
@@ -84,7 +82,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
     }
     if (!fingerprints.isEmpty()) {
       long dateHourMillis = (status.getPublishedMillis()
-          / ONE_HOUR_MILLIS) * ONE_HOUR_MILLIS;
+          / DateTimeHelper.ONE_HOUR) * DateTimeHelper.ONE_HOUR;
       for (String fingerprint : fingerprints) {
         if (!this.newRunningBridges.containsKey(fingerprint)) {
           this.newRunningBridges.put(fingerprint, new TreeSet<Long>());
@@ -134,15 +132,16 @@ public class UptimeStatusUpdater implements DescriptorListener,
       if (!history.headSet(interval).isEmpty()) {
         UptimeHistory prev = history.headSet(interval).last();
         if (prev.relay == interval.relay &&
-            prev.startMillis + ONE_HOUR_MILLIS * prev.uptimeHours >
-            interval.startMillis) {
+            prev.startMillis + DateTimeHelper.ONE_HOUR
+            * prev.uptimeHours > interval.startMillis) {
           continue;
         }
       }
       if (!history.tailSet(interval).isEmpty()) {
         UptimeHistory next = history.tailSet(interval).first();
         if (next.relay == interval.relay &&
-            next.startMillis < interval.startMillis + ONE_HOUR_MILLIS) {
+            next.startMillis < interval.startMillis
+            + DateTimeHelper.ONE_HOUR) {
           continue;
         }
       }
@@ -157,7 +156,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
     UptimeHistory lastInterval = null;
     for (UptimeHistory interval : history) {
       if (lastInterval != null &&
-          lastInterval.startMillis + ONE_HOUR_MILLIS
+          lastInterval.startMillis + DateTimeHelper.ONE_HOUR
           * lastInterval.uptimeHours == interval.startMillis &&
           lastInterval.relay == interval.relay) {
         lastInterval.addUptime(interval);

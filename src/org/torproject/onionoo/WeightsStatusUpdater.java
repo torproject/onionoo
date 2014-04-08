@@ -285,16 +285,19 @@ public class WeightsStatusUpdater implements DescriptorListener,
       long startMillis = e.getKey()[0], endMillis = e.getKey()[1];
       double[] weights = e.getValue();
       long intervalLengthMillis;
-      if (this.now - endMillis <= 7L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 60L * 60L * 1000L;
-      } else if (this.now - endMillis <= 31L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 4L * 60L * 60L * 1000L;
-      } else if (this.now - endMillis <= 92L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 12L * 60L * 60L * 1000L;
-      } else if (this.now - endMillis <= 366L * 24L * 60L * 60L * 1000L) {
-        intervalLengthMillis = 2L * 24L * 60L * 60L * 1000L;
+      if (this.now - endMillis <= DateTimeHelper.ONE_WEEK) {
+        intervalLengthMillis = DateTimeHelper.ONE_HOUR;
+      } else if (this.now - endMillis <=
+          DateTimeHelper.ROUGHLY_ONE_MONTH) {
+        intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
+      } else if (this.now - endMillis <=
+          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+        intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
+      } else if (this.now - endMillis <=
+          DateTimeHelper.ROUGHLY_ONE_YEAR) {
+        intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {
-        intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
+        intervalLengthMillis = DateTimeHelper.TEN_DAYS;
       }
       String monthString = DateTimeHelper.format(startMillis,
           DateTimeHelper.ISO_YEARMONTH_FORMAT);
@@ -303,11 +306,11 @@ public class WeightsStatusUpdater implements DescriptorListener,
           ((endMillis - 1L) / intervalLengthMillis) &&
           lastMonthString.equals(monthString)) {
         double lastIntervalInHours = (double) ((lastEndMillis
-            - lastStartMillis) / 60L * 60L * 1000L);
+            - lastStartMillis) / DateTimeHelper.ONE_HOUR);
         double currentIntervalInHours = (double) ((endMillis
-            - startMillis) / 60L * 60L * 1000L);
+            - startMillis) / DateTimeHelper.ONE_HOUR);
         double newIntervalInHours = (double) ((endMillis
-            - lastStartMillis) / 60L * 60L * 1000L);
+            - lastStartMillis) / DateTimeHelper.ONE_HOUR);
         for (int i = 0; i < lastWeights.length; i++) {
           lastWeights[i] *= lastIntervalInHours;
           lastWeights[i] += weights[i] * currentIntervalInHours;
