@@ -2,10 +2,7 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.SortedMap;
-import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.torproject.descriptor.Descriptor;
@@ -20,16 +17,11 @@ public class BandwidthStatusUpdater implements DescriptorListener,
 
   private long now;
 
-  private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-      "yyyy-MM-dd HH:mm:ss");
-
   public BandwidthStatusUpdater(DescriptorSource descriptorSource,
       DocumentStore documentStore, Time time) {
     this.descriptorSource = descriptorSource;
     this.documentStore = documentStore;
     this.now = time.currentTimeMillis();
-    this.dateTimeFormat.setLenient(false);
-    this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.registerDescriptorListeners();
   }
 
@@ -76,23 +68,22 @@ public class BandwidthStatusUpdater implements DescriptorListener,
     if (parts.length < 6) {
       return;
     }
-    try {
-      long endMillis = this.dateTimeFormat.parse(parts[1] + " "
-          + parts[2]).getTime();
-      long intervalMillis = Long.parseLong(parts[3].substring(1)) * 1000L;
-      String[] values = parts[5].split(",");
-      for (int i = values.length - 1; i >= 0; i--) {
-        long bandwidthValue = Long.parseLong(values[i]);
-        long startMillis = endMillis - intervalMillis;
-        /* TODO Should we first check whether an interval is already
-         * contained in history? */
-        history.put(startMillis, new long[] { startMillis, endMillis,
-            bandwidthValue });
-        endMillis -= intervalMillis;
-      }
-    } catch (ParseException e) {
+    long endMillis = DateTimeHelper.parse(parts[1] + " " + parts[2]);
+    if (endMillis < 0L) {
       System.err.println("Could not parse timestamp in line '" + line
           + "'.  Skipping.");
+      return;
+    }
+    long intervalMillis = Long.parseLong(parts[3].substring(1)) * 1000L;
+    String[] values = parts[5].split(",");
+    for (int i = values.length - 1; i >= 0; i--) {
+      long bandwidthValue = Long.parseLong(values[i]);
+      long startMillis = endMillis - intervalMillis;
+      /* TODO Should we first check whether an interval is already
+       * contained in history? */
+      history.put(startMillis, new long[] { startMillis, endMillis,
+          bandwidthValue });
+      endMillis -= intervalMillis;
     }
   }
 
@@ -101,8 +92,6 @@ public class BandwidthStatusUpdater implements DescriptorListener,
         new TreeMap<Long, long[]>(history);
     history.clear();
     long lastStartMillis = 0L, lastEndMillis = 0L, lastBandwidth = 0L;
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     String lastMonthString = "1970-01";
     for (long[] v : uncompressedHistory.values()) {
       long startMillis = v[0], endMillis = v[1], bandwidth = v[2];
@@ -120,7 +109,8 @@ public class BandwidthStatusUpdater implements DescriptorListener,
       } else {
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
       }
-      String monthString = dateTimeFormat.format(startMillis);
+      String monthString = DateTimeHelper.format(startMillis,
+          DateTimeHelper.ISO_YEARMONTH_FORMAT);
       if (lastEndMillis == startMillis &&
           ((lastEndMillis - 1L) / intervalLengthMillis) ==
           ((endMillis - 1L) / intervalLengthMillis) &&

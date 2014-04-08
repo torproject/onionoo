@@ -2,7 +2,6 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TimeZone;
 
 public class BandwidthDocumentWriter implements FingerprintListener,
     DocumentWriter{
@@ -21,16 +19,11 @@ public class BandwidthDocumentWriter implements FingerprintListener,
 
   private long now;
 
-  private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-      "yyyy-MM-dd HH:mm:ss");
-
   public BandwidthDocumentWriter(DescriptorSource descriptorSource,
       DocumentStore documentStore, Time time) {
     this.descriptorSource = descriptorSource;
     this.documentStore = documentStore;
     this.now = time.currentTimeMillis();
-    this.dateTimeFormat.setLenient(false);
-    this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.registerFingerprintListeners();
   }
 
@@ -161,9 +154,9 @@ public class BandwidthDocumentWriter implements FingerprintListener,
       StringBuilder sb2 = new StringBuilder();
       sb2.append("\"" + graphName + "\":{"
           + "\"first\":\""
-          + this.dateTimeFormat.format(firstDataPointMillis) + "\","
+          + DateTimeHelper.format(firstDataPointMillis) + "\","
           + "\"last\":\""
-          + this.dateTimeFormat.format(lastDataPointMillis) + "\","
+          + DateTimeHelper.format(lastDataPointMillis) + "\","
           +"\"interval\":" + String.valueOf(dataPointInterval / 1000L)
           + ",\"factor\":" + String.format(Locale.US, "%.3f", factor)
           + ",\"count\":" + String.valueOf(count) + ",\"values\":[");

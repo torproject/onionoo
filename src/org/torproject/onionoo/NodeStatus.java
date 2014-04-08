@@ -2,18 +2,15 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.SortedMap;
-import java.util.TimeZone;
-import java.util.TreeSet;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -126,9 +123,6 @@ public class NodeStatus extends Document {
     int orPort = -1, dirPort = -1;
     Boolean recommendedVersion = null;
     try {
-      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-          "yyyy-MM-dd HH:mm:ss");
-      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       String separator = documentString.contains("\t") ? "\t" : " ";
       String[] parts = documentString.trim().split(separator);
       isRelay = parts[0].equals("r");
@@ -161,8 +155,12 @@ public class NodeStatus extends Document {
       } else {
         address = addresses;
       }
-      lastSeenMillis = dateTimeFormat.parse(parts[4] + " " + parts[5]).
-          getTime();
+      lastSeenMillis = DateTimeHelper.parse(parts[4] + " " + parts[5]);
+      if (lastSeenMillis < 0L) {
+        System.err.println("Parse exception while parsing node status "
+            + "line '" + documentString + "'.  Skipping.");
+        return null;
+      }
       orPort = Integer.parseInt(parts[6]);
       dirPort = Integer.parseInt(parts[7]);
       relayFlags = new TreeSet<String>();
@@ -189,13 +187,23 @@ public class NodeStatus extends Document {
       }
       firstSeenMillis = lastSeenMillis;
       if (parts.length > 16) {
-        firstSeenMillis = dateTimeFormat.parse(parts[15] + " "
-            + parts[16]).getTime();
+        firstSeenMillis = DateTimeHelper.parse(parts[15] + " "
+            + parts[16]);
+        if (firstSeenMillis < 0L) {
+          System.err.println("Parse exception while parsing node status "
+              + "line '" + documentString + "'.  Skipping.");
+          return null;
+        }
       }
       lastChangedAddresses = lastSeenMillis;
       if (parts.length > 18 && !parts[17].equals("null")) {
-        lastChangedAddresses = dateTimeFormat.parse(parts[17] + " "
-            + parts[18]).getTime();
+        lastChangedAddresses = DateTimeHelper.parse(parts[17] + " "
+            + parts[18]);
+        if (lastChangedAddresses < 0L) {
+          System.err.println("Parse exception while parsing node status "
+              + "line '" + documentString + "'.  Skipping.");
+          return null;
+        }
       }
       if (parts.length > 19) {
         aSNumber = parts[19];
@@ -211,11 +219,6 @@ public class NodeStatus extends Document {
       System.err.println("Number format exception while parsing node "
           + "status line '" + documentString + "': " + e.getMessage()
           + ".  Skipping.");
-      return null;
-    } catch (ParseException e) {
-      System.err.println("Parse exception while parsing node status "
-          + "line '" + documentString + "': " + e.getMessage() + ".  "
-          + "Skipping.");
       return null;
     } catch (Exception e) {
       /* This catch block is only here to handle yet unknown errors.  It
@@ -260,9 +263,6 @@ public class NodeStatus extends Document {
   }
 
   public String toString() {
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd\tHH:mm:ss");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     StringBuilder sb = new StringBuilder();
     sb.append(this.isRelay ? "r" : "b");
     sb.append("\t" + this.nickname);
@@ -280,7 +280,8 @@ public class NodeStatus extends Document {
             + exitAddress);
       }
     }
-    sb.append("\t" + dateTimeFormat.format(this.lastSeenMillis));
+    sb.append("\t" + DateTimeHelper.format(this.lastSeenMillis,
+        DateTimeHelper.ISO_DATETIME_TAB_FORMAT));
     sb.append("\t" + this.orPort);
     sb.append("\t" + this.dirPort + "\t");
     written = 0;
@@ -299,10 +300,12 @@ public class NodeStatus extends Document {
     } else {
       sb.append("\t-1\t??\tnull\t-1\tnull\tnull");
     }
-    sb.append("\t" + dateTimeFormat.format(this.firstSeenMillis));
+    sb.append("\t" + DateTimeHelper.format(this.firstSeenMillis,
+        DateTimeHelper.ISO_DATETIME_TAB_FORMAT));
     if (this.isRelay) {
-      sb.append("\t" + dateTimeFormat.format(
-          this.getLastChangedOrAddress()));
+      sb.append("\t" + DateTimeHelper.format(
+          this.getLastChangedOrAddress(),
+          DateTimeHelper.ISO_DATETIME_TAB_FORMAT));
       sb.append("\t" + (this.aSNumber != null ? this.aSNumber : "null"));
     } else {
       sb.append("\tnull\tnull\tnull");

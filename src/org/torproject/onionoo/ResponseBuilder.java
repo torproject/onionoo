@@ -3,7 +3,6 @@
 package org.torproject.onionoo;
 
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeMap;
 
 public class ResponseBuilder {
@@ -114,12 +112,9 @@ public class ResponseBuilder {
           currentBridges.add(node);
         }
       }
-      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-          "yyyy-MM-dd HH:mm:ss");
-      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      newRelaysPublishedString = dateTimeFormat.format(
+      newRelaysPublishedString = DateTimeHelper.format(
           relaysLastValidAfterMillis);
-      newBridgesPublishedString = dateTimeFormat.format(
+      newBridgesPublishedString = DateTimeHelper.format(
           bridgesLastPublishedMillis);
       List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
       for (NodeStatus entry : currentRelays) {

@@ -2,11 +2,9 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -177,8 +175,6 @@ public class ClientsStatusUpdater implements DescriptorListener,
     SortedSet<ClientsHistory> compressedHistory =
         new TreeSet<ClientsHistory>();
     ClientsHistory lastResponses = null;
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     String lastMonthString = "1970-01";
     for (ClientsHistory responses : history) {
       long intervalLengthMillis;
@@ -191,7 +187,8 @@ public class ClientsStatusUpdater implements DescriptorListener,
       } else {
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
       }
-      String monthString = dateTimeFormat.format(responses.startMillis);
+      String monthString = DateTimeHelper.format(responses.startMillis,
+          DateTimeHelper.ISO_YEARMONTH_FORMAT);
       if (lastResponses != null &&
           lastResponses.endMillis == responses.startMillis &&
           ((lastResponses.endMillis - 1L) / intervalLengthMillis) ==

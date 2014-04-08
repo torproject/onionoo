@@ -2,11 +2,8 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Scanner;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeSet;
 
 class UptimeHistory
@@ -36,14 +33,9 @@ class UptimeHistory
     } else if (!parts[0].equals("b")) {
       return null;
     }
-    long startMillis = -1L;
-    SimpleDateFormat dateHourFormat = new SimpleDateFormat(
-        "yyyy-MM-dd-HH");
-    dateHourFormat.setLenient(false);
-    dateHourFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    try {
-      startMillis = dateHourFormat.parse(parts[1]).getTime();
-    } catch (ParseException e) {
+    long startMillis = DateTimeHelper.parse(parts[1],
+          DateTimeHelper.YEARHOUR_NOSPACE_FORMAT);
+    if (startMillis < 0L) {
       return null;
     }
     int uptimeHours = -1;
@@ -57,12 +49,9 @@ class UptimeHistory
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    SimpleDateFormat dateHourFormat = new SimpleDateFormat(
-        "yyyy-MM-dd-HH");
-    dateHourFormat.setLenient(false);
-    dateHourFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     sb.append(this.relay ? "r" : "b");
-    sb.append(" " + dateHourFormat.format(this.startMillis));
+    sb.append(" " + DateTimeHelper.format(this.startMillis,
+        DateTimeHelper.YEARHOUR_NOSPACE_FORMAT));
     sb.append(" " + String.format("%d", this.uptimeHours));
     return sb.toString();
   }

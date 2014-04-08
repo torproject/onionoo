@@ -2,7 +2,6 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TimeZone;
 
 public class WeightsDocumentWriter implements FingerprintListener,
     DocumentWriter {
@@ -183,12 +181,9 @@ public class WeightsDocumentWriter implements FingerprintListener,
     double factor = ((double) maxValue) / 999.0;
     int count = lastNonNullIndex - firstNonNullIndex + 1;
     StringBuilder sb = new StringBuilder();
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     sb.append("\"" + graphName + "\":{"
-        + "\"first\":\"" + dateTimeFormat.format(firstDataPointMillis)
-        + "\",\"last\":\"" + dateTimeFormat.format(lastDataPointMillis)
+        + "\"first\":\"" + DateTimeHelper.format(firstDataPointMillis)
+        + "\",\"last\":\"" + DateTimeHelper.format(lastDataPointMillis)
         + "\",\"interval\":" + String.valueOf(dataPointInterval / 1000L)
         + ",\"factor\":" + String.format(Locale.US, "%.9f", factor)
         + ",\"count\":" + String.valueOf(count) + ",\"values\":[");

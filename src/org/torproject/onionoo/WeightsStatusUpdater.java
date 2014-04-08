@@ -2,7 +2,6 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -282,8 +280,6 @@ public class WeightsStatusUpdater implements DescriptorListener,
         new TreeMap<long[], double[]>(history.comparator());
     long lastStartMillis = 0L, lastEndMillis = 0L;
     double[] lastWeights = null;
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     String lastMonthString = "1970-01";
     for (Map.Entry<long[], double[]> e : history.entrySet()) {
       long startMillis = e.getKey()[0], endMillis = e.getKey()[1];
@@ -300,7 +296,8 @@ public class WeightsStatusUpdater implements DescriptorListener,
       } else {
         intervalLengthMillis = 10L * 24L * 60L * 60L * 1000L;
       }
-      String monthString = dateTimeFormat.format(startMillis);
+      String monthString = DateTimeHelper.format(startMillis,
+          DateTimeHelper.ISO_YEARMONTH_FORMAT);
       if (lastEndMillis == startMillis &&
           ((lastEndMillis - 1L) / intervalLengthMillis) ==
           ((endMillis - 1L) / intervalLengthMillis) &&

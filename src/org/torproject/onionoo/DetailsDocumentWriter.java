@@ -1,6 +1,5 @@
 package org.torproject.onionoo;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -101,9 +99,6 @@ public class DetailsDocumentWriter implements DescriptorListener,
   }
 
   private void updateRelayDetailsFiles() {
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     for (String fingerprint : this.newRelays) {
 
       /* Generate network-status-specific part. */
@@ -124,10 +119,10 @@ public class DetailsDocumentWriter implements DescriptorListener,
             (addressesWritten++ > 0 ? "," : "") + "\""
             + orAddress.toLowerCase() + "\"");
       }
-      String lastSeen = dateTimeFormat.format(entry.getLastSeenMillis());
-      String firstSeen = dateTimeFormat.format(
+      String lastSeen = DateTimeHelper.format(entry.getLastSeenMillis());
+      String firstSeen = DateTimeHelper.format(
           entry.getFirstSeenMillis());
-      String lastChangedOrAddress = dateTimeFormat.format(
+      String lastChangedOrAddress = DateTimeHelper.format(
           entry.getLastChangedOrAddress());
       String running = entry.getRunning() ? "true" : "false";
       int dirPort = entry.getDirPort();
@@ -302,9 +297,6 @@ public class DetailsDocumentWriter implements DescriptorListener,
   }
 
   private void updateBridgeDetailsFiles() {
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     for (String fingerprint : this.newBridges) {
 
       /* Generate network-status-specific part. */
@@ -314,8 +306,8 @@ public class DetailsDocumentWriter implements DescriptorListener,
         continue;
       }
       String nickname = entry.getNickname();
-      String lastSeen = dateTimeFormat.format(entry.getLastSeenMillis());
-      String firstSeen = dateTimeFormat.format(
+      String lastSeen = DateTimeHelper.format(entry.getLastSeenMillis());
+      String firstSeen = DateTimeHelper.format(
           entry.getFirstSeenMillis());
       String running = entry.getRunning() ? "true" : "false";
       String address = entry.getAddress();

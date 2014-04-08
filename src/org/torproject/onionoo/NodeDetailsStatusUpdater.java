@@ -2,7 +2,6 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +10,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -289,12 +287,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     String fingerprint = descriptor.getFingerprint();
     DetailsStatus detailsStatus = this.documentStore.retrieve(
         DetailsStatus.class, false, fingerprint);
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setLenient(false);
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     String publishedDateTime =
-        dateTimeFormat.format(descriptor.getPublishedMillis());
+        DateTimeHelper.format(descriptor.getPublishedMillis());
     if (detailsStatus != null) {
       String detailsString = detailsStatus.documentString;
       String descPublishedLine = "\"desc_published\":\""
@@ -313,7 +307,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       s.close();
     }
     StringBuilder sb = new StringBuilder();
-    String lastRestartedString = dateTimeFormat.format(
+    String lastRestartedString = DateTimeHelper.format(
         descriptor.getPublishedMillis() - descriptor.getUptime() * 1000L);
     int bandwidthRate = descriptor.getBandwidthRate();
     int bandwidthBurst = descriptor.getBandwidthBurst();
@@ -377,12 +371,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     String fingerprint = descriptor.getFingerprint();
     DetailsStatus detailsStatus = this.documentStore.retrieve(
         DetailsStatus.class, false, fingerprint);
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setLenient(false);
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     String publishedDateTime =
-        dateTimeFormat.format(descriptor.getPublishedMillis());
+        DateTimeHelper.format(descriptor.getPublishedMillis());
     String poolAssignmentLine = null;
     if (detailsStatus != null) {
       String detailsString = detailsStatus.documentString;
@@ -401,7 +391,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       s.close();
     }
     StringBuilder sb = new StringBuilder();
-    String lastRestartedString = dateTimeFormat.format(
+    String lastRestartedString = DateTimeHelper.format(
         descriptor.getPublishedMillis() - descriptor.getUptime() * 1000L);
     int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
         Math.min(descriptor.getBandwidthBurst(),

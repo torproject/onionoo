@@ -2,13 +2,10 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -45,17 +42,9 @@ class ClientsHistory implements Comparable<ClientsHistory> {
     if (parts.length != 8) {
       return null;
     }
-    long startMillis = -1L, endMillis = -1L;
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setLenient(false);
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    try {
-      startMillis = dateTimeFormat.parse(parts[0] + " " + parts[1]).
-          getTime();
-      endMillis = dateTimeFormat.parse(parts[2] + " " + parts[3]).
-          getTime();
-    } catch (ParseException e) {
+    long startMillis = DateTimeHelper.parse(parts[0] + " " + parts[1]);
+    long endMillis = DateTimeHelper.parse(parts[2] + " " + parts[3]);
+    if (startMillis < 0L || endMillis < 0L) {
       return null;
     }
     if (startMillis >= endMillis) {
@@ -104,12 +93,8 @@ class ClientsHistory implements Comparable<ClientsHistory> {
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setLenient(false);
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    sb.append(dateTimeFormat.format(startMillis));
-    sb.append(" " + dateTimeFormat.format(endMillis));
+    sb.append(DateTimeHelper.format(startMillis));
+    sb.append(" " + DateTimeHelper.format(endMillis));
     sb.append(" " + String.format("%.3f", this.totalResponses));
     this.appendResponses(sb, this.responsesByCountry);
     this.appendResponses(sb, this.responsesByTransport);
