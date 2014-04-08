@@ -51,7 +51,7 @@ public class DummyDocumentStore extends DocumentStore {
       boolean parse) {
     if (documentType.equals(UpdateStatus.class)) {
       UpdateStatus updateStatus = new UpdateStatus();
-      updateStatus.documentString = String.valueOf(this.lastModified);
+      updateStatus.setDocumentString(String.valueOf(this.lastModified));
       return documentType.cast(updateStatus);
     }
     throw new RuntimeException("Not implemented.");

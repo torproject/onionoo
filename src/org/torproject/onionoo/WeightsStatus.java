@@ -9,15 +9,24 @@ import java.util.TreeMap;
 
 class WeightsStatus extends Document {
 
-  SortedMap<long[], double[]> history = new TreeMap<long[], double[]>(
-      new Comparator<long[]>() {
+  private SortedMap<long[], double[]> history =
+      new TreeMap<long[], double[]>(new Comparator<long[]>() {
     public int compare(long[] a, long[] b) {
       return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
     }
   });
+  public void setHistory(SortedMap<long[], double[]> history) {
+    this.history = history;
+  }
+  public SortedMap<long[], double[]> getHistory() {
+    return this.history;
+  }
 
-  Map<String, Integer> advertisedBandwidths =
+  private Map<String, Integer> advertisedBandwidths =
       new HashMap<String, Integer>();
+  public Map<String, Integer> getAdvertisedBandwidths() {
+    return this.advertisedBandwidths;
+  }
 
   public void fromDocumentString(String documentString) {
     Scanner s = new Scanner(documentString);

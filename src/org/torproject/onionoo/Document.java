@@ -4,7 +4,13 @@ package org.torproject.onionoo;
 
 abstract class Document {
 
-  transient String documentString;
+  private transient String documentString;
+  public void setDocumentString(String documentString) {
+    this.documentString = documentString;
+  }
+  public String getDocumentString() {
+    return this.documentString;
+  }
 
   public void fromDocumentString(String documentString) {
     /* Subclasses may override this method to parse documentString. */

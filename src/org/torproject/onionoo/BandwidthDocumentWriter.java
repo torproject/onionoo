@@ -49,7 +49,8 @@ public class BandwidthDocumentWriter implements FingerprintListener,
         continue;
       }
       this.writeBandwidthDataFileToDisk(fingerprint,
-          bandwidthStatus.writeHistory, bandwidthStatus.readHistory);
+          bandwidthStatus.getWriteHistory(),
+          bandwidthStatus.getReadHistory());
     }
     Logger.printStatusTime("Wrote bandwidth document files");
   }
@@ -64,7 +65,7 @@ public class BandwidthDocumentWriter implements FingerprintListener,
         + "\"write_history\":{\n" + writeHistoryString + "},\n"
         + "\"read_history\":{\n" + readHistoryString + "}}\n");
     BandwidthDocument bandwidthDocument = new BandwidthDocument();
-    bandwidthDocument.documentString = sb.toString();
+    bandwidthDocument.setDocumentString(sb.toString());
     this.documentStore.store(bandwidthDocument, fingerprint);
   }
 

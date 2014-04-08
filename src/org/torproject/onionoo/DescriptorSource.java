@@ -77,13 +77,25 @@ class DescriptorQueue {
 
   private List<Descriptor> descriptors;
 
-  int historySizeBefore;
+  private int historySizeBefore;
+  public int getHistorySizeBefore() {
+    return this.historySizeBefore;
+  }
 
-  int historySizeAfter;
+  private int historySizeAfter;
+  public int getHistorySizeAfter() {
+    return this.historySizeAfter;
+  }
 
-  long returnedDescriptors = 0L;
+  private long returnedDescriptors = 0L;
+  public long getReturnedDescriptors() {
+    return this.returnedDescriptors;
+  }
 
-  long returnedBytes = 0L;
+  private long returnedBytes = 0L;
+  public long getReturnedBytes() {
+    return this.returnedBytes;
+  }
 
   public DescriptorQueue(File inDir, File statusDir) {
     this.inDir = inDir;
@@ -424,10 +436,10 @@ public class DescriptorSource {
     int historySizeBefore = 0, historySizeAfter = 0;
     long descriptors = 0L, bytes = 0L;
     for (DescriptorQueue descriptorQueue : descriptorQueues) {
-      historySizeBefore += descriptorQueue.historySizeBefore;
-      historySizeAfter += descriptorQueue.historySizeAfter;
-      descriptors += descriptorQueue.returnedDescriptors;
-      bytes += descriptorQueue.returnedBytes;
+      historySizeBefore += descriptorQueue.getHistorySizeBefore();
+      historySizeAfter += descriptorQueue.getHistorySizeAfter();
+      descriptors += descriptorQueue.getReturnedDescriptors();
+      bytes += descriptorQueue.getReturnedBytes();
     }
     sb.append("    " + Logger.formatDecimalNumber(historySizeBefore)
         + " descriptors excluded from this execution\n");

@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.torproject.onionoo.LookupService.LookupResult;
 
 public class LookupServiceTest {
 
@@ -121,59 +120,59 @@ public class LookupServiceTest {
     this.performLookups();
     if (countryCode == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).countryCode == null);
+          this.lookupResults.get(addressString).getCountryCode() == null);
     } else {
       assertEquals(countryCode,
-          this.lookupResults.get(addressString).countryCode);
+          this.lookupResults.get(addressString).getCountryCode());
     }
     if (countryName == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).countryName == null);
+          this.lookupResults.get(addressString).getCountryName() == null);
     } else {
       assertEquals(countryName,
-          this.lookupResults.get(addressString).countryName);
+          this.lookupResults.get(addressString).getCountryName());
     }
     if (regionName == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).regionName == null);
+          this.lookupResults.get(addressString).getRegionName() == null);
     } else {
       assertEquals(regionName,
-          this.lookupResults.get(addressString).regionName);
+          this.lookupResults.get(addressString).getRegionName());
     }
     if (cityName == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).cityName == null);
+          this.lookupResults.get(addressString).getCityName() == null);
     } else {
       assertEquals(cityName,
-          this.lookupResults.get(addressString).cityName);
+          this.lookupResults.get(addressString).getCityName());
     }
     if (latitude == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).latitude == null);
+          this.lookupResults.get(addressString).getLatitude() == null);
     } else {
       assertEquals(latitude,
-          this.lookupResults.get(addressString).latitude);
+          this.lookupResults.get(addressString).getLatitude());
     }
     if (longitude == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).longitude == null);
+          this.lookupResults.get(addressString).getLongitude() == null);
     } else {
       assertEquals(longitude,
-          this.lookupResults.get(addressString).longitude);
+          this.lookupResults.get(addressString).getLongitude());
     }
     if (aSNumber == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).aSNumber == null);
+          this.lookupResults.get(addressString).getAsNumber() == null);
     } else {
       assertEquals(aSNumber,
-          this.lookupResults.get(addressString).aSNumber);
+          this.lookupResults.get(addressString).getAsNumber());
     }
     if (aSName == null) {
       assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).aSName == null);
+          this.lookupResults.get(addressString).getAsName() == null);
     } else {
       assertEquals(aSName,
-          this.lookupResults.get(addressString).aSName);
+          this.lookupResults.get(addressString).getAsName());
     }
   }
 

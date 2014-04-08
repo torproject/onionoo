@@ -35,10 +35,10 @@ public class DocumentStore {
 
   private Time time;
 
-  boolean listedArchivedNodeStatuses = false,
+  private boolean listedArchivedNodeStatuses = false,
       listedCurrentNodeStatuses = false;
 
-  long listOperations = 0L, listedFiles = 0L, storedFiles = 0L,
+  private long listOperations = 0L, listedFiles = 0L, storedFiles = 0L,
       storedBytes = 0L, retrievedFiles = 0L, retrievedBytes = 0L,
       removedFiles = 0L;
 
@@ -187,8 +187,8 @@ public class DocumentStore {
       return false;
     }
     String documentString;
-    if (document.documentString != null) {
-      documentString = document.documentString;
+    if (document.getDocumentString() != null) {
+      documentString = document.getDocumentString();
     } else if (document instanceof DetailsDocument ||
           document instanceof BandwidthDocument ||
           document instanceof WeightsDocument ||
@@ -329,7 +329,7 @@ public class DocumentStore {
     Gson gson = new Gson();
     try {
       result = gson.fromJson(documentString, documentType);
-      result.documentString = documentString;
+      result.setDocumentString(documentString);
     } catch (JsonParseException e) {
       /* Handle below. */
       e.printStackTrace();
@@ -346,7 +346,7 @@ public class DocumentStore {
     T result = null;
     try {
       result = documentType.newInstance();
-      result.documentString = documentString;
+      result.setDocumentString(documentString);
     } catch (InstantiationException e) {
       /* Handle below. */
       e.printStackTrace();

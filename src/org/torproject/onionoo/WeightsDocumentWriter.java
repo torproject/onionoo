@@ -56,10 +56,10 @@ public class WeightsDocumentWriter implements FingerprintListener,
       if (weightsStatus == null) {
         continue;
       }
-      SortedMap<long[], double[]> history = weightsStatus.history;
+      SortedMap<long[], double[]> history = weightsStatus.getHistory();
       WeightsDocument weightsDocument = new WeightsDocument();
-      weightsDocument.documentString = this.formatHistoryString(
-          fingerprint, history);
+      weightsDocument.setDocumentString(this.formatHistoryString(
+          fingerprint, history));
       this.documentStore.store(weightsDocument, fingerprint);
     }
   }

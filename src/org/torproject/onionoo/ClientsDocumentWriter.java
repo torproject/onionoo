@@ -74,10 +74,10 @@ public class ClientsDocumentWriter implements FingerprintListener,
       if (clientsStatus == null) {
         continue;
       }
-      SortedSet<ClientsHistory> history = clientsStatus.history;
+      SortedSet<ClientsHistory> history = clientsStatus.getHistory();
       ClientsDocument clientsDocument = new ClientsDocument();
-      clientsDocument.documentString = this.formatHistoryString(
-          hashedFingerprint, history);
+      clientsDocument.setDocumentString(this.formatHistoryString(
+          hashedFingerprint, history));
       this.documentStore.store(clientsDocument, hashedFingerprint);
       this.writtenDocuments++;
     }
@@ -140,11 +140,11 @@ public class ClientsDocumentWriter implements FingerprintListener,
         totalResponsesByTransport = new TreeMap<String, Double>(),
         totalResponsesByVersion = new TreeMap<String, Double>();
     for (ClientsHistory hist : history) {
-      if (hist.endMillis < intervalStartMillis) {
+      if (hist.getEndMillis() < intervalStartMillis) {
         continue;
       }
       while ((intervalStartMillis / dataPointInterval) !=
-          (hist.endMillis / dataPointInterval)) {
+          (hist.getEndMillis() / dataPointInterval)) {
         dataPoints.add(millis * 2L < dataPointInterval
             ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)
             / (((double) millis) * 10.0));
@@ -152,10 +152,10 @@ public class ClientsDocumentWriter implements FingerprintListener,
         millis = 0L;
         intervalStartMillis += dataPointInterval;
       }
-      responses += hist.totalResponses;
-      totalResponses += hist.totalResponses;
+      responses += hist.getTotalResponses();
+      totalResponses += hist.getTotalResponses();
       for (Map.Entry<String, Double> e :
-          hist.responsesByCountry.entrySet()) {
+          hist.getResponsesByCountry().entrySet()) {
         if (!totalResponsesByCountry.containsKey(e.getKey())) {
           totalResponsesByCountry.put(e.getKey(), 0.0);
         }
@@ -163,7 +163,7 @@ public class ClientsDocumentWriter implements FingerprintListener,
             + totalResponsesByCountry.get(e.getKey()));
       }
       for (Map.Entry<String, Double> e :
-          hist.responsesByTransport.entrySet()) {
+          hist.getResponsesByTransport().entrySet()) {
         if (!totalResponsesByTransport.containsKey(e.getKey())) {
           totalResponsesByTransport.put(e.getKey(), 0.0);
         }
@@ -171,14 +171,14 @@ public class ClientsDocumentWriter implements FingerprintListener,
             + totalResponsesByTransport.get(e.getKey()));
       }
       for (Map.Entry<String, Double> e :
-          hist.responsesByVersion.entrySet()) {
+          hist.getResponsesByVersion().entrySet()) {
         if (!totalResponsesByVersion.containsKey(e.getKey())) {
           totalResponsesByVersion.put(e.getKey(), 0.0);
         }
         totalResponsesByVersion.put(e.getKey(), e.getValue()
             + totalResponsesByVersion.get(e.getKey()));
       }
-      millis += (hist.endMillis - hist.startMillis);
+      millis += (hist.getEndMillis() - hist.getStartMillis());
     }
     dataPoints.add(millis * 2L < dataPointInterval
         ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)

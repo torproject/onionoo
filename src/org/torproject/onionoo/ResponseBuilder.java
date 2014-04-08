@@ -49,8 +49,9 @@ public class ResponseBuilder {
     long newSummaryFileLastModified = -1L;
     UpdateStatus updateStatus = documentStore.retrieve(UpdateStatus.class,
         false);
-    if (updateStatus != null && updateStatus.documentString != null) {
-      String updateString = updateStatus.documentString;
+    if (updateStatus != null &&
+        updateStatus.getDocumentString() != null) {
+      String updateString = updateStatus.getDocumentString();
       try {
         newSummaryFileLastModified = Long.parseLong(updateString.trim());
       } catch (NumberFormatException e) {
@@ -806,9 +807,9 @@ public class ResponseBuilder {
     DetailsDocument detailsDocument = documentStore.retrieve(
         DetailsDocument.class, false, fingerprint);
     if (detailsDocument != null &&
-        detailsDocument.documentString != null) {
+        detailsDocument.getDocumentString() != null) {
       StringBuilder sb = new StringBuilder();
-      Scanner s = new Scanner(detailsDocument.documentString);
+      Scanner s = new Scanner(detailsDocument.getDocumentString());
       sb.append("{");
       if (s.hasNextLine()) {
         /* Skip version line. */
@@ -876,8 +877,8 @@ public class ResponseBuilder {
     BandwidthDocument bandwidthDocument = documentStore.retrieve(
         BandwidthDocument.class, false, fingerprint);
     if (bandwidthDocument != null &&
-        bandwidthDocument.documentString != null) {
-      String bandwidthLines = bandwidthDocument.documentString;
+        bandwidthDocument.getDocumentString() != null) {
+      String bandwidthLines = bandwidthDocument.getDocumentString();
       bandwidthLines = bandwidthLines.substring(0,
           bandwidthLines.length() - 1);
       return bandwidthLines;
@@ -900,8 +901,8 @@ public class ResponseBuilder {
     WeightsDocument weightsDocument = documentStore.retrieve(
         WeightsDocument.class, false, fingerprint);
     if (weightsDocument != null &&
-        weightsDocument.documentString != null) {
-      String weightsLines = weightsDocument.documentString;
+        weightsDocument.getDocumentString() != null) {
+      String weightsLines = weightsDocument.getDocumentString();
       weightsLines = weightsLines.substring(0, weightsLines.length() - 1);
       return weightsLines;
     } else {
@@ -923,8 +924,8 @@ public class ResponseBuilder {
     ClientsDocument clientsDocument = documentStore.retrieve(
         ClientsDocument.class, false, fingerprint);
     if (clientsDocument != null &&
-        clientsDocument.documentString != null) {
-      String clientsLines = clientsDocument.documentString;
+        clientsDocument.getDocumentString() != null) {
+      String clientsLines = clientsDocument.getDocumentString();
       clientsLines = clientsLines.substring(0, clientsLines.length() - 1);
       return clientsLines;
     } else {
@@ -949,8 +950,8 @@ public class ResponseBuilder {
     UptimeDocument uptimeDocument = documentStore.retrieve(
         UptimeDocument.class, false, fingerprint);
     if (uptimeDocument != null &&
-        uptimeDocument.documentString != null) {
-      String uptimeLines = uptimeDocument.documentString;
+        uptimeDocument.getDocumentString() != null) {
+      String uptimeLines = uptimeDocument.getDocumentString();
       uptimeLines = uptimeLines.substring(0, uptimeLines.length() - 1);
       return uptimeLines;
     } else {

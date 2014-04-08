@@ -155,42 +155,43 @@ public class ClientsStatusUpdater implements DescriptorListener,
 
   private void addToHistory(ClientsStatus clientsStatus,
       SortedSet<ClientsHistory> newIntervals) {
-    SortedSet<ClientsHistory> history = clientsStatus.history;
+    SortedSet<ClientsHistory> history = clientsStatus.getHistory();
     for (ClientsHistory interval : newIntervals) {
       if ((history.headSet(interval).isEmpty() ||
-          history.headSet(interval).last().endMillis <=
-          interval.startMillis) &&
+          history.headSet(interval).last().getEndMillis() <=
+          interval.getStartMillis()) &&
           (history.tailSet(interval).isEmpty() ||
-          history.tailSet(interval).first().startMillis >=
-          interval.endMillis)) {
+          history.tailSet(interval).first().getStartMillis() >=
+          interval.getEndMillis())) {
         history.add(interval);
       }
     }
   }
 
   private void compressHistory(ClientsStatus clientsStatus) {
-    SortedSet<ClientsHistory> history = clientsStatus.history;
+    SortedSet<ClientsHistory> history = clientsStatus.getHistory();
     SortedSet<ClientsHistory> compressedHistory =
         new TreeSet<ClientsHistory>();
     ClientsHistory lastResponses = null;
     String lastMonthString = "1970-01";
     for (ClientsHistory responses : history) {
       long intervalLengthMillis;
-      if (this.now - responses.endMillis <=
+      if (this.now - responses.getEndMillis() <=
           DateTimeHelper.ROUGHLY_THREE_MONTHS) {
         intervalLengthMillis = DateTimeHelper.ONE_DAY;
-      } else if (this.now - responses.endMillis <=
+      } else if (this.now - responses.getEndMillis() <=
           DateTimeHelper.ROUGHLY_ONE_YEAR) {
         intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {
         intervalLengthMillis = DateTimeHelper.TEN_DAYS;
       }
-      String monthString = DateTimeHelper.format(responses.startMillis,
+      String monthString = DateTimeHelper.format(
+          responses.getStartMillis(),
           DateTimeHelper.ISO_YEARMONTH_FORMAT);
       if (lastResponses != null &&
-          lastResponses.endMillis == responses.startMillis &&
-          ((lastResponses.endMillis - 1L) / intervalLengthMillis) ==
-          ((responses.endMillis - 1L) / intervalLengthMillis) &&
+          lastResponses.getEndMillis() == responses.getStartMillis() &&
+          ((lastResponses.getEndMillis() - 1L) / intervalLengthMillis) ==
+          ((responses.getEndMillis() - 1L) / intervalLengthMillis) &&
           lastMonthString.equals(monthString)) {
         lastResponses.addResponses(responses);
       } else {
@@ -204,7 +205,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
     if (lastResponses != null) {
       compressedHistory.add(lastResponses);
     }
-    clientsStatus.history = compressedHistory;
+    clientsStatus.setHistory(compressedHistory);
   }
 
   public String getStatsString() {

@@ -17,12 +17,79 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+class LookupResult {
+
+  private String countryCode;
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
+  }
+  public String getCountryCode() {
+    return this.countryCode;
+  }
+
+  private String countryName;
+  public void setCountryName(String countryName) {
+    this.countryName = countryName;
+  }
+  public String getCountryName() {
+    return this.countryName;
+  }
+
+  private String regionName;
+  public void setRegionName(String regionName) {
+    this.regionName = regionName;
+  }
+  public String getRegionName() {
+    return this.regionName;
+  }
+
+  private String cityName;
+  public void setCityName(String cityName) {
+    this.cityName = cityName;
+  }
+  public String getCityName() {
+    return this.cityName;
+  }
+
+  private String latitude;
+  public void setLatitude(String latitude) {
+    this.latitude = latitude;
+  }
+  public String getLatitude() {
+    return this.latitude;
+  }
+
+  private String longitude;
+  public void setLongitude(String longitude) {
+    this.longitude = longitude;
+  }
+  public String getLongitude() {
+    return this.longitude;
+  }
+
+  private String asNumber;
+  public void setAsNumber(String asNumber) {
+    this.asNumber = asNumber;
+  }
+  public String getAsNumber() {
+    return this.asNumber;
+  }
+
+  private String asName;
+  public void setAsName(String asName) {
+    this.asName = asName;
+  }
+  public String getAsName() {
+    return this.asName;
+  }
+}
+
 public class LookupService {
 
-  File geoipDir;
-  File geoLite2CityBlocksCsvFile;
-  File geoLite2CityLocationsCsvFile;
-  File geoIPASNum2CsvFile;
+  private File geoipDir;
+  private File geoLite2CityBlocksCsvFile;
+  private File geoLite2CityLocationsCsvFile;
+  private File geoIPASNum2CsvFile;
   private boolean hasAllFiles = false;
   public LookupService(File geoipDir) {
     this.geoipDir = geoipDir;
@@ -294,28 +361,28 @@ public class LookupService {
         if (blockLocations.containsKey(blockNumber)) {
           String[] parts = blockLocations.get(blockNumber).
               replaceAll("\"", "").split(",", -1);
-          lookupResult.countryCode = parts[3].toLowerCase();
+          lookupResult.setCountryCode(parts[3].toLowerCase());
           if (parts[4].length() > 0) {
-            lookupResult.countryName = parts[4];
+            lookupResult.setCountryName(parts[4]);
           }
           if (parts[6].length() > 0) {
-            lookupResult.regionName = parts[6];
+            lookupResult.setRegionName(parts[6]);
           }
           if (parts[7].length() > 0) {
-            lookupResult.cityName = parts[7];
+            lookupResult.setCityName(parts[7]);
           }
         }
       }
       if (addressNumberLatLong.containsKey(addressNumber)) {
         String[] latLong = addressNumberLatLong.get(addressNumber);
-        lookupResult.latitude = latLong[0];
-        lookupResult.longitude = latLong[1];
+        lookupResult.setLatitude(latLong[0]);
+        lookupResult.setLongitude(latLong[1]);
       }
       if (addressNumberASN.containsKey(addressNumber)) {
         String[] parts = addressNumberASN.get(addressNumber).split(" ",
             2);
-        lookupResult.aSNumber = parts[0];
-        lookupResult.aSName = parts[1];
+        lookupResult.setAsNumber(parts[0]);
+        lookupResult.setAsName(parts[1]);
       }
       lookupResults.put(addressString, lookupResult);
     }
@@ -327,18 +394,7 @@ public class LookupService {
     return lookupResults;
   }
 
-  class LookupResult {
-    String countryCode;
-    String countryName;
-    String regionName;
-    String cityName;
-    String latitude;
-    String longitude;
-    String aSNumber;
-    String aSName;
-  }
-
-  int addressesLookedUp = 0, addressesResolved = 0;
+  private int addressesLookedUp = 0, addressesResolved = 0;
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();

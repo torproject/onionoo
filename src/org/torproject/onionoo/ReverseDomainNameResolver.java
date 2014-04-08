@@ -55,9 +55,9 @@ public class ReverseDomainNameResolver {
   }
 
   private class RdnsLookupRequest extends Thread {
-    RdnsLookupWorker parent;
-    String address, hostName;
-    long lookupStartedMillis = -1L, lookupCompletedMillis = -1L;
+    private RdnsLookupWorker parent;
+    private String address, hostName;
+    private long lookupStartedMillis = -1L, lookupCompletedMillis = -1L;
     public RdnsLookupRequest(RdnsLookupWorker parent, String address) {
       this.parent = parent;
       this.address = address;

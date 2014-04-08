@@ -9,11 +9,20 @@ import java.util.TreeSet;
 class UptimeHistory
     implements Comparable<UptimeHistory> {
 
-  boolean relay;
+  private boolean relay;
+  public boolean isRelay() {
+    return this.relay;
+  }
 
-  long startMillis;
+  private long startMillis;
+  public long getStartMillis() {
+    return this.startMillis;
+  }
 
-  int uptimeHours;
+  private int uptimeHours;
+  public int getUptimeHours() {
+    return this.uptimeHours;
+  }
 
   UptimeHistory(boolean relay, long startMillis,
       int uptimeHours) {
@@ -86,7 +95,13 @@ class UptimeHistory
 
 class UptimeStatus extends Document {
 
-  SortedSet<UptimeHistory> history = new TreeSet<UptimeHistory>();
+  private SortedSet<UptimeHistory> history = new TreeSet<UptimeHistory>();
+  public void setHistory(SortedSet<UptimeHistory> history) {
+    this.history = history;
+  }
+  public SortedSet<UptimeHistory> getHistory() {
+    return this.history;
+  }
 
   public void fromDocumentString(String documentString) {
     Scanner s = new Scanner(documentString);

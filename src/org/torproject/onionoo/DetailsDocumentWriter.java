@@ -263,13 +263,14 @@ public class DetailsDocumentWriter implements DescriptorListener,
 
       /* Append descriptor-specific part from details status file, and
        * update contact in node status. */
+      /* TODO Updating the contact here seems like a pretty bad hack. */
       DetailsStatus detailsStatus = this.documentStore.retrieve(
           DetailsStatus.class, false, fingerprint);
       if (detailsStatus != null &&
-          detailsStatus.documentString.length() > 0) {
-        sb.append(",\n" + detailsStatus.documentString);
+          detailsStatus.getDocumentString().length() > 0) {
+        sb.append(",\n" + detailsStatus.getDocumentString());
         String contact = null;
-        Scanner s = new Scanner(detailsStatus.documentString);
+        Scanner s = new Scanner(detailsStatus.getDocumentString());
         while (s.hasNextLine()) {
           String line = s.nextLine();
           if (!line.startsWith("\"contact\":")) {
@@ -291,7 +292,7 @@ public class DetailsDocumentWriter implements DescriptorListener,
 
       /* Write details file to disk. */
       DetailsDocument detailsDocument = new DetailsDocument();
-      detailsDocument.documentString = sb.toString();
+      detailsDocument.setDocumentString(sb.toString());
       this.documentStore.store(detailsDocument, fingerprint);
     }
   }
@@ -343,8 +344,8 @@ public class DetailsDocumentWriter implements DescriptorListener,
       DetailsStatus detailsStatus = this.documentStore.retrieve(
           DetailsStatus.class, false, fingerprint);
       if (detailsStatus != null &&
-          detailsStatus.documentString.length() > 0) {
-        sb.append(",\n" + detailsStatus.documentString);
+          detailsStatus.getDocumentString().length() > 0) {
+        sb.append(",\n" + detailsStatus.getDocumentString());
       }
 
       /* Finish details string. */
@@ -352,7 +353,7 @@ public class DetailsDocumentWriter implements DescriptorListener,
 
       /* Write details file to disk. */
       DetailsDocument detailsDocument = new DetailsDocument();
-      detailsDocument.documentString = sb.toString();
+      detailsDocument.setDocumentString(sb.toString());
       this.documentStore.store(detailsDocument, fingerprint);
     }
   }

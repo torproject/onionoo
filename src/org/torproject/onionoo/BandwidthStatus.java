@@ -8,9 +8,23 @@ import java.util.TreeMap;
 
 class BandwidthStatus extends Document {
 
-  SortedMap<Long, long[]> writeHistory = new TreeMap<Long, long[]>();
+  private SortedMap<Long, long[]> writeHistory =
+      new TreeMap<Long, long[]>();
+  public void setWriteHistory(SortedMap<Long, long[]> writeHistory) {
+    this.writeHistory = writeHistory;
+  }
+  public SortedMap<Long, long[]> getWriteHistory() {
+    return this.writeHistory;
+  }
 
-  SortedMap<Long, long[]> readHistory = new TreeMap<Long, long[]>();
+  private SortedMap<Long, long[]> readHistory =
+      new TreeMap<Long, long[]>();
+  public void setReadHistory(SortedMap<Long, long[]> readHistory) {
+    this.readHistory = readHistory;
+  }
+  public SortedMap<Long, long[]> getReadHistory() {
+    return this.readHistory;
+  }
 
   public void fromDocumentString(String documentString) {
     Scanner s = new Scanner(documentString);

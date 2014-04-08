@@ -51,14 +51,14 @@ public class BandwidthStatusUpdater implements DescriptorListener,
     }
     if (descriptor.getWriteHistory() != null) {
       parseHistoryLine(descriptor.getWriteHistory().getLine(),
-          bandwidthStatus.writeHistory);
+          bandwidthStatus.getWriteHistory());
     }
     if (descriptor.getReadHistory() != null) {
       parseHistoryLine(descriptor.getReadHistory().getLine(),
-          bandwidthStatus.readHistory);
+          bandwidthStatus.getReadHistory());
     }
-    this.compressHistory(bandwidthStatus.writeHistory);
-    this.compressHistory(bandwidthStatus.readHistory);
+    this.compressHistory(bandwidthStatus.getWriteHistory());
+    this.compressHistory(bandwidthStatus.getReadHistory());
     this.documentStore.store(bandwidthStatus, fingerprint);
   }
 

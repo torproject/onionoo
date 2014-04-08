@@ -126,21 +126,21 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private void addToHistory(UptimeStatus uptimeStatus, boolean relay,
       SortedSet<Long> newIntervals) {
-    SortedSet<UptimeHistory> history = uptimeStatus.history;
+    SortedSet<UptimeHistory> history = uptimeStatus.getHistory();
     for (long startMillis : newIntervals) {
       UptimeHistory interval = new UptimeHistory(relay, startMillis, 1);
       if (!history.headSet(interval).isEmpty()) {
         UptimeHistory prev = history.headSet(interval).last();
-        if (prev.relay == interval.relay &&
-            prev.startMillis + DateTimeHelper.ONE_HOUR
-            * prev.uptimeHours > interval.startMillis) {
+        if (prev.isRelay() == interval.isRelay() &&
+            prev.getStartMillis() + DateTimeHelper.ONE_HOUR
+            * prev.getUptimeHours() > interval.getStartMillis()) {
           continue;
         }
       }
       if (!history.tailSet(interval).isEmpty()) {
         UptimeHistory next = history.tailSet(interval).first();
-        if (next.relay == interval.relay &&
-            next.startMillis < interval.startMillis
+        if (next.isRelay() == interval.isRelay() &&
+            next.getStartMillis() < interval.getStartMillis()
             + DateTimeHelper.ONE_HOUR) {
           continue;
         }
@@ -150,15 +150,15 @@ public class UptimeStatusUpdater implements DescriptorListener,
   }
 
   private void compressHistory(UptimeStatus uptimeStatus) {
-    SortedSet<UptimeHistory> history = uptimeStatus.history;
+    SortedSet<UptimeHistory> history = uptimeStatus.getHistory();
     SortedSet<UptimeHistory> compressedHistory =
         new TreeSet<UptimeHistory>();
     UptimeHistory lastInterval = null;
     for (UptimeHistory interval : history) {
       if (lastInterval != null &&
-          lastInterval.startMillis + DateTimeHelper.ONE_HOUR
-          * lastInterval.uptimeHours == interval.startMillis &&
-          lastInterval.relay == interval.relay) {
+          lastInterval.getStartMillis() + DateTimeHelper.ONE_HOUR
+          * lastInterval.getUptimeHours() == interval.getStartMillis() &&
+          lastInterval.isRelay() == interval.isRelay()) {
         lastInterval.addUptime(interval);
       } else {
         if (lastInterval != null) {
@@ -170,7 +170,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
     if (lastInterval != null) {
       compressedHistory.add(lastInterval);
     }
-    uptimeStatus.history = compressedHistory;
+    uptimeStatus.setHistory(compressedHistory);
   }
 
   private void writeHistory(String fingerprint,

@@ -11,17 +11,35 @@ import java.util.TreeSet;
 
 class ClientsHistory implements Comparable<ClientsHistory> {
 
-  long startMillis;
+  private long startMillis;
+  public long getStartMillis() {
+    return this.startMillis;
+  }
 
-  long endMillis;
+  private long endMillis;
+  public long getEndMillis() {
+    return this.endMillis;
+  }
 
-  double totalResponses;
+  private double totalResponses;
+  public double getTotalResponses() {
+    return this.totalResponses;
+  }
 
-  SortedMap<String, Double> responsesByCountry;
+  private SortedMap<String, Double> responsesByCountry;
+  public SortedMap<String, Double> getResponsesByCountry() {
+    return this.responsesByCountry;
+  }
 
-  SortedMap<String, Double> responsesByTransport;
+  private SortedMap<String, Double> responsesByTransport;
+  public SortedMap<String, Double> getResponsesByTransport() {
+    return this.responsesByTransport;
+  }
 
-  SortedMap<String, Double> responsesByVersion;
+  private SortedMap<String, Double> responsesByVersion;
+  public SortedMap<String, Double> getResponsesByVersion() {
+    return this.responsesByVersion;
+  }
 
   ClientsHistory(long startMillis, long endMillis,
       double totalResponses,
@@ -158,7 +176,14 @@ class ClientsHistory implements Comparable<ClientsHistory> {
 
 class ClientsStatus extends Document {
 
-  SortedSet<ClientsHistory> history = new TreeSet<ClientsHistory>();
+  private SortedSet<ClientsHistory> history =
+      new TreeSet<ClientsHistory>();
+  public void setHistory(SortedSet<ClientsHistory> history) {
+    this.history = history;
+  }
+  public SortedSet<ClientsHistory> getHistory() {
+    return this.history;
+  }
 
   public void fromDocumentString(String documentString) {
     Scanner s = new Scanner(documentString);

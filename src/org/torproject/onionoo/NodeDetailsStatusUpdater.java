@@ -20,7 +20,6 @@ import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
-import org.torproject.onionoo.LookupService.LookupResult;
 
 public class NodeDetailsStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -245,14 +244,14 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       String addressString = node.getAddress();
       if (lookupResults.containsKey(addressString)) {
         LookupResult lookupResult = lookupResults.get(addressString);
-        node.setCountryCode(lookupResult.countryCode);
-        node.setCountryName(lookupResult.countryName);
-        node.setRegionName(lookupResult.regionName);
-        node.setCityName(lookupResult.cityName);
-        node.setLatitude(lookupResult.latitude);
-        node.setLongitude(lookupResult.longitude);
-        node.setASNumber(lookupResult.aSNumber);
-        node.setASName(lookupResult.aSName);
+        node.setCountryCode(lookupResult.getCountryCode());
+        node.setCountryName(lookupResult.getCountryName());
+        node.setRegionName(lookupResult.getRegionName());
+        node.setCityName(lookupResult.getCityName());
+        node.setLatitude(lookupResult.getLatitude());
+        node.setLongitude(lookupResult.getLongitude());
+        node.setASNumber(lookupResult.getAsNumber());
+        node.setASName(lookupResult.getAsName());
       }
     }
   }
@@ -290,7 +289,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     String publishedDateTime =
         DateTimeHelper.format(descriptor.getPublishedMillis());
     if (detailsStatus != null) {
-      String detailsString = detailsStatus.documentString;
+      String detailsString = detailsStatus.getDocumentString();
       String descPublishedLine = "\"desc_published\":\""
           + publishedDateTime + "\",";
       Scanner s = new Scanner(detailsString);
@@ -363,7 +362,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       sb.append(",\n\"hibernating\":true");
     }
     detailsStatus = new DetailsStatus();
-    detailsStatus.documentString = sb.toString();
+    detailsStatus.setDocumentString(sb.toString());
     this.documentStore.store(detailsStatus, fingerprint);
   }
 
@@ -376,7 +375,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         DateTimeHelper.format(descriptor.getPublishedMillis());
     String poolAssignmentLine = null;
     if (detailsStatus != null) {
-      String detailsString = detailsStatus.documentString;
+      String detailsString = detailsStatus.getDocumentString();
       String descPublishedLine = "\"desc_published\":\""
           + publishedDateTime + "\",";
       Scanner s = new Scanner(detailsString);
@@ -407,7 +406,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       sb.append(",\n" + poolAssignmentLine);
     }
     detailsStatus = new DetailsStatus();
-    detailsStatus.documentString = sb.toString();
+    detailsStatus.setDocumentString(sb.toString());
     this.documentStore.store(detailsStatus, fingerprint);
   }
 
@@ -425,7 +424,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       DetailsStatus detailsStatus = this.documentStore.retrieve(
           DetailsStatus.class, false, fingerprint);
       if (detailsStatus != null) {
-        String detailsString = detailsStatus.documentString;
+        String detailsString = detailsStatus.getDocumentString();
         Scanner s = new Scanner(detailsString);
         int linesWritten = 0;
         boolean endsWithComma = false;
@@ -443,7 +442,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       }
       sb.append("\"pool_assignment\":\"" + details + "\"");
       detailsStatus = new DetailsStatus();
-      detailsStatus.documentString = sb.toString();
+      detailsStatus.setDocumentString(sb.toString());
       this.documentStore.store(detailsStatus, fingerprint);
     }
   }
@@ -535,7 +534,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           DetailsStatus.class, false, fingerprint);
       if (detailsStatus != null) {
         double advertisedBandwidth = -1.0;
-        String detailsString = detailsStatus.documentString;
+        String detailsString = detailsStatus.getDocumentString();
         Scanner s = new Scanner(detailsString);
         while (s.hasNextLine()) {
           String line = s.nextLine();

@@ -179,9 +179,9 @@ public class WeightsStatusUpdater implements DescriptorListener,
                 new HashSet<String>());
           }
           this.descriptorDigestsByFingerprint.get(fingerprint).addAll(
-              weightsStatus.advertisedBandwidths.keySet());
+              weightsStatus.getAdvertisedBandwidths().keySet());
           this.advertisedBandwidths.putAll(
-              weightsStatus.advertisedBandwidths);
+              weightsStatus.getAdvertisedBandwidths());
         }
       }
       if (this.advertisedBandwidths.containsKey(
@@ -245,7 +245,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
     if (weightsStatus == null) {
       weightsStatus = new WeightsStatus();
     }
-    SortedMap<long[], double[]> history = weightsStatus.history;
+    SortedMap<long[], double[]> history = weightsStatus.getHistory();
     long[] interval = new long[] { validAfterMillis, freshUntilMillis };
     if ((history.headMap(interval).isEmpty() ||
         history.headMap(interval).lastKey()[1] <= validAfterMillis) &&
@@ -267,7 +267,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
         if (this.advertisedBandwidths.containsKey(descriptorDigest)) {
           int advertisedBandwidth =
               this.advertisedBandwidths.get(descriptorDigest);
-          weightsStatus.advertisedBandwidths.put(descriptorDigest,
+          weightsStatus.getAdvertisedBandwidths().put(descriptorDigest,
               advertisedBandwidth);
         }
       }
@@ -275,7 +275,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
   }
 
   private void compressHistory(WeightsStatus weightsStatus) {
-    SortedMap<long[], double[]> history = weightsStatus.history;
+    SortedMap<long[], double[]> history = weightsStatus.getHistory();
     SortedMap<long[], double[]> compressedHistory =
         new TreeMap<long[], double[]>(history.comparator());
     long lastStartMillis = 0L, lastEndMillis = 0L;
@@ -332,7 +332,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
       compressedHistory.put(new long[] { lastStartMillis, lastEndMillis },
           lastWeights);
     }
-    weightsStatus.history = compressedHistory;
+    weightsStatus.setHistory(compressedHistory);
   }
 
   private void updateWeightsStatuses() {

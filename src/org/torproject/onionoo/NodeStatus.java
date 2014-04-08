@@ -19,41 +19,285 @@ import org.apache.commons.codec.digest.DigestUtils;
 /* Store search data of a single relay that was running in the past seven
  * days. */
 public class NodeStatus extends Document {
+
   private boolean isRelay;
+  public boolean isRelay() {
+    return this.isRelay;
+  }
+
   private String fingerprint;
+  public String getFingerprint() {
+    return this.fingerprint;
+  }
+
   private String hashedFingerprint;
+  public String getHashedFingerprint() {
+    return this.hashedFingerprint;
+  }
+
   private String nickname;
+  public String getNickname() {
+    return this.nickname;
+  }
+
   private String address;
+  public String getAddress() {
+    return this.address;
+  }
+
   private SortedSet<String> orAddresses;
   private SortedSet<String> orAddressesAndPorts;
+  public SortedSet<String> getOrAddresses() {
+    return new TreeSet<String>(this.orAddresses);
+  }
+  public void addOrAddressAndPort(String orAddressAndPort) {
+    if (!orAddressAndPort.contains(":")) {
+      System.err.println("Illegal OR address:port '" + orAddressAndPort
+          + "'.  Exiting.");
+      System.exit(1);
+    } else if (orAddressAndPort.length() > 0) {
+      String orAddress = orAddressAndPort.substring(0,
+          orAddressAndPort.lastIndexOf(':'));
+      if (this.exitAddresses.contains(orAddress)) {
+        this.exitAddresses.remove(orAddress);
+      }
+      this.orAddresses.add(orAddress);
+      this.orAddressesAndPorts.add(orAddressAndPort);
+    }
+  }
+  public SortedSet<String> getOrAddressesAndPorts() {
+    return new TreeSet<String>(this.orAddressesAndPorts);
+  }
+
   private SortedSet<String> exitAddresses;
+  public void addExitAddress(String exitAddress) {
+    if (exitAddress.length() > 0 && !this.address.equals(exitAddress) &&
+        !this.orAddresses.contains(exitAddress)) {
+      this.exitAddresses.add(exitAddress);
+    }
+  }
+  public SortedSet<String> getExitAddresses() {
+    return new TreeSet<String>(this.exitAddresses);
+  }
+
   private String latitude;
+  public void setLatitude(String latitude) {
+    this.latitude = latitude;
+  }
+  public String getLatitude() {
+    return this.latitude;
+  }
+
   private String longitude;
+  public void setLongitude(String longitude) {
+    this.longitude = longitude;
+  }
+  public String getLongitude() {
+    return this.longitude;
+  }
+
   private String countryCode;
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
+  }
+  public String getCountryCode() {
+    return this.countryCode;
+  }
+
   private String countryName;
+  public void setCountryName(String countryName) {
+    this.countryName = countryName;
+  }
+  public String getCountryName() {
+    return this.countryName;
+  }
+
   private String regionName;
+  public void setRegionName(String regionName) {
+    this.regionName = regionName;
+  }
+  public String getRegionName() {
+    return this.regionName;
+  }
+
   private String cityName;
+  public void setCityName(String cityName) {
+    this.cityName = cityName;
+  }
+  public String getCityName() {
+    return this.cityName;
+  }
+
   private String aSName;
+  public void setASName(String aSName) {
+    this.aSName = aSName;
+  }
+  public String getASName() {
+    return this.aSName;
+  }
+
   private String aSNumber;
+  public void setASNumber(String aSNumber) {
+    this.aSNumber = aSNumber;
+  }
+  public String getASNumber() {
+    return this.aSNumber;
+  }
+
   private long firstSeenMillis;
+  public long getFirstSeenMillis() {
+    return this.firstSeenMillis;
+  }
+
   private long lastSeenMillis;
+  public long getLastSeenMillis() {
+    return this.lastSeenMillis;
+  }
+
   private int orPort;
+  public int getOrPort() {
+    return this.orPort;
+  }
+
   private int dirPort;
+  public int getDirPort() {
+    return this.dirPort;
+  }
+
   private SortedSet<String> relayFlags;
+  public SortedSet<String> getRelayFlags() {
+    return this.relayFlags;
+  }
+
   private long consensusWeight;
+  public long getConsensusWeight() {
+    return this.consensusWeight;
+  }
+
   private boolean running;
+  public void setRunning(boolean running) {
+    this.running = running;
+  }
+  public boolean getRunning() {
+    return this.running;
+  }
+
   private String hostName;
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
+  public String getHostName() {
+    return this.hostName;
+  }
+
   private long lastRdnsLookup = -1L;
+  public void setLastRdnsLookup(long lastRdnsLookup) {
+    this.lastRdnsLookup = lastRdnsLookup;
+  }
+  public long getLastRdnsLookup() {
+    return this.lastRdnsLookup;
+  }
+
   private double advertisedBandwidthFraction = -1.0;
+  public void setAdvertisedBandwidthFraction(
+      double advertisedBandwidthFraction) {
+    this.advertisedBandwidthFraction = advertisedBandwidthFraction;
+  }
+  public double getAdvertisedBandwidthFraction() {
+    return this.advertisedBandwidthFraction;
+  }
+
   private double consensusWeightFraction = -1.0;
+  public void setConsensusWeightFraction(double consensusWeightFraction) {
+    this.consensusWeightFraction = consensusWeightFraction;
+  }
+  public double getConsensusWeightFraction() {
+    return this.consensusWeightFraction;
+  }
+
   private double guardProbability = -1.0;
+  public void setGuardProbability(double guardProbability) {
+    this.guardProbability = guardProbability;
+  }
+  public double getGuardProbability() {
+    return this.guardProbability;
+  }
+
   private double middleProbability = -1.0;
+  public void setMiddleProbability(double middleProbability) {
+    this.middleProbability = middleProbability;
+  }
+  public double getMiddleProbability() {
+    return this.middleProbability;
+  }
+
   private double exitProbability = -1.0;
+  public void setExitProbability(double exitProbability) {
+    this.exitProbability = exitProbability;
+  }
+  public double getExitProbability() {
+    return this.exitProbability;
+  }
+
   private String defaultPolicy;
+  public String getDefaultPolicy() {
+    return this.defaultPolicy;
+  }
+
   private String portList;
+  public String getPortList() {
+    return this.portList;
+  }
+
   private SortedMap<Long, Set<String>> lastAddresses;
+  public SortedMap<Long, Set<String>> getLastAddresses() {
+    return this.lastAddresses == null ? null :
+        new TreeMap<Long, Set<String>>(this.lastAddresses);
+  }
+  public long getLastChangedOrAddress() {
+    long lastChangedAddressesMillis = -1L;
+    if (this.lastAddresses != null) {
+      Set<String> lastAddresses = null;
+      for (Map.Entry<Long, Set<String>> e : this.lastAddresses.entrySet()) {
+        if (lastAddresses != null) {
+          for (String address : e.getValue()) {
+            if (!lastAddresses.contains(address)) {
+              return lastChangedAddressesMillis;
+            }
+          }
+        }
+        lastChangedAddressesMillis = e.getKey();
+        lastAddresses = e.getValue();
+      }
+    }
+    return lastChangedAddressesMillis;
+  }
+
   private String contact;
+  public void setContact(String contact) {
+    if (contact == null) {
+      this.contact = null;
+    } else {
+      StringBuilder sb = new StringBuilder();
+      for (char c : contact.toLowerCase().toCharArray()) {
+        if (c >= 32 && c < 127) {
+          sb.append(c);
+        } else {
+          sb.append(" ");
+        }
+      }
+      this.contact = sb.toString();
+    }
+  }
+  public String getContact() {
+    return this.contact;
+  }
+
   private Boolean recommendedVersion;
+  public Boolean getRecommendedVersion() {
+    return this.recommendedVersion;
+  }
+
   public NodeStatus(boolean isRelay, String nickname, String fingerprint,
       String address, SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
@@ -259,7 +503,7 @@ public class NodeStatus extends Document {
       this.lastAddresses.putAll(newNodeStatus.lastAddresses);
     }
     this.firstSeenMillis = Math.min(newNodeStatus.firstSeenMillis,
-        this.getFirstSeenMillis());
+        this.firstSeenMillis);
   }
 
   public String toString() {
@@ -314,216 +558,6 @@ public class NodeStatus extends Document {
     sb.append("\t" + (this.recommendedVersion == null ? "null" :
         this.recommendedVersion ? "true" : "false"));
     return sb.toString();
-  }
-
-  public boolean isRelay() {
-    return this.isRelay;
-  }
-  public String getFingerprint() {
-    return this.fingerprint;
-  }
-  public String getHashedFingerprint() {
-    return this.hashedFingerprint;
-  }
-  public String getNickname() {
-    return this.nickname;
-  }
-  public String getAddress() {
-    return this.address;
-  }
-  public SortedSet<String> getOrAddresses() {
-    return new TreeSet<String>(this.orAddresses);
-  }
-  public void addOrAddressAndPort(String orAddressAndPort) {
-    if (!orAddressAndPort.contains(":")) {
-      System.err.println("Illegal OR address:port '" + orAddressAndPort
-          + "'.  Exiting.");
-      System.exit(1);
-    } else if (orAddressAndPort.length() > 0) {
-      String orAddress = orAddressAndPort.substring(0,
-          orAddressAndPort.lastIndexOf(':'));
-      if (this.exitAddresses.contains(orAddress)) {
-        this.exitAddresses.remove(orAddress);
-      }
-      this.orAddresses.add(orAddress);
-      this.orAddressesAndPorts.add(orAddressAndPort);
-    }
-  }
-  public SortedSet<String> getOrAddressesAndPorts() {
-    return new TreeSet<String>(this.orAddressesAndPorts);
-  }
-  public void addExitAddress(String exitAddress) {
-    if (exitAddress.length() > 0 && !this.address.equals(exitAddress) &&
-        !this.orAddresses.contains(exitAddress)) {
-      this.exitAddresses.add(exitAddress);
-    }
-  }
-  public SortedSet<String> getExitAddresses() {
-    return new TreeSet<String>(this.exitAddresses);
-  }
-  public void setLatitude(String latitude) {
-    this.latitude = latitude;
-  }
-  public String getLatitude() {
-    return this.latitude;
-  }
-  public void setLongitude(String longitude) {
-    this.longitude = longitude;
-  }
-  public String getLongitude() {
-    return this.longitude;
-  }
-  public void setCountryCode(String countryCode) {
-    this.countryCode = countryCode;
-  }
-  public String getCountryCode() {
-    return this.countryCode;
-  }
-  public void setCountryName(String countryName) {
-    this.countryName = countryName;
-  }
-  public String getCountryName() {
-    return this.countryName;
-  }
-  public void setRegionName(String regionName) {
-    this.regionName = regionName;
-  }
-  public String getRegionName() {
-    return this.regionName;
-  }
-  public void setCityName(String cityName) {
-    this.cityName = cityName;
-  }
-  public String getCityName() {
-    return this.cityName;
-  }
-  public void setASNumber(String aSNumber) {
-    this.aSNumber = aSNumber;
-  }
-  public String getASNumber() {
-    return this.aSNumber;
-  }
-  public void setASName(String aSName) {
-    this.aSName = aSName;
-  }
-  public String getASName() {
-    return this.aSName;
-  }
-  public long getFirstSeenMillis() {
-    return this.firstSeenMillis;
-  }
-  public long getLastSeenMillis() {
-    return this.lastSeenMillis;
-  }
-  public int getOrPort() {
-    return this.orPort;
-  }
-  public int getDirPort() {
-    return this.dirPort;
-  }
-  public SortedSet<String> getRelayFlags() {
-    return this.relayFlags;
-  }
-  public long getConsensusWeight() {
-    return this.consensusWeight;
-  }
-  public void setRunning(boolean running) {
-    this.running = running;
-  }
-  public boolean getRunning() {
-    return this.running;
-  }
-  public void setHostName(String hostName) {
-    this.hostName = hostName;
-  }
-  public String getHostName() {
-    return this.hostName;
-  }
-  public void setLastRdnsLookup(long lastRdnsLookup) {
-    this.lastRdnsLookup = lastRdnsLookup;
-  }
-  public long getLastRdnsLookup() {
-    return this.lastRdnsLookup;
-  }
-  public void setAdvertisedBandwidthFraction(
-      double advertisedBandwidthFraction) {
-    this.advertisedBandwidthFraction = advertisedBandwidthFraction;
-  }
-  public double getAdvertisedBandwidthFraction() {
-    return this.advertisedBandwidthFraction;
-  }
-  public void setConsensusWeightFraction(double consensusWeightFraction) {
-    this.consensusWeightFraction = consensusWeightFraction;
-  }
-  public double getConsensusWeightFraction() {
-    return this.consensusWeightFraction;
-  }
-  public void setGuardProbability(double guardProbability) {
-    this.guardProbability = guardProbability;
-  }
-  public double getGuardProbability() {
-    return this.guardProbability;
-  }
-  public void setMiddleProbability(double middleProbability) {
-    this.middleProbability = middleProbability;
-  }
-  public double getMiddleProbability() {
-    return this.middleProbability;
-  }
-  public void setExitProbability(double exitProbability) {
-    this.exitProbability = exitProbability;
-  }
-  public double getExitProbability() {
-    return this.exitProbability;
-  }
-  public String getDefaultPolicy() {
-    return this.defaultPolicy;
-  }
-  public String getPortList() {
-    return this.portList;
-  }
-  public SortedMap<Long, Set<String>> getLastAddresses() {
-    return this.lastAddresses == null ? null :
-        new TreeMap<Long, Set<String>>(this.lastAddresses);
-  }
-  public long getLastChangedOrAddress() {
-    long lastChangedAddressesMillis = -1L;
-    if (this.lastAddresses != null) {
-      Set<String> lastAddresses = null;
-      for (Map.Entry<Long, Set<String>> e : this.lastAddresses.entrySet()) {
-        if (lastAddresses != null) {
-          for (String address : e.getValue()) {
-            if (!lastAddresses.contains(address)) {
-              return lastChangedAddressesMillis;
-            }
-          }
-        }
-        lastChangedAddressesMillis = e.getKey();
-        lastAddresses = e.getValue();
-      }
-    }
-    return lastChangedAddressesMillis;
-  }
-  public void setContact(String contact) {
-    if (contact == null) {
-      this.contact = null;
-    } else {
-      StringBuilder sb = new StringBuilder();
-      for (char c : contact.toLowerCase().toCharArray()) {
-        if (c >= 32 && c < 127) {
-          sb.append(c);
-        } else {
-          sb.append(" ");
-        }
-      }
-      this.contact = sb.toString();
-    }
-  }
-  public String getContact() {
-    return this.contact;
-  }
-  public Boolean getRecommendedVersion() {
-    return this.recommendedVersion;
   }
 }
 
