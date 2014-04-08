@@ -196,7 +196,8 @@ public class DocumentStore {
           document instanceof UptimeDocument) {
       Gson gson = new Gson();
       documentString = gson.toJson(this);
-    } else if (document instanceof ClientsStatus ||
+    } else if (document instanceof WeightsStatus ||
+        document instanceof ClientsStatus ||
         document instanceof UptimeStatus) {
       documentString = document.toDocumentString();
     } else {
@@ -289,7 +290,8 @@ public class DocumentStore {
         documentType.equals(UptimeDocument.class)) {
       return this.retrieveParsedDocumentFile(documentType,
           documentString);
-    } else if (documentType.equals(ClientsStatus.class) ||
+    } else if (documentType.equals(WeightsStatus.class) ||
+        documentType.equals(ClientsStatus.class) ||
         documentType.equals(UptimeStatus.class)) {
       return this.retrieveParsedStatusFile(documentType, documentString);
     } else {

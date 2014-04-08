@@ -2,17 +2,14 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -230,7 +227,19 @@ public class WeightsDataWriter implements DescriptorListener,
       double advertisedBandwidth = 0.0;
       if (!this.advertisedBandwidths.containsKey(
           serverDescriptorDigest)) {
-        this.readHistoryFromDisk(fingerprint);
+        WeightsStatus weightsStatus = this.documentStore.retrieve(
+            WeightsStatus.class, true, fingerprint);
+        if (weightsStatus != null) {
+          if (!this.descriptorDigestsByFingerprint.containsKey(
+              fingerprint)) {
+            this.descriptorDigestsByFingerprint.put(fingerprint,
+                new HashSet<String>());
+          }
+          this.descriptorDigestsByFingerprint.get(fingerprint).addAll(
+              weightsStatus.advertisedBandwidths.keySet());
+          this.advertisedBandwidths.putAll(
+              weightsStatus.advertisedBandwidths);
+        }
       }
       if (this.advertisedBandwidths.containsKey(
           serverDescriptorDigest)) {
@@ -288,93 +297,42 @@ public class WeightsDataWriter implements DescriptorListener,
 
   private void addToHistory(String fingerprint, long validAfterMillis,
       long freshUntilMillis, double[] weights) {
-    SortedMap<long[], double[]> history =
-        this.readHistoryFromDisk(fingerprint);
+    WeightsStatus weightsStatus = this.documentStore.retrieve(
+        WeightsStatus.class, true, fingerprint);
+    if (weightsStatus == null) {
+      weightsStatus = new WeightsStatus();
+    }
+    SortedMap<long[], double[]> history = weightsStatus.history;
     long[] interval = new long[] { validAfterMillis, freshUntilMillis };
     if ((history.headMap(interval).isEmpty() ||
         history.headMap(interval).lastKey()[1] <= validAfterMillis) &&
         (history.tailMap(interval).isEmpty() ||
         history.tailMap(interval).firstKey()[0] >= freshUntilMillis)) {
       history.put(interval, weights);
-      history = this.compressHistory(history);
-      this.writeHistoryToDisk(fingerprint, history);
+      this.compressHistory(weightsStatus);
+      this.addAdvertisedBandwidths(weightsStatus, fingerprint);
+      this.documentStore.store(weightsStatus, fingerprint);
       this.updateWeightsStatuses.remove(fingerprint);
     }
   }
 
-  private SortedMap<long[], double[]> readHistoryFromDisk(
+  private void addAdvertisedBandwidths(WeightsStatus weightsStatus,
       String fingerprint) {
-    SortedMap<long[], double[]> history =
-        new TreeMap<long[], double[]>(new Comparator<long[]>() {
-      public int compare(long[] a, long[] b) {
-        return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
-      }
-    });
-    WeightsStatus weightsStatus = this.documentStore.retrieve(
-        WeightsStatus.class, false, fingerprint);
-    if (weightsStatus != null) {
-      String historyString = weightsStatus.documentString;
-      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-          "yyyy-MM-dd HH:mm:ss");
-      dateTimeFormat.setLenient(false);
-      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      try {
-        Scanner s = new Scanner(historyString);
-        while (s.hasNextLine()) {
-          String line = s.nextLine();
-          String[] parts = line.split(" ");
-          if (parts.length == 2) {
-            String descriptorDigest = parts[0];
-            int advertisedBandwidth = Integer.parseInt(parts[1]);
-            if (!this.descriptorDigestsByFingerprint.containsKey(
-                fingerprint)) {
-              this.descriptorDigestsByFingerprint.put(fingerprint,
-                  new HashSet<String>());
-            }
-            this.descriptorDigestsByFingerprint.get(fingerprint).add(
-                descriptorDigest);
-            this.advertisedBandwidths.put(descriptorDigest,
-                advertisedBandwidth);
-            continue;
-          }
-          if (parts.length != 9) {
-            System.err.println("Illegal line '" + line + "' in weights "
-                + "history for fingerprint '" + fingerprint + "'.  "
-                + "Skipping this line.");
-            continue;
-          }
-          if (parts[4].equals("NaN")) {
-            /* Remove corrupt lines written on 2013-07-07 and the days
-             * after. */
-            continue;
-          }
-          long validAfterMillis = dateTimeFormat.parse(parts[0]
-              + " " + parts[1]).getTime();
-          long freshUntilMillis = dateTimeFormat.parse(parts[2]
-              + " " + parts[3]).getTime();
-          long[] interval = new long[] { validAfterMillis,
-              freshUntilMillis };
-          double[] weights = new double[] {
-              Double.parseDouble(parts[4]),
-              Double.parseDouble(parts[5]),
-              Double.parseDouble(parts[6]),
-              Double.parseDouble(parts[7]),
-              Double.parseDouble(parts[8]) };
-          history.put(interval, weights);
+    if (this.descriptorDigestsByFingerprint.containsKey(fingerprint)) {
+      for (String descriptorDigest :
+          this.descriptorDigestsByFingerprint.get(fingerprint)) {
+        if (this.advertisedBandwidths.containsKey(descriptorDigest)) {
+          int advertisedBandwidth =
+              this.advertisedBandwidths.get(descriptorDigest);
+          weightsStatus.advertisedBandwidths.put(descriptorDigest,
+              advertisedBandwidth);
         }
-        s.close();
-      } catch (ParseException e) {
-        System.err.println("Could not parse timestamp while reading "
-            + "weights history for fingerprint '" + fingerprint + "'.  "
-            + "Skipping.");
-        e.printStackTrace();
       }
     }
-    return history;
   }
 
-  private SortedMap<long[], double[]> compressHistory(
-      SortedMap<long[], double[]> history) {
+  private void compressHistory(WeightsStatus weightsStatus) {
+    SortedMap<long[], double[]> history = weightsStatus.history;
     SortedMap<long[], double[]> compressedHistory =
         new TreeMap<long[], double[]>(history.comparator());
     long lastStartMillis = 0L, lastEndMillis = 0L;
@@ -429,39 +387,7 @@ public class WeightsDataWriter implements DescriptorListener,
       compressedHistory.put(new long[] { lastStartMillis, lastEndMillis },
           lastWeights);
     }
-    return compressedHistory;
-  }
-
-  private void writeHistoryToDisk(String fingerprint,
-      SortedMap<long[], double[]> history) {
-    StringBuilder sb = new StringBuilder();
-    if (this.descriptorDigestsByFingerprint.containsKey(fingerprint)) {
-      for (String descriptorDigest :
-          this.descriptorDigestsByFingerprint.get(fingerprint)) {
-        if (this.advertisedBandwidths.containsKey(descriptorDigest)) {
-          int advertisedBandwidth =
-              this.advertisedBandwidths.get(descriptorDigest);
-          sb.append(descriptorDigest + " "
-              + String.valueOf(advertisedBandwidth) + "\n");
-        }
-      }
-    }
-    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    for (Map.Entry<long[], double[]> e : history.entrySet()) {
-      long[] fresh = e.getKey();
-      double[] weights = e.getValue();
-      sb.append(dateTimeFormat.format(fresh[0]) + " "
-          + dateTimeFormat.format(fresh[1]));
-      for (double weight : weights) {
-        sb.append(String.format(" %.12f", weight));
-      }
-      sb.append("\n");
-    }
-    WeightsStatus weightsStatus = new WeightsStatus();
-    weightsStatus.documentString = sb.toString();
-    this.documentStore.store(weightsStatus, fingerprint);
+    weightsStatus.history = compressedHistory;
   }
 
   public void processFingerprints(SortedSet<String> fingerprints,
@@ -473,13 +399,18 @@ public class WeightsDataWriter implements DescriptorListener,
 
   private void writeWeightsDataFiles() {
     for (String fingerprint : this.updateWeightsDocuments) {
-      SortedMap<long[], double[]> history =
-          this.readHistoryFromDisk(fingerprint);
+      WeightsStatus weightsStatus = this.documentStore.retrieve(
+          WeightsStatus.class, true, fingerprint);
+      if (weightsStatus == null) {
+        continue;
+      }
+      SortedMap<long[], double[]> history = weightsStatus.history;
       WeightsDocument weightsDocument = new WeightsDocument();
       weightsDocument.documentString = this.formatHistoryString(
           fingerprint, history);
       this.documentStore.store(weightsDocument, fingerprint);
     }
+    Logger.printStatusTime("Wrote weights document files");
   }
 
   private String[] graphTypes = new String[] {
@@ -633,9 +564,13 @@ public class WeightsDataWriter implements DescriptorListener,
 
   private void updateWeightsStatuses() {
     for (String fingerprint : this.updateWeightsStatuses) {
-      SortedMap<long[], double[]> history =
-          this.readHistoryFromDisk(fingerprint);
-      this.writeHistoryToDisk(fingerprint, history);
+      WeightsStatus weightsStatus = this.documentStore.retrieve(
+          WeightsStatus.class, true, fingerprint);
+      if (weightsStatus == null) {
+        weightsStatus = new WeightsStatus();
+      }
+      this.addAdvertisedBandwidths(weightsStatus, fingerprint);
+      this.documentStore.store(weightsStatus, fingerprint);
     }
   }
 
