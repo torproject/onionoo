@@ -2,13 +2,11 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -127,112 +125,26 @@ public class UptimeDataWriter implements DescriptorListener,
     Logger.printStatusTime("Updated uptime status files");
   }
 
-  private static class UptimeHistory
-      implements Comparable<UptimeHistory> {
-    private boolean relay;
-    private long startMillis;
-    private int uptimeHours;
-    private UptimeHistory(boolean relay, long startMillis,
-        int uptimeHours) {
-      this.relay = relay;
-      this.startMillis = startMillis;
-      this.uptimeHours = uptimeHours;
-    }
-    public static UptimeHistory fromString(String uptimeHistoryString) {
-      String[] parts = uptimeHistoryString.split(" ", 3);
-      if (parts.length != 3) {
-        return null;
-      }
-      boolean relay = false;
-      if (parts[0].equals("r")) {
-        relay = true;
-      } else if (!parts[0].equals("b")) {
-        return null;
-      }
-      long startMillis = -1L;
-      SimpleDateFormat dateHourFormat = new SimpleDateFormat(
-          "yyyy-MM-dd-HH");
-      dateHourFormat.setLenient(false);
-      dateHourFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      try {
-        startMillis = dateHourFormat.parse(parts[1]).getTime();
-      } catch (ParseException e) {
-        return null;
-      }
-      int uptimeHours = -1;
-      try {
-        uptimeHours = Integer.parseInt(parts[2]);
-      } catch (NumberFormatException e) {
-        return null;
-      }
-      return new UptimeHistory(relay, startMillis, uptimeHours);
-    }
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      SimpleDateFormat dateHourFormat = new SimpleDateFormat(
-          "yyyy-MM-dd-HH");
-      dateHourFormat.setLenient(false);
-      dateHourFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      sb.append(this.relay ? "r" : "b");
-      sb.append(" " + dateHourFormat.format(this.startMillis));
-      sb.append(" " + String.format("%d", this.uptimeHours));
-      return sb.toString();
-    }
-    public void addUptime(UptimeHistory other) {
-      this.uptimeHours += other.uptimeHours;
-      if (this.startMillis > other.startMillis) {
-        this.startMillis = other.startMillis;
-      }
-    }
-    public int compareTo(UptimeHistory other) {
-      if (this.relay && !other.relay) {
-        return -1;
-      } else if (!this.relay && other.relay) {
-        return 1;
-      }
-      return this.startMillis < other.startMillis ? -1 :
-          this.startMillis > other.startMillis ? 1 : 0;
-    }
-    public boolean equals(Object other) {
-      return other instanceof UptimeHistory &&
-          this.relay == ((UptimeHistory) other).relay &&
-          this.startMillis == ((UptimeHistory) other).startMillis;
-    }
-  }
-
   private void updateStatus(boolean relay, String fingerprint,
       SortedSet<Long> newUptimeHours) {
-    SortedSet<UptimeHistory> history = this.readHistory(fingerprint);
-    this.addToHistory(history, relay, newUptimeHours);
-    history = this.compressHistory(history);
-    this.writeHistory(fingerprint, history);
-  }
-
-  private SortedSet<UptimeHistory> readHistory(String fingerprint) {
-    SortedSet<UptimeHistory> history = new TreeSet<UptimeHistory>();
-    UptimeStatus uptimeStatus = fingerprint == null ?
-        documentStore.retrieve(UptimeStatus.class, false) :
-        documentStore.retrieve(UptimeStatus.class, false, fingerprint);
-    if (uptimeStatus != null) {
-      Scanner s = new Scanner(uptimeStatus.documentString);
-      while (s.hasNextLine()) {
-        String line = s.nextLine();
-        UptimeHistory parsedLine = UptimeHistory.fromString(line);
-        if (parsedLine != null) {
-          history.add(parsedLine);
-        } else {
-          System.err.println("Could not parse uptime history line '"
-              + line + "' for fingerprint '" + fingerprint
-              + "'.  Skipping.");
-        }
-      }
-      s.close();
+    UptimeStatus uptimeStatus = this.readHistory(fingerprint);
+    if (uptimeStatus == null) {
+      uptimeStatus = new UptimeStatus();
     }
-    return history;
+    this.addToHistory(uptimeStatus, relay, newUptimeHours);
+    this.compressHistory(uptimeStatus);
+    this.writeHistory(fingerprint, uptimeStatus);
   }
 
-  private void addToHistory(SortedSet<UptimeHistory> history,
-      boolean relay, SortedSet<Long> newIntervals) {
+  private UptimeStatus readHistory(String fingerprint) {
+    return fingerprint == null ?
+        documentStore.retrieve(UptimeStatus.class, true) :
+        documentStore.retrieve(UptimeStatus.class, true, fingerprint);
+  }
+
+  private void addToHistory(UptimeStatus uptimeStatus, boolean relay,
+      SortedSet<Long> newIntervals) {
+    SortedSet<UptimeHistory> history = uptimeStatus.history;
     for (long startMillis : newIntervals) {
       UptimeHistory interval = new UptimeHistory(relay, startMillis, 1);
       if (!history.headSet(interval).isEmpty()) {
@@ -254,8 +166,8 @@ public class UptimeDataWriter implements DescriptorListener,
     }
   }
 
-  private SortedSet<UptimeHistory> compressHistory(
-      SortedSet<UptimeHistory> history) {
+  private void compressHistory(UptimeStatus uptimeStatus) {
+    SortedSet<UptimeHistory> history = uptimeStatus.history;
     SortedSet<UptimeHistory> compressedHistory =
         new TreeSet<UptimeHistory>();
     UptimeHistory lastInterval = null;
@@ -275,17 +187,11 @@ public class UptimeDataWriter implements DescriptorListener,
     if (lastInterval != null) {
       compressedHistory.add(lastInterval);
     }
-    return compressedHistory;
+    uptimeStatus.history = compressedHistory;
   }
 
   private void writeHistory(String fingerprint,
-      SortedSet<UptimeHistory> history) {
-    StringBuilder sb = new StringBuilder();
-    for (UptimeHistory interval : history) {
-      sb.append(interval.toString() + "\n");
-    }
-    UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.documentString = sb.toString();
+      UptimeStatus uptimeStatus) {
     if (fingerprint == null) {
       this.documentStore.store(uptimeStatus);
     } else {
@@ -309,7 +215,12 @@ public class UptimeDataWriter implements DescriptorListener,
     SortedSet<UptimeHistory>
         knownRelayStatuses = new TreeSet<UptimeHistory>(),
         knownBridgeStatuses = new TreeSet<UptimeHistory>();
-    SortedSet<UptimeHistory> knownStatuses = this.readHistory(null);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true);
+    if (uptimeStatus == null) {
+      return;
+    }
+    SortedSet<UptimeHistory> knownStatuses = uptimeStatus.history;
     for (UptimeHistory status : knownStatuses) {
       if (status.relay) {
         knownRelayStatuses.add(status);
@@ -328,11 +239,15 @@ public class UptimeDataWriter implements DescriptorListener,
 
   private void updateDocument(boolean relay, String fingerprint,
       SortedSet<UptimeHistory> knownStatuses) {
-    SortedSet<UptimeHistory> history = this.readHistory(fingerprint);
-    UptimeDocument uptimeDocument = new UptimeDocument();
-    uptimeDocument.documentString = this.formatHistoryString(relay,
-        fingerprint, history, knownStatuses);
-    this.documentStore.store(uptimeDocument, fingerprint);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, fingerprint);
+    if (uptimeStatus != null) {
+      SortedSet<UptimeHistory> history = uptimeStatus.history;
+      UptimeDocument uptimeDocument = new UptimeDocument();
+      uptimeDocument.documentString = this.formatHistoryString(relay,
+          fingerprint, history, knownStatuses);
+      this.documentStore.store(uptimeDocument, fingerprint);
+    }
   }
 
   private String[] graphNames = new String[] {

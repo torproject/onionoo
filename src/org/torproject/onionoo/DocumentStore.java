@@ -196,6 +196,8 @@ public class DocumentStore {
           document instanceof UptimeDocument) {
       Gson gson = new Gson();
       documentString = gson.toJson(this);
+    } else if (document instanceof UptimeStatus) {
+      documentString = document.toDocumentString();
     } else {
       System.err.println("Serializing is not supported for type "
           + document.getClass().getName() + ".");
@@ -286,9 +288,31 @@ public class DocumentStore {
         documentType.equals(UptimeDocument.class)) {
       return this.retrieveParsedDocumentFile(documentType,
           documentString);
+    } else if (documentType.equals(UptimeStatus.class)) {
+      return this.retrieveParsedStatusFile(documentType, documentString);
     } else {
       System.err.println("Parsing is not supported for type "
           + documentType.getName() + ".");
+    }
+    return result;
+  }
+
+  private <T extends Document> T retrieveParsedStatusFile(
+      Class<T> documentType, String documentString) {
+    T result = null;
+    try {
+      result = documentType.newInstance();
+      result.fromDocumentString(documentString);
+    } catch (InstantiationException e) {
+      /* Handle below. */
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      /* Handle below. */
+      e.printStackTrace();
+    }
+    if (result == null) {
+      System.err.println("Could not initialize parsed status file of "
+          + "type " + documentType.getName() + ".");
     }
     return result;
   }
