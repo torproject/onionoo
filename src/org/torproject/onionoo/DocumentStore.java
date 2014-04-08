@@ -196,7 +196,8 @@ public class DocumentStore {
           document instanceof UptimeDocument) {
       Gson gson = new Gson();
       documentString = gson.toJson(this);
-    } else if (document instanceof UptimeStatus) {
+    } else if (document instanceof ClientsStatus ||
+        document instanceof UptimeStatus) {
       documentString = document.toDocumentString();
     } else {
       System.err.println("Serializing is not supported for type "
@@ -288,7 +289,8 @@ public class DocumentStore {
         documentType.equals(UptimeDocument.class)) {
       return this.retrieveParsedDocumentFile(documentType,
           documentString);
-    } else if (documentType.equals(UptimeStatus.class)) {
+    } else if (documentType.equals(ClientsStatus.class) ||
+        documentType.equals(UptimeStatus.class)) {
       return this.retrieveParsedStatusFile(documentType, documentString);
     } else {
       System.err.println("Parsing is not supported for type "

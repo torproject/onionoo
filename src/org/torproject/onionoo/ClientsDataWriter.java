@@ -2,13 +2,11 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -54,147 +52,6 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
 public class ClientsDataWriter implements DescriptorListener,
     StatusUpdater, FingerprintListener, DocumentWriter {
 
-  private static class ResponseHistory
-      implements Comparable<ResponseHistory> {
-    private long startMillis;
-    private long endMillis;
-    private double totalResponses;
-    private SortedMap<String, Double> responsesByCountry;
-    private SortedMap<String, Double> responsesByTransport;
-    private SortedMap<String, Double> responsesByVersion;
-    private ResponseHistory(long startMillis, long endMillis,
-        double totalResponses,
-        SortedMap<String, Double> responsesByCountry,
-        SortedMap<String, Double> responsesByTransport,
-        SortedMap<String, Double> responsesByVersion) {
-      this.startMillis = startMillis;
-      this.endMillis = endMillis;
-      this.totalResponses = totalResponses;
-      this.responsesByCountry = responsesByCountry;
-      this.responsesByTransport = responsesByTransport;
-      this.responsesByVersion = responsesByVersion;
-    }
-    public static ResponseHistory fromString(
-        String responseHistoryString) {
-      String[] parts = responseHistoryString.split(" ", 8);
-      if (parts.length != 8) {
-        return null;
-      }
-      long startMillis = -1L, endMillis = -1L;
-      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-          "yyyy-MM-dd HH:mm:ss");
-      dateTimeFormat.setLenient(false);
-      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      try {
-        startMillis = dateTimeFormat.parse(parts[0] + " " + parts[1]).
-            getTime();
-        endMillis = dateTimeFormat.parse(parts[2] + " " + parts[3]).
-            getTime();
-      } catch (ParseException e) {
-        return null;
-      }
-      if (startMillis >= endMillis) {
-        return null;
-      }
-      double totalResponses = 0.0;
-      try {
-        totalResponses = Double.parseDouble(parts[4]);
-      } catch (NumberFormatException e) {
-        return null;
-      }
-      SortedMap<String, Double> responsesByCountry =
-          parseResponses(parts[5]);
-      SortedMap<String, Double> responsesByTransport =
-          parseResponses(parts[6]);
-      SortedMap<String, Double> responsesByVersion =
-          parseResponses(parts[7]);
-      if (responsesByCountry == null || responsesByTransport == null ||
-          responsesByVersion == null) {
-        return null;
-      }
-      return new ResponseHistory(startMillis, endMillis, totalResponses,
-          responsesByCountry, responsesByTransport, responsesByVersion);
-    }
-    private static SortedMap<String, Double> parseResponses(
-        String responsesString) {
-      SortedMap<String, Double> responses = new TreeMap<String, Double>();
-      if (responsesString.length() > 0) {
-        for (String pair : responsesString.split(",")) {
-          String[] keyValue = pair.split("=");
-          if (keyValue.length != 2) {
-            return null;
-          }
-          double value = 0.0;
-          try {
-            value = Double.parseDouble(keyValue[1]);
-          } catch (NumberFormatException e) {
-            return null;
-          }
-          responses.put(keyValue[0], value);
-        }
-      }
-      return responses;
-    }
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
-          "yyyy-MM-dd HH:mm:ss");
-      dateTimeFormat.setLenient(false);
-      dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      sb.append(dateTimeFormat.format(startMillis));
-      sb.append(" " + dateTimeFormat.format(endMillis));
-      sb.append(" " + String.format("%.3f", this.totalResponses));
-      this.appendResponses(sb, this.responsesByCountry);
-      this.appendResponses(sb, this.responsesByTransport);
-      this.appendResponses(sb, this.responsesByVersion);
-      return sb.toString();
-    }
-    private void appendResponses(StringBuilder sb,
-        SortedMap<String, Double> responses) {
-      sb.append(" ");
-      int written = 0;
-      for (Map.Entry<String, Double> e : responses.entrySet()) {
-        sb.append((written++ > 0 ? "," : "") + e.getKey() + "="
-            + String.format("%.3f", e.getValue()));
-      }
-    }
-    public void addResponses(ResponseHistory other) {
-      this.totalResponses += other.totalResponses;
-      this.addResponsesByCategory(this.responsesByCountry,
-          other.responsesByCountry);
-      this.addResponsesByCategory(this.responsesByTransport,
-          other.responsesByTransport);
-      this.addResponsesByCategory(this.responsesByVersion,
-          other.responsesByVersion);
-      if (this.startMillis > other.startMillis) {
-        this.startMillis = other.startMillis;
-      }
-      if (this.endMillis < other.endMillis) {
-        this.endMillis = other.endMillis;
-      }
-    }
-    private void addResponsesByCategory(
-        SortedMap<String, Double> thisResponses,
-        SortedMap<String, Double> otherResponses) {
-      for (Map.Entry<String, Double> e : otherResponses.entrySet()) {
-        if (thisResponses.containsKey(e.getKey())) {
-          thisResponses.put(e.getKey(), thisResponses.get(e.getKey())
-              + e.getValue());
-        } else {
-          thisResponses.put(e.getKey(), e.getValue());
-        }
-      }
-    }
-    public int compareTo(ResponseHistory other) {
-      return this.startMillis < other.startMillis ? -1 :
-          this.startMillis > other.startMillis ? 1 : 0;
-    }
-    public boolean equals(Object other) {
-      return other instanceof ResponseHistory &&
-          this.startMillis == ((ResponseHistory) other).startMillis;
-    }
-  }
-
   private DescriptorSource descriptorSource;
 
   private DocumentStore documentStore;
@@ -230,8 +87,8 @@ public class ClientsDataWriter implements DescriptorListener,
   private static final long ONE_HOUR_MILLIS = 60L * 60L * 1000L,
       ONE_DAY_MILLIS = 24L * ONE_HOUR_MILLIS;
 
-  private SortedMap<String, SortedSet<ResponseHistory>> newResponses =
-      new TreeMap<String, SortedSet<ResponseHistory>>();
+  private SortedMap<String, SortedSet<ClientsHistory>> newResponses =
+      new TreeMap<String, SortedSet<ClientsHistory>>();
 
   private void processBridgeExtraInfoDescriptor(
       ExtraInfoDescriptor descriptor) {
@@ -271,12 +128,12 @@ public class ClientsDataWriter implements DescriptorListener,
       SortedMap<String, Double> responsesByVersion =
           this.weightResponsesWithUniqueIps(totalResponses,
           descriptor.getBridgeIpVersions(), "");
-      ResponseHistory newResponseHistory = new ResponseHistory(
+      ClientsHistory newResponseHistory = new ClientsHistory(
           startMillis, endMillis, totalResponses, responsesByCountry,
           responsesByTransport, responsesByVersion); 
       if (!this.newResponses.containsKey(hashedFingerprint)) {
         this.newResponses.put(hashedFingerprint,
-            new TreeSet<ResponseHistory>());
+            new TreeSet<ClientsHistory>());
       }
       this.newResponses.get(hashedFingerprint).add(
           newResponseHistory);
@@ -309,44 +166,25 @@ public class ClientsDataWriter implements DescriptorListener,
   }
 
   public void updateStatuses() {
-    for (Map.Entry<String, SortedSet<ResponseHistory>> e :
+    for (Map.Entry<String, SortedSet<ClientsHistory>> e :
         this.newResponses.entrySet()) {
       String hashedFingerprint = e.getKey();
-      SortedSet<ResponseHistory> history =
-          this.readHistory(hashedFingerprint);
-      this.addToHistory(history, e.getValue());
-      history = this.compressHistory(history);
-      this.writeHistory(hashedFingerprint, history);
+      ClientsStatus clientsStatus = this.documentStore.retrieve(
+          ClientsStatus.class, true, hashedFingerprint);
+      if (clientsStatus == null) {
+        clientsStatus = new ClientsStatus();
+      }
+      this.addToHistory(clientsStatus, e.getValue());
+      this.compressHistory(clientsStatus);
+      this.documentStore.store(clientsStatus, hashedFingerprint);
     }
     Logger.printStatusTime("Updated clients status files");
   }
 
-  private SortedSet<ResponseHistory> readHistory(
-      String hashedFingerprint) {
-    SortedSet<ResponseHistory> history = new TreeSet<ResponseHistory>();
-    ClientsStatus clientsStatus = this.documentStore.retrieve(
-        ClientsStatus.class, false, hashedFingerprint);
-    if (clientsStatus != null) {
-      Scanner s = new Scanner(clientsStatus.documentString);
-      while (s.hasNextLine()) {
-        String line = s.nextLine();
-        ResponseHistory parsedLine = ResponseHistory.fromString(line);
-        if (parsedLine != null) {
-          history.add(parsedLine);
-        } else {
-          System.err.println("Could not parse clients history line '"
-              + line + "' for fingerprint '" + hashedFingerprint
-              + "'.  Skipping."); 
-        }
-      }
-      s.close();
-    }
-    return history;
-  }
-
-  private void addToHistory(SortedSet<ResponseHistory> history,
-      SortedSet<ResponseHistory> newIntervals) {
-    for (ResponseHistory interval : newIntervals) {
+  private void addToHistory(ClientsStatus clientsStatus,
+      SortedSet<ClientsHistory> newIntervals) {
+    SortedSet<ClientsHistory> history = clientsStatus.history;
+    for (ClientsHistory interval : newIntervals) {
       if ((history.headSet(interval).isEmpty() ||
           history.headSet(interval).last().endMillis <=
           interval.startMillis) &&
@@ -358,15 +196,15 @@ public class ClientsDataWriter implements DescriptorListener,
     }
   }
 
-  private SortedSet<ResponseHistory> compressHistory(
-      SortedSet<ResponseHistory> history) {
-    SortedSet<ResponseHistory> compressedHistory =
-        new TreeSet<ResponseHistory>();
-    ResponseHistory lastResponses = null;
+  private void compressHistory(ClientsStatus clientsStatus) {
+    SortedSet<ClientsHistory> history = clientsStatus.history;
+    SortedSet<ClientsHistory> compressedHistory =
+        new TreeSet<ClientsHistory>();
+    ClientsHistory lastResponses = null;
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM");
     dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     String lastMonthString = "1970-01";
-    for (ResponseHistory responses : history) {
+    for (ClientsHistory responses : history) {
       long intervalLengthMillis;
       if (this.now - responses.endMillis <=
           92L * 24L * 60L * 60L * 1000L) {
@@ -395,18 +233,7 @@ public class ClientsDataWriter implements DescriptorListener,
     if (lastResponses != null) {
       compressedHistory.add(lastResponses);
     }
-    return compressedHistory;
-  }
-
-  private void writeHistory(String hashedFingerprint,
-      SortedSet<ResponseHistory> history) {
-    StringBuilder sb = new StringBuilder();
-    for (ResponseHistory responses : history) {
-      sb.append(responses.toString() + "\n");
-    }
-    ClientsStatus clientsStatus = new ClientsStatus();
-    clientsStatus.documentString = sb.toString();
-    this.documentStore.store(clientsStatus, hashedFingerprint);
+    clientsStatus.history = compressedHistory;
   }
 
   public void processFingerprints(SortedSet<String> fingerprints,
@@ -420,8 +247,12 @@ public class ClientsDataWriter implements DescriptorListener,
 
   public void writeDocuments() {
     for (String hashedFingerprint : this.updateDocuments) {
-      SortedSet<ResponseHistory> history =
-          this.readHistory(hashedFingerprint);
+      ClientsStatus clientsStatus = this.documentStore.retrieve(
+          ClientsStatus.class, true, hashedFingerprint);
+      if (clientsStatus == null) {
+        continue;
+      }
+      SortedSet<ClientsHistory> history = clientsStatus.history;
       ClientsDocument clientsDocument = new ClientsDocument();
       clientsDocument.documentString = this.formatHistoryString(
           hashedFingerprint, history);
@@ -452,7 +283,7 @@ public class ClientsDataWriter implements DescriptorListener,
       10L * 24L * 60L * 60L * 1000L };
 
   private String formatHistoryString(String hashedFingerprint,
-      SortedSet<ResponseHistory> history) {
+      SortedSet<ClientsHistory> history) {
     StringBuilder sb = new StringBuilder();
     sb.append("{\"fingerprint\":\"" + hashedFingerprint + "\"");
     sb.append(",\n\"average_clients\":{");
@@ -471,7 +302,7 @@ public class ClientsDataWriter implements DescriptorListener,
   }
 
   private String formatTimeline(int graphIntervalIndex,
-      SortedSet<ResponseHistory> history) {
+      SortedSet<ClientsHistory> history) {
     String graphName = this.graphNames[graphIntervalIndex];
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
@@ -485,7 +316,7 @@ public class ClientsDataWriter implements DescriptorListener,
         totalResponsesByCountry = new TreeMap<String, Double>(),
         totalResponsesByTransport = new TreeMap<String, Double>(),
         totalResponsesByVersion = new TreeMap<String, Double>();
-    for (ResponseHistory hist : history) {
+    for (ClientsHistory hist : history) {
       if (hist.endMillis < intervalStartMillis) {
         continue;
       }
@@ -636,7 +467,7 @@ public class ClientsDataWriter implements DescriptorListener,
 
   public String getStatsString() {
     int newIntervals = 0;
-    for (SortedSet<ResponseHistory> hist : this.newResponses.values()) {
+    for (SortedSet<ClientsHistory> hist : this.newResponses.values()) {
       newIntervals += hist.size();
     }
     StringBuilder sb = new StringBuilder();
