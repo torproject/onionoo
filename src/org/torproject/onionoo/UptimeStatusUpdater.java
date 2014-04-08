@@ -109,72 +109,14 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private void updateStatus(boolean relay, String fingerprint,
       SortedSet<Long> newUptimeHours) {
-    UptimeStatus uptimeStatus = this.readHistory(fingerprint);
+    UptimeStatus uptimeStatus = fingerprint == null ?
+        documentStore.retrieve(UptimeStatus.class, true) :
+        documentStore.retrieve(UptimeStatus.class, true, fingerprint);
     if (uptimeStatus == null) {
       uptimeStatus = new UptimeStatus();
     }
-    this.addToHistory(uptimeStatus, relay, newUptimeHours);
-    this.compressHistory(uptimeStatus);
-    this.writeHistory(fingerprint, uptimeStatus);
-  }
-
-  private UptimeStatus readHistory(String fingerprint) {
-    return fingerprint == null ?
-        documentStore.retrieve(UptimeStatus.class, true) :
-        documentStore.retrieve(UptimeStatus.class, true, fingerprint);
-  }
-
-  private void addToHistory(UptimeStatus uptimeStatus, boolean relay,
-      SortedSet<Long> newIntervals) {
-    SortedSet<UptimeHistory> history = uptimeStatus.getHistory();
-    for (long startMillis : newIntervals) {
-      UptimeHistory interval = new UptimeHistory(relay, startMillis, 1);
-      if (!history.headSet(interval).isEmpty()) {
-        UptimeHistory prev = history.headSet(interval).last();
-        if (prev.isRelay() == interval.isRelay() &&
-            prev.getStartMillis() + DateTimeHelper.ONE_HOUR
-            * prev.getUptimeHours() > interval.getStartMillis()) {
-          continue;
-        }
-      }
-      if (!history.tailSet(interval).isEmpty()) {
-        UptimeHistory next = history.tailSet(interval).first();
-        if (next.isRelay() == interval.isRelay() &&
-            next.getStartMillis() < interval.getStartMillis()
-            + DateTimeHelper.ONE_HOUR) {
-          continue;
-        }
-      }
-      history.add(interval);
-    }
-  }
-
-  private void compressHistory(UptimeStatus uptimeStatus) {
-    SortedSet<UptimeHistory> history = uptimeStatus.getHistory();
-    SortedSet<UptimeHistory> compressedHistory =
-        new TreeSet<UptimeHistory>();
-    UptimeHistory lastInterval = null;
-    for (UptimeHistory interval : history) {
-      if (lastInterval != null &&
-          lastInterval.getStartMillis() + DateTimeHelper.ONE_HOUR
-          * lastInterval.getUptimeHours() == interval.getStartMillis() &&
-          lastInterval.isRelay() == interval.isRelay()) {
-        lastInterval.addUptime(interval);
-      } else {
-        if (lastInterval != null) {
-          compressedHistory.add(lastInterval);
-        }
-        lastInterval = interval;
-      }
-    }
-    if (lastInterval != null) {
-      compressedHistory.add(lastInterval);
-    }
-    uptimeStatus.setHistory(compressedHistory);
-  }
-
-  private void writeHistory(String fingerprint,
-      UptimeStatus uptimeStatus) {
+    uptimeStatus.addToHistory(relay, newUptimeHours);
+    uptimeStatus.compressHistory();
     if (fingerprint == null) {
       this.documentStore.store(uptimeStatus);
     } else {

@@ -118,6 +118,52 @@ class UptimeStatus extends Document {
     s.close();
   }
 
+  public void addToHistory(boolean relay, SortedSet<Long> newIntervals) {
+    for (long startMillis : newIntervals) {
+      UptimeHistory interval = new UptimeHistory(relay, startMillis, 1);
+      if (!this.history.headSet(interval).isEmpty()) {
+        UptimeHistory prev = this.history.headSet(interval).last();
+        if (prev.isRelay() == interval.isRelay() &&
+            prev.getStartMillis() + DateTimeHelper.ONE_HOUR
+            * prev.getUptimeHours() > interval.getStartMillis()) {
+          continue;
+        }
+      }
+      if (!this.history.tailSet(interval).isEmpty()) {
+        UptimeHistory next = this.history.tailSet(interval).first();
+        if (next.isRelay() == interval.isRelay() &&
+            next.getStartMillis() < interval.getStartMillis()
+            + DateTimeHelper.ONE_HOUR) {
+          continue;
+        }
+      }
+      this.history.add(interval);
+    }
+  }
+
+  public void compressHistory() {
+    SortedSet<UptimeHistory> compressedHistory =
+        new TreeSet<UptimeHistory>();
+    UptimeHistory lastInterval = null;
+    for (UptimeHistory interval : history) {
+      if (lastInterval != null &&
+          lastInterval.getStartMillis() + DateTimeHelper.ONE_HOUR
+          * lastInterval.getUptimeHours() == interval.getStartMillis() &&
+          lastInterval.isRelay() == interval.isRelay()) {
+        lastInterval.addUptime(interval);
+      } else {
+        if (lastInterval != null) {
+          compressedHistory.add(lastInterval);
+        }
+        lastInterval = interval;
+      }
+    }
+    if (lastInterval != null) {
+      compressedHistory.add(lastInterval);
+    }
+    this.history = compressedHistory;
+  }
+
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
     for (UptimeHistory interval : this.history) {
