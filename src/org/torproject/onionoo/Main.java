@@ -38,9 +38,12 @@ public class Main {
     Logger.printStatusTime("Initialized weights data writer");
     ClientsDataWriter cdw = new ClientsDataWriter(dso, ds, t);
     Logger.printStatusTime("Initialized clients data writer");
-    UptimeDataWriter udw = new UptimeDataWriter(dso, ds, t);
-    Logger.printStatusTime("Initialized uptime data writer");
-    StatusUpdater[] sus = new StatusUpdater[] { ndw, bdw, wdw, cdw, udw };
+    UptimeStatusUpdater usu = new UptimeStatusUpdater(dso, ds);
+    Logger.printStatusTime("Initialized uptime status updater");
+    StatusUpdater[] sus = new StatusUpdater[] { ndw, bdw, wdw, cdw, usu };
+
+    UptimeDocumentWriter udw = new UptimeDocumentWriter(dso, ds, t);
+    Logger.printStatusTime("Initialized uptime document writer");
     DocumentWriter[] dws = new DocumentWriter[] { ndw, bdw, wdw, cdw,
         udw };
 
@@ -86,8 +89,15 @@ public class Main {
             statsString);
       }
     }
-    /* TODO Print status updater statistics once all data writers have
-     * been separated. */
+    /* TODO Print status updater statistics for *all* status updaters once
+     * all data writers have been separated. */
+    for (DocumentWriter dw : new DocumentWriter[] { udw }) {
+      String statsString = dw.getStatsString();
+      if (statsString != null) {
+        Logger.printStatistics(dw.getClass().getSimpleName(),
+            statsString);
+      }
+    }
     Logger.printStatistics("Descriptor source", dso.getStatsString());
     Logger.printStatistics("Document store", ds.getStatsString());
     Logger.printStatistics("GeoIP lookup service", ls.getStatsString());
