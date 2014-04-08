@@ -6,6 +6,9 @@ import java.util.Date;
 
 public class Logger {
 
+  private Logger() {
+  }
+
   private static Time time;
 
   public static void setTime(Time timeParam) {

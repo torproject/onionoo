@@ -11,6 +11,9 @@ import java.util.TimeZone;
 
 public class DateTimeHelper {
 
+  private DateTimeHelper() {
+  }
+
   public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
   public static final String ISO_DATETIME_TAB_FORMAT =

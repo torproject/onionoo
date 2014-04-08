@@ -6,6 +6,10 @@ import java.io.File;
 
 /* Update search data and status data files. */
 public class Main {
+
+  private Main() {
+  }
+
   public static void main(String[] args) {
 
     Time t = new Time();
