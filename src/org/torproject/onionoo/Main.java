@@ -32,16 +32,18 @@ public class Main {
     Logger.printStatusTime("Initialized reverse domain name resolver");
     NodeDataWriter ndw = new NodeDataWriter(dso, rdnr, ls, ds, t);
     Logger.printStatusTime("Initialized node data writer");
-    BandwidthDataWriter bdw = new BandwidthDataWriter(dso, ds, t);
-    Logger.printStatusTime("Initialized bandwidth data writer");
+    BandwidthStatusUpdater bsu = new BandwidthStatusUpdater(dso, ds, t);
+    Logger.printStatusTime("Initialized bandwidth status updater");
     WeightsStatusUpdater wsu = new WeightsStatusUpdater(dso, ds, t);
     Logger.printStatusTime("Initialized weights status updater");
     ClientsStatusUpdater csu = new ClientsStatusUpdater(dso, ds, t);
     Logger.printStatusTime("Initialized clients status updater");
     UptimeStatusUpdater usu = new UptimeStatusUpdater(dso, ds);
     Logger.printStatusTime("Initialized uptime status updater");
-    StatusUpdater[] sus = new StatusUpdater[] { ndw, bdw, wsu, csu, usu };
+    StatusUpdater[] sus = new StatusUpdater[] { ndw, bsu, wsu, csu, usu };
 
+    BandwidthDocumentWriter bdw = new BandwidthDocumentWriter(dso, ds, t);
+    Logger.printStatusTime("Initialized bandwidth document writer");
     WeightsDocumentWriter wdw = new WeightsDocumentWriter(dso, ds, t);
     Logger.printStatusTime("Initialized weights document writer");
     ClientsDocumentWriter cdw = new ClientsDocumentWriter(dso, ds, t);
@@ -95,7 +97,8 @@ public class Main {
     }
     /* TODO Print status updater statistics for *all* status updaters once
      * all data writers have been separated. */
-    for (DocumentWriter dw : new DocumentWriter[] { wdw, cdw, udw }) {
+    for (DocumentWriter dw : new DocumentWriter[] { bdw, wdw, cdw,
+        udw }) {
       String statsString = dw.getStatsString();
       if (statsString != null) {
         Logger.printStatistics(dw.getClass().getSimpleName(),
