@@ -129,43 +129,8 @@ public class UptimeDocumentWriter implements FingerprintListener,
         this.dataPointIntervals[graphIntervalIndex];
     int dataPointIntervalHours = (int) (dataPointInterval
         / DateTimeHelper.ONE_HOUR);
-    List<Integer> statusDataPoints = new ArrayList<Integer>();
-    long intervalStartMillis = ((this.now - graphInterval)
-        / dataPointInterval) * dataPointInterval;
-    int statusHours = 0;
-    for (UptimeHistory hist : knownStatuses) {
-      if (hist.isRelay() != relay) {
-        continue;
-      }
-      long histEndMillis = hist.getStartMillis() + DateTimeHelper.ONE_HOUR
-          * hist.getUptimeHours();
-      if (histEndMillis < intervalStartMillis) {
-        continue;
-      }
-      while (hist.getStartMillis() >= intervalStartMillis
-          + dataPointInterval) {
-        statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
-            ? statusHours : -1);
-        statusHours = 0;
-        intervalStartMillis += dataPointInterval;
-      }
-      while (histEndMillis >= intervalStartMillis + dataPointInterval) {
-        statusHours += (int) ((intervalStartMillis + dataPointInterval
-            - Math.max(hist.getStartMillis(), intervalStartMillis))
-            / DateTimeHelper.ONE_HOUR);
-        statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
-            ? statusHours : -1);
-        statusHours = 0;
-        intervalStartMillis += dataPointInterval;
-      }
-      statusHours += (int) ((histEndMillis - Math.max(
-          hist.getStartMillis(), intervalStartMillis))
-          / DateTimeHelper.ONE_HOUR);
-    }
-    statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
-        ? statusHours : -1);
     List<Integer> uptimeDataPoints = new ArrayList<Integer>();
-    intervalStartMillis = ((this.now - graphInterval)
+    long intervalStartMillis = ((this.now - graphInterval)
         / dataPointInterval) * dataPointInterval;
     int uptimeHours = 0;
     long firstStatusStartMillis = -1L;
@@ -205,6 +170,50 @@ public class UptimeDocumentWriter implements FingerprintListener,
           / DateTimeHelper.ONE_HOUR);
     }
     uptimeDataPoints.add(uptimeHours);
+    List<Integer> statusDataPoints = new ArrayList<Integer>();
+    intervalStartMillis = ((this.now - graphInterval)
+        / dataPointInterval) * dataPointInterval;
+    int statusHours = -1;
+    for (UptimeHistory hist : knownStatuses) {
+      if (hist.isRelay() != relay) {
+        continue;
+      }
+      long histEndMillis = hist.getStartMillis() + DateTimeHelper.ONE_HOUR
+          * hist.getUptimeHours();
+      if (histEndMillis < intervalStartMillis) {
+        continue;
+      }
+      while (hist.getStartMillis() >= intervalStartMillis
+          + dataPointInterval) {
+        statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
+            ? statusHours : -1);
+        statusHours = -1;
+        intervalStartMillis += dataPointInterval;
+      }
+      while (histEndMillis >= intervalStartMillis + dataPointInterval) {
+        if (statusHours < 0) {
+          statusHours = 0;
+        }
+        statusHours += (int) ((intervalStartMillis + dataPointInterval
+            - Math.max(Math.max(hist.getStartMillis(),
+            firstStatusStartMillis), intervalStartMillis))
+            / DateTimeHelper.ONE_HOUR);
+        statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
+            ? statusHours : -1);
+        statusHours = -1;
+        intervalStartMillis += dataPointInterval;
+      }
+      if (statusHours < 0) {
+        statusHours = 0;
+      }
+      statusHours += (int) ((histEndMillis - Math.max(Math.max(
+          hist.getStartMillis(), firstStatusStartMillis),
+          intervalStartMillis)) / DateTimeHelper.ONE_HOUR);
+    }
+    if (statusHours > 0) {
+      statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
+          ? statusHours : -1);
+    }
     List<Double> dataPoints = new ArrayList<Double>();
     for (int dataPointIndex = 0; dataPointIndex < statusDataPoints.size();
         dataPointIndex++) {
