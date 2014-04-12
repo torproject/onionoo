@@ -104,42 +104,44 @@ public class ResourceServletTest {
   @Before
   public void createSampleRelaysAndBridges() {
     this.relays = new TreeMap<String, String>();
-    this.relays.put("000C5F55", "r\tTorkaZ\t"
-        + "000C5F55BD4814B917CC474BD537F1A3B33CCE2A\t"
+    this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
+        "r\tTorkaZ\t000C5F55BD4814B917CC474BD537F1A3B33CCE2A\t"
         + "62.216.201.221;;62.216.201.222+62.216.201.223\t"
         + "2013-04-19\t05:00:00\t9001\t0\tRunning,Valid\t20\tde\tnull\t"
         + "-1\treject\t1-65535\t2013-04-18\t05:00:00\t"
         + "2013-04-19\t05:00:00\tAS8767\ttorkaz <klaus dot zufall at "
         + "gmx dot de> <fb-token:np5_g_83jmf=>");
-    this.relays.put("001C13B3", "r\tFerrari458\t"
-        + "001C13B3A55A71B977CA65EC85539D79C653A3FC\t"
+    this.relays.put("001C13B3A55A71B977CA65EC85539D79C653A3FC",
+        "r\tFerrari458\t001C13B3A55A71B977CA65EC85539D79C653A3FC\t"
         + "68.38.171.200;[2001:4f8:3:2e::51]:9001;\t"
         + "2013-04-24\t12:00:00\t9001\t9030\t"
         + "Fast,Named,Running,V2Dir,Valid\t1140\tus\t"
         + "c-68-38-171-200.hsd1.pa.comcast.net\t1366805763009\treject\t"
         + "1-65535\t2013-02-12\t16:00:00\t2013-02-26\t18:00:00\t"
         + "AS7922\t");
-    this.relays.put("0025C136", "r\tTimMayTribute\t"
-        + "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B\t89.69.68.246;;\t"
-        + "2013-04-22\t20:00:00\t9001\t9030\t"
+    this.relays.put("0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B",
+        "r\tTimMayTribute\t0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B\t"
+        + "89.69.68.246;;\t2013-04-22\t20:00:00\t9001\t9030\t"
         + "Fast,Running,Unnamed,V2Dir,Valid\t63\ta1\tnull\t-1\treject\t"
         + "1-65535\t2013-04-16\t18:00:00\t2013-04-16\t18:00:00\t"
         + "AS6830\t1024D/51E2A1C7 steven j. murdoch "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>");
     this.bridges = new TreeMap<String, String>();
-    this.bridges.put("0000831B", "b\tec2bridgercc7f31fe\t"
+    this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
+        "b\tec2bridgercc7f31fe\t"
         + "0000831B236DFF73D409AD17B40E2A728A53994F\t10.199.7.176;;\t"
         + "2013-04-21\t18:07:03\t443\t0\tValid\t-1\t??\tnull\t-1\t"
         + "null\tnull\t2013-04-20\t15:37:04\tnull\tnull\tnull\tnull");
-    this.bridges.put("0002D9BD", "b\tUnnamed\t"
-        + "0002D9BDBBC230BD9C78FF502A16E0033EF87E0C\t10.0.52.84;;\t"
-        + "2013-04-20\t17:37:04\t443\t0\tValid\t-1\t??\tnull\t-1\t"
-        + "null\tnull\t2013-04-14\t07:07:05\tnull\tnull\tnull\tnull");
-    this.bridges.put("0010D49C", "b\tgummy\t"
-        + "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756\t10.63.169.98;;\t"
-        + "2013-04-24\t01:07:04\t9001\t0\tRunning,Valid\t-1\t??\tnull\t"
-        + "-1\tnull\tnull\t2013-01-16\t21:07:04\tnull\tnull\tnull\t"
+    this.bridges.put("0002D9BDBBC230BD9C78FF502A16E0033EF87E0C",
+        "b\tUnnamed\t0002D9BDBBC230BD9C78FF502A16E0033EF87E0C\t"
+        + "10.0.52.84;;\t2013-04-20\t17:37:04\t443\t0\tValid\t-1\t??\t"
+        + "null\t-1\tnull\tnull\t2013-04-14\t07:07:05\tnull\tnull\tnull\t"
         + "null");
+    this.bridges.put("1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756",
+        "b\tgummy\t1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756\t"
+        + "10.63.169.98;;\t2013-04-24\t01:07:04\t9001\t0\tRunning,Valid\t"
+        + "-1\t??\tnull\t-1\tnull\tnull\t2013-01-16\t21:07:04\tnull\t"
+        + "null\tnull\tnull");
   }
 
   private void runTest(String requestURI,
@@ -164,13 +166,17 @@ public class ResourceServletTest {
      * ResponseBuilder to read state from the newly created DocumentStore.
      * Otherwise, ResponseBuilder would use data from the previous test
      * run.  This is bad design and should be fixed. */
-    DummyDocumentStore documentStore = new DummyDocumentStore(
-        lastModified++);
-    for (String relay : relays.values()) {
-      documentStore.addNodeStatus(relay);
+    DummyDocumentStore documentStore = new DummyDocumentStore();
+    UpdateStatus updateStatus = new UpdateStatus();
+    updateStatus.setDocumentString(String.valueOf(lastModified++));
+    documentStore.addDocument(updateStatus, null);
+    for (Map.Entry<String, String> e : relays.entrySet()) {
+      documentStore.addDocument(NodeStatus.fromString(e.getValue()),
+          e.getKey());
     }
-    for (String bridge : bridges.values()) {
-      documentStore.addNodeStatus(bridge);
+    for (Map.Entry<String, String> e : bridges.entrySet()) {
+      documentStore.addDocument(NodeStatus.fromString(e.getValue()),
+          e.getKey());
     }
     ApplicationFactory.setDocumentStore(documentStore);
   }
@@ -278,11 +284,11 @@ public class ResourceServletTest {
   @Test()
   public void testValidSummaryRelay() throws IOException {
     this.relays.clear();
-    this.relays.put("000C5F55", "r TorkaZ "
-        + "000C5F55BD4814B917CC474BD537F1A3B33CCE2A 62.216.201.221;; "
-        + "2013-04-19 05:00:00 9001 0 Running,Valid 20 de null -1 "
-        + "reject 1-65535 2013-04-18 05:00:00 2013-04-19 05:00:00 "
-        + "AS8767");
+    this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
+        "r TorkaZ 000C5F55BD4814B917CC474BD537F1A3B33CCE2A "
+        + "62.216.201.221;; 2013-04-19 05:00:00 9001 0 Running,Valid 20 "
+        + "de null -1 reject 1-65535 2013-04-18 05:00:00 2013-04-19 "
+        + "05:00:00 AS8767");
     this.runTest("/summary", null);
     assertEquals("2013-04-19 05:00:00",
         this.summaryDocument.relays_published);
@@ -298,10 +304,10 @@ public class ResourceServletTest {
   @Test()
   public void testValidSummaryBridge() {
     this.bridges.clear();
-    this.bridges.put("0000831", "b ec2bridgercc7f31fe "
-        + "0000831B236DFF73D409AD17B40E2A728A53994F 10.199.7.176;; "
-        + "2013-04-21 18:07:03 443 0 Valid -1 ?? null -1 null null "
-        + "2013-04-20 15:37:04 null null null");
+    this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
+        "b ec2bridgercc7f31fe 0000831B236DFF73D409AD17B40E2A728A53994F "
+        + "10.199.7.176;; 2013-04-21 18:07:03 443 0 Valid -1 ?? null -1 "
+        + "null null 2013-04-20 15:37:04 null null null");
     this.runTest("/summary", null);
     assertEquals("2013-04-21 18:07:03",
         this.summaryDocument.bridges_published);

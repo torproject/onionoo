@@ -43,7 +43,7 @@ class UptimeHistory
       return null;
     }
     long startMillis = DateTimeHelper.parse(parts[1],
-          DateTimeHelper.YEARHOUR_NOSPACE_FORMAT);
+          DateTimeHelper.DATEHOUR_NOSPACE_FORMAT);
     if (startMillis < 0L) {
       return null;
     }
@@ -60,7 +60,7 @@ class UptimeHistory
     StringBuilder sb = new StringBuilder();
     sb.append(this.relay ? "r" : "b");
     sb.append(" " + DateTimeHelper.format(this.startMillis,
-        DateTimeHelper.YEARHOUR_NOSPACE_FORMAT));
+        DateTimeHelper.DATEHOUR_NOSPACE_FORMAT));
     sb.append(" " + String.format("%d", this.uptimeHours));
     return sb.toString();
   }

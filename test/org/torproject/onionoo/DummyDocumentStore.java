@@ -1,5 +1,7 @@
 package org.torproject.onionoo;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -7,69 +9,96 @@ import java.util.TreeSet;
 
 public class DummyDocumentStore extends DocumentStore {
 
-  private long lastModified;
+  private Map<Class<? extends Document>, SortedMap<String, Document>>
+      storedDocuments = new HashMap<Class<? extends Document>,
+      SortedMap<String, Document>>();
 
-  public DummyDocumentStore(long lastModified) {
-    this.lastModified = lastModified;
+  private static final String FINGERPRINT_NULL = "";
+
+  private <T extends Document> SortedMap<String, Document>
+      getStoredDocumentsByClass(Class<T> documentType) {
+    if (!this.storedDocuments.containsKey(documentType)) {
+      this.storedDocuments.put(documentType,
+          new TreeMap<String, Document>());
+    }
+    return this.storedDocuments.get(documentType);
   }
 
-  private SortedMap<String, NodeStatus> nodeStatuses =
-      new TreeMap<String, NodeStatus>();
-  void addNodeStatus(String nodeStatusString) {
-    NodeStatus nodeStatus = NodeStatus.fromString(nodeStatusString);
-    this.nodeStatuses.put(nodeStatus.getFingerprint(), nodeStatus);
+  public <T extends Document> void addDocument(T document,
+      String fingerprint) {
+    this.getStoredDocumentsByClass(document.getClass()).put(
+        fingerprint == null ? FINGERPRINT_NULL : fingerprint, document);
   }
 
   public void flushDocumentCache() {
-    throw new RuntimeException("Not implemented.");
+    /* Nothing to do. */
   }
 
   public String getStatsString() {
-    throw new RuntimeException("Not implemented.");
+    /* No statistics to return. */
+    return null;
+  }
+
+  private int performedListOperations = 0;
+  public int getPerformedListOperations() {
+    return this.performedListOperations;
   }
 
   public <T extends Document> SortedSet<String> list(
       Class<T> documentType, boolean includeArchive) {
-    if (documentType.equals(NodeStatus.class)) {
-      return new TreeSet<String>(this.nodeStatuses.keySet());
-    }
-    throw new RuntimeException("Not implemented.");
+    this.performedListOperations++;
+    return new TreeSet<String>(this.getStoredDocumentsByClass(
+        documentType).keySet());
+  }
+
+  private int performedRemoveOperations = 0;
+  public int getPerformedRemoveOperations() {
+    return this.performedRemoveOperations;
   }
 
   public <T extends Document> boolean remove(Class<T> documentType) {
-    throw new RuntimeException("Not implemented.");
+    return this.remove(documentType, null);
   }
 
   public <T extends Document> boolean remove(Class<T> documentType,
       String fingerprint) {
-    throw new RuntimeException("Not implemented.");
+    this.performedRemoveOperations++;
+    return this.getStoredDocumentsByClass(documentType).remove(
+        fingerprint) != null;
+  }
+
+  private int performedRetrieveOperations = 0;
+  public int getPerformedRetrieveOperations() {
+    return this.performedRetrieveOperations;
   }
 
   public <T extends Document> T retrieve(Class<T> documentType,
       boolean parse) {
-    if (documentType.equals(UpdateStatus.class)) {
-      UpdateStatus updateStatus = new UpdateStatus();
-      updateStatus.setDocumentString(String.valueOf(this.lastModified));
-      return documentType.cast(updateStatus);
-    }
-    throw new RuntimeException("Not implemented.");
+    return this.retrieve(documentType, parse, null);
   }
 
   public <T extends Document> T retrieve(Class<T> documentType,
       boolean parse, String fingerprint) {
-    if (documentType.equals(NodeStatus.class)) {
-      return documentType.cast(this.nodeStatuses.get(fingerprint));
-    }
-    throw new RuntimeException("Not implemented.");
+    this.performedRetrieveOperations++;
+    return documentType.cast(this.getStoredDocumentsByClass(documentType).
+        get(fingerprint == null ? FINGERPRINT_NULL : fingerprint));
+  }
+
+  private int performedStoreOperations = 0;
+  public int getPerformedStoreOperations() {
+    return this.performedStoreOperations;
   }
 
   public <T extends Document> boolean store(T document) {
-    throw new RuntimeException("Not implemented.");
+    return this.store(document, null);
   }
 
   public <T extends Document> boolean store(T document,
       String fingerprint) {
-    throw new RuntimeException("Not implemented.");
+    this.performedStoreOperations++;
+    this.getStoredDocumentsByClass(document.getClass()).put(
+        fingerprint == null ? FINGERPRINT_NULL : fingerprint, document);
+    return true;
   }
 }
 

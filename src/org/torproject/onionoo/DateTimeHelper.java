@@ -40,7 +40,7 @@ public class DateTimeHelper {
 
   public static final String ISO_YEARMONTH_FORMAT = "yyyy-MM";
 
-  public static final String YEARHOUR_NOSPACE_FORMAT = "yyyy-MM-dd-HH";
+  public static final String DATEHOUR_NOSPACE_FORMAT = "yyyy-MM-dd-HH";
 
   private static Map<String, DateFormat> dateFormats =
       new HashMap<String, DateFormat>();
