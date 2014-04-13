@@ -978,6 +978,8 @@ found.
 <p>
 Bandwidth in bytes per second that this
 relay is willing and capable to provide.
+This bandwidth value is the minimum of <strong>bandwidth_rate</strong>,
+<strong>bandwidth_burst</strong>, and <strong>observed_bandwidth</strong>.
 Missing if router descriptor containing this information cannot be
 found.
 </p>
@@ -1256,6 +1258,8 @@ found.
 <p>
 Bandwidth in bytes per second that this
 bridge is willing and capable to provide.
+This bandwidth value is the minimum of <strong>bandwidth_rate</strong>,
+<strong>bandwidth_burst</strong>, and <strong>observed_bandwidth</strong>.
 Missing if router descriptor containing this information cannot be
 found.
 </p>
