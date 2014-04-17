@@ -5,8 +5,6 @@ package org.torproject.onionoo;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 
 public class DateTimeHelper {
@@ -42,17 +40,15 @@ public class DateTimeHelper {
 
   public static final String DATEHOUR_NOSPACE_FORMAT = "yyyy-MM-dd-HH";
 
-  private static Map<String, DateFormat> dateFormats =
-      new HashMap<String, DateFormat>();
-
   private static DateFormat getDateFormat(String format) {
-    DateFormat dateFormat = dateFormats.get(format);
-    if (dateFormat == null) {
-      dateFormat = new SimpleDateFormat(format);
-      dateFormat.setLenient(false);
-      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      dateFormats.put(format, dateFormat);
-    }
+    /* TODO We're creating a new SimpleDateFormat instance here, because
+     * we can't share a single instance per date format between multiple
+     * threads.  A better solution would be to share a single instance per
+     * date format and thread, or to share an instance of a thread-safe
+     * alternative per date format. */
+    DateFormat dateFormat = new SimpleDateFormat(format);
+    dateFormat.setLenient(false);
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     return dateFormat;
   }
 
