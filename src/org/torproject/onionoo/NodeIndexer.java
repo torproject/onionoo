@@ -165,7 +165,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
   private Thread nodeIndexerThread = null;
 
   public synchronized long getLastIndexed(long timeoutMillis) {
-    if (this.lastIndexed == 0L && this.nodeIndexerThread != null &&
+    if (this.lastIndexed == -1L && this.nodeIndexerThread != null &&
         timeoutMillis > 0L) {
       try {
         this.wait(timeoutMillis);
