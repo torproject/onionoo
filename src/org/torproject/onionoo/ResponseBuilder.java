@@ -9,10 +9,10 @@ import java.util.Scanner;
 
 public class ResponseBuilder {
 
-  private static DocumentStore documentStore;
+  private DocumentStore documentStore;
 
-  public static void initialize() {
-    documentStore = ApplicationFactory.getDocumentStore();
+  public ResponseBuilder() {
+    this.documentStore = ApplicationFactory.getDocumentStore();
   }
 
   private String resourceType;
@@ -114,7 +114,7 @@ public class ResponseBuilder {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    DetailsDocument detailsDocument = documentStore.retrieve(
+    DetailsDocument detailsDocument = this.documentStore.retrieve(
         DetailsDocument.class, false, fingerprint);
     if (detailsDocument != null &&
         detailsDocument.getDocumentString() != null) {
@@ -184,7 +184,7 @@ public class ResponseBuilder {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    BandwidthDocument bandwidthDocument = documentStore.retrieve(
+    BandwidthDocument bandwidthDocument = this.documentStore.retrieve(
         BandwidthDocument.class, false, fingerprint);
     if (bandwidthDocument != null &&
         bandwidthDocument.getDocumentString() != null) {
@@ -208,7 +208,7 @@ public class ResponseBuilder {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    WeightsDocument weightsDocument = documentStore.retrieve(
+    WeightsDocument weightsDocument = this.documentStore.retrieve(
         WeightsDocument.class, false, fingerprint);
     if (weightsDocument != null &&
         weightsDocument.getDocumentString() != null) {
@@ -231,7 +231,7 @@ public class ResponseBuilder {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    ClientsDocument clientsDocument = documentStore.retrieve(
+    ClientsDocument clientsDocument = this.documentStore.retrieve(
         ClientsDocument.class, false, fingerprint);
     if (clientsDocument != null &&
         clientsDocument.getDocumentString() != null) {
@@ -257,7 +257,7 @@ public class ResponseBuilder {
       return "";
     }
     fingerprint = fingerprint.substring(0, 40);
-    UptimeDocument uptimeDocument = documentStore.retrieve(
+    UptimeDocument uptimeDocument = this.documentStore.retrieve(
         UptimeDocument.class, false, fingerprint);
     if (uptimeDocument != null &&
         uptimeDocument.getDocumentString() != null) {

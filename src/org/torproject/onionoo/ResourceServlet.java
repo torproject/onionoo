@@ -2,7 +2,6 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -27,30 +26,17 @@ public class ResourceServlet extends HttpServlet {
   /* Called by servlet container, not by test class. */
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    boolean maintenanceMode =
-        config.getInitParameter("maintenance") != null
-        && config.getInitParameter("maintenance").equals("1");
-    File outDir = new File(config.getInitParameter("outDir"));
-    DocumentStore documentStore = ApplicationFactory.getDocumentStore();
-    documentStore.setOutDir(outDir);
-    this.init(maintenanceMode);
-  }
-
-  /* Called (indirectly) by servlet container and (directly) by test
-   * class. */
-  protected void init(boolean maintenanceMode) {
-    this.maintenanceMode = maintenanceMode;
-    if (!maintenanceMode) {
-      RequestHandler.initialize();
-      ResponseBuilder.initialize();
-    }
+    this.maintenanceMode =
+        config.getInitParameter("maintenance") != null &&
+        config.getInitParameter("maintenance").equals("1");
   }
 
   public long getLastModified(HttpServletRequest request) {
     if (this.maintenanceMode) {
       return super.getLastModified(request);
     } else {
-      return RequestHandler.getLastModified();
+      return ApplicationFactory.getNodeIndexer().getLastIndexed(
+          DateTimeHelper.TEN_SECONDS);
     }
   }
 
@@ -109,7 +95,16 @@ public class ResourceServlet extends HttpServlet {
       return;
     }
 
-    if (!RequestHandler.update()) {
+    if (ApplicationFactory.getNodeIndexer().getLastIndexed(
+        DateTimeHelper.TEN_SECONDS) + DateTimeHelper.SIX_HOURS
+        < ApplicationFactory.getTime().currentTimeMillis()) {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
+    }
+
+    NodeIndex nodeIndex = ApplicationFactory.getNodeIndexer().
+        getLatestNodeIndex(DateTimeHelper.TEN_SECONDS);
+    if (nodeIndex == null) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
@@ -135,7 +130,8 @@ public class ResourceServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
-    RequestHandler rh = new RequestHandler();
+
+    RequestHandler rh = new RequestHandler(nodeIndex);
     rh.setResourceType(resourceType);
 
     /* Extract parameters either from the old-style URI or from request

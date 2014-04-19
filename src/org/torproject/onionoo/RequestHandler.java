@@ -10,278 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
 
 public class RequestHandler {
 
-  private static long summaryFileLastModified = -1L;
-  private static DocumentStore documentStore;
-  private static Time time;
-  private static boolean successfullyReadSummaryFile = false;
-  private static String relaysPublishedString, bridgesPublishedString;
-  private static List<String> relaysByConsensusWeight = null;
-  private static Map<String, String> relayFingerprintSummaryLines = null,
-      bridgeFingerprintSummaryLines = null;
-  private static Map<String, Set<String>> relaysByCountryCode = null,
-      relaysByASNumber = null, relaysByFlag = null, bridgesByFlag = null,
-      relaysByContact = null;
-  private static SortedMap<Integer, Set<String>>
-      relaysByFirstSeenDays = null, bridgesByFirstSeenDays = null,
-      relaysByLastSeenDays = null, bridgesByLastSeenDays = null;
-  private static final long SUMMARY_MAX_AGE = DateTimeHelper.SIX_HOURS;
+  private NodeIndex nodeIndex;
 
-  public static void initialize() {
-    documentStore = ApplicationFactory.getDocumentStore();
-    time = ApplicationFactory.getTime();
-    readSummaryFile();
-  }
-
-  public static boolean update() {
-    readSummaryFile();
-    return successfullyReadSummaryFile;
-  }
-
-  private static void readSummaryFile() {
-    long newSummaryFileLastModified = -1L;
-    UpdateStatus updateStatus = documentStore.retrieve(UpdateStatus.class,
-        false);
-    if (updateStatus != null &&
-        updateStatus.getDocumentString() != null) {
-      String updateString = updateStatus.getDocumentString();
-      try {
-        newSummaryFileLastModified = Long.parseLong(updateString.trim());
-      } catch (NumberFormatException e) {
-        /* Handle below. */
-      }
-    }
-    if (newSummaryFileLastModified < 0L) {
-      // TODO Does this actually solve anything?  Should we instead
-      // switch to a variant of the maintenance mode and re-check when
-      // the next requests comes in that happens x seconds after this one?
-      successfullyReadSummaryFile = false;
-      return;
-    }
-    if (newSummaryFileLastModified + SUMMARY_MAX_AGE
-        < time.currentTimeMillis()) {
-      // TODO Does this actually solve anything?  Should we instead
-      // switch to a variant of the maintenance mode and re-check when
-      // the next requests comes in that happens x seconds after this one?
-      successfullyReadSummaryFile = false;
-      return;
-    }
-    if (newSummaryFileLastModified > summaryFileLastModified) {
-      List<String> newRelaysByConsensusWeight = new ArrayList<String>();
-      Map<String, String>
-          newRelayFingerprintSummaryLines = new HashMap<String, String>(),
-          newBridgeFingerprintSummaryLines =
-          new HashMap<String, String>();
-      Map<String, Set<String>>
-          newRelaysByCountryCode = new HashMap<String, Set<String>>(),
-          newRelaysByASNumber = new HashMap<String, Set<String>>(),
-          newRelaysByFlag = new HashMap<String, Set<String>>(),
-          newBridgesByFlag = new HashMap<String, Set<String>>(),
-          newRelaysByContact = new HashMap<String, Set<String>>();
-      SortedMap<Integer, Set<String>>
-          newRelaysByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
-          newBridgesByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
-          newRelaysByLastSeenDays = new TreeMap<Integer, Set<String>>(),
-          newBridgesByLastSeenDays = new TreeMap<Integer, Set<String>>();
-      long relaysLastValidAfterMillis = -1L,
-          bridgesLastPublishedMillis = -1L;
-      String newRelaysPublishedString, newBridgesPublishedString;
-      Set<NodeStatus> currentRelays = new HashSet<NodeStatus>(),
-          currentBridges = new HashSet<NodeStatus>();
-      SortedSet<String> fingerprints = documentStore.list(
-          NodeStatus.class, false);
-      // TODO We should be able to learn if something goes wrong when
-      // reading the summary file, rather than silently having an empty
-      // list of fingerprints.
-      for (String fingerprint : fingerprints) {
-        NodeStatus node = documentStore.retrieve(NodeStatus.class, true,
-            fingerprint);
-        if (node.isRelay()) {
-          relaysLastValidAfterMillis = Math.max(
-              relaysLastValidAfterMillis, node.getLastSeenMillis());
-          currentRelays.add(node);
-        } else {
-          bridgesLastPublishedMillis = Math.max(
-              bridgesLastPublishedMillis, node.getLastSeenMillis());
-          currentBridges.add(node);
-        }
-      }
-      newRelaysPublishedString = DateTimeHelper.format(
-          relaysLastValidAfterMillis);
-      newBridgesPublishedString = DateTimeHelper.format(
-          bridgesLastPublishedMillis);
-      List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
-      for (NodeStatus entry : currentRelays) {
-        String fingerprint = entry.getFingerprint().toUpperCase();
-        String hashedFingerprint = entry.getHashedFingerprint().
-            toUpperCase();
-        entry.setRunning(entry.getLastSeenMillis() ==
-            relaysLastValidAfterMillis);
-        String line = formatRelaySummaryLine(entry);
-        newRelayFingerprintSummaryLines.put(fingerprint, line);
-        newRelayFingerprintSummaryLines.put(hashedFingerprint, line);
-        long consensusWeight = entry.getConsensusWeight();
-        orderRelaysByConsensusWeight.add(String.format("%020d %s",
-            consensusWeight, fingerprint));
-        orderRelaysByConsensusWeight.add(String.format("%020d %s",
-            consensusWeight, hashedFingerprint));
-        if (entry.getCountryCode() != null) {
-          String countryCode = entry.getCountryCode();
-          if (!newRelaysByCountryCode.containsKey(countryCode)) {
-            newRelaysByCountryCode.put(countryCode,
-                new HashSet<String>());
-          }
-          newRelaysByCountryCode.get(countryCode).add(fingerprint);
-          newRelaysByCountryCode.get(countryCode).add(hashedFingerprint);
-        }
-        if (entry.getASNumber() != null) {
-          String aSNumber = entry.getASNumber();
-          if (!newRelaysByASNumber.containsKey(aSNumber)) {
-            newRelaysByASNumber.put(aSNumber, new HashSet<String>());
-          }
-          newRelaysByASNumber.get(aSNumber).add(fingerprint);
-          newRelaysByASNumber.get(aSNumber).add(hashedFingerprint);
-        }
-        for (String flag : entry.getRelayFlags()) {
-          String flagLowerCase = flag.toLowerCase();
-          if (!newRelaysByFlag.containsKey(flagLowerCase)) {
-            newRelaysByFlag.put(flagLowerCase, new HashSet<String>());
-          }
-          newRelaysByFlag.get(flagLowerCase).add(fingerprint);
-          newRelaysByFlag.get(flagLowerCase).add(hashedFingerprint);
-        }
-        int daysSinceFirstSeen = (int) ((newSummaryFileLastModified
-            - entry.getFirstSeenMillis()) / 86400000L);
-        if (!newRelaysByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
-          newRelaysByFirstSeenDays.put(daysSinceFirstSeen,
-              new HashSet<String>());
-        }
-        newRelaysByFirstSeenDays.get(daysSinceFirstSeen).add(fingerprint);
-        newRelaysByFirstSeenDays.get(daysSinceFirstSeen).add(
-            hashedFingerprint);
-        int daysSinceLastSeen = (int) ((newSummaryFileLastModified
-            - entry.getLastSeenMillis()) / 86400000L);
-        if (!newRelaysByLastSeenDays.containsKey(daysSinceLastSeen)) {
-          newRelaysByLastSeenDays.put(daysSinceLastSeen,
-              new HashSet<String>());
-        }
-        newRelaysByLastSeenDays.get(daysSinceLastSeen).add(fingerprint);
-        newRelaysByLastSeenDays.get(daysSinceLastSeen).add(
-            hashedFingerprint);
-        String contact = entry.getContact();
-        if (!newRelaysByContact.containsKey(contact)) {
-          newRelaysByContact.put(contact, new HashSet<String>());
-        }
-        newRelaysByContact.get(contact).add(fingerprint);
-        newRelaysByContact.get(contact).add(hashedFingerprint);
-      }
-      Collections.sort(orderRelaysByConsensusWeight);
-      newRelaysByConsensusWeight = new ArrayList<String>();
-      for (String relay : orderRelaysByConsensusWeight) {
-        newRelaysByConsensusWeight.add(relay.split(" ")[1]);
-      }
-      for (NodeStatus entry : currentBridges) {
-        String hashedFingerprint = entry.getFingerprint().toUpperCase();
-        String hashedHashedFingerprint = entry.getHashedFingerprint().
-            toUpperCase();
-        entry.setRunning(entry.getRelayFlags().contains("Running") &&
-            entry.getLastSeenMillis() == bridgesLastPublishedMillis);
-        String line = formatBridgeSummaryLine(entry);
-        newBridgeFingerprintSummaryLines.put(hashedFingerprint, line);
-        newBridgeFingerprintSummaryLines.put(hashedHashedFingerprint,
-            line);
-        for (String flag : entry.getRelayFlags()) {
-          String flagLowerCase = flag.toLowerCase();
-          if (!newBridgesByFlag.containsKey(flagLowerCase)) {
-            newBridgesByFlag.put(flagLowerCase, new HashSet<String>());
-          }
-          newBridgesByFlag.get(flagLowerCase).add(hashedFingerprint);
-          newBridgesByFlag.get(flagLowerCase).add(
-              hashedHashedFingerprint);
-        }
-        int daysSinceFirstSeen = (int) ((newSummaryFileLastModified
-            - entry.getFirstSeenMillis()) / 86400000L);
-        if (!newBridgesByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
-          newBridgesByFirstSeenDays.put(daysSinceFirstSeen,
-              new HashSet<String>());
-        }
-        newBridgesByFirstSeenDays.get(daysSinceFirstSeen).add(
-            hashedFingerprint);
-        newBridgesByFirstSeenDays.get(daysSinceFirstSeen).add(
-            hashedHashedFingerprint);
-        int daysSinceLastSeen = (int) ((newSummaryFileLastModified
-            - entry.getLastSeenMillis()) / 86400000L);
-        if (!newBridgesByLastSeenDays.containsKey(daysSinceLastSeen)) {
-          newBridgesByLastSeenDays.put(daysSinceLastSeen,
-              new HashSet<String>());
-        }
-        newBridgesByLastSeenDays.get(daysSinceLastSeen).add(
-            hashedFingerprint);
-        newBridgesByLastSeenDays.get(daysSinceLastSeen).add(
-            hashedHashedFingerprint);
-      }
-      relaysByConsensusWeight = newRelaysByConsensusWeight;
-      relayFingerprintSummaryLines = newRelayFingerprintSummaryLines;
-      bridgeFingerprintSummaryLines = newBridgeFingerprintSummaryLines;
-      relaysByCountryCode = newRelaysByCountryCode;
-      relaysByASNumber = newRelaysByASNumber;
-      relaysByFlag = newRelaysByFlag;
-      bridgesByFlag = newBridgesByFlag;
-      relaysByContact = newRelaysByContact;
-      relaysByFirstSeenDays = newRelaysByFirstSeenDays;
-      relaysByLastSeenDays = newRelaysByLastSeenDays;
-      bridgesByFirstSeenDays = newBridgesByFirstSeenDays;
-      bridgesByLastSeenDays = newBridgesByLastSeenDays;
-      relaysPublishedString = newRelaysPublishedString;
-      bridgesPublishedString = newBridgesPublishedString;
-    }
-    summaryFileLastModified = newSummaryFileLastModified;
-    successfullyReadSummaryFile = true;
-  }
-
-  private static String formatRelaySummaryLine(NodeStatus entry) {
-    String nickname = !entry.getNickname().equals("Unnamed") ?
-        entry.getNickname() : null;
-    String fingerprint = entry.getFingerprint();
-    String running = entry.getRunning() ? "true" : "false";
-    List<String> addresses = new ArrayList<String>();
-    addresses.add(entry.getAddress());
-    for (String orAddress : entry.getOrAddresses()) {
-      addresses.add(orAddress);
-    }
-    for (String exitAddress : entry.getExitAddresses()) {
-      if (!addresses.contains(exitAddress)) {
-        addresses.add(exitAddress);
-      }
-    }
-    StringBuilder addressesBuilder = new StringBuilder();
-    int written = 0;
-    for (String address : addresses) {
-      addressesBuilder.append((written++ > 0 ? "," : "") + "\""
-          + address.toLowerCase() + "\"");
-    }
-    return String.format("{%s\"f\":\"%s\",\"a\":[%s],\"r\":%s}",
-        (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
-        fingerprint, addressesBuilder.toString(), running);
-  }
-
-  private static String formatBridgeSummaryLine(NodeStatus entry) {
-    String nickname = !entry.getNickname().equals("Unnamed") ?
-        entry.getNickname() : null;
-    String hashedFingerprint = entry.getFingerprint();
-    String running = entry.getRunning() ? "true" : "false";
-    return String.format("{%s\"h\":\"%s\",\"r\":%s}",
-         (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
-         hashedFingerprint, running);
-  }
-
-  public static long getLastModified() {
-    readSummaryFile();
-    return summaryFileLastModified;
+  public RequestHandler(NodeIndex nodeIndex) {
+    this.nodeIndex = nodeIndex;
   }
 
   private String resourceType;
@@ -368,8 +103,10 @@ public class RequestHandler {
       new HashMap<String, String>();
 
   public void handleRequest() {
-    this.filteredRelays.putAll(relayFingerprintSummaryLines);
-    this.filteredBridges.putAll(bridgeFingerprintSummaryLines);
+    this.filteredRelays.putAll(
+        this.nodeIndex.getRelayFingerprintSummaryLines());
+    this.filteredBridges.putAll(
+        this.nodeIndex.getBridgeFingerprintSummaryLines());
     this.filterByResourceType();
     this.filterByType();
     this.filterByRunning();
@@ -531,11 +268,12 @@ public class RequestHandler {
       return;
     }
     String countryCode = this.country.toLowerCase();
-    if (!relaysByCountryCode.containsKey(countryCode)) {
+    if (!this.nodeIndex.getRelaysByCountryCode().containsKey(
+        countryCode)) {
       this.filteredRelays.clear();
     } else {
       Set<String> relaysWithCountryCode =
-          relaysByCountryCode.get(countryCode);
+          this.nodeIndex.getRelaysByCountryCode().get(countryCode);
       Set<String> removeRelays = new HashSet<String>();
       for (Map.Entry<String, String> e : this.filteredRelays.entrySet()) {
         String fingerprint = e.getKey();
@@ -558,11 +296,11 @@ public class RequestHandler {
     if (!aSNumber.startsWith("AS")) {
       aSNumber = "AS" + aSNumber;
     }
-    if (!relaysByASNumber.containsKey(aSNumber)) {
+    if (!this.nodeIndex.getRelaysByASNumber().containsKey(aSNumber)) {
       this.filteredRelays.clear();
     } else {
       Set<String> relaysWithASNumber =
-          relaysByASNumber.get(aSNumber);
+          this.nodeIndex.getRelaysByASNumber().get(aSNumber);
       Set<String> removeRelays = new HashSet<String>();
       for (Map.Entry<String, String> e : this.filteredRelays.entrySet()) {
         String fingerprint = e.getKey();
@@ -582,10 +320,11 @@ public class RequestHandler {
       return;
     }
     String flag = this.flag.toLowerCase();
-    if (!relaysByFlag.containsKey(flag)) {
+    if (!this.nodeIndex.getRelaysByFlag().containsKey(flag)) {
       this.filteredRelays.clear();
     } else {
-      Set<String> relaysWithFlag = relaysByFlag.get(flag);
+      Set<String> relaysWithFlag = this.nodeIndex.getRelaysByFlag().get(
+          flag);
       Set<String> removeRelays = new HashSet<String>();
       for (Map.Entry<String, String> e : this.filteredRelays.entrySet()) {
         String fingerprint = e.getKey();
@@ -597,10 +336,11 @@ public class RequestHandler {
         this.filteredRelays.remove(fingerprint);
       }
     }
-    if (!bridgesByFlag.containsKey(flag)) {
+    if (!this.nodeIndex.getBridgesByFlag().containsKey(flag)) {
       this.filteredBridges.clear();
     } else {
-      Set<String> bridgesWithFlag = bridgesByFlag.get(flag);
+      Set<String> bridgesWithFlag = this.nodeIndex.getBridgesByFlag().get(
+          flag);
       Set<String> removeBridges = new HashSet<String>();
       for (Map.Entry<String, String> e :
           this.filteredBridges.entrySet()) {
@@ -619,20 +359,20 @@ public class RequestHandler {
     if (this.firstSeenDays == null) {
       return;
     }
-    filterNodesByDays(this.filteredRelays, relaysByFirstSeenDays,
-        this.firstSeenDays);
-    filterNodesByDays(this.filteredBridges, bridgesByFirstSeenDays,
-        this.firstSeenDays);
+    filterNodesByDays(this.filteredRelays,
+        this.nodeIndex.getRelaysByFirstSeenDays(), this.firstSeenDays);
+    filterNodesByDays(this.filteredBridges,
+        this.nodeIndex.getBridgesByFirstSeenDays(), this.firstSeenDays);
   }
 
   private void filterNodesByLastSeenDays() {
     if (this.lastSeenDays == null) {
       return;
     }
-    filterNodesByDays(this.filteredRelays, relaysByLastSeenDays,
-        this.lastSeenDays);
-    filterNodesByDays(this.filteredBridges, bridgesByLastSeenDays,
-        this.lastSeenDays);
+    filterNodesByDays(this.filteredRelays,
+        this.nodeIndex.getRelaysByLastSeenDays(), this.lastSeenDays);
+    filterNodesByDays(this.filteredBridges,
+        this.nodeIndex.getBridgesByLastSeenDays(), this.lastSeenDays);
   }
 
   private void filterNodesByDays(Map<String, String> filteredNodes,
@@ -657,7 +397,8 @@ public class RequestHandler {
       return;
     }
     Set<String> removeRelays = new HashSet<String>();
-    for (Map.Entry<String, Set<String>> e : relaysByContact.entrySet()) {
+    for (Map.Entry<String, Set<String>> e :
+        this.nodeIndex.getRelaysByContact().entrySet()) {
       String contact = e.getKey();
       for (String contactPart : this.contact) {
         if (contact == null ||
@@ -676,7 +417,7 @@ public class RequestHandler {
   private void order() {
     if (this.order != null && this.order.length == 1) {
       List<String> orderBy = new ArrayList<String>(
-          relaysByConsensusWeight);
+          this.nodeIndex.getRelaysByConsensusWeight());
       if (this.order[0].startsWith("-")) {
         Collections.reverse(orderBy);
       }
@@ -747,10 +488,10 @@ public class RequestHandler {
   }
 
   public String getRelaysPublishedString() {
-    return relaysPublishedString;
+    return this.nodeIndex.getRelaysPublishedString();
   }
 
   public String getBridgesPublishedString() {
-    return bridgesPublishedString;
+    return this.nodeIndex.getBridgesPublishedString();
   }
 }

@@ -32,12 +32,8 @@ public class ResourceServletTest {
 
   private SortedMap<String, String> relays, bridges;
 
-  // 2013-04-24 12:22:22
-  private static long lastModified = 1366806142000L;
-
-  private long currentTimeMillis = 1366806142000L;
-
-  private boolean maintenanceMode = false;
+  private long currentTimeMillis = DateTimeHelper.parse(
+      "2013-04-24 12:22:22");
 
   private class TestingHttpServletRequestWrapper
       extends HttpServletRequestWrapper {
@@ -149,6 +145,7 @@ public class ResourceServletTest {
     try {
       this.createDummyTime();
       this.createDummyDocumentStore();
+      this.createNodeIndexer();
       this.makeRequest(requestURI, parameterMap);
       this.parseResponse();
     } catch (IOException e) {
@@ -162,13 +159,10 @@ public class ResourceServletTest {
   }
 
   private void createDummyDocumentStore() {
-    /* TODO Incrementing static lastModified is necessary for
-     * ResponseBuilder to read state from the newly created DocumentStore.
-     * Otherwise, ResponseBuilder would use data from the previous test
-     * run.  This is bad design and should be fixed. */
     DummyDocumentStore documentStore = new DummyDocumentStore();
     UpdateStatus updateStatus = new UpdateStatus();
-    updateStatus.setDocumentString(String.valueOf(lastModified++));
+    updateStatus.setDocumentString(String.valueOf(
+        this.currentTimeMillis));
     documentStore.addDocument(updateStatus, null);
     for (Map.Entry<String, String> e : relays.entrySet()) {
       documentStore.addDocument(NodeStatus.fromString(e.getValue()),
@@ -181,10 +175,15 @@ public class ResourceServletTest {
     ApplicationFactory.setDocumentStore(documentStore);
   }
 
+  private void createNodeIndexer() {
+    NodeIndexer newNodeIndexer = new NodeIndexer();
+    newNodeIndexer.startIndexing();
+    ApplicationFactory.setNodeIndexer(newNodeIndexer);
+  }
+
   private void makeRequest(String requestURI,
       Map<String, String[]> parameterMap) throws IOException {
     ResourceServlet rs = new ResourceServlet();
-    rs.init(this.maintenanceMode);
     this.request = new TestingHttpServletRequestWrapper(requestURI,
        parameterMap);
     this.response = new TestingHttpServletResponseWrapper();

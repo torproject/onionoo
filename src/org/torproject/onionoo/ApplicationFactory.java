@@ -37,4 +37,15 @@ public class ApplicationFactory {
     }
     return documentStoreInstance;
   }
+
+  private static NodeIndexer nodeIndexerInstance;
+  public static void setNodeIndexer(NodeIndexer nodeIndexer) {
+    nodeIndexerInstance = nodeIndexer;
+  }
+  public static NodeIndexer getNodeIndexer() {
+    if (nodeIndexerInstance == null) {
+      nodeIndexerInstance = new NodeIndexer();
+    }
+    return nodeIndexerInstance;
+  }
 }

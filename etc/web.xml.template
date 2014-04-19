@@ -12,10 +12,6 @@
       org.torproject.onionoo.ResourceServlet
     </servlet-class>
     <init-param>
-      <param-name>outDir</param-name>
-      <param-value>/srv/onionoo/out/</param-value>
-    </init-param>
-    <init-param>
       <param-name>maintenance</param-name>
       <param-value>0</param-value>
     </init-param>
@@ -45,5 +41,15 @@
     <url-pattern>/uptime</url-pattern>
   </servlet-mapping>
 
+  <context-param>
+    <param-name>outDir</param-name>
+    <param-value>/srv/onionoo.torproject.org/onionoo/out/</param-value>
+  </context-param>
+
+  <listener>
+    <listener-class>
+      org.torproject.onionoo.NodeIndexer
+    </listener-class>
+  </listener>
 </web-app>
 
