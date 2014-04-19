@@ -43,21 +43,22 @@ class NodeIndex {
     return relaysByConsensusWeight;
   }
 
-  private Map<String, String> relayFingerprintSummaryLines;
+
+  private Map<String, NodeStatus> relayFingerprintSummaryLines;
   public void setRelayFingerprintSummaryLines(
-      Map<String, String> relayFingerprintSummaryLines) {
+      Map<String, NodeStatus> relayFingerprintSummaryLines) {
     this.relayFingerprintSummaryLines = relayFingerprintSummaryLines;
   }
-  public Map<String, String> getRelayFingerprintSummaryLines() {
+  public Map<String, NodeStatus> getRelayFingerprintSummaryLines() {
     return this.relayFingerprintSummaryLines;
   }
 
-  private Map<String, String> bridgeFingerprintSummaryLines;
+  private Map<String, NodeStatus> bridgeFingerprintSummaryLines;
   public void setBridgeFingerprintSummaryLines(
-      Map<String, String> bridgeFingerprintSummaryLines) {
+      Map<String, NodeStatus> bridgeFingerprintSummaryLines) {
     this.bridgeFingerprintSummaryLines = bridgeFingerprintSummaryLines;
   }
-  public Map<String, String> getBridgeFingerprintSummaryLines() {
+  public Map<String, NodeStatus> getBridgeFingerprintSummaryLines() {
     return this.bridgeFingerprintSummaryLines;
   }
 
@@ -230,9 +231,11 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       }
     }
     List<String> newRelaysByConsensusWeight = new ArrayList<String>();
-    Map<String, String>
-        newRelayFingerprintSummaryLines = new HashMap<String, String>(),
-        newBridgeFingerprintSummaryLines = new HashMap<String, String>();
+    Map<String, NodeStatus>
+        newRelayFingerprintSummaryLines =
+        new HashMap<String, NodeStatus>(),
+        newBridgeFingerprintSummaryLines =
+        new HashMap<String, NodeStatus>();
     Map<String, Set<String>>
         newRelaysByCountryCode = new HashMap<String, Set<String>>(),
         newRelaysByASNumber = new HashMap<String, Set<String>>(),
@@ -270,9 +273,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           toUpperCase();
       entry.setRunning(entry.getLastSeenMillis() ==
           relaysLastValidAfterMillis);
-      String line = formatRelaySummaryLine(entry);
-      newRelayFingerprintSummaryLines.put(fingerprint, line);
-      newRelayFingerprintSummaryLines.put(hashedFingerprint, line);
+      newRelayFingerprintSummaryLines.put(fingerprint, entry);
+      newRelayFingerprintSummaryLines.put(hashedFingerprint, entry);
       long consensusWeight = entry.getConsensusWeight();
       orderRelaysByConsensusWeight.add(String.format("%020d %s",
           consensusWeight, fingerprint));
@@ -339,10 +341,9 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           toUpperCase();
       entry.setRunning(entry.getRelayFlags().contains("Running") &&
           entry.getLastSeenMillis() == bridgesLastPublishedMillis);
-      String line = formatBridgeSummaryLine(entry);
-      newBridgeFingerprintSummaryLines.put(hashedFingerprint, line);
+      newBridgeFingerprintSummaryLines.put(hashedFingerprint, entry);
       newBridgeFingerprintSummaryLines.put(hashedHashedFingerprint,
-          line);
+          entry);
       for (String flag : entry.getRelayFlags()) {
         String flagLowerCase = flag.toLowerCase();
         if (!newBridgesByFlag.containsKey(flagLowerCase)) {
@@ -397,42 +398,6 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       this.latestNodeIndex = newNodeIndex;
       this.notifyAll();
     }
-  }
-
-  private String formatRelaySummaryLine(NodeStatus entry) {
-    String nickname = !entry.getNickname().equals("Unnamed") ?
-        entry.getNickname() : null;
-    String fingerprint = entry.getFingerprint();
-    String running = entry.getRunning() ? "true" : "false";
-    List<String> addresses = new ArrayList<String>();
-    addresses.add(entry.getAddress());
-    for (String orAddress : entry.getOrAddresses()) {
-      addresses.add(orAddress);
-    }
-    for (String exitAddress : entry.getExitAddresses()) {
-      if (!addresses.contains(exitAddress)) {
-        addresses.add(exitAddress);
-      }
-    }
-    StringBuilder addressesBuilder = new StringBuilder();
-    int written = 0;
-    for (String address : addresses) {
-      addressesBuilder.append((written++ > 0 ? "," : "") + "\""
-          + address.toLowerCase() + "\"");
-    }
-    return String.format("{%s\"f\":\"%s\",\"a\":[%s],\"r\":%s}",
-        (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
-        fingerprint, addressesBuilder.toString(), running);
-  }
-
-  private String formatBridgeSummaryLine(NodeStatus entry) {
-    String nickname = !entry.getNickname().equals("Unnamed") ?
-        entry.getNickname() : null;
-    String hashedFingerprint = entry.getFingerprint();
-    String running = entry.getRunning() ? "true" : "false";
-    return String.format("{%s\"h\":\"%s\",\"r\":%s}",
-         (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
-         hashedFingerprint, running);
   }
 }
 

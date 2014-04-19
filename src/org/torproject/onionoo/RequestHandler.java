@@ -96,11 +96,11 @@ public class RequestHandler {
         lastSeenDays.length);
   }
 
-  private Map<String, String> filteredRelays =
-      new HashMap<String, String>();
+  private Map<String, NodeStatus> filteredRelays =
+      new HashMap<String, NodeStatus>();
 
-  private Map<String, String> filteredBridges =
-      new HashMap<String, String>();
+  private Map<String, NodeStatus> filteredBridges =
+      new HashMap<String, NodeStatus>();
 
   public void handleRequest() {
     this.filteredRelays.putAll(
@@ -149,8 +149,8 @@ public class RequestHandler {
     }
     boolean runningRequested = this.running.equals("true");
     Set<String> removeRelays = new HashSet<String>();
-    for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
-      if (e.getValue().contains("\"r\":true") != runningRequested) {
+    for (Map.Entry<String, NodeStatus> e : filteredRelays.entrySet()) {
+      if (e.getValue().getRunning() != runningRequested) {
         removeRelays.add(e.getKey());
       }
     }
@@ -158,8 +158,8 @@ public class RequestHandler {
       this.filteredRelays.remove(fingerprint);
     }
     Set<String> removeBridges = new HashSet<String>();
-    for (Map.Entry<String, String> e : filteredBridges.entrySet()) {
-      if (e.getValue().contains("\"r\":true") != runningRequested) {
+    for (Map.Entry<String, NodeStatus> e : filteredBridges.entrySet()) {
+      if (e.getValue().getRunning() != runningRequested) {
         removeBridges.add(e.getKey());
       }
     }
@@ -179,15 +179,12 @@ public class RequestHandler {
 
   private void filterBySearchTerm(String searchTerm) {
     Set<String> removeRelays = new HashSet<String>();
-    for (Map.Entry<String, String> e : filteredRelays.entrySet()) {
+    for (Map.Entry<String, NodeStatus> e : filteredRelays.entrySet()) {
       String fingerprint = e.getKey();
-      String line = e.getValue();
+      NodeStatus entry = e.getValue();
       boolean lineMatches = false;
-      String nickname = "unnamed";
-      if (line.contains("\"n\":\"")) {
-        nickname = line.substring(line.indexOf("\"n\":\"") + 5).
-            split("\"")[0].toLowerCase();
-      }
+      String nickname = entry.getNickname() != null ?
+          entry.getNickname().toLowerCase() : "unnamed";
       if (searchTerm.startsWith("$")) {
         /* Search is for $-prefixed fingerprint. */
         if (fingerprint.startsWith(
@@ -201,10 +198,22 @@ public class RequestHandler {
       } else if (fingerprint.startsWith(searchTerm.toUpperCase())) {
         /* Non-$-prefixed fingerprint matches. */
         lineMatches = true;
-      } else if (line.substring(line.indexOf("\"a\":[")).contains("\""
-          + searchTerm.toLowerCase())) {
-        /* Address matches. */
-        lineMatches = true;
+      } else {
+        List<String> addresses = new ArrayList<String>();
+        addresses.add(entry.getAddress().toLowerCase());
+        for (String orAddress : entry.getOrAddresses()) {
+          addresses.add(orAddress.toLowerCase());
+        }
+        for (String exitAddress : entry.getExitAddresses()) {
+          addresses.add(exitAddress.toLowerCase());
+        }
+        for (String address : addresses) {
+          if (address.startsWith(searchTerm.toLowerCase())) {
+            /* Address matches. */
+            lineMatches = true;
+            break;
+          }
+        }
       }
       if (!lineMatches) {
         removeRelays.add(e.getKey());
@@ -214,15 +223,12 @@ public class RequestHandler {
       this.filteredRelays.remove(fingerprint);
     }
     Set<String> removeBridges = new HashSet<String>();
-    for (Map.Entry<String, String> e : filteredBridges.entrySet()) {
+    for (Map.Entry<String, NodeStatus> e : filteredBridges.entrySet()) {
       String hashedFingerprint = e.getKey();
-      String line = e.getValue();
+      NodeStatus entry = e.getValue();
       boolean lineMatches = false;
-      String nickname = "unnamed";
-      if (line.contains("\"n\":\"")) {
-        nickname = line.substring(line.indexOf("\"n\":\"") + 5).
-            split("\"")[0].toLowerCase();
-      }
+      String nickname = entry.getNickname() != null ?
+          entry.getNickname().toLowerCase() : "unnamed";
       if (searchTerm.startsWith("$")) {
         /* Search is for $-prefixed hashed fingerprint. */
         if (hashedFingerprint.startsWith(
@@ -251,12 +257,12 @@ public class RequestHandler {
       return;
     }
     String fingerprint = this.lookup;
-    String relayLine = this.filteredRelays.get(fingerprint);
+    NodeStatus relayLine = this.filteredRelays.get(fingerprint);
     this.filteredRelays.clear();
     if (relayLine != null) {
       this.filteredRelays.put(fingerprint, relayLine);
     }
-    String bridgeLine = this.filteredBridges.get(fingerprint);
+    NodeStatus bridgeLine = this.filteredBridges.get(fingerprint);
     this.filteredBridges.clear();
     if (bridgeLine != null) {
       this.filteredBridges.put(fingerprint, bridgeLine);
@@ -275,8 +281,7 @@ public class RequestHandler {
       Set<String> relaysWithCountryCode =
           this.nodeIndex.getRelaysByCountryCode().get(countryCode);
       Set<String> removeRelays = new HashSet<String>();
-      for (Map.Entry<String, String> e : this.filteredRelays.entrySet()) {
-        String fingerprint = e.getKey();
+      for (String fingerprint : this.filteredRelays.keySet()) {
         if (!relaysWithCountryCode.contains(fingerprint)) {
           removeRelays.add(fingerprint);
         }
@@ -302,8 +307,7 @@ public class RequestHandler {
       Set<String> relaysWithASNumber =
           this.nodeIndex.getRelaysByASNumber().get(aSNumber);
       Set<String> removeRelays = new HashSet<String>();
-      for (Map.Entry<String, String> e : this.filteredRelays.entrySet()) {
-        String fingerprint = e.getKey();
+      for (String fingerprint : this.filteredRelays.keySet()) {
         if (!relaysWithASNumber.contains(fingerprint)) {
           removeRelays.add(fingerprint);
         }
@@ -326,8 +330,7 @@ public class RequestHandler {
       Set<String> relaysWithFlag = this.nodeIndex.getRelaysByFlag().get(
           flag);
       Set<String> removeRelays = new HashSet<String>();
-      for (Map.Entry<String, String> e : this.filteredRelays.entrySet()) {
-        String fingerprint = e.getKey();
+      for (String fingerprint : this.filteredRelays.keySet()) {
         if (!relaysWithFlag.contains(fingerprint)) {
           removeRelays.add(fingerprint);
         }
@@ -342,9 +345,7 @@ public class RequestHandler {
       Set<String> bridgesWithFlag = this.nodeIndex.getBridgesByFlag().get(
           flag);
       Set<String> removeBridges = new HashSet<String>();
-      for (Map.Entry<String, String> e :
-          this.filteredBridges.entrySet()) {
-        String fingerprint = e.getKey();
+      for (String fingerprint : this.filteredBridges.keySet()) {
         if (!bridgesWithFlag.contains(fingerprint)) {
           removeBridges.add(fingerprint);
         }
@@ -375,7 +376,7 @@ public class RequestHandler {
         this.nodeIndex.getBridgesByLastSeenDays(), this.lastSeenDays);
   }
 
-  private void filterNodesByDays(Map<String, String> filteredNodes,
+  private void filterNodesByDays(Map<String, NodeStatus> filteredNodes,
       SortedMap<Integer, Set<String>> nodesByDays, int[] days) {
     Set<String> removeNodes = new HashSet<String>();
     for (Set<String> nodes : nodesByDays.headMap(days[0]).values()) {
@@ -432,14 +433,14 @@ public class RequestHandler {
           this.orderedRelays.add(this.filteredRelays.remove(relay));
         }
       }
-      Set<String> uniqueBridges = new HashSet<String>(
+      Set<NodeStatus> uniqueBridges = new HashSet<NodeStatus>(
           this.filteredBridges.values());
       this.orderedBridges.addAll(uniqueBridges);
     } else {
-      Set<String> uniqueRelays = new HashSet<String>(
+      Set<NodeStatus> uniqueRelays = new HashSet<NodeStatus>(
           this.filteredRelays.values());
       this.orderedRelays.addAll(uniqueRelays);
-      Set<String> uniqueBridges = new HashSet<String>(
+      Set<NodeStatus> uniqueBridges = new HashSet<NodeStatus>(
           this.filteredBridges.values());
       this.orderedBridges.addAll(uniqueBridges);
     }
@@ -477,13 +478,13 @@ public class RequestHandler {
     }
   }
 
-  private List<String> orderedRelays = new ArrayList<String>();
-  public List<String> getOrderedRelays() {
+  private List<NodeStatus> orderedRelays = new ArrayList<NodeStatus>();
+  public List<NodeStatus> getOrderedRelays() {
     return this.orderedRelays;
   }
 
-  private List<String> orderedBridges = new ArrayList<String>();
-  public List<String> getOrderedBridges() {
+  private List<NodeStatus> orderedBridges = new ArrayList<NodeStatus>();
+  public List<NodeStatus> getOrderedBridges() {
     return this.orderedBridges;
   }
 
