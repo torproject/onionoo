@@ -146,9 +146,9 @@ public class ResourceServlet extends HttpServlet {
     /* Make sure that the request doesn't contain any unknown
      * parameters. */
     Set<String> knownParameters = new HashSet<String>(Arrays.asList((
-        "type,running,search,lookup,country,as,flag,first_seen_days,"
-        + "last_seen_days,contact,order,limit,offset,fields").
-        split(",")));
+        "type,running,search,lookup,fingerprint,country,as,flag,"
+        + "first_seen_days,last_seen_days,contact,order,limit,offset,"
+        + "fields").split(",")));
     for (String parameterKey : parameterMap.keySet()) {
       if (!knownParameters.contains(parameterKey)) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -190,14 +190,24 @@ public class ResourceServlet extends HttpServlet {
       rh.setSearch(searchTerms);
     }
     if (parameterMap.containsKey("lookup")) {
-      String fingerprintParameter = this.parseFingerprintParameter(
+      String lookupParameter = this.parseFingerprintParameter(
           parameterMap.get("lookup"));
+      if (lookupParameter == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      String fingerprint = lookupParameter.toUpperCase();
+      rh.setLookup(fingerprint);
+    }
+    if (parameterMap.containsKey("fingerprint")) {
+      String fingerprintParameter = this.parseFingerprintParameter(
+          parameterMap.get("fingerprint"));
       if (fingerprintParameter == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
       String fingerprint = fingerprintParameter.toUpperCase();
-      rh.setLookup(fingerprint);
+      rh.setFingerprint(fingerprint);
     }
     if (parameterMap.containsKey("country")) {
       String countryCodeParameter = this.parseCountryCodeParameter(

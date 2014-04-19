@@ -725,7 +725,7 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testSearchBridgeHashedHashedFingerprint() {
+  public void testLookupBridgeHashedHashedFingerprint() {
     this.assertSummaryDocument(
         "/summary?lookup=CE52F898DB3678BCE33FAC28C92774DE90D618B5", 0,
         null, 1, new String[] { "gummy" });
@@ -736,6 +736,48 @@ public class ResourceServletTest {
     this.assertSummaryDocument(
         "/summary?lookup=0010D49C6DA1E46A316563099F41BFE40B6C7183", 0,
         null, 0, null);
+  }
+
+  @Test()
+  public void testLookupNonExistantFingerprint() {
+    this.assertSummaryDocument(
+        "/summary?lookup=0000000000000000000000000000000000000000", 0,
+        null, 0, null);
+  }
+
+  @Test()
+  public void testFingerprintRelayFingerprint() {
+    this.assertSummaryDocument(
+        "/summary?fingerprint=000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
+        1, new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test()
+  public void testFingerprintRelayHashedFingerprint() {
+    this.assertSummaryDocument(
+        "/summary?fingerprint=5aa14c08d62913e0057a9ad5863b458c0ce94cee",
+        0, null, 0, null);
+  }
+
+  @Test()
+  public void testFingerprintBridgeHashedFingerprint() {
+    this.assertSummaryDocument(
+        "/summary?fingerprint=1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756",
+        0, null, 1, new String[] { "gummy" });
+  }
+
+  @Test()
+  public void testFingerprintBridgeHashedHashedFingerprint() {
+    this.assertSummaryDocument(
+        "/summary?fingerprint=CE52F898DB3678BCE33FAC28C92774DE90D618B5",
+        0, null, 0, null);
+  }
+
+  @Test()
+  public void testFingerprintBridgeOriginalFingerprint() {
+    this.assertSummaryDocument(
+        "/summary?fingerprint=0010D49C6DA1E46A316563099F41BFE40B6C7183",
+        0, null, 0, null);
   }
 
   @Test()

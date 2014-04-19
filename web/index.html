@@ -174,8 +174,9 @@ below.</p>
 
 <p>
 The following methods each return a single document containing zero or
-more objects of relays and/or bridges that are currently running or that
-have been running in the past week.
+more objects of relays and/or bridges.
+By default, all relays and bridges are included that have been running in
+the past week.
 </p>
 
 <ul class="api-urls">
@@ -226,8 +227,12 @@ document</a></span>
 
 <h4>Parameters</h4>
 <p>
-Each of the methods above can be parameterized to select only a subset
-of relay and/or bridge documents to be included in the response.
+Each of the methods can be parameterized to select only a subset of relay
+and/or bridge documents that are currently running or that have been
+running in the past week.
+(The <strong>fingerprint</strong> parameter is special here, because it
+allows selecting a specific relay or bridge, regardless of whether it has
+been running in the past week.)
 If multiple parameters are specified, they are combined using a logical
 AND operation, meaning that only the intersection of relays and bridges
 matching all parameters is returned.
@@ -293,6 +298,22 @@ Lookups are case-insensitive.
 </li>
 
 <li>
+<font color="blue"><b>fingerprint</b></font>
+<p>
+Return only the relay with the parameter value matching the fingerprint
+or the bridge with the parameter value matching the hashed fingerprint.
+Fingerprints must consist of 40 hex characters, case does not matter.
+This parameter is quite similar to the <strong>lookup</strong> parameter
+with two exceptions:
+(1) the provided relay fingerprint or hashed bridge fingerprint <i>must
+not</i> be hashed (again) using SHA-1;
+(2) the response will contain any matching relay or bridge regardless of
+whether they have been running in the past week.
+<font color="blue">Added on April 20, 2014.</font>
+</p>
+</li>
+
+<li>
 <b>country</b>
 <p>
 Return only relays which are located in the
@@ -344,8 +365,8 @@ last been seen at least x and at most y days ago.
 Accepted short forms are "x", "x-", and "-y" which are interpreted as
 "x-x", "x-infinity", and "0-y".
 Note that relays and bridges that haven't been running in the past week
-are never included in results, so that setting x to 8 or higher will
-always lead to an empty result set.
+are not included in results, so that setting x to 8 or higher will lead to
+an empty result set.
 </p>
 </li>
 
@@ -609,8 +630,6 @@ running in the last bridge network status.
 </h3>
 
 <p>
-Details documents contain all known details of relays and bridges that
-have been running in the past week.
 Details documents are based on the network statuses published by the Tor
 directories and the server descriptors published by relays and bridges.
 Details documents contain the following fields:
@@ -1387,8 +1406,6 @@ graphs.
 <p>
 Bandwidth documents contain aggregate statistics of a relay's or
 bridge's consumed bandwidth for different time intervals.
-Bandwidth documents are available for all relays and bridges that have
-been running in the past week.
 Bandwidth documents contain the following fields:
 </p>
 
@@ -1551,7 +1568,7 @@ The specification of graph history objects is similar to those in the
 Weights documents contain aggregate statistics of a relay's probability
 to be selected by clients for building paths.
 Weights documents contain different time intervals and are available for
-all relays that have been running in the past week.
+relays only.
 Weights documents contain the following fields:
 </p>
 
@@ -1725,7 +1742,7 @@ Clients documents contain estimates of the average number of clients
 connecting to a bridge every day.
 There are no clients documents available for relays, just for bridges.
 Clients documents contain different time intervals and are available for
-all bridges that have been running in the past week.
+bridges only.
 Clients documents contain the following fields:
 </p>
 
@@ -1894,7 +1911,7 @@ It might be removed in the future without notice.</font>
 <font color="blue">Added on March 10, 2014.</font>
 Uptime documents contain fractional uptimes of relays and bridges.
 Uptime documents contain different time intervals and are available for
-all relays and bridges that have been running in the past week.
+relays and bridges.
 Uptime documents contain the following fields:
 </p>
 

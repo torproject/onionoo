@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.Stack;
@@ -239,7 +240,93 @@ public class DocumentStore {
   }
 
   private NodeStatus retrieveNodeStatus(String fingerprint) {
-    return this.cachedNodeStatuses.get(fingerprint);
+    if (this.cachedNodeStatuses.containsKey(fingerprint)) {
+      return this.cachedNodeStatuses.get(fingerprint);
+    } else if (this.listedArchivedNodeStatuses) {
+      return null;
+    }
+    /* TODO This is an evil hack to support looking up relays or bridges
+     * that haven't been running for a week without having to load
+     * 500,000 NodeStatus instances into memory.  Maybe there's a better
+     * way?  Or do we need to switch to a real database for this? */
+    DetailsDocument detailsDocument = this.retrieveDocumentFile(
+        DetailsDocument.class, false, fingerprint);
+    if (detailsDocument == null) {
+      return null;
+    }
+    try {
+      boolean isRelay = true, running = false;
+      String nickname = null, address = null, countryCode = null,
+          hostName = null, defaultPolicy = null, portList = null,
+          aSNumber = null, contact = null;
+      SortedSet<String> orAddressesAndPorts = new TreeSet<String>(),
+          exitAddresses = new TreeSet<String>(),
+          relayFlags = new TreeSet<String>();
+      long lastSeenMillis = -1L, consensusWeight = -1L,
+          lastRdnsLookup = -1L, firstSeenMillis = -1L,
+          lastChangedAddresses = -1L;
+      int orPort = 0, dirPort = 0;
+      Boolean recommendedVersion = null;
+      Scanner s = new Scanner(detailsDocument.getDocumentString());
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        if (!line.contains(":")) {
+          continue;
+        }
+        String[] parts = line.split(":", 2);
+        String key = parts[0], value = parts[1];
+        if (key.equals("\"nickname\"")) {
+          if (!value.startsWith("\"") || !value.endsWith("\",")) {
+            return null;
+          }
+          nickname = value.substring(1, value.length() - 2);
+        } else if (key.equals("\"hashed_fingerprint\"")) {
+          isRelay = false;
+        } else if (key.equals("\"or_addresses\"")) {
+          if (!value.startsWith("[") || !value.endsWith("],")) {
+            return null;
+          }
+          for (String addressAndPort :
+              value.substring(1, value.length() - 2).split(",")) {
+            if (addressAndPort.length() < 2 ||
+                !addressAndPort.contains(":")) {
+              return null;
+            }
+            if (address == null) {
+              address = addressAndPort.substring(1,
+                  addressAndPort.lastIndexOf(":"));
+            } else {
+              orAddressesAndPorts.add(addressAndPort);
+            }
+          }
+        } else if (key.equals("\"exit_addresses\"")) {
+          if (!value.startsWith("[") || !value.endsWith("],")) {
+            return null;
+          }
+          for (String addressPart :
+              value.substring(1, value.length() - 2).split(",")) {
+            exitAddresses.add(addressPart);
+          }
+        } else if (key.equals("\"running\"")) {
+          if (value.equals("true,")) {
+            running = true;
+          } else if (!value.equals("false,")) {
+            return null;
+          }
+        }
+      }
+      NodeStatus nodeStatus = new NodeStatus(isRelay, nickname,
+          fingerprint, address, orAddressesAndPorts, exitAddresses,
+          lastSeenMillis, orPort, dirPort, relayFlags, consensusWeight,
+          countryCode, hostName, lastRdnsLookup, defaultPolicy, portList,
+          firstSeenMillis, lastChangedAddresses, aSNumber, contact,
+          recommendedVersion);
+      nodeStatus.setRunning(running);
+      return nodeStatus;
+    } catch (Exception e) {
+      /* Play it safe and fall back to returning nothing. */
+      return null;
+    }
   }
 
   private <T extends Document> T retrieveDocumentFile(

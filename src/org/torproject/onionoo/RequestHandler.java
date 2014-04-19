@@ -15,8 +15,11 @@ public class RequestHandler {
 
   private NodeIndex nodeIndex;
 
+  private DocumentStore documentStore;
+
   public RequestHandler(NodeIndex nodeIndex) {
     this.nodeIndex = nodeIndex;
+    this.documentStore = ApplicationFactory.getDocumentStore();
   }
 
   private String resourceType;
@@ -43,6 +46,11 @@ public class RequestHandler {
   private String lookup;
   public void setLookup(String lookup) {
     this.lookup = lookup;
+  }
+
+  private String fingerprint;
+  public void setFingerprint(String fingerprint) {
+    this.fingerprint = fingerprint;
   }
 
   private String country;
@@ -111,6 +119,7 @@ public class RequestHandler {
     this.filterByType();
     this.filterByRunning();
     this.filterBySearchTerms();
+    this.filterByLookup();
     this.filterByFingerprint();
     this.filterByCountryCode();
     this.filterByASNumber();
@@ -252,7 +261,7 @@ public class RequestHandler {
     }
   }
 
-  private void filterByFingerprint() {
+  private void filterByLookup() {
     if (this.lookup == null) {
       return;
     }
@@ -266,6 +275,24 @@ public class RequestHandler {
     this.filteredBridges.clear();
     if (bridgeLine != null) {
       this.filteredBridges.put(fingerprint, bridgeLine);
+    }
+  }
+
+  private void filterByFingerprint() {
+    if (this.fingerprint == null) {
+      return;
+    }
+    this.filteredRelays.clear();
+    this.filteredBridges.clear();
+    String fingerprint = this.fingerprint;
+    NodeStatus entry = this.documentStore.retrieve(NodeStatus.class, true,
+        fingerprint);
+    if (entry != null) {
+      if (entry.isRelay()) {
+        this.filteredRelays.put(fingerprint, entry);
+      } else {
+        this.filteredBridges.put(fingerprint, entry);
+      }
     }
   }
 
