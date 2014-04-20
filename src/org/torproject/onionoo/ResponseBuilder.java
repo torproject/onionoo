@@ -209,9 +209,7 @@ public class ResponseBuilder {
           bandwidthLines.length() - 1);
       return bandwidthLines;
     } else {
-      // TODO We should probably log that we didn't find a bandwidth
-      // document that we expected to exist.
-      return "";
+      return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }
   }
 
@@ -225,9 +223,7 @@ public class ResponseBuilder {
       weightsLines = weightsLines.substring(0, weightsLines.length() - 1);
       return weightsLines;
     } else {
-      // TODO We should probably log that we didn't find a weights
-      // document that we expected to exist.
-      return "";
+      return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }
   }
 
@@ -241,9 +237,7 @@ public class ResponseBuilder {
       clientsLines = clientsLines.substring(0, clientsLines.length() - 1);
       return clientsLines;
     } else {
-      // TODO We should probably log that we didn't find a clients
-      // document that we expected to exist.
-      return "";
+      return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }
   }
 
@@ -257,9 +251,7 @@ public class ResponseBuilder {
       uptimeLines = uptimeLines.substring(0, uptimeLines.length() - 1);
       return uptimeLines;
     } else {
-      // TODO We should probably log that we didn't find an uptime
-      // document that we expected to exist.
-      return "";
+      return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }
   }
 }

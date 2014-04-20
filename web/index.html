@@ -1474,7 +1474,7 @@ hexadecimal characters.
 <li>
 <b>write_history</b>
 <code class="typeof">object</code>
-<span class="required-true">required</span>
+<span class="required-false">optional</span>
 <p>
 Object containing graph history objects with written bytes for different
 time periods.
@@ -1493,18 +1493,20 @@ The unit is bytes per second.
 Contained graph history objects may contain null values if the relay did
 not provide any bandwidth data or only data for less than 20% of a given
 time period.
+<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
 <li>
 <b>read_history</b>
 <code class="typeof">object</code>
-<span class="required-true">required</span>
+<span class="required-false">optional</span>
 <p>
 Object containing graph history objects with read bytes for different time
 periods.
 The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field.
+<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
@@ -1531,24 +1533,26 @@ of 40 upper-case hexadecimal characters.
 <li>
 <b>write_history</b>
 <code class="typeof">object</code>
-<span class="required-true">required</span>
+<span class="required-false">optional</span>
 <p>
 Object containing graph history objects with written bytes for different
 time periods.
 The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field of <strong>relays</strong>.
+<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
 <li>
 <b>read_history</b>
 <code class="typeof">object</code>
-<span class="required-true">required</span>
+<span class="required-false">optional</span>
 <p>
 Object containing graph history objects with read bytes for different time
 periods.
 The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field of <strong>relays</strong>.
+<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
@@ -2023,11 +2027,12 @@ of 40 upper-case hexadecimal characters.
 <li>
 <b>uptime</b>
 <code class="typeof">object</code>
-<span class="required-true">required</span>
+<span class="required-false">optional</span>
 <p>
 Object containing uptime history objects for different time periods.
 The specification of uptime history objects is similar to those in the
 <strong>uptime</strong> field of <strong>relays</strong>.
+<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
