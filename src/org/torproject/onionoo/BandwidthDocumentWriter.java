@@ -4,8 +4,9 @@ package org.torproject.onionoo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -47,25 +48,23 @@ public class BandwidthDocumentWriter implements FingerprintListener,
       if (bandwidthStatus == null) {
         continue;
       }
-      this.writeBandwidthDataFileToDisk(fingerprint,
-          bandwidthStatus.getWriteHistory(),
-          bandwidthStatus.getReadHistory());
+      BandwidthDocument bandwidthDocument = this.compileBandwidthDocument(
+          fingerprint, bandwidthStatus);
+      this.documentStore.store(bandwidthDocument, fingerprint);
     }
     Logger.printStatusTime("Wrote bandwidth document files");
   }
 
-  private void writeBandwidthDataFileToDisk(String fingerprint,
-      SortedMap<Long, long[]> writeHistory,
-      SortedMap<Long, long[]> readHistory) {
-    String writeHistoryString = formatHistoryString(writeHistory);
-    String readHistoryString = formatHistoryString(readHistory);
-    StringBuilder sb = new StringBuilder();
-    sb.append("{\"fingerprint\":\"" + fingerprint + "\",\n"
-        + "\"write_history\":{\n" + writeHistoryString + "},\n"
-        + "\"read_history\":{\n" + readHistoryString + "}}\n");
+
+  private BandwidthDocument compileBandwidthDocument(String fingerprint,
+      BandwidthStatus bandwidthStatus) {
     BandwidthDocument bandwidthDocument = new BandwidthDocument();
-    bandwidthDocument.setDocumentString(sb.toString());
-    this.documentStore.store(bandwidthDocument, fingerprint);
+    bandwidthDocument.setFingerprint(fingerprint);
+    bandwidthDocument.setWriteHistory(this.compileGraphType(
+        bandwidthStatus.getWriteHistory()));
+    bandwidthDocument.setReadHistory(this.compileGraphType(
+        bandwidthStatus.getReadHistory()));
+    return bandwidthDocument;
   }
 
   private String[] graphNames = new String[] {
@@ -92,8 +91,10 @@ public class BandwidthDocumentWriter implements FingerprintListener,
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
-  private String formatHistoryString(SortedMap<Long, long[]> history) {
-    StringBuilder sb = new StringBuilder();
+  private Map<String, GraphHistory> compileGraphType(
+      SortedMap<Long, long[]> history) {
+    Map<String, GraphHistory> graphs =
+        new LinkedHashMap<String, GraphHistory>();
     for (int i = 0; i < this.graphIntervals.length; i++) {
       String graphName = this.graphNames[i];
       long graphInterval = this.graphIntervals[i];
@@ -153,18 +154,16 @@ public class BandwidthDocumentWriter implements FingerprintListener,
           + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
       double factor = ((double) maxValue) / 999.0;
       int count = lastNonNullIndex - firstNonNullIndex + 1;
-      StringBuilder sb2 = new StringBuilder();
-      sb2.append("\"" + graphName + "\":{"
-          + "\"first\":\""
-          + DateTimeHelper.format(firstDataPointMillis) + "\","
-          + "\"last\":\""
-          + DateTimeHelper.format(lastDataPointMillis) + "\","
-          + "\"interval\":" + String.valueOf(dataPointInterval
-          / DateTimeHelper.ONE_SECOND)
-          + ",\"factor\":" + String.format(Locale.US, "%.3f", factor)
-          + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
-      int written = 0, previousNonNullIndex = -2;
+      GraphHistory graphHistory = new GraphHistory();
+      graphHistory.setFirst(DateTimeHelper.format(firstDataPointMillis));
+      graphHistory.setLast(DateTimeHelper.format(lastDataPointMillis));
+      graphHistory.setInterval((int) (dataPointInterval
+          / DateTimeHelper.ONE_SECOND));
+      graphHistory.setFactor(factor);
+      graphHistory.setCount(count);
+      int previousNonNullIndex = -2;
       boolean foundTwoAdjacentDataPoints = false;
+      List<Integer> values = new ArrayList<Integer>();
       for (int j = firstNonNullIndex; j <= lastNonNullIndex; j++) {
         long dataPoint = dataPoints.get(j);
         if (dataPoint >= 0L) {
@@ -173,19 +172,15 @@ public class BandwidthDocumentWriter implements FingerprintListener,
           }
           previousNonNullIndex = j;
         }
-        sb2.append((written++ > 0 ? "," : "") + (dataPoint < 0L ? "null" :
-            String.valueOf((dataPoint * 999L) / maxValue)));
+        values.add(dataPoint < 0L ? null :
+          (int) ((dataPoint * 999L) / maxValue));
       }
-      sb2.append("]},\n");
+      graphHistory.setValues(values);
       if (foundTwoAdjacentDataPoints) {
-        sb.append(sb2.toString());
+        graphs.put(graphName, graphHistory);
       }
     }
-    String result = sb.toString();
-    if (result.length() >= 2) {
-      result = result.substring(0, result.length() - 2) + "\n";
-    }
-    return result;
+    return graphs;
   }
 
   public String getStatsString() {

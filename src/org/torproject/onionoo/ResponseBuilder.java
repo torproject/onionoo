@@ -193,10 +193,7 @@ public class ResponseBuilder {
         BandwidthDocument.class, false, fingerprint);
     if (bandwidthDocument != null &&
         bandwidthDocument.getDocumentString() != null) {
-      String bandwidthLines = bandwidthDocument.getDocumentString();
-      bandwidthLines = bandwidthLines.substring(0,
-          bandwidthLines.length() - 1);
-      return bandwidthLines;
+      return bandwidthDocument.getDocumentString();
     } else {
       return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }
