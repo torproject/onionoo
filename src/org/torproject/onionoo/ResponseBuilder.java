@@ -222,9 +222,7 @@ public class ResponseBuilder {
         ClientsDocument.class, false, fingerprint);
     if (clientsDocument != null &&
         clientsDocument.getDocumentString() != null) {
-      String clientsLines = clientsDocument.getDocumentString();
-      clientsLines = clientsLines.substring(0, clientsLines.length() - 1);
-      return clientsLines;
+      return clientsDocument.getDocumentString();
     } else {
       return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }

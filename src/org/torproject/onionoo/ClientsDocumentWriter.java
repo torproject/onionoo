@@ -3,8 +3,8 @@
 package org.torproject.onionoo;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -74,9 +74,8 @@ public class ClientsDocumentWriter implements FingerprintListener,
         continue;
       }
       SortedSet<ClientsHistory> history = clientsStatus.getHistory();
-      ClientsDocument clientsDocument = new ClientsDocument();
-      clientsDocument.setDocumentString(this.formatHistoryString(
-          hashedFingerprint, history));
+      ClientsDocument clientsDocument = this.compileClientsDocument(
+          hashedFingerprint, history);
       this.documentStore.store(clientsDocument, hashedFingerprint);
       this.writtenDocuments++;
     }
@@ -104,28 +103,27 @@ public class ClientsDocumentWriter implements FingerprintListener,
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
-  private String formatHistoryString(String hashedFingerprint,
+  private ClientsDocument compileClientsDocument(String hashedFingerprint,
       SortedSet<ClientsHistory> history) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("{\"fingerprint\":\"" + hashedFingerprint + "\"");
-    sb.append(",\n\"average_clients\":{");
-    int graphIntervalsWritten = 0;
+    ClientsDocument clientsDocument = new ClientsDocument();
+    clientsDocument.setFingerprint(hashedFingerprint);
+    Map<String, ClientsGraphHistory> averageClients =
+        new LinkedHashMap<String, ClientsGraphHistory>();
     for (int graphIntervalIndex = 0; graphIntervalIndex <
         this.graphIntervals.length; graphIntervalIndex++) {
-      String timeline = this.formatTimeline(graphIntervalIndex, history);
-      if (timeline != null) {
-        sb.append((graphIntervalsWritten++ > 0 ? "," : "") + "\n"
-            + timeline);
+      String graphName = this.graphNames[graphIntervalIndex];
+      ClientsGraphHistory graphHistory = this.compileClientsHistory(
+          graphIntervalIndex, history);
+      if (graphHistory != null) {
+        averageClients.put(graphName, graphHistory);
       }
     }
-    sb.append("}");
-    sb.append("\n}\n");
-    return sb.toString();
+    clientsDocument.setAverageClients(averageClients);
+    return clientsDocument;
   }
 
-  private String formatTimeline(int graphIntervalIndex,
-      SortedSet<ClientsHistory> history) {
-    String graphName = this.graphNames[graphIntervalIndex];
+  private ClientsGraphHistory compileClientsHistory(
+      int graphIntervalIndex, SortedSet<ClientsHistory> history) {
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
@@ -214,16 +212,16 @@ public class ClientsDocumentWriter implements FingerprintListener,
         + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
     double factor = ((double) maxValue) / 999.0;
     int count = lastNonNullIndex - firstNonNullIndex + 1;
-    StringBuilder sb = new StringBuilder();
-    sb.append("\"" + graphName + "\":{"
-        + "\"first\":\"" + DateTimeHelper.format(firstDataPointMillis)
-        + "\",\"last\":\"" + DateTimeHelper.format(lastDataPointMillis)
-        + "\",\"interval\":" + String.valueOf(dataPointInterval
-        / DateTimeHelper.ONE_SECOND)
-        + ",\"factor\":" + String.format(Locale.US, "%.9f", factor)
-        + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
-    int dataPointsWritten = 0, previousNonNullIndex = -2;
+    ClientsGraphHistory graphHistory = new ClientsGraphHistory();
+    graphHistory.setFirst(DateTimeHelper.format(firstDataPointMillis));
+    graphHistory.setLast(DateTimeHelper.format(lastDataPointMillis));
+    graphHistory.setInterval((int) (dataPointInterval
+        / DateTimeHelper.ONE_SECOND));
+    graphHistory.setFactor(factor);
+    graphHistory.setCount(count);
+    int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
+    List<Integer> values = new ArrayList<Integer>();
     for (int dataPointIndex = firstNonNullIndex; dataPointIndex <=
         lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
@@ -233,53 +231,45 @@ public class ClientsDocumentWriter implements FingerprintListener,
         }
         previousNonNullIndex = dataPointIndex;
       }
-      sb.append((dataPointsWritten++ > 0 ? "," : "")
-          + (dataPoint < 0.0 ? "null" :
-          String.valueOf((long) ((dataPoint * 999.0) / maxValue))));
+      values.add(dataPoint < 0.0 ? null :
+          (int) ((dataPoint * 999.0) / maxValue));
     }
-    sb.append("]");
+    graphHistory.setValues(values);
     if (!totalResponsesByCountry.isEmpty()) {
-      sb.append(",\"countries\":{");
-      int written = 0;
+      SortedMap<String, Float> countries = new TreeMap<String, Float>();
       for (Map.Entry<String, Double> e :
           totalResponsesByCountry.entrySet()) {
         if (e.getValue() > totalResponses / 100.0) {
-          sb.append((written++ > 0 ? "," : "") + "\"" + e.getKey()
-              + "\":" + String.format(Locale.US, "%.4f",
-              e.getValue() / totalResponses));
+          countries.put(e.getKey(),
+              (float) (e.getValue() / totalResponses));
         }
       }
-      sb.append("}");
+      graphHistory.setCountries(countries);
     }
     if (!totalResponsesByTransport.isEmpty()) {
-      sb.append(",\"transports\":{");
-      int written = 0;
+      SortedMap<String, Float> transports = new TreeMap<String, Float>();
       for (Map.Entry<String, Double> e :
           totalResponsesByTransport.entrySet()) {
         if (e.getValue() > totalResponses / 100.0) {
-          sb.append((written++ > 0 ? "," : "") + "\"" + e.getKey()
-              + "\":" + String.format(Locale.US, "%.4f",
-              e.getValue() / totalResponses));
+          transports.put(e.getKey(),
+              (float) (e.getValue() / totalResponses));
         }
       }
-      sb.append("}");
+      graphHistory.setTransports(transports);
     }
     if (!totalResponsesByVersion.isEmpty()) {
-      sb.append(",\"versions\":{");
-      int written = 0;
+      SortedMap<String, Float> versions = new TreeMap<String, Float>();
       for (Map.Entry<String, Double> e :
           totalResponsesByVersion.entrySet()) {
         if (e.getValue() > totalResponses / 100.0) {
-          sb.append((written++ > 0 ? "," : "") + "\"" + e.getKey()
-              + "\":" + String.format(Locale.US, "%.4f",
-              e.getValue() / totalResponses));
+          versions.put(e.getKey(),
+              (float) (e.getValue() / totalResponses));
         }
       }
-      sb.append("}");
+      graphHistory.setVersions(versions);
     }
-    sb.append("}");
     if (foundTwoAdjacentDataPoints) {
-      return sb.toString();
+      return graphHistory;
     } else {
       return null;
     }
