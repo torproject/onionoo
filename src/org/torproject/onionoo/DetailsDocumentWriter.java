@@ -1,6 +1,7 @@
 package org.torproject.onionoo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExitList;
 import org.torproject.descriptor.ExitListEntry;
@@ -106,141 +106,63 @@ public class DetailsDocumentWriter implements DescriptorListener,
       if (entry == null) {
         continue;
       }
-      String nickname = entry.getNickname();
-      String address = entry.getAddress();
+      DetailsDocument detailsDocument = new DetailsDocument();
+      detailsDocument.setNickname(entry.getNickname());
+      detailsDocument.setFingerprint(fingerprint);
       List<String> orAddresses = new ArrayList<String>();
-      orAddresses.add(address + ":" + entry.getOrPort());
-      orAddresses.addAll(entry.getOrAddressesAndPorts());
-      StringBuilder orAddressesAndPortsBuilder = new StringBuilder();
-      int addressesWritten = 0;
-      for (String orAddress : orAddresses) {
-        orAddressesAndPortsBuilder.append(
-            (addressesWritten++ > 0 ? "," : "") + "\""
-            + orAddress.toLowerCase() + "\"");
+      orAddresses.add(entry.getAddress() + ":" + entry.getOrPort());
+      for (String orAddress : entry.getOrAddressesAndPorts()) {
+        orAddresses.add(orAddress.toLowerCase());
       }
-      String lastSeen = DateTimeHelper.format(entry.getLastSeenMillis());
-      String firstSeen = DateTimeHelper.format(
-          entry.getFirstSeenMillis());
-      String lastChangedOrAddress = DateTimeHelper.format(
-          entry.getLastChangedOrAddress());
-      String running = entry.getRunning() ? "true" : "false";
-      int dirPort = entry.getDirPort();
-      String countryCode = entry.getCountryCode();
-      Float latitude = entry.getLatitude();
-      Float longitude = entry.getLongitude();
-      String countryName = entry.getCountryName();
-      String regionName = entry.getRegionName();
-      String cityName = entry.getCityName();
-      String aSNumber = entry.getASNumber();
-      String aSName = entry.getASName();
-      long consensusWeight = entry.getConsensusWeight();
-      String hostName = entry.getHostName();
-      double advertisedBandwidthFraction =
-          entry.getAdvertisedBandwidthFraction();
-      double consensusWeightFraction = entry.getConsensusWeightFraction();
-      double guardProbability = entry.getGuardProbability();
-      double middleProbability = entry.getMiddleProbability();
-      double exitProbability = entry.getExitProbability();
+      detailsDocument.setOrAddresses(orAddresses);
+      if (entry.getDirPort() != 0) {
+        detailsDocument.setDirAddress(entry.getAddress() + ":"
+            + entry.getDirPort());
+      }
+      detailsDocument.setLastSeen(DateTimeHelper.format(
+          entry.getLastSeenMillis()));
+      detailsDocument.setFirstSeen(DateTimeHelper.format(
+          entry.getFirstSeenMillis()));
+      detailsDocument.setLastChangedAddressOrPort(
+          DateTimeHelper.format(entry.getLastChangedOrAddress()));
+      detailsDocument.setRunning(entry.getRunning());
+      if (!entry.getRelayFlags().isEmpty()) {
+        detailsDocument.setFlags(new ArrayList<String>(
+            entry.getRelayFlags()));
+      }
+      detailsDocument.setCountry(entry.getCountryCode());
+      detailsDocument.setLatitude(entry.getLatitude());
+      detailsDocument.setLongitude(entry.getLongitude());
+      detailsDocument.setCountryName(entry.getCountryName());
+      detailsDocument.setRegionName(entry.getRegionName());
+      detailsDocument.setCityName(entry.getCityName());
+      detailsDocument.setAsNumber(entry.getASNumber());
+      detailsDocument.setAsName(entry.getASName());
+      detailsDocument.setConsensusWeight(entry.getConsensusWeight());
+      detailsDocument.setHostName(entry.getHostName());
+      detailsDocument.setAdvertisedBandwidthFraction(
+          (float) entry.getAdvertisedBandwidthFraction());
+      detailsDocument.setConsensusWeightFraction(
+          (float) entry.getConsensusWeightFraction());
+      detailsDocument.setGuardProbability(
+          (float) entry.getGuardProbability());
+      detailsDocument.setMiddleProbability(
+          (float) entry.getMiddleProbability());
+      detailsDocument.setExitProbability(
+          (float) entry.getExitProbability());
       String defaultPolicy = entry.getDefaultPolicy();
       String portList = entry.getPortList();
-      Boolean recommendedVersion = entry.getRecommendedVersion();
-      StringBuilder sb = new StringBuilder();
-      sb.append("{\n"
-          + "\"nickname\":\"" + nickname + "\",\n"
-          + "\"fingerprint\":\"" + fingerprint + "\",\n"
-          + "\"or_addresses\":[" + orAddressesAndPortsBuilder.toString()
-          + "]");
-      if (dirPort != 0) {
-        sb.append(",\n\"dir_address\":\"" + address + ":" + dirPort
-            + "\"");
-      }
-      sb.append(",\n\"last_seen\":\"" + lastSeen + "\"");
-      sb.append(",\n\"first_seen\":\"" + firstSeen + "\"");
-      sb.append(",\n\"last_changed_address_or_port\":\""
-          + lastChangedOrAddress + "\"");
-      sb.append(",\n\"running\":" + running);
-      SortedSet<String> relayFlags = entry.getRelayFlags();
-      if (!relayFlags.isEmpty()) {
-        sb.append(",\n\"flags\":[");
-        int written = 0;
-        for (String relayFlag : relayFlags) {
-          sb.append((written++ > 0 ? "," : "") + "\"" + relayFlag + "\"");
-        }
-        sb.append("]");
-      }
-      if (countryCode != null) {
-        sb.append(",\n\"country\":\"" + countryCode + "\"");
-      }
-      if (latitude != null) {
-        sb.append(String.format(",\n\"latitude\":%.4f", latitude));
-      }
-      if (longitude != null) {
-        sb.append(String.format(",\n\"longitude\":%.4f", longitude));
-      }
-      if (countryName != null) {
-        sb.append(",\n\"country_name\":\""
-            + escapeJSON(countryName) + "\"");
-      }
-      if (regionName != null) {
-        sb.append(",\n\"region_name\":\""
-            + escapeJSON(regionName) + "\"");
-      }
-      if (cityName != null) {
-        sb.append(",\n\"city_name\":\""
-            + escapeJSON(cityName) + "\"");
-      }
-      if (aSNumber != null) {
-        sb.append(",\n\"as_number\":\""
-            + escapeJSON(aSNumber) + "\"");
-      }
-      if (aSName != null) {
-        sb.append(",\n\"as_name\":\""
-            + escapeJSON(aSName) + "\"");
-      }
-      if (consensusWeight >= 0L) {
-        sb.append(",\n\"consensus_weight\":"
-            + String.valueOf(consensusWeight));
-      }
-      if (hostName != null) {
-        sb.append(",\n\"host_name\":\""
-            + escapeJSON(hostName) + "\"");
-      }
-      if (advertisedBandwidthFraction >= 0.0) {
-        sb.append(String.format(
-            ",\n\"advertised_bandwidth_fraction\":%.9f",
-            advertisedBandwidthFraction));
-      }
-      if (consensusWeightFraction >= 0.0) {
-        sb.append(String.format(",\n\"consensus_weight_fraction\":%.9f",
-            consensusWeightFraction));
-      }
-      if (guardProbability >= 0.0) {
-        sb.append(String.format(",\n\"guard_probability\":%.9f",
-            guardProbability));
-      }
-      if (middleProbability >= 0.0) {
-        sb.append(String.format(",\n\"middle_probability\":%.9f",
-            middleProbability));
-      }
-      if (exitProbability >= 0.0) {
-        sb.append(String.format(",\n\"exit_probability\":%.9f",
-            exitProbability));
-      }
       if (defaultPolicy != null && (defaultPolicy.equals("accept") ||
           defaultPolicy.equals("reject")) && portList != null) {
-        sb.append(",\n\"exit_policy_summary\":{\"" + defaultPolicy
-            + "\":[");
-        int portsWritten = 0;
-        for (String portOrPortRange : portList.split(",")) {
-          sb.append((portsWritten++ > 0 ? "," : "")
-              + "\"" + portOrPortRange + "\"");
-        }
-        sb.append("]}");
+        Map<String, List<String>> exitPolicySummary =
+            new HashMap<String, List<String>>();
+        List<String> portsOrPortRanges = Arrays.asList(
+            portList.split(","));
+        exitPolicySummary.put(defaultPolicy, portsOrPortRanges);
+        detailsDocument.setExitPolicySummary(exitPolicySummary);
       }
-      if (recommendedVersion != null) {
-        sb.append(",\n\"recommended_version\":" + (recommendedVersion ?
-            "true" : "false"));
-      }
+      detailsDocument.setRecommendedVersion(
+          entry.getRecommendedVersion());
 
       /* Add exit addresses if at least one of them is distinct from the
        * onion-routing addresses. */
@@ -252,44 +174,39 @@ public class DetailsDocumentWriter implements DescriptorListener,
           if (exitAddress.length() > 0 &&
               !entry.getAddress().equals(exitAddress) &&
               !entry.getOrAddresses().contains(exitAddress)) {
-            exitAddresses.add(exitAddress);
+            exitAddresses.add(exitAddress.toLowerCase());
           }
         }
       }
       if (!exitAddresses.isEmpty()) {
-        sb.append(",\n\"exit_addresses\":[");
-        int written = 0;
-        for (String exitAddress : exitAddresses) {
-          sb.append((written++ > 0 ? "," : "") + "\""
-              + exitAddress.toLowerCase() + "\"");
-        }
-        sb.append("]");
+        detailsDocument.setExitAddresses(new ArrayList<String>(
+            exitAddresses));
       }
 
       /* Append descriptor-specific part from details status file. */
       DetailsStatus detailsStatus = this.documentStore.retrieve(
-          DetailsStatus.class, false, fingerprint);
-      if (detailsStatus != null &&
-          detailsStatus.getDocumentString().length() > 0) {
-        sb.append(",");
-        String contact = null;
-        Scanner s = new Scanner(detailsStatus.getDocumentString());
-        while (s.hasNextLine()) {
-          String line = s.nextLine();
-          if (line.startsWith("\"desc_published\":")) {
-            continue;
-          }
-          sb.append("\n" + line);
-        }
-        s.close();
+          DetailsStatus.class, true, fingerprint);
+      if (detailsStatus != null) {
+        detailsDocument.setLastRestarted(
+            detailsStatus.getLastRestarted());
+        detailsDocument.setBandwidthRate(
+            detailsStatus.getBandwidthRate());
+        detailsDocument.setBandwidthBurst(
+            detailsStatus.getBandwidthBurst());
+        detailsDocument.setObservedBandwidth(
+            detailsStatus.getObservedBandwidth());
+        detailsDocument.setAdvertisedBandwidth(
+            detailsStatus.getAdvertisedBandwidth());
+        detailsDocument.setExitPolicy(detailsStatus.getExitPolicy());
+        detailsDocument.setContact(detailsStatus.getContact());
+        detailsDocument.setPlatform(detailsStatus.getPlatform());
+        detailsDocument.setFamily(detailsStatus.getFamily());
+        detailsDocument.setExitPolicyV6Summary(
+            detailsStatus.getExitPolicyV6Summary());
+        detailsDocument.setHibernating(detailsStatus.getHibernating());
       }
 
-      /* Finish details string. */
-      sb.append("\n}\n");
-
       /* Write details file to disk. */
-      DetailsDocument detailsDocument = new DetailsDocument();
-      detailsDocument.setDocumentString(sb.toString());
       this.documentStore.store(detailsDocument, fingerprint);
     }
   }
@@ -303,60 +220,40 @@ public class DetailsDocumentWriter implements DescriptorListener,
       if (entry == null) {
         continue;
       }
-      String nickname = entry.getNickname();
-      String lastSeen = DateTimeHelper.format(entry.getLastSeenMillis());
-      String firstSeen = DateTimeHelper.format(
-          entry.getFirstSeenMillis());
-      String running = entry.getRunning() ? "true" : "false";
+      DetailsDocument detailsDocument = new DetailsDocument();
+      detailsDocument.setNickname(entry.getNickname());
+      detailsDocument.setHashedFingerprint(fingerprint);
       String address = entry.getAddress();
       List<String> orAddresses = new ArrayList<String>();
       orAddresses.add(address + ":" + entry.getOrPort());
-      orAddresses.addAll(entry.getOrAddressesAndPorts());
-      StringBuilder orAddressesAndPortsBuilder = new StringBuilder();
-      int addressesWritten = 0;
-      for (String orAddress : orAddresses) {
-        orAddressesAndPortsBuilder.append(
-            (addressesWritten++ > 0 ? "," : "") + "\""
-            + orAddress.toLowerCase() + "\"");
+      for (String orAddress : entry.getOrAddressesAndPorts()) {
+        orAddresses.add(orAddress.toLowerCase());
       }
-      StringBuilder sb = new StringBuilder();
-      sb.append("{\"version\":1,\n"
-          + "\"nickname\":\"" + nickname + "\",\n"
-          + "\"hashed_fingerprint\":\"" + fingerprint + "\",\n"
-          + "\"or_addresses\":[" + orAddressesAndPortsBuilder.toString()
-          + "],\n\"last_seen\":\"" + lastSeen + "\",\n\"first_seen\":\""
-          + firstSeen + "\",\n\"running\":" + running);
-
-      SortedSet<String> relayFlags = entry.getRelayFlags();
-      if (!relayFlags.isEmpty()) {
-        sb.append(",\n\"flags\":[");
-        int written = 0;
-        for (String relayFlag : relayFlags) {
-          sb.append((written++ > 0 ? "," : "") + "\"" + relayFlag + "\"");
-        }
-        sb.append("]");
-      }
+      detailsDocument.setOrAddresses(orAddresses);
+      detailsDocument.setLastSeen(DateTimeHelper.format(
+          entry.getLastSeenMillis()));
+      detailsDocument.setFirstSeen(DateTimeHelper.format(
+          entry.getFirstSeenMillis()));
+      detailsDocument.setRunning(entry.getRunning());
+      detailsDocument.setFlags(new ArrayList<String>(
+          entry.getRelayFlags()));
 
       /* Append descriptor-specific part from details status file. */
       DetailsStatus detailsStatus = this.documentStore.retrieve(
-          DetailsStatus.class, false, fingerprint);
-      if (detailsStatus != null &&
-          detailsStatus.getDocumentString().length() > 0) {
-        sb.append(",\n" + detailsStatus.getDocumentString());
+          DetailsStatus.class, true, fingerprint);
+      if (detailsStatus != null) {
+        detailsDocument.setLastRestarted(
+            detailsStatus.getLastRestarted());
+        detailsDocument.setAdvertisedBandwidth(
+            detailsStatus.getAdvertisedBandwidth());
+        detailsDocument.setPlatform(detailsStatus.getPlatform());
+        detailsDocument.setPoolAssignment(
+            detailsStatus.getPoolAssignment());
       }
 
-      /* Finish details string. */
-      sb.append("\n}\n");
-
       /* Write details file to disk. */
-      DetailsDocument detailsDocument = new DetailsDocument();
-      detailsDocument.setDocumentString(sb.toString());
       this.documentStore.store(detailsDocument, fingerprint);
     }
-  }
-
-  private static String escapeJSON(String s) {
-    return StringEscapeUtils.escapeJavaScript(s).replaceAll("\\\\'", "'");
   }
 
   public String getStatsString() {

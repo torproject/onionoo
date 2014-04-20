@@ -5,7 +5,9 @@ package org.torproject.onionoo;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class ResponseBuilder {
 
@@ -140,50 +142,128 @@ public class ResponseBuilder {
 
   private String writeDetailsLines(NodeStatus entry) {
     String fingerprint = entry.getFingerprint();
-    DetailsDocument detailsDocument = this.documentStore.retrieve(
-        DetailsDocument.class, false, fingerprint);
-    if (detailsDocument != null &&
-        detailsDocument.getDocumentString() != null) {
-      StringBuilder sb = new StringBuilder();
-      Scanner s = new Scanner(detailsDocument.getDocumentString());
-      boolean includeLine = true;
-      while (s.hasNextLine()) {
-        String line = s.nextLine();
-        if (line.equals("{")) {
-          /* Omit newline after opening bracket. */
-          sb.append("{");
-        } else if (line.equals("}")) {
-          /* Omit newline after closing bracket. */
-          sb.append("}");
-          break;
-        } else if (this.fields != null) {
-          if (line.startsWith("\"")) {
-            includeLine = false;
-            for (String field : this.fields) {
-              if (line.startsWith("\"" + field + "\":")) {
-                sb.append(line + "\n");
-                includeLine = true;
-              }
-            }
-          } else if (includeLine) {
-            sb.append(line + "\n");
+    if (this.fields != null) {
+      /* TODO Maybe there's a more elegant way (more maintainable, more
+       * efficient, etc.) to implement this? */
+      DetailsDocument detailsDocument = documentStore.retrieve(
+          DetailsDocument.class, true, fingerprint);
+      if (detailsDocument != null) {
+        DetailsDocument dd = new DetailsDocument();
+        for (String field : this.fields) {
+          if (field.equals("nickname")) {
+            dd.setNickname(detailsDocument.getNickname());
+          } else if (field.equals("fingerprint")) {
+            dd.setFingerprint(detailsDocument.getFingerprint());
+          } else if (field.equals("hashed_fingerprint")) {
+            dd.setHashedFingerprint(
+                detailsDocument.getHashedFingerprint());
+          } else if (field.equals("or_addresses")) {
+            dd.setOrAddresses(detailsDocument.getOrAddresses());
+          } else if (field.equals("exit_addresses")) {
+            dd.setExitAddresses(detailsDocument.getExitAddresses());
+          } else if (field.equals("dir_address")) {
+            dd.setDirAddress(detailsDocument.getDirAddress());
+          } else if (field.equals("last_seen")) {
+            dd.setLastSeen(detailsDocument.getLastSeen());
+          } else if (field.equals("last_changed_address_or_port")) {
+            dd.setLastChangedAddressOrPort(
+                detailsDocument.getLastChangedAddressOrPort());
+          } else if (field.equals("first_seen")) {
+            dd.setFirstSeen(detailsDocument.getFirstSeen());
+          } else if (field.equals("running")) {
+            dd.setRunning(detailsDocument.getRunning());
+          } else if (field.equals("flags")) {
+            dd.setFlags(detailsDocument.getFlags());
+          } else if (field.equals("country")) {
+            dd.setCountry(detailsDocument.getCountry());
+          } else if (field.equals("country_name")) {
+            dd.setCountryName(detailsDocument.getCountryName());
+          } else if (field.equals("region_name")) {
+            dd.setRegionName(detailsDocument.getRegionName());
+          } else if (field.equals("city_name")) {
+            dd.setCityName(detailsDocument.getCityName());
+          } else if (field.equals("latitude")) {
+            dd.setLatitude(detailsDocument.getLatitude());
+          } else if (field.equals("longitude")) {
+            dd.setLongitude(detailsDocument.getLongitude());
+          } else if (field.equals("as_number")) {
+            dd.setAsNumber(detailsDocument.getAsNumber());
+          } else if (field.equals("as_name")) {
+            dd.setAsName(detailsDocument.getAsName());
+          } else if (field.equals("consensus_weight")) {
+            dd.setConsensusWeight(detailsDocument.getConsensusWeight());
+          } else if (field.equals("host_name")) {
+            dd.setHostName(detailsDocument.getHostName());
+          } else if (field.equals("last_restarted")) {
+            dd.setLastRestarted(detailsDocument.getLastRestarted());
+          } else if (field.equals("bandwidth_rate")) {
+            dd.setBandwidthRate(detailsDocument.getBandwidthRate());
+          } else if (field.equals("bandwidth_burst")) {
+            dd.setBandwidthBurst(detailsDocument.getBandwidthBurst());
+          } else if (field.equals("observed_bandwidth")) {
+            dd.setObservedBandwidth(
+                detailsDocument.getObservedBandwidth());
+          } else if (field.equals("advertised_bandwidth")) {
+            dd.setAdvertisedBandwidth(
+                detailsDocument.getAdvertisedBandwidth());
+          } else if (field.equals("exit_policy")) {
+            dd.setExitPolicy(detailsDocument.getExitPolicy());
+          } else if (field.equals("exit_policy_summary")) {
+            dd.setExitPolicySummary(
+                detailsDocument.getExitPolicySummary());
+          } else if (field.equals("exit_policy_v6_summary")) {
+            dd.setExitPolicyV6Summary(
+                detailsDocument.getExitPolicyV6Summary());
+          } else if (field.equals("contact")) {
+            dd.setContact(detailsDocument.getContact());
+          } else if (field.equals("platform")) {
+            dd.setPlatform(detailsDocument.getPlatform());
+          } else if (field.equals("family")) {
+            dd.setFamily(detailsDocument.getFamily());
+          } else if (field.equals("advertised_bandwidth_fraction")) {
+            dd.setAdvertisedBandwidthFraction(
+                detailsDocument.getAdvertisedBandwidthFraction());
+          } else if (field.equals("consensus_weight_fraction")) {
+            dd.setConsensusWeightFraction(
+                detailsDocument.getConsensusWeightFraction());
+          } else if (field.equals("guard_probability")) {
+            dd.setGuardProbability(detailsDocument.getGuardProbability());
+          } else if (field.equals("middle_probability")) {
+            dd.setMiddleProbability(
+                detailsDocument.getMiddleProbability());
+          } else if (field.equals("exit_probability")) {
+            dd.setExitProbability(detailsDocument.getExitProbability());
+          } else if (field.equals("recommended_version")) {
+            dd.setRecommendedVersion(
+                detailsDocument.getRecommendedVersion());
+          } else if (field.equals("hibernating")) {
+            dd.setHibernating(detailsDocument.getHibernating());
+          } else if (field.equals("pool_assignment")) {
+            dd.setPoolAssignment(detailsDocument.getPoolAssignment());
           }
-        } else {
-          sb.append(line + "\n");
         }
+        /* Don't escape HTML characters, like < and >, contained in
+         * strings. */
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        /* Whenever we provide Gson with a string containing an escaped
+         * non-ASCII character like \u00F2, it escapes the \ to \\, which
+         * we need to undo before including the string in a response. */
+        return gson.toJson(dd).replaceAll("\\\\\\\\u", "\\\\u");
+      } else {
+        // TODO We should probably log that we didn't find a details
+        // document that we expected to exist.
+        return "";
       }
-      s.close();
-      String detailsLines = sb.toString();
-      if (detailsLines.endsWith(",\n}")) {
-        /* Fix broken JSON if we omitted lines above. */
-        detailsLines = detailsLines.substring(0,
-            detailsLines.length() - 3) + "\n}";
-      }
-      return detailsLines;
     } else {
-      // TODO We should probably log that we didn't find a details
-      // document that we expected to exist.
-      return "";
+      DetailsDocument detailsDocument = documentStore.retrieve(
+          DetailsDocument.class, false, fingerprint);
+      if (detailsDocument != null) {
+        return detailsDocument.getDocumentString();
+      } else {
+        // TODO We should probably log that we didn't find a details
+        // document that we expected to exist.
+        return "";
+      }
     }
   }
 
