@@ -4,8 +4,8 @@ package org.torproject.onionoo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -56,20 +56,12 @@ public class WeightsDocumentWriter implements FingerprintListener,
         continue;
       }
       SortedMap<long[], double[]> history = weightsStatus.getHistory();
-      WeightsDocument weightsDocument = new WeightsDocument();
-      weightsDocument.setDocumentString(this.formatHistoryString(
-          fingerprint, history));
+      WeightsDocument weightsDocument = this.compileWeightsDocument(
+          fingerprint, history);
       this.documentStore.store(weightsDocument, fingerprint);
     }
+    Logger.printStatusTime("Wrote weights document files");
   }
-
-  private String[] graphTypes = new String[] {
-      "advertised_bandwidth_fraction",
-      "consensus_weight_fraction",
-      "guard_probability",
-      "middle_probability",
-      "exit_probability"
-  };
 
   private String[] graphNames = new String[] {
       "1_week",
@@ -92,33 +84,41 @@ public class WeightsDocumentWriter implements FingerprintListener,
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
-  private String formatHistoryString(String fingerprint,
+  private WeightsDocument compileWeightsDocument(String fingerprint,
       SortedMap<long[], double[]> history) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("{\"fingerprint\":\"" + fingerprint + "\"");
-    for (int graphTypeIndex = 0; graphTypeIndex < this.graphTypes.length;
-        graphTypeIndex++) {
-      String graphType = this.graphTypes[graphTypeIndex];
-      sb.append(",\n\"" + graphType + "\":{");
-      int graphIntervalsWritten = 0;
-      for (int graphIntervalIndex = 0; graphIntervalIndex <
-          this.graphIntervals.length; graphIntervalIndex++) {
-        String timeline = this.formatTimeline(graphTypeIndex,
-            graphIntervalIndex, history);
-        if (timeline != null) {
-          sb.append((graphIntervalsWritten++ > 0 ? "," : "") + "\n"
-            + timeline);
-        }
-      }
-      sb.append("}");
-    }
-    sb.append("\n}\n");
-    return sb.toString();
+    WeightsDocument weightsDocument = new WeightsDocument();
+    weightsDocument.setFingerprint(fingerprint);
+    weightsDocument.setAdvertisedBandwidthFraction(
+        this.compileGraphType(history, 0));
+    weightsDocument.setConsensusWeightFraction(
+        this.compileGraphType(history, 1));
+    weightsDocument.setGuardProbability(
+        this.compileGraphType(history, 2));
+    weightsDocument.setMiddleProbability(
+        this.compileGraphType(history, 3));
+    weightsDocument.setExitProbability(
+        this.compileGraphType(history, 4));
+    return weightsDocument;
   }
 
-  private String formatTimeline(int graphTypeIndex,
+  private Map<String, GraphHistory> compileGraphType(
+      SortedMap<long[], double[]> history, int graphTypeIndex) {
+    Map<String, GraphHistory> graphs =
+        new LinkedHashMap<String, GraphHistory>();
+    for (int graphIntervalIndex = 0; graphIntervalIndex <
+        this.graphIntervals.length; graphIntervalIndex++) {
+      String graphName = this.graphNames[graphIntervalIndex];
+      GraphHistory graphHistory = this.compileWeightsHistory(
+          graphTypeIndex, graphIntervalIndex, history);
+      if (graphHistory != null) {
+        graphs.put(graphName, graphHistory);
+      }
+    }
+    return graphs;
+  }
+
+  private GraphHistory compileWeightsHistory(int graphTypeIndex,
       int graphIntervalIndex, SortedMap<long[], double[]> history) {
-    String graphName = this.graphNames[graphIntervalIndex];
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
@@ -179,16 +179,16 @@ public class WeightsDocumentWriter implements FingerprintListener,
         + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
     double factor = ((double) maxValue) / 999.0;
     int count = lastNonNullIndex - firstNonNullIndex + 1;
-    StringBuilder sb = new StringBuilder();
-    sb.append("\"" + graphName + "\":{"
-        + "\"first\":\"" + DateTimeHelper.format(firstDataPointMillis)
-        + "\",\"last\":\"" + DateTimeHelper.format(lastDataPointMillis)
-        + "\",\"interval\":" + String.valueOf(dataPointInterval
-        / DateTimeHelper.ONE_SECOND)
-        + ",\"factor\":" + String.format(Locale.US, "%.9f", factor)
-        + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
-    int dataPointsWritten = 0, previousNonNullIndex = -2;
+    GraphHistory graphHistory = new GraphHistory();
+    graphHistory.setFirst(DateTimeHelper.format(firstDataPointMillis));
+    graphHistory.setLast(DateTimeHelper.format(lastDataPointMillis));
+    graphHistory.setInterval((int) (dataPointInterval
+        / DateTimeHelper.ONE_SECOND));
+    graphHistory.setFactor(factor);
+    graphHistory.setCount(count);
+    int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
+    List<Integer> values = new ArrayList<Integer>();
     for (int dataPointIndex = firstNonNullIndex; dataPointIndex <=
         lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
@@ -198,13 +198,12 @@ public class WeightsDocumentWriter implements FingerprintListener,
         }
         previousNonNullIndex = dataPointIndex;
       }
-      sb.append((dataPointsWritten++ > 0 ? "," : "")
-          + (dataPoint < 0.0 ? "null" :
-          String.valueOf((long) ((dataPoint * 999.0) / maxValue))));
+      values.add(dataPoint < 0.0 ? null :
+          (int) ((dataPoint * 999.0) / maxValue));
     }
-    sb.append("]}");
+    graphHistory.setValues(values);
     if (foundTwoAdjacentDataPoints) {
-      return sb.toString();
+      return graphHistory;
     } else {
       return null;
     }

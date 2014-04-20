@@ -208,9 +208,7 @@ public class ResponseBuilder {
         WeightsDocument.class, false, fingerprint);
     if (weightsDocument != null &&
         weightsDocument.getDocumentString() != null) {
-      String weightsLines = weightsDocument.getDocumentString();
-      weightsLines = weightsLines.substring(0, weightsLines.length() - 1);
-      return weightsLines;
+      return weightsDocument.getDocumentString();
     } else {
       return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }
