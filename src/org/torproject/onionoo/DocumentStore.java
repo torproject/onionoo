@@ -21,6 +21,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 // TODO For later migration from disk to database, do the following:
@@ -187,13 +188,34 @@ public class DocumentStore {
     String documentString;
     if (document.getDocumentString() != null) {
       documentString = document.getDocumentString();
-    } else if (document instanceof DetailsDocument ||
-          document instanceof BandwidthDocument ||
+    } else if (document instanceof BandwidthDocument ||
           document instanceof WeightsDocument ||
           document instanceof ClientsDocument ||
           document instanceof UptimeDocument) {
       Gson gson = new Gson();
       documentString = gson.toJson(document);
+    } else if (document instanceof DetailsStatus ||
+        document instanceof DetailsDocument) {
+      /* Don't escape HTML characters, like < and >, contained in
+       * strings. */
+      Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+      /* We must ensure that details files only contain ASCII characters
+       * and no UTF-8 characters.  While UTF-8 characters are perfectly
+       * valid in JSON, this would break compatibility with existing files
+       * pretty badly.  We already make sure that all strings in details
+       * objects are escaped JSON, e.g., \u00F2.  When Gson serlializes
+       * this string, it escapes the \ to \\, hence writes \\u00F2.  We
+       * need to undo this and change \\u00F2 back to \u00F2. */
+      documentString = gson.toJson(document).replaceAll("\\\\\\\\u",
+          "\\\\u");
+      /* Existing details statuses don't contain opening and closing curly
+       * brackets, so we should remove them from new details statuses,
+       * too. */
+       if (document instanceof DetailsStatus) {
+         documentString = documentString.substring(
+             documentString.indexOf("{") + 1,
+             documentString.lastIndexOf("}"));
+       }
     } else if (document instanceof BandwidthStatus ||
         document instanceof WeightsStatus ||
         document instanceof ClientsStatus ||
@@ -380,6 +402,9 @@ public class DocumentStore {
         documentType.equals(ClientsStatus.class) ||
         documentType.equals(UptimeStatus.class)) {
       return this.retrieveParsedStatusFile(documentType, documentString);
+    } else if (documentType.equals(DetailsStatus.class)) {
+      return this.retrieveParsedDocumentFile(documentType, "{"
+          + documentString + "}");
     } else {
       System.err.println("Parsing is not supported for type "
           + documentType.getName() + ".");

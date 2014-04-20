@@ -5,15 +5,14 @@ package org.torproject.onionoo;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
@@ -291,27 +290,16 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       ServerDescriptor descriptor) {
     String fingerprint = descriptor.getFingerprint();
     DetailsStatus detailsStatus = this.documentStore.retrieve(
-        DetailsStatus.class, false, fingerprint);
+        DetailsStatus.class, true, fingerprint);
     String publishedDateTime =
         DateTimeHelper.format(descriptor.getPublishedMillis());
-    if (detailsStatus != null) {
-      String detailsString = detailsStatus.getDocumentString();
-      String descPublishedLine = "\"desc_published\":\""
-          + publishedDateTime + "\",";
-      Scanner s = new Scanner(detailsString);
-      while (s.hasNextLine()) {
-        String line = s.nextLine();
-        if (line.startsWith("\"desc_published\":\"")) {
-          if (descPublishedLine.compareTo(line) < 0) {
-            return;
-          } else {
-            break;
-          }
-        }
-      }
-      s.close();
+    if (detailsStatus == null) {
+      detailsStatus = new DetailsStatus();
+    } else if (detailsStatus.getDescPublished() != null &&
+        publishedDateTime.compareTo(
+            detailsStatus.getDescPublished()) < 0) {
+      return;
     }
-    StringBuilder sb = new StringBuilder();
     String lastRestartedString = DateTimeHelper.format(
         descriptor.getPublishedMillis() - descriptor.getUptime()
         * DateTimeHelper.ONE_SECOND);
@@ -320,55 +308,31 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     int observedBandwidth = descriptor.getBandwidthObserved();
     int advertisedBandwidth = Math.min(bandwidthRate,
         Math.min(bandwidthBurst, observedBandwidth));
-    sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
-        + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
-        + "\"bandwidth_rate\":" + bandwidthRate + ",\n"
-        + "\"bandwidth_burst\":" + bandwidthBurst + ",\n"
-        + "\"observed_bandwidth\":" + observedBandwidth + ",\n"
-        + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
-        + "\"exit_policy\":[");
-    int written = 0;
-    for (String exitPolicyLine : descriptor.getExitPolicyLines()) {
-      sb.append((written++ > 0 ? "," : "") + "\n  \"" + exitPolicyLine
-          + "\"");
-    }
-    sb.append("\n]");
-    if (descriptor.getContact() != null) {
-      sb.append(",\n\"contact\":\""
-          + escapeJSON(descriptor.getContact()) + "\"");
-    }
-    if (descriptor.getPlatform() != null) {
-      sb.append(",\n\"platform\":\""
-          + escapeJSON(descriptor.getPlatform()) + "\"");
-    }
-    if (descriptor.getFamilyEntries() != null) {
-      sb.append(",\n\"family\":[");
-      written = 0;
-      for (String familyEntry : descriptor.getFamilyEntries()) {
-        sb.append((written++ > 0 ? "," : "") + "\n  \"" + familyEntry
-            + "\"");
-      }
-      sb.append("\n]");
-    }
+    detailsStatus.setDescPublished(publishedDateTime);
+    detailsStatus.setLastRestarted(lastRestartedString);
+    detailsStatus.setBandwidthRate(bandwidthRate);
+    detailsStatus.setBandwidthBurst(bandwidthBurst);
+    detailsStatus.setObservedBandwidth(observedBandwidth);
+    detailsStatus.setAdvertisedBandwidth(advertisedBandwidth);
+    detailsStatus.setExitPolicy(descriptor.getExitPolicyLines());
+    detailsStatus.setContact(descriptor.getContact());
+    detailsStatus.setPlatform(descriptor.getPlatform());
+    detailsStatus.setFamily(descriptor.getFamilyEntries());
     if (descriptor.getIpv6DefaultPolicy() != null &&
         (descriptor.getIpv6DefaultPolicy().equals("accept") ||
         descriptor.getIpv6DefaultPolicy().equals("reject")) &&
         descriptor.getIpv6PortList() != null) {
-      sb.append(",\n\"exit_policy_v6_summary\":{\""
-          + descriptor.getIpv6DefaultPolicy() + "\":[");
-      int portsWritten = 0;
-      for (String portOrPortRange :
-          descriptor.getIpv6PortList().split(",")) {
-        sb.append((portsWritten++ > 0 ? "," : "") + "\"" + portOrPortRange
-            + "\"");
-      }
-      sb.append("]}");
+      Map<String, List<String>> exitPolicyV6Summary =
+          new HashMap<String, List<String>>();
+      List<String> portsOrPortRanges = Arrays.asList(
+          descriptor.getIpv6PortList().split(","));
+      exitPolicyV6Summary.put(descriptor.getIpv6DefaultPolicy(),
+          portsOrPortRanges);
+      detailsStatus.setExitPolicyV6Summary(exitPolicyV6Summary);
     }
     if (descriptor.isHibernating()) {
-      sb.append(",\n\"hibernating\":true");
+      detailsStatus.setHibernating(true);
     }
-    detailsStatus = new DetailsStatus();
-    detailsStatus.setDocumentString(sb.toString());
     this.documentStore.store(detailsStatus, fingerprint);
     if (descriptor.getContact() != null) {
       this.contacts.put(fingerprint, descriptor.getContact());
@@ -379,48 +343,27 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       ServerDescriptor descriptor) {
     String fingerprint = descriptor.getFingerprint();
     DetailsStatus detailsStatus = this.documentStore.retrieve(
-        DetailsStatus.class, false, fingerprint);
+        DetailsStatus.class, true, fingerprint);
     String publishedDateTime =
         DateTimeHelper.format(descriptor.getPublishedMillis());
-    String poolAssignmentLine = null;
-    if (detailsStatus != null) {
-      String detailsString = detailsStatus.getDocumentString();
-      String descPublishedLine = "\"desc_published\":\""
-          + publishedDateTime + "\",";
-      Scanner s = new Scanner(detailsString);
-      while (s.hasNextLine()) {
-        String line = s.nextLine();
-        if (line.startsWith("\"pool_assignment\":")) {
-          poolAssignmentLine = line;
-        } else if (line.startsWith("\"desc_published\":") &&
-            descPublishedLine.compareTo(line) < 0) {
-          return;
-        }
-      }
-      s.close();
+    if (detailsStatus == null) {
+      detailsStatus = new DetailsStatus();
+    } else if (detailsStatus.getDescPublished() != null &&
+        publishedDateTime.compareTo(
+            detailsStatus.getDescPublished()) < 0) {
+      return;
     }
-    StringBuilder sb = new StringBuilder();
     String lastRestartedString = DateTimeHelper.format(
         descriptor.getPublishedMillis() - descriptor.getUptime()
         * DateTimeHelper.ONE_SECOND);
     int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
         Math.min(descriptor.getBandwidthBurst(),
         descriptor.getBandwidthObserved()));
-    sb.append("\"desc_published\":\"" + publishedDateTime + "\",\n"
-        + "\"last_restarted\":\"" + lastRestartedString + "\",\n"
-        + "\"advertised_bandwidth\":" + advertisedBandwidth + ",\n"
-        + "\"platform\":\"" + escapeJSON(descriptor.getPlatform())
-        + "\"");
-    if (poolAssignmentLine != null) {
-      sb.append(",\n" + poolAssignmentLine);
-    }
-    detailsStatus = new DetailsStatus();
-    detailsStatus.setDocumentString(sb.toString());
+    detailsStatus.setDescPublished(publishedDateTime);
+    detailsStatus.setLastRestarted(lastRestartedString);
+    detailsStatus.setAdvertisedBandwidth(advertisedBandwidth);
+    detailsStatus.setPlatform(descriptor.getPlatform());
     this.documentStore.store(detailsStatus, fingerprint);
-  }
-
-  private static String escapeJSON(String s) {
-    return StringEscapeUtils.escapeJavaScript(s).replaceAll("\\\\'", "'");
   }
 
   private void processBridgePoolAssignment(
@@ -429,29 +372,14 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         bridgePoolAssignment.getEntries().entrySet()) {
       String fingerprint = e.getKey();
       String details = e.getValue();
-      StringBuilder sb = new StringBuilder();
       DetailsStatus detailsStatus = this.documentStore.retrieve(
-          DetailsStatus.class, false, fingerprint);
-      if (detailsStatus != null) {
-        String detailsString = detailsStatus.getDocumentString();
-        Scanner s = new Scanner(detailsString);
-        int linesWritten = 0;
-        boolean endsWithComma = false;
-        while (s.hasNextLine()) {
-          String line = s.nextLine();
-          if (!line.startsWith("\"pool_assignment\":")) {
-            sb.append((linesWritten++ > 0 ? "\n" : "") + line);
-            endsWithComma = line.endsWith(",");
-          }
-        }
-        s.close();
-        if (sb.length() > 0) {
-          sb.append((endsWithComma ? "" : ",") + "\n");
-        }
+          DetailsStatus.class, true, fingerprint);
+      if (detailsStatus == null) {
+        detailsStatus = new DetailsStatus();
+      } else if (details.equals(detailsStatus.getPoolAssignment())) {
+        return;
       }
-      sb.append("\"pool_assignment\":\"" + details + "\"");
-      detailsStatus = new DetailsStatus();
-      detailsStatus.setDocumentString(sb.toString());
+      detailsStatus.setPoolAssignment(details);
       this.documentStore.store(detailsStatus, fingerprint);
     }
   }
@@ -540,25 +468,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           !relay.getRelayFlags().contains("BadExit");
       boolean isGuard = relay.getRelayFlags().contains("Guard");
       DetailsStatus detailsStatus = this.documentStore.retrieve(
-          DetailsStatus.class, false, fingerprint);
+          DetailsStatus.class, true, fingerprint);
       if (detailsStatus != null) {
-        double advertisedBandwidth = -1.0;
-        String detailsString = detailsStatus.getDocumentString();
-        Scanner s = new Scanner(detailsString);
-        while (s.hasNextLine()) {
-          String line = s.nextLine();
-          if (!line.startsWith("\"advertised_bandwidth\":")) {
-            continue;
-          }
-          try {
-            advertisedBandwidth = (double) Integer.parseInt(
-                line.split(":")[1].replaceAll(",", ""));
-          } catch (NumberFormatException ex) {
-            /* Handle below. */
-          }
-          break;
-        }
-        s.close();
+        double advertisedBandwidth =
+            detailsStatus.getAdvertisedBandwidth();
         if (advertisedBandwidth >= 0.0) {
           advertisedBandwidths.put(fingerprint, advertisedBandwidth);
           totalAdvertisedBandwidth += advertisedBandwidth;
