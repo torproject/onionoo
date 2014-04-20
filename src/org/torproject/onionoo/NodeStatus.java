@@ -51,11 +51,7 @@ public class NodeStatus extends Document {
     return new TreeSet<String>(this.orAddresses);
   }
   public void addOrAddressAndPort(String orAddressAndPort) {
-    if (!orAddressAndPort.contains(":")) {
-      System.err.println("Illegal OR address:port '" + orAddressAndPort
-          + "'.  Exiting.");
-      System.exit(1);
-    } else if (orAddressAndPort.length() > 0) {
+    if (orAddressAndPort.contains(":") && orAddressAndPort.length() > 0) {
       String orAddress = orAddressAndPort.substring(0,
           orAddressAndPort.lastIndexOf(':'));
       if (this.exitAddresses.contains(orAddress)) {
