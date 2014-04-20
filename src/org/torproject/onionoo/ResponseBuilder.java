@@ -236,9 +236,7 @@ public class ResponseBuilder {
         UptimeDocument.class, false, fingerprint);
     if (uptimeDocument != null &&
         uptimeDocument.getDocumentString() != null) {
-      String uptimeLines = uptimeDocument.getDocumentString();
-      uptimeLines = uptimeLines.substring(0, uptimeLines.length() - 1);
-      return uptimeLines;
+      return uptimeDocument.getDocumentString();
     } else {
       return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }

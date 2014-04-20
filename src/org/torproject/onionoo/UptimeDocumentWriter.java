@@ -3,8 +3,9 @@
 package org.torproject.onionoo;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -70,9 +71,8 @@ public class UptimeDocumentWriter implements FingerprintListener,
       SortedSet<UptimeHistory> history = relay
           ? uptimeStatus.getRelayHistory()
           : uptimeStatus.getBridgeHistory();
-      UptimeDocument uptimeDocument = new UptimeDocument();
-      uptimeDocument.setDocumentString(this.formatHistoryString(relay,
-          fingerprint, history, knownStatuses));
+      UptimeDocument uptimeDocument = this.compileUptimeDocument(relay,
+          fingerprint, history, knownStatuses);
       this.documentStore.store(uptimeDocument, fingerprint);
       this.writtenDocuments++;
     }
@@ -99,31 +99,29 @@ public class UptimeDocumentWriter implements FingerprintListener,
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
-  private String formatHistoryString(boolean relay, String fingerprint,
-      SortedSet<UptimeHistory> history,
+  private UptimeDocument compileUptimeDocument(boolean relay,
+      String fingerprint, SortedSet<UptimeHistory> history,
       SortedSet<UptimeHistory> knownStatuses) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("{\"fingerprint\":\"" + fingerprint + "\"");
-    sb.append(",\n\"uptime\":{");
-    int graphIntervalsWritten = 0;
+    UptimeDocument uptimeDocument = new UptimeDocument();
+    uptimeDocument.setFingerprint(fingerprint);
+    Map<String, GraphHistory> uptime =
+        new LinkedHashMap<String, GraphHistory>();
     for (int graphIntervalIndex = 0; graphIntervalIndex <
         this.graphIntervals.length; graphIntervalIndex++) {
-      String timeline = this.formatTimeline(graphIntervalIndex, relay,
-          history, knownStatuses);
-      if (timeline != null) {
-        sb.append((graphIntervalsWritten++ > 0 ? "," : "") + "\n"
-            + timeline);
+      String graphName = this.graphNames[graphIntervalIndex];
+      GraphHistory graphHistory = this.compileUptimeHistory(
+          graphIntervalIndex, relay, history, knownStatuses);
+      if (graphHistory != null) {
+        uptime.put(graphName, graphHistory);
       }
     }
-    sb.append("}");
-    sb.append("\n}\n");
-    return sb.toString();
+    uptimeDocument.setUptime(uptime);
+    return uptimeDocument;
   }
 
-  private String formatTimeline(int graphIntervalIndex, boolean relay,
-      SortedSet<UptimeHistory> history,
+  private GraphHistory compileUptimeHistory(int graphIntervalIndex,
+      boolean relay, SortedSet<UptimeHistory> history,
       SortedSet<UptimeHistory> knownStatuses) {
-    String graphName = this.graphNames[graphIntervalIndex];
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
@@ -253,18 +251,17 @@ public class UptimeDocumentWriter implements FingerprintListener,
     }
     long lastDataPointMillis = firstDataPointMillis
         + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
-    double factor = 1.0 / 999.0;
     int count = lastNonNullIndex - firstNonNullIndex + 1;
-    StringBuilder sb = new StringBuilder();
-    sb.append("\"" + graphName + "\":{"
-        + "\"first\":\"" + DateTimeHelper.format(firstDataPointMillis)
-        + "\",\"last\":\"" + DateTimeHelper.format(lastDataPointMillis)
-        + "\",\"interval\":" + String.valueOf(dataPointInterval
-        / DateTimeHelper.ONE_SECOND)
-        + ",\"factor\":" + String.format(Locale.US, "%.9f", factor)
-        + ",\"count\":" + String.valueOf(count) + ",\"values\":[");
-    int dataPointsWritten = 0, previousNonNullIndex = -2;
+    GraphHistory graphHistory = new GraphHistory();
+    graphHistory.setFirst(DateTimeHelper.format(firstDataPointMillis));
+    graphHistory.setLast(DateTimeHelper.format(lastDataPointMillis));
+    graphHistory.setInterval((int) (dataPointInterval
+        / DateTimeHelper.ONE_SECOND));
+    graphHistory.setFactor(1.0 / 999.0);
+    graphHistory.setCount(count);
+    int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
+    List<Integer> values = new ArrayList<Integer>();
     for (int dataPointIndex = firstNonNullIndex; dataPointIndex <=
         lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
@@ -274,13 +271,11 @@ public class UptimeDocumentWriter implements FingerprintListener,
         }
         previousNonNullIndex = dataPointIndex;
       }
-      sb.append((dataPointsWritten++ > 0 ? "," : "")
-          + (dataPoint < -0.5 ? "null" :
-          String.valueOf((long) (dataPoint * 999.0))));
+      values.add(dataPoint < -0.5 ? null : ((int) (dataPoint * 999.0)));
     }
-    sb.append("]}");
+    graphHistory.setValues(values);
     if (foundTwoAdjacentDataPoints) {
-      return sb.toString();
+      return graphHistory;
     } else {
       return null;
     }
