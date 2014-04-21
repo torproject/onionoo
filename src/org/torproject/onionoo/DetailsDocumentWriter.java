@@ -244,25 +244,29 @@ public class DetailsDocumentWriter implements DescriptorListener,
 
       /* Add exit addresses if at least one of them is distinct from the
        * onion-routing addresses. */
-      if (exitListEntries.containsKey(fingerprint)) {
+      SortedSet<String> exitAddresses = new TreeSet<String>();
+      if (this.exitListEntries.containsKey(fingerprint)) {
         for (ExitListEntry exitListEntry :
-            exitListEntries.get(fingerprint)) {
-          entry.addExitAddress(exitListEntry.getExitAddress());
+            this.exitListEntries.get(fingerprint)) {
+          String exitAddress = exitListEntry.getExitAddress();
+          if (exitAddress.length() > 0 &&
+              !entry.getAddress().equals(exitAddress) &&
+              !entry.getOrAddresses().contains(exitAddress)) {
+            exitAddresses.add(exitAddress);
+          }
         }
       }
-      if (!entry.getExitAddresses().isEmpty()) {
+      if (!exitAddresses.isEmpty()) {
         sb.append(",\n\"exit_addresses\":[");
         int written = 0;
-        for (String exitAddress : entry.getExitAddresses()) {
+        for (String exitAddress : exitAddresses) {
           sb.append((written++ > 0 ? "," : "") + "\""
               + exitAddress.toLowerCase() + "\"");
         }
         sb.append("]");
       }
 
-      /* Append descriptor-specific part from details status file, and
-       * update contact in node status. */
-      /* TODO Updating the contact here seems like a pretty bad hack. */
+      /* Append descriptor-specific part from details status file. */
       DetailsStatus detailsStatus = this.documentStore.retrieve(
           DetailsStatus.class, false, fingerprint);
       if (detailsStatus != null &&
@@ -275,18 +279,9 @@ public class DetailsDocumentWriter implements DescriptorListener,
           if (line.startsWith("\"desc_published\":")) {
             continue;
           }
-          if (line.startsWith("\"contact\":")) {
-            int start = "\"contact\":\"".length(),
-                end = line.length() - 1;
-            if (line.endsWith(",")) {
-              end--;
-            }
-            contact = unescapeJSON(line.substring(start, end));
-          }
           sb.append("\n" + line);
         }
         s.close();
-        entry.setContact(contact);
       }
 
       /* Finish details string. */
@@ -362,10 +357,6 @@ public class DetailsDocumentWriter implements DescriptorListener,
 
   private static String escapeJSON(String s) {
     return StringEscapeUtils.escapeJavaScript(s).replaceAll("\\\\'", "'");
-  }
-
-  private static String unescapeJSON(String s) {
-    return StringEscapeUtils.unescapeJavaScript(s.replaceAll("'", "\\'"));
   }
 
   public String getStatsString() {
