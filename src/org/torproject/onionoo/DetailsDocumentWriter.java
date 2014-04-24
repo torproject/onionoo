@@ -145,7 +145,7 @@ public class DetailsDocumentWriter implements DescriptorListener,
       String portList = entry.getPortList();
       Boolean recommendedVersion = entry.getRecommendedVersion();
       StringBuilder sb = new StringBuilder();
-      sb.append("{\"version\":1,\n"
+      sb.append("{\n"
           + "\"nickname\":\"" + nickname + "\",\n"
           + "\"fingerprint\":\"" + fingerprint + "\",\n"
           + "\"or_addresses\":[" + orAddressesAndPortsBuilder.toString()
@@ -267,20 +267,23 @@ public class DetailsDocumentWriter implements DescriptorListener,
           DetailsStatus.class, false, fingerprint);
       if (detailsStatus != null &&
           detailsStatus.getDocumentString().length() > 0) {
-        sb.append(",\n" + detailsStatus.getDocumentString());
+        sb.append(",");
         String contact = null;
         Scanner s = new Scanner(detailsStatus.getDocumentString());
         while (s.hasNextLine()) {
           String line = s.nextLine();
-          if (!line.startsWith("\"contact\":")) {
+          if (line.startsWith("\"desc_published\":")) {
             continue;
           }
-          int start = "\"contact\":\"".length(), end = line.length() - 1;
-          if (line.endsWith(",")) {
-            end--;
+          if (line.startsWith("\"contact\":")) {
+            int start = "\"contact\":\"".length(),
+                end = line.length() - 1;
+            if (line.endsWith(",")) {
+              end--;
+            }
+            contact = unescapeJSON(line.substring(start, end));
           }
-          contact = unescapeJSON(line.substring(start, end));
-          break;
+          sb.append("\n" + line);
         }
         s.close();
         entry.setContact(contact);
