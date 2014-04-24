@@ -413,7 +413,6 @@ public class DocumentStore {
     Gson gson = new Gson();
     try {
       result = gson.fromJson(documentString, documentType);
-      result.setDocumentString(documentString);
     } catch (JsonParseException e) {
       /* Handle below. */
       e.printStackTrace();
