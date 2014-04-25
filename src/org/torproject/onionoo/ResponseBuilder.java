@@ -146,24 +146,16 @@ public class ResponseBuilder {
         detailsDocument.getDocumentString() != null) {
       StringBuilder sb = new StringBuilder();
       Scanner s = new Scanner(detailsDocument.getDocumentString());
-      sb.append("{");
-      if (s.hasNextLine()) {
-        /* Skip version line. */
-        s.nextLine();
-      }
       boolean includeLine = true;
       while (s.hasNextLine()) {
         String line = s.nextLine();
-        if (line.equals("}")) {
-          sb.append("}\n");
+        if (line.equals("{")) {
+          /* Omit newline after opening bracket. */
+          sb.append("{");
+        } else if (line.equals("}")) {
+          /* Omit newline after closing bracket. */
+          sb.append("}");
           break;
-        } else if (line.startsWith("\"desc_published\":")) {
-          continue;
-        } else if (line.startsWith("\"hibernating\":True")) {
-          /* TODO This workaround saves us from bulk-editing all details
-           * files in out/details/ and status/details/.  May take this out
-           * when all/most of those files with invalid JSON are gone. */
-          sb.append(line.replaceAll("T", "t") + "\n");
         } else if (this.fields != null) {
           if (line.startsWith("\"")) {
             includeLine = false;
@@ -182,11 +174,8 @@ public class ResponseBuilder {
       }
       s.close();
       String detailsLines = sb.toString();
-      if (detailsLines.length() > 1) {
-        detailsLines = detailsLines.substring(0,
-            detailsLines.length() - 1);
-      }
       if (detailsLines.endsWith(",\n}")) {
+        /* Fix broken JSON if we omitted lines above. */
         detailsLines = detailsLines.substring(0,
             detailsLines.length() - 3) + "\n}";
       }
