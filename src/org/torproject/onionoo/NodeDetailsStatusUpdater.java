@@ -36,8 +36,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   private SortedMap<String, NodeStatus> knownNodes =
       new TreeMap<String, NodeStatus>();
 
-  private Map<String, String> contacts = new HashMap<String, String>();
-
   private SortedMap<String, NodeStatus> relays;
 
   private SortedMap<String, NodeStatus> bridges;
@@ -214,16 +212,20 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
       String fingerprint = e.getKey();
       NodeStatus node = e.getValue();
-      if (node.isRelay() && node.getRelayFlags().contains("Running") &&
-          node.getLastSeenMillis() == this.relaysLastValidAfterMillis) {
-        node.setRunning(true);
+      if (node.isRelay()) {
+        if (node.getRelayFlags().contains("Running") &&
+            node.getLastSeenMillis() == this.relaysLastValidAfterMillis) {
+          node.setRunning(true);
+        }
+        DetailsStatus detailsStatus = this.documentStore.retrieve(
+            DetailsStatus.class, true, fingerprint);
+        if (detailsStatus != null) {
+          node.setContact(detailsStatus.getContact());
+        }
       }
       if (!node.isRelay() && node.getRelayFlags().contains("Running") &&
           node.getLastSeenMillis() == this.bridgesLastPublishedMillis) {
         node.setRunning(true);
-      }
-      if (this.contacts.containsKey(fingerprint)) {
-        node.setContact(this.contacts.get(fingerprint));
       }
     }
   }
@@ -334,9 +336,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       detailsStatus.setHibernating(true);
     }
     this.documentStore.store(detailsStatus, fingerprint);
-    if (descriptor.getContact() != null) {
-      this.contacts.put(fingerprint, descriptor.getContact());
-    }
   }
 
   private void processBridgeServerDescriptor(

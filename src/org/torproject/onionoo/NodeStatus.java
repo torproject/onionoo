@@ -492,7 +492,6 @@ public class NodeStatus extends Document {
       this.defaultPolicy = newNodeStatus.defaultPolicy;
       this.portList = newNodeStatus.portList;
       this.aSNumber = newNodeStatus.aSNumber;
-      this.contact = newNodeStatus.contact;
       this.recommendedVersion = newNodeStatus.recommendedVersion;
     }
     if (this.isRelay && newNodeStatus.isRelay) {
