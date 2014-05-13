@@ -482,7 +482,6 @@ public class NodeStatus extends Document {
       this.nickname = newNodeStatus.nickname;
       this.address = newNodeStatus.address;
       this.orAddressesAndPorts = newNodeStatus.orAddressesAndPorts;
-      this.exitAddresses = newNodeStatus.exitAddresses;
       this.lastSeenMillis = newNodeStatus.lastSeenMillis;
       this.orPort = newNodeStatus.orPort;
       this.dirPort = newNodeStatus.dirPort;

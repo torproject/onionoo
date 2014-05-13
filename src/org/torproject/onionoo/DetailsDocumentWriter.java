@@ -3,20 +3,13 @@ package org.torproject.onionoo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.torproject.descriptor.Descriptor;
-import org.torproject.descriptor.ExitList;
-import org.torproject.descriptor.ExitListEntry;
-
-public class DetailsDocumentWriter implements DescriptorListener,
-    FingerprintListener, DocumentWriter {
+public class DetailsDocumentWriter implements FingerprintListener,
+    DocumentWriter {
 
   private DescriptorSource descriptorSource;
 
@@ -28,40 +21,7 @@ public class DetailsDocumentWriter implements DescriptorListener,
     this.descriptorSource = ApplicationFactory.getDescriptorSource();
     this.documentStore = ApplicationFactory.getDocumentStore();
     this.now = ApplicationFactory.getTime().currentTimeMillis();
-    this.registerDescriptorListeners();
     this.registerFingerprintListeners();
-  }
-
-  private void registerDescriptorListeners() {
-    this.descriptorSource.registerDescriptorListener(this,
-        DescriptorType.EXIT_LISTS);
-  }
-
-  public void processDescriptor(Descriptor descriptor, boolean relay) {
-    if (descriptor instanceof ExitList) {
-      this.processExitList((ExitList) descriptor);
-    }
-  }
-
-  private Map<String, Set<ExitListEntry>> exitListEntries =
-      new HashMap<String, Set<ExitListEntry>>();
-
-  /* TODO Processing descriptors should really be done in
-   * NodeDetailsStatusUpdater, not here.  This is also a bug, because
-   * we're only considering newly published exit lists. */
-  private void processExitList(ExitList exitList) {
-    for (ExitListEntry exitListEntry : exitList.getExitListEntries()) {
-      if (exitListEntry.getScanMillis() <
-          this.now - 24L * 60L * 60L * 1000L) {
-        continue;
-      }
-      String fingerprint = exitListEntry.getFingerprint();
-      if (!this.exitListEntries.containsKey(fingerprint)) {
-        this.exitListEntries.put(fingerprint,
-            new HashSet<ExitListEntry>());
-      }
-      this.exitListEntries.get(fingerprint).add(exitListEntry);
-    }
   }
 
   private void registerFingerprintListeners() {
@@ -164,26 +124,8 @@ public class DetailsDocumentWriter implements DescriptorListener,
       detailsDocument.setRecommendedVersion(
           entry.getRecommendedVersion());
 
-      /* Add exit addresses if at least one of them is distinct from the
-       * onion-routing addresses. */
-      SortedSet<String> exitAddresses = new TreeSet<String>();
-      if (this.exitListEntries.containsKey(fingerprint)) {
-        for (ExitListEntry exitListEntry :
-            this.exitListEntries.get(fingerprint)) {
-          String exitAddress = exitListEntry.getExitAddress();
-          if (exitAddress.length() > 0 &&
-              !entry.getAddress().equals(exitAddress) &&
-              !entry.getOrAddresses().contains(exitAddress)) {
-            exitAddresses.add(exitAddress.toLowerCase());
-          }
-        }
-      }
-      if (!exitAddresses.isEmpty()) {
-        detailsDocument.setExitAddresses(new ArrayList<String>(
-            exitAddresses));
-      }
-
-      /* Append descriptor-specific part from details status file. */
+      /* Append descriptor-specific part and exit addresses from details
+       * status file. */
       DetailsStatus detailsStatus = this.documentStore.retrieve(
           DetailsStatus.class, true, fingerprint);
       if (detailsStatus != null) {
@@ -204,6 +146,23 @@ public class DetailsDocumentWriter implements DescriptorListener,
         detailsDocument.setExitPolicyV6Summary(
             detailsStatus.getExitPolicyV6Summary());
         detailsDocument.setHibernating(detailsStatus.getHibernating());
+        if (detailsStatus.getExitAddresses() != null) {
+          SortedSet<String> exitAddresses = new TreeSet<String>();
+          for (Map.Entry<String, Long> e :
+              detailsStatus.getExitAddresses().entrySet()) {
+            String exitAddress = e.getKey().toLowerCase();
+            long scanMillis = e.getValue();
+            if (!entry.getAddress().equals(exitAddress) &&
+                !entry.getOrAddresses().contains(exitAddress) &&
+                scanMillis >= this.now - DateTimeHelper.ONE_DAY) {
+              exitAddresses.add(exitAddress);
+            }
+          }
+          if (!exitAddresses.isEmpty()) {
+            detailsDocument.setExitAddresses(new ArrayList<String>(
+                exitAddresses));
+          }
+        }
       }
 
       /* Write details file to disk. */

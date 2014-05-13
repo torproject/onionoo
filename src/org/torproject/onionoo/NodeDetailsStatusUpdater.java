@@ -16,6 +16,8 @@ import java.util.TreeSet;
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
+import org.torproject.descriptor.ExitList;
+import org.torproject.descriptor.ExitListEntry;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
@@ -86,6 +88,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       this.processBridgeServerDescriptor((ServerDescriptor) descriptor);
     } else if (descriptor instanceof BridgePoolAssignment) {
       this.processBridgePoolAssignment((BridgePoolAssignment) descriptor);
+    } else if (descriptor instanceof ExitList) {
+      this.processExitList((ExitList) descriptor);
     }
   }
 
@@ -98,8 +102,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     Logger.printStatusTime("Started reverse domain name lookups");
     this.lookUpCitiesAndASes();
     Logger.printStatusTime("Looked up cities and ASes");
-    this.setRunningBitsAndContacts();
-    Logger.printStatusTime("Set running bits and contacts");
+    this.setRunningBitsContactsAndExitAddresses();
+    Logger.printStatusTime("Set running bits, contacts, and exit "
+        + "addresses");
     this.calculatePathSelectionProbabilities();
     Logger.printStatusTime("Calculated path selection probabilities");
     this.finishReverseDomainNameLookups();
@@ -111,6 +116,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
      * all node statuses and an out/summary with only recent ones?
     this.writeOutSummary();
     Logger.printStatusTime("Wrote out summary");*/
+    this.updateDetailsStatuses();
+    Logger.printStatusTime("Updated exit addresses in details statuses");
   }
 
   private void processRelayNetworkStatusConsensus(
@@ -208,7 +215,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
-  private void setRunningBitsAndContacts() {
+  private void setRunningBitsContactsAndExitAddresses() {
     for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
       String fingerprint = e.getKey();
       NodeStatus node = e.getValue();
@@ -221,6 +228,14 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
             DetailsStatus.class, true, fingerprint);
         if (detailsStatus != null) {
           node.setContact(detailsStatus.getContact());
+          if (detailsStatus.getExitAddresses() != null) {
+            for (Map.Entry<String, Long> ea :
+                detailsStatus.getExitAddresses().entrySet()) {
+              if (ea.getValue() >= this.now - DateTimeHelper.ONE_DAY) {
+                node.addExitAddress(ea.getKey());
+              }
+            }
+          }
         }
       }
       if (!node.isRelay() && node.getRelayFlags().contains("Running") &&
@@ -396,6 +411,31 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
+  private Map<String, Map<String, Long>> exitListEntries =
+      new HashMap<String, Map<String, Long>>();
+
+  private void processExitList(ExitList exitList) {
+    for (ExitListEntry exitListEntry : exitList.getExitListEntries()) {
+      String fingerprint = exitListEntry.getFingerprint();
+      if (exitListEntry.getScanMillis() <
+          this.now - DateTimeHelper.ONE_DAY) {
+        continue;
+      }
+      if (!this.exitListEntries.containsKey(fingerprint)) {
+        this.exitListEntries.put(fingerprint,
+            new HashMap<String, Long>());
+      }
+      String exitAddress = exitListEntry.getExitAddress();
+      long scanMillis = exitListEntry.getScanMillis();
+      if (!this.exitListEntries.get(fingerprint).containsKey(exitAddress)
+          || this.exitListEntries.get(fingerprint).get(exitAddress)
+          < scanMillis) {
+        this.exitListEntries.get(fingerprint).put(exitAddress,
+            scanMillis);
+      }
+    }
+  }
+
   private void startReverseDomainNameLookups() {
     Map<String, Long> addressLastLookupTimes =
         new HashMap<String, Long>();
@@ -531,6 +571,44 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         relay.setExitProbability(exitWeights.get(fingerprint)
             / totalExitWeight);
       }
+    }
+  }
+
+  private void updateDetailsStatuses() {
+    SortedSet<String> fingerprints = new TreeSet<String>();
+    fingerprints.addAll(this.exitListEntries.keySet());
+    for (String fingerprint : fingerprints) {
+      DetailsStatus detailsStatus = this.documentStore.retrieve(
+          DetailsStatus.class, true, fingerprint);
+      if (detailsStatus == null) {
+        detailsStatus = new DetailsStatus();
+      }
+      Map<String, Long> exitAddresses = new HashMap<String, Long>();
+      if (detailsStatus.getExitAddresses() != null) {
+        for (Map.Entry<String, Long> e :
+            detailsStatus.getExitAddresses().entrySet()) {
+          if (e.getValue() >= this.now - DateTimeHelper.ONE_DAY) {
+            exitAddresses.put(e.getKey(), e.getValue());
+          }
+        }
+      }
+      if (this.exitListEntries.containsKey(fingerprint)) {
+        for (Map.Entry<String, Long> e :
+            this.exitListEntries.get(fingerprint).entrySet()) {
+          if (!exitAddresses.containsKey(e.getKey()) ||
+              exitAddresses.get(e.getKey()) < e.getValue()) {
+            exitAddresses.put(e.getKey(), e.getValue());
+          }
+        }
+      }
+      if (this.knownNodes.containsKey(fingerprint)) {
+        for (String orAddress :
+            this.knownNodes.get(fingerprint).getOrAddresses()) {
+          this.exitListEntries.remove(orAddress);
+        }
+      }
+      detailsStatus.setExitAddresses(exitAddresses);
+      this.documentStore.store(detailsStatus, fingerprint);
     }
   }
 

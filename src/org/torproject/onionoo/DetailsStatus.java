@@ -130,4 +130,12 @@ class DetailsStatus extends Document {
   public String getPoolAssignment() {
     return this.pool_assignment;
   }
+
+  private Map<String, Long> exit_addresses;
+  public void setExitAddresses(Map<String, Long> exitAddresses) {
+    this.exit_addresses = exitAddresses;
+  }
+  public Map<String, Long> getExitAddresses() {
+    return this.exit_addresses;
+  }
 }
