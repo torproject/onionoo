@@ -92,7 +92,7 @@
   </target>
   <target name="run" depends="compile">
     <java fork="true"
-          maxmemory="2048m"
+          maxmemory="4g"
           classname="org.torproject.onionoo.Main">
       <classpath refid="classpath"/>
     </java>

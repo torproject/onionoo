@@ -106,24 +106,29 @@ class DescriptorQueue {
 
   public void addDirectory(DescriptorType descriptorType) {
     String directoryName = null;
+    int maxDescriptorFilesInQueue = -1;
     switch (descriptorType) {
     case RELAY_CONSENSUSES:
       directoryName = "relay-descriptors/consensuses";
       break;
     case RELAY_SERVER_DESCRIPTORS:
-      directoryName = "relay-descriptors/server-descriptors";
+      directoryName = "relay-descriptors/server-descriptors-cat";
+      maxDescriptorFilesInQueue = 1;
       break;
     case RELAY_EXTRA_INFOS:
-      directoryName = "relay-descriptors/extra-infos";
+      directoryName = "relay-descriptors/extra-infos-cat";
+      maxDescriptorFilesInQueue = 1;
       break;
     case BRIDGE_STATUSES:
       directoryName = "bridge-descriptors/statuses";
       break;
     case BRIDGE_SERVER_DESCRIPTORS:
-      directoryName = "bridge-descriptors/server-descriptors";
+      directoryName = "bridge-descriptors/server-descriptors-cat";
+      maxDescriptorFilesInQueue = 1;
       break;
     case BRIDGE_EXTRA_INFOS:
-      directoryName = "bridge-descriptors/extra-infos";
+      directoryName = "bridge-descriptors/extra-infos-cat";
+      maxDescriptorFilesInQueue = 1;
       break;
     case BRIDGE_POOL_ASSIGNMENTS:
       directoryName = "bridge-pool-assignments";
@@ -139,6 +144,10 @@ class DescriptorQueue {
     File directory = new File(this.inDir, directoryName);
     if (directory.exists() && directory.isDirectory()) {
       this.descriptorReader.addDirectory(directory);
+      if (maxDescriptorFilesInQueue >= 1) {
+        this.descriptorReader.setMaxDescriptorFilesInQueue(
+            maxDescriptorFilesInQueue);
+      }
     } else {
       System.err.println("Directory " + directory.getAbsolutePath()
           + " either does not exist or is not a directory.  Not adding "

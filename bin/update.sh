@@ -1,4 +1,4 @@
 #!/bin/bash
-rsync -az --delete metrics.torproject.org::'metrics-recent/relay-descriptors/consensuses/ metrics-recent/relay-descriptors/server-descriptors/ metrics-recent/relay-descriptors/extra-infos/ metrics-recent/bridge-descriptors/statuses/ metrics-recent/bridge-descriptors/server-descriptors/ metrics-recent/bridge-descriptors/extra-infos/ metrics-recent/bridge-pool-assignments/ metrics-recent/exit-lists' in
+rsync -az --delete --exclude 'relay-descriptors/votes' --exclude 'relay-descriptors/microdescs' --exclude 'relay-descriptors/server-descriptors' --exclude 'relay-descriptors/extra-infos' --exclude 'bridge-descriptors/server-descriptors' --exclude 'bridge-descriptors/extra-infos' --exclude 'torperf' metrics.torproject.org::metrics-recent in
 ant run >> log
 
