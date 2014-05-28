@@ -3,10 +3,7 @@
 package org.torproject.onionoo;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -50,28 +47,18 @@ public class WeightsStatusUpdater implements DescriptorListener,
   }
 
   public void updateStatuses() {
-    this.updateWeightsHistories();
-    Logger.printStatusTime("Updated weights histories");
-    this.updateWeightsStatuses();
-    Logger.printStatusTime("Updated weights status files");
+    /* Nothing to do. */
   }
-
-  private Set<RelayNetworkStatusConsensus> consensuses =
-      new HashSet<RelayNetworkStatusConsensus>();
 
   private void processRelayNetworkConsensus(
       RelayNetworkStatusConsensus consensus) {
-    // TODO This does not scale for bulk imports.
-    this.consensuses.add(consensus);
+    long validAfterMillis = consensus.getValidAfterMillis(),
+        freshUntilMillis = consensus.getFreshUntilMillis();
+    SortedMap<String, double[]> pathSelectionWeights =
+        this.calculatePathSelectionProbabilities(consensus);
+    this.updateWeightsHistory(validAfterMillis, freshUntilMillis,
+        pathSelectionWeights);
   }
-
-  private Set<String> updateWeightsStatuses = new HashSet<String>();
-
-  private Map<String, Set<String>> descriptorDigestsByFingerprint =
-      new HashMap<String, Set<String>>();
-
-  private Map<String, Integer> advertisedBandwidths =
-      new HashMap<String, Integer>();
 
   private void processRelayServerDescriptor(
       ServerDescriptor serverDescriptor) {
@@ -81,27 +68,16 @@ public class WeightsStatusUpdater implements DescriptorListener,
         serverDescriptor.getBandwidthBurst(),
         serverDescriptor.getBandwidthObserved()),
         serverDescriptor.getBandwidthRate());
-    this.advertisedBandwidths.put(digest, advertisedBandwidth);
     String fingerprint = serverDescriptor.getFingerprint();
-    this.updateWeightsStatuses.add(fingerprint);
-    if (!this.descriptorDigestsByFingerprint.containsKey(
-        fingerprint)) {
-      this.descriptorDigestsByFingerprint.put(fingerprint,
-          new HashSet<String>());
+    WeightsStatus weightsStatus = this.documentStore.retrieve(
+        WeightsStatus.class, true, fingerprint);
+    if (weightsStatus == null) {
+      weightsStatus = new WeightsStatus();
     }
-    this.descriptorDigestsByFingerprint.get(fingerprint).add(digest);
-  }
-
-  private void updateWeightsHistories() {
-    for (RelayNetworkStatusConsensus consensus : this.consensuses) {
-      long validAfterMillis = consensus.getValidAfterMillis(),
-          freshUntilMillis = consensus.getFreshUntilMillis();
-      SortedMap<String, double[]> pathSelectionWeights =
-          this.calculatePathSelectionProbabilities(consensus);
-      this.updateWeightsHistory(validAfterMillis, freshUntilMillis,
-          pathSelectionWeights);
-    }
-  }
+    weightsStatus.getAdvertisedBandwidths().put(digest,
+        advertisedBandwidth);
+    this.documentStore.store(weightsStatus, fingerprint);
+}
 
   private void updateWeightsHistory(long validAfterMillis,
       long freshUntilMillis,
@@ -164,29 +140,19 @@ public class WeightsStatusUpdater implements DescriptorListener,
       boolean isExit = relay.getFlags().contains("Exit") &&
           !relay.getFlags().contains("BadExit");
       boolean isGuard = relay.getFlags().contains("Guard");
-      String serverDescriptorDigest = relay.getDescriptor().
-          toUpperCase();
+      String digest = relay.getDescriptor().toUpperCase();
       double advertisedBandwidth = 0.0;
-      if (!this.advertisedBandwidths.containsKey(
-          serverDescriptorDigest)) {
-        WeightsStatus weightsStatus = this.documentStore.retrieve(
-            WeightsStatus.class, true, fingerprint);
-        if (weightsStatus != null) {
-          if (!this.descriptorDigestsByFingerprint.containsKey(
-              fingerprint)) {
-            this.descriptorDigestsByFingerprint.put(fingerprint,
-                new HashSet<String>());
-          }
-          this.descriptorDigestsByFingerprint.get(fingerprint).addAll(
-              weightsStatus.getAdvertisedBandwidths().keySet());
-          this.advertisedBandwidths.putAll(
-              weightsStatus.getAdvertisedBandwidths());
-        }
-      }
-      if (this.advertisedBandwidths.containsKey(
-          serverDescriptorDigest)) {
-        advertisedBandwidth = (double) this.advertisedBandwidths.get(
-            serverDescriptorDigest);
+      WeightsStatus weightsStatus = this.documentStore.retrieve(
+          WeightsStatus.class, true, fingerprint);
+      if (weightsStatus != null &&
+          weightsStatus.getAdvertisedBandwidths() != null &&
+          weightsStatus.getAdvertisedBandwidths().containsKey(digest)) {
+        /* Read advertised bandwidth from weights status file.  Server
+         * descriptors are parsed before consensuses, so we're sure that
+         * if there's a server descriptor for this relay, it'll be
+         * contained in the weights status file by now. */
+        advertisedBandwidth =
+            (double) weightsStatus.getAdvertisedBandwidths().get(digest);
       }
       double consensusWeight = (double) relay.getBandwidth();
       double guardWeight = (double) relay.getBandwidth();
@@ -252,24 +218,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
         history.tailMap(interval).firstKey()[0] >= freshUntilMillis)) {
       history.put(interval, weights);
       this.compressHistory(weightsStatus);
-      this.addAdvertisedBandwidths(weightsStatus, fingerprint);
       this.documentStore.store(weightsStatus, fingerprint);
-      this.updateWeightsStatuses.remove(fingerprint);
-    }
-  }
-
-  private void addAdvertisedBandwidths(WeightsStatus weightsStatus,
-      String fingerprint) {
-    if (this.descriptorDigestsByFingerprint.containsKey(fingerprint)) {
-      for (String descriptorDigest :
-          this.descriptorDigestsByFingerprint.get(fingerprint)) {
-        if (this.advertisedBandwidths.containsKey(descriptorDigest)) {
-          int advertisedBandwidth =
-              this.advertisedBandwidths.get(descriptorDigest);
-          weightsStatus.getAdvertisedBandwidths().put(descriptorDigest,
-              advertisedBandwidth);
-        }
-      }
     }
   }
 
@@ -332,18 +281,6 @@ public class WeightsStatusUpdater implements DescriptorListener,
           lastWeights);
     }
     weightsStatus.setHistory(compressedHistory);
-  }
-
-  private void updateWeightsStatuses() {
-    for (String fingerprint : this.updateWeightsStatuses) {
-      WeightsStatus weightsStatus = this.documentStore.retrieve(
-          WeightsStatus.class, true, fingerprint);
-      if (weightsStatus == null) {
-        weightsStatus = new WeightsStatus();
-      }
-      this.addAdvertisedBandwidths(weightsStatus, fingerprint);
-      this.documentStore.store(weightsStatus, fingerprint);
-    }
   }
 
   public String getStatsString() {

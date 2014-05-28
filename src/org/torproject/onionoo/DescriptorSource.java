@@ -328,22 +328,24 @@ public class DescriptorSource {
   }
 
   public void readDescriptors() {
-    this.readDescriptors(DescriptorType.RELAY_CONSENSUSES,
-        DescriptorHistory.RELAY_CONSENSUS_HISTORY, true);
+    /* Careful when changing the order of parsing descriptor types!  The
+     * various status updaters may base assumptions on this order. */
     this.readDescriptors(DescriptorType.RELAY_SERVER_DESCRIPTORS,
         DescriptorHistory.RELAY_SERVER_HISTORY, true);
     this.readDescriptors(DescriptorType.RELAY_EXTRA_INFOS,
         DescriptorHistory.RELAY_EXTRAINFO_HISTORY, true);
     this.readDescriptors(DescriptorType.EXIT_LISTS,
         DescriptorHistory.EXIT_LIST_HISTORY, true);
-    this.readDescriptors(DescriptorType.BRIDGE_STATUSES,
-        DescriptorHistory.BRIDGE_STATUS_HISTORY, false);
+    this.readDescriptors(DescriptorType.RELAY_CONSENSUSES,
+        DescriptorHistory.RELAY_CONSENSUS_HISTORY, true);
     this.readDescriptors(DescriptorType.BRIDGE_SERVER_DESCRIPTORS,
         DescriptorHistory.BRIDGE_SERVER_HISTORY, false);
     this.readDescriptors(DescriptorType.BRIDGE_EXTRA_INFOS,
         DescriptorHistory.BRIDGE_EXTRAINFO_HISTORY, false);
     this.readDescriptors(DescriptorType.BRIDGE_POOL_ASSIGNMENTS,
         DescriptorHistory.BRIDGE_POOLASSIGN_HISTORY, false);
+    this.readDescriptors(DescriptorType.BRIDGE_STATUSES,
+        DescriptorHistory.BRIDGE_STATUS_HISTORY, false);
   }
 
   private void readDescriptors(DescriptorType descriptorType,
