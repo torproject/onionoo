@@ -58,6 +58,9 @@ public class Main {
     DocumentWriter[] dws = new DocumentWriter[] { ddw, bdw, wdw, cdw,
         udw };
 
+    Logger.printStatus("Downloading descriptors.");
+    dso.downloadDescriptors();
+
     Logger.printStatus("Reading descriptors.");
     dso.readDescriptors();
 

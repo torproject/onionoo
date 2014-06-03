@@ -1,13 +1,20 @@
-/* Copyright 2013 The Tor Project
+/* Copyright 2013, 2014 The Tor Project
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +26,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.zip.GZIPInputStream;
 
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.BridgePoolAssignment;
@@ -61,6 +69,169 @@ enum DescriptorHistory {
   BRIDGE_SERVER_HISTORY,
   BRIDGE_EXTRAINFO_HISTORY,
   BRIDGE_POOLASSIGN_HISTORY,
+}
+
+class DescriptorDownloader {
+
+  private final String protocolHostNameResourcePrefix =
+      "https://collector.torproject.org/recent/";
+
+  private String directory;
+
+  private final File inDir = new File("in");
+
+  public DescriptorDownloader(DescriptorType descriptorType) {
+    switch (descriptorType) {
+    case RELAY_CONSENSUSES:
+      this.directory = "relay-descriptors/consensuses/";
+      break;
+    case RELAY_SERVER_DESCRIPTORS:
+      this.directory = "relay-descriptors/server-descriptors/";
+      break;
+    case RELAY_EXTRA_INFOS:
+      this.directory = "relay-descriptors/extra-infos/";
+      break;
+    case EXIT_LISTS:
+      this.directory = "exit-lists/";
+      break;
+    case BRIDGE_STATUSES:
+      this.directory = "bridge-descriptors/statuses/";
+      break;
+    case BRIDGE_SERVER_DESCRIPTORS:
+      this.directory = "bridge-descriptors/server-descriptors/";
+      break;
+    case BRIDGE_EXTRA_INFOS:
+      this.directory = "bridge-descriptors/extra-infos/";
+      break;
+    case BRIDGE_POOL_ASSIGNMENTS:
+      this.directory = "bridge-pool-assignments/";
+      break;
+    default:
+      System.err.println("Unknown descriptor type.");
+      return;
+    }
+  }
+
+  private SortedSet<String> localFiles = new TreeSet<String>();
+
+  public int statLocalFiles() {
+    File localDirectory = new File(this.inDir, this.directory);
+    if (localDirectory.exists()) {
+      for (File file : localDirectory.listFiles()) {
+        this.localFiles.add(file.getName());
+      }
+    }
+    return this.localFiles.size();
+  }
+
+  private SortedSet<String> remoteFiles = new TreeSet<String>();
+
+  public int fetchRemoteDirectory() {
+    String directoryUrl = this.protocolHostNameResourcePrefix
+        + this.directory;
+    try {
+      URL u = new URL(directoryUrl);
+      HttpURLConnection huc = (HttpURLConnection) u.openConnection();
+      huc.setRequestMethod("GET");
+      huc.connect();
+      if (huc.getResponseCode() != 200) {
+        System.err.println("Could not fetch " + directoryUrl
+            + ": " + huc.getResponseCode() + " "
+            + huc.getResponseMessage() + ".  Skipping.");
+        return 0;
+      }
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+          huc.getInputStream()));
+      String line;
+      while ((line = br.readLine()) != null) {
+        if (!line.trim().startsWith("<tr>") ||
+            !line.contains("<a href=\"")) {
+          continue;
+        }
+        String linePart = line.substring(
+            line.indexOf("<a href=\"") + "<a href=\"".length());
+        if (!linePart.contains("\"")) {
+          continue;
+        }
+        linePart = linePart.substring(0, linePart.indexOf("\""));
+        if (linePart.endsWith("/")) {
+          continue;
+        }
+        this.remoteFiles.add(linePart);
+      }
+      br.close();
+    } catch (IOException e) {
+      System.err.println("Could not fetch or parse " + directoryUrl
+          + ".  Skipping.");
+    }
+    return this.remoteFiles.size();
+  }
+
+  public int fetchRemoteFiles() {
+    int fetchedFiles = 0;
+    for (String remoteFile : this.remoteFiles) {
+      if (this.localFiles.contains(remoteFile)) {
+        continue;
+      }
+      String fileUrl = this.protocolHostNameResourcePrefix
+          + this.directory + remoteFile;
+      File localTempFile = new File(this.inDir, this.directory
+          + remoteFile + ".tmp");
+      File localFile = new File(this.inDir, this.directory + remoteFile);
+      try {
+        localFile.getParentFile().mkdirs();
+        URL u = new URL(fileUrl);
+        HttpURLConnection huc = (HttpURLConnection) u.openConnection();
+        huc.setRequestMethod("GET");
+        huc.addRequestProperty("Accept-Encoding", "gzip");
+        huc.connect();
+        if (huc.getResponseCode() != 200) {
+          System.err.println("Could not fetch " + fileUrl
+              + ": " + huc.getResponseCode() + " "
+              + huc.getResponseMessage() + ".  Skipping.");
+          continue;
+        }
+        long lastModified = huc.getHeaderFieldDate("Last-Modified", -1L);
+        InputStream is;
+        if (huc.getContentEncoding() != null &&
+            huc.getContentEncoding().equalsIgnoreCase("gzip")) {
+          is = new GZIPInputStream(huc.getInputStream());
+        } else {
+          is = huc.getInputStream();
+        }
+        BufferedInputStream bis = new BufferedInputStream(is);
+        BufferedOutputStream bos = new BufferedOutputStream(
+            new FileOutputStream(localTempFile));
+        int len;
+        byte[] data = new byte[1024];
+        while ((len = bis.read(data, 0, 1024)) >= 0) {
+          bos.write(data, 0, len);
+        }
+        bis.close();
+        bos.close();
+        localTempFile.renameTo(localFile);
+        if (lastModified >= 0) {
+          localFile.setLastModified(lastModified);
+        }
+        fetchedFiles++;
+      } catch (IOException e) {
+        System.err.println("Could not fetch or store " + fileUrl
+            + ".  Skipping.");
+      }
+    }
+    return fetchedFiles;
+  }
+
+  public int deleteOldLocalFiles() {
+    int deletedFiles = 0;
+    for (String localFile : this.localFiles) {
+      if (!this.remoteFiles.contains(localFile)) {
+        new File(this.inDir, this.directory + localFile).delete();
+        deletedFiles++;
+      }
+    }
+    return deletedFiles;
+  }
 }
 
 class DescriptorQueue {
@@ -112,22 +283,22 @@ class DescriptorQueue {
       directoryName = "relay-descriptors/consensuses";
       break;
     case RELAY_SERVER_DESCRIPTORS:
-      directoryName = "relay-descriptors/server-descriptors-cat";
+      directoryName = "relay-descriptors/server-descriptors";
       maxDescriptorFilesInQueue = 1;
       break;
     case RELAY_EXTRA_INFOS:
-      directoryName = "relay-descriptors/extra-infos-cat";
+      directoryName = "relay-descriptors/extra-infos";
       maxDescriptorFilesInQueue = 1;
       break;
     case BRIDGE_STATUSES:
       directoryName = "bridge-descriptors/statuses";
       break;
     case BRIDGE_SERVER_DESCRIPTORS:
-      directoryName = "bridge-descriptors/server-descriptors-cat";
+      directoryName = "bridge-descriptors/server-descriptors";
       maxDescriptorFilesInQueue = 1;
       break;
     case BRIDGE_EXTRA_INFOS:
-      directoryName = "bridge-descriptors/extra-infos-cat";
+      directoryName = "bridge-descriptors/extra-infos";
       maxDescriptorFilesInQueue = 1;
       break;
     case BRIDGE_POOL_ASSIGNMENTS:
@@ -327,6 +498,29 @@ public class DescriptorSource {
     this.fingerprintListeners.get(descriptorType).add(listener);
   }
 
+  public void downloadDescriptors() {
+    for (DescriptorType descriptorType : DescriptorType.values()) {
+      this.downloadDescriptors(descriptorType);
+    }
+  }
+
+  private int localFilesBefore = 0, foundRemoteFiles = 0,
+      downloadedFiles = 0, deletedLocalFiles = 0;
+
+  private void downloadDescriptors(DescriptorType descriptorType) {
+    if (!this.descriptorListeners.containsKey(descriptorType) &&
+        !this.fingerprintListeners.containsKey(descriptorType)) {
+      return;
+    }
+    DescriptorDownloader descriptorDownloader =
+        new DescriptorDownloader(descriptorType);
+    this.localFilesBefore += descriptorDownloader.statLocalFiles();
+    this.foundRemoteFiles +=
+        descriptorDownloader.fetchRemoteDirectory();
+    this.downloadedFiles += descriptorDownloader.fetchRemoteFiles();
+    this.deletedLocalFiles += descriptorDownloader.deleteOldLocalFiles();
+  }
+
   public void readDescriptors() {
     /* Careful when changing the order of parsing descriptor types!  The
      * various status updaters may base assumptions on this order. */
@@ -445,6 +639,14 @@ public class DescriptorSource {
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
+    sb.append("    " + this.localFilesBefore + " descriptor files found "
+        + "locally\n");
+    sb.append("    " + this.foundRemoteFiles + " descriptor files found "
+        + "remotely\n");
+    sb.append("    " + this.downloadedFiles + " descriptor files "
+        + "downloaded from remote\n");
+    sb.append("    " + this.deletedLocalFiles + " descriptor files "
+        + "deleted locally\n");
     sb.append("    " + this.descriptorQueues.size() + " descriptor "
         + "queues created\n");
     int historySizeBefore = 0, historySizeAfter = 0;
