@@ -3,15 +3,7 @@
 classes/
 etc/context.xml
 etc/web.xml
-geoip/Automatic-GeoLiteCity-Blocks.csv
-geoip/GeoIPASNum2.csv
-geoip/GeoIPASNum2.zip
-geoip/GeoLiteCity-Blocks.csv
-geoip/GeoLiteCity-Location.csv
-geoip/GeoLiteCity-latest.zip
-geoip/Manual-GeoLiteCity-Blocks.csv
-geoip/iso3166.csv
-geoip/region.csv
+geoip/
 in/
 log
 onionoo.war
