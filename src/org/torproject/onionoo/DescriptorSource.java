@@ -78,7 +78,7 @@ class DescriptorDownloader {
 
   private String directory;
 
-  private final File inDir = new File("in");
+  private final File inDir = new File("in/recent");
 
   public DescriptorDownloader(DescriptorType descriptorType) {
     switch (descriptorType) {
@@ -447,7 +447,7 @@ class DescriptorQueue {
 
 public class DescriptorSource {
 
-  private final File inDir = new File("in");
+  private final File inDir = new File("in/recent");
 
   private final File statusDir = new File("status");
 
