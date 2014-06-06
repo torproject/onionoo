@@ -391,7 +391,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       if (detailsStatus == null) {
         detailsStatus = new DetailsStatus();
       } else if (details.equals(detailsStatus.getPoolAssignment())) {
-        return;
+        continue;
       }
       detailsStatus.setPoolAssignment(details);
       this.documentStore.store(detailsStatus, fingerprint);
