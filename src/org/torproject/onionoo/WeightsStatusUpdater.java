@@ -101,6 +101,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
 
   private SortedMap<String, double[]> calculatePathSelectionProbabilities(
       RelayNetworkStatusConsensus consensus) {
+    boolean containsBandwidthWeights = false;
     double wgg = 1.0, wgd = 1.0, wmg = 1.0, wmm = 1.0, wme = 1.0,
         wmd = 1.0, wee = 1.0, wed = 1.0;
     SortedMap<String, Integer> bandwidthWeights =
@@ -118,6 +119,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
         wmd = ((double) bandwidthWeights.get("Wmd")) / 10000.0;
         wee = ((double) bandwidthWeights.get("Wee")) / 10000.0;
         wed = ((double) bandwidthWeights.get("Wed")) / 10000.0;
+        containsBandwidthWeights = true;
       }
     }
     SortedMap<String, Double>
@@ -137,11 +139,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
       if (!relay.getFlags().contains("Running")) {
         continue;
       }
-      boolean isExit = relay.getFlags().contains("Exit") &&
-          !relay.getFlags().contains("BadExit");
-      boolean isGuard = relay.getFlags().contains("Guard");
       String digest = relay.getDescriptor().toUpperCase();
-      double advertisedBandwidth = 0.0;
       WeightsStatus weightsStatus = this.documentStore.retrieve(
           WeightsStatus.class, true, fingerprint);
       if (weightsStatus != null &&
@@ -151,53 +149,83 @@ public class WeightsStatusUpdater implements DescriptorListener,
          * descriptors are parsed before consensuses, so we're sure that
          * if there's a server descriptor for this relay, it'll be
          * contained in the weights status file by now. */
-        advertisedBandwidth =
+        double advertisedBandwidth =
             (double) weightsStatus.getAdvertisedBandwidths().get(digest);
+        advertisedBandwidths.put(fingerprint, advertisedBandwidth);
+        totalAdvertisedBandwidth += advertisedBandwidth;
       }
-      double consensusWeight = (double) relay.getBandwidth();
-      double guardWeight = (double) relay.getBandwidth();
-      double middleWeight = (double) relay.getBandwidth();
-      double exitWeight = (double) relay.getBandwidth();
-      if (isGuard && isExit) {
-        guardWeight *= wgd;
-        middleWeight *= wmd;
-        exitWeight *= wed;
-      } else if (isGuard) {
-        guardWeight *= wgg;
-        middleWeight *= wmg;
-        exitWeight = 0.0;
-      } else if (isExit) {
-        guardWeight = 0.0;
-        middleWeight *= wme;
-        exitWeight *= wee;
-      } else {
-        guardWeight = 0.0;
-        middleWeight *= wmm;
-        exitWeight = 0.0;
+      if (relay.getBandwidth() >= 0L) {
+        double consensusWeight = (double) relay.getBandwidth();
+        consensusWeights.put(fingerprint, consensusWeight);
+        totalConsensusWeight += consensusWeight;
+        if (containsBandwidthWeights) {
+          double guardWeight = (double) relay.getBandwidth();
+          double middleWeight = (double) relay.getBandwidth();
+          double exitWeight = (double) relay.getBandwidth();
+          boolean isExit = relay.getFlags().contains("Exit") &&
+              !relay.getFlags().contains("BadExit");
+          boolean isGuard = relay.getFlags().contains("Guard");
+          if (isGuard && isExit) {
+            guardWeight *= wgd;
+            middleWeight *= wmd;
+            exitWeight *= wed;
+          } else if (isGuard) {
+            guardWeight *= wgg;
+            middleWeight *= wmg;
+            exitWeight = 0.0;
+          } else if (isExit) {
+            guardWeight = 0.0;
+            middleWeight *= wme;
+            exitWeight *= wee;
+          } else {
+            guardWeight = 0.0;
+            middleWeight *= wmm;
+            exitWeight = 0.0;
+          }
+          guardWeights.put(fingerprint, guardWeight);
+          middleWeights.put(fingerprint, middleWeight);
+          exitWeights.put(fingerprint, exitWeight);
+          totalGuardWeight += guardWeight;
+          totalMiddleWeight += middleWeight;
+          totalExitWeight += exitWeight;
+        }
       }
-      advertisedBandwidths.put(fingerprint, advertisedBandwidth);
-      consensusWeights.put(fingerprint, consensusWeight);
-      guardWeights.put(fingerprint, guardWeight);
-      middleWeights.put(fingerprint, middleWeight);
-      exitWeights.put(fingerprint, exitWeight);
-      totalAdvertisedBandwidth += advertisedBandwidth;
-      totalConsensusWeight += consensusWeight;
-      totalGuardWeight += guardWeight;
-      totalMiddleWeight += middleWeight;
-      totalExitWeight += exitWeight;
     }
     SortedMap<String, double[]> pathSelectionProbabilities =
         new TreeMap<String, double[]>();
-    for (NetworkStatusEntry relay :
-        consensus.getStatusEntries().values()) {
-      String fingerprint = relay.getFingerprint();
-      double[] probabilities = new double[] {
-          advertisedBandwidths.get(fingerprint)
-            / totalAdvertisedBandwidth,
-          consensusWeights.get(fingerprint) / totalConsensusWeight,
-          guardWeights.get(fingerprint) / totalGuardWeight,
-          middleWeights.get(fingerprint) / totalMiddleWeight,
-          exitWeights.get(fingerprint) / totalExitWeight };
+    SortedSet<String> fingerprints = new TreeSet<String>();
+    fingerprints.addAll(consensusWeights.keySet());
+    fingerprints.addAll(advertisedBandwidths.keySet());
+    for (String fingerprint : fingerprints) {
+      double[] probabilities = new double[] { -1.0, -1.0, -1.0, -1.0,
+          -1.0, -1.0, -1.0 };
+      if (consensusWeights.containsKey(fingerprint) &&
+          totalConsensusWeight > 0.0) {
+        probabilities[1] = consensusWeights.get(fingerprint) /
+            totalConsensusWeight;
+        probabilities[6] = consensusWeights.get(fingerprint);
+      }
+      if (guardWeights.containsKey(fingerprint) &&
+          totalGuardWeight > 0.0) {
+        probabilities[2] = guardWeights.get(fingerprint) /
+            totalGuardWeight;
+      }
+      if (middleWeights.containsKey(fingerprint) &&
+          totalMiddleWeight > 0.0) {
+        probabilities[3] = middleWeights.get(fingerprint) /
+            totalMiddleWeight;
+      }
+      if (exitWeights.containsKey(fingerprint) &&
+          totalExitWeight > 0.0) {
+        probabilities[4] = exitWeights.get(fingerprint) /
+            totalExitWeight;
+      }
+      if (advertisedBandwidths.containsKey(fingerprint) &&
+          totalAdvertisedBandwidth > 0.0) {
+        probabilities[0] = advertisedBandwidths.get(fingerprint)
+            / totalAdvertisedBandwidth;
+        probabilities[5] = advertisedBandwidths.get(fingerprint);
+      }
       pathSelectionProbabilities.put(fingerprint, probabilities);
     }
     return pathSelectionProbabilities;

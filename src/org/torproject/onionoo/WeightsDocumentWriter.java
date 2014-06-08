@@ -98,6 +98,10 @@ public class WeightsDocumentWriter implements FingerprintListener,
         this.compileGraphType(history, 3));
     weightsDocument.setExitProbability(
         this.compileGraphType(history, 4));
+    weightsDocument.setAdvertisedBandwidth(
+        this.compileGraphType(history, 5));
+    weightsDocument.setConsensusWeight(
+        this.compileGraphType(history, 6));
     return weightsDocument;
   }
 
@@ -141,9 +145,11 @@ public class WeightsDocumentWriter implements FingerprintListener,
         totalMillis = 0L;
         intervalStartMillis += dataPointInterval;
       }
-      totalWeightTimesMillis += weight
-          * ((double) (endMillis - startMillis));
-      totalMillis += (endMillis - startMillis);
+      if (weight >= 0.0) {
+        totalWeightTimesMillis += weight
+            * ((double) (endMillis - startMillis));
+        totalMillis += (endMillis - startMillis);
+      }
     }
     dataPoints.add(totalMillis * 5L < dataPointInterval
         ? -1.0 : totalWeightTimesMillis / (double) totalMillis);

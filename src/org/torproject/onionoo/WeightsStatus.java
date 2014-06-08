@@ -40,7 +40,7 @@ class WeightsStatus extends Document {
             advertisedBandwidth);
         continue;
       }
-      if (parts.length != 9) {
+      if (parts.length != 9 && parts.length != 11) {
         System.err.println("Illegal line '" + line + "' in weights "
               + "status file.  Skipping this line.");
         continue;
@@ -65,7 +65,11 @@ class WeightsStatus extends Document {
           Double.parseDouble(parts[5]),
           Double.parseDouble(parts[6]),
           Double.parseDouble(parts[7]),
-          Double.parseDouble(parts[8]) };
+          Double.parseDouble(parts[8]), -1.0, -1.0 };
+      if (parts.length == 11) {
+        weights[5] = Double.parseDouble(parts[9]);
+        weights[6] = Double.parseDouble(parts[10]);
+      }
       this.history.put(interval, weights);
     }
     s.close();

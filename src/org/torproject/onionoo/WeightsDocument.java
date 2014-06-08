@@ -40,5 +40,17 @@ class WeightsDocument extends Document {
       Map<String, GraphHistory> exitProbability) {
     this.exit_probability = exitProbability;
   }
+
+  private Map<String, GraphHistory> advertised_bandwidth;
+  public void setAdvertisedBandwidth(
+      Map<String, GraphHistory> advertisedBandwidth) {
+    this.advertised_bandwidth = advertisedBandwidth;
+  }
+
+  private Map<String, GraphHistory> consensus_weight;
+  public void setConsensusWeight(
+      Map<String, GraphHistory> consensusWeight) {
+    this.consensus_weight = consensusWeight;
+  }
 }
 
