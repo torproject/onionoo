@@ -257,6 +257,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
     long lastStartMillis = 0L, lastEndMillis = 0L;
     double[] lastWeights = null;
     String lastMonthString = "1970-01";
+    int lastMissingValues = -1;
     for (Map.Entry<long[], double[]> e : history.entrySet()) {
       long startMillis = e.getKey()[0], endMillis = e.getKey()[1];
       double[] weights = e.getValue();
@@ -277,10 +278,17 @@ public class WeightsStatusUpdater implements DescriptorListener,
       }
       String monthString = DateTimeHelper.format(startMillis,
           DateTimeHelper.ISO_YEARMONTH_FORMAT);
+      int missingValues = 0;
+      for (int i = 0; i < weights.length; i++) {
+        if (weights[i] < -0.5) {
+          missingValues += 1 << i;
+        }
+      }
       if (lastEndMillis == startMillis &&
           ((lastEndMillis - 1L) / intervalLengthMillis) ==
           ((endMillis - 1L) / intervalLengthMillis) &&
-          lastMonthString.equals(monthString)) {
+          lastMonthString.equals(monthString) &&
+          lastMissingValues == missingValues) {
         double lastIntervalInHours = (double) ((lastEndMillis
             - lastStartMillis) / DateTimeHelper.ONE_HOUR);
         double currentIntervalInHours = (double) ((endMillis
@@ -303,6 +311,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
         lastWeights = weights;
       }
       lastMonthString = monthString;
+      lastMissingValues = missingValues;
     }
     if (lastStartMillis > 0L) {
       compressedHistory.put(new long[] { lastStartMillis, lastEndMillis },
