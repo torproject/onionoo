@@ -300,7 +300,7 @@ Lookups are case-insensitive.
 </li>
 
 <li>
-<font color="blue"><b>fingerprint</b></font>
+<b>fingerprint</b>
 <p>
 Return only the relay with the parameter value matching the fingerprint
 or the bridge with the parameter value matching the hashed fingerprint.
@@ -311,7 +311,6 @@ with two exceptions:
 not</i> be hashed (again) using SHA-1;
 (2) the response will contain any matching relay or bridge regardless of
 whether they have been running in the past week.
-<font color="blue">Added on April 20, 2014.</font>
 </p>
 </li>
 
@@ -1495,7 +1494,6 @@ The unit is bytes per second.
 Contained graph history objects may contain null values if the relay did
 not provide any bandwidth data or only data for less than 20% of a given
 time period.
-<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
@@ -1508,7 +1506,6 @@ Object containing graph history objects with read bytes for different time
 periods.
 The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field.
-<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
@@ -1541,7 +1538,6 @@ Object containing graph history objects with written bytes for different
 time periods.
 The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field of <strong>relays</strong>.
-<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
@@ -1554,7 +1550,6 @@ Object containing graph history objects with read bytes for different time
 periods.
 The specification of graph history objects is similar to those in the
 <strong>write_history</strong> field of <strong>relays</strong>.
-<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
@@ -1743,7 +1738,6 @@ The specification of this history object is similar to that in the
 </h3>
 
 <p>
-<font color="blue">Added on March 10, 2014.</font>
 Clients documents contain estimates of the average number of clients
 connecting to a bridge every day.
 There are no clients documents available for relays, just for bridges.
@@ -1914,7 +1908,6 @@ It might be removed in the future without notice.</font>
 </h3>
 
 <p>
-<font color="blue">Added on March 10, 2014.</font>
 Uptime documents contain fractional uptimes of relays and bridges.
 Uptime documents contain different time intervals and are available for
 relays and bridges.
@@ -2034,7 +2027,6 @@ of 40 upper-case hexadecimal characters.
 Object containing uptime history objects for different time periods.
 The specification of uptime history objects is similar to those in the
 <strong>uptime</strong> field of <strong>relays</strong>.
-<font color="red">As of April 20, 2014, this field is optional.</font>
 </p>
 </li>
 
