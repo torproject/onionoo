@@ -559,6 +559,9 @@ public class DescriptorSource {
       for (DescriptorListener descriptorListener : descriptorListeners) {
         descriptorListener.processDescriptor(descriptor, relay);
       }
+      if (fingerprintListeners == null) {
+        continue;
+      }
       SortedSet<String> fingerprints = new TreeSet<String>();
       if (descriptorType == DescriptorType.RELAY_CONSENSUSES &&
           descriptor instanceof RelayNetworkStatusConsensus) {
