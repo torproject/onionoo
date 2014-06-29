@@ -24,6 +24,7 @@
         <li><a href="#weights">Weights documents</a></li>
         <li><a href="#clients">Clients documents</a></li>
         <li><a href="#uptime">Uptime documents</a></li>
+        <li><a href="#examples">Example usage</a></li>
     </ul>
 
 </div>
@@ -2003,6 +2004,66 @@ The specification of uptime history objects is similar to those in the
 </li>
 
 </ul>
+
+</div> <!-- box -->
+
+<div class="box">
+<a name="examples"></a>
+<h3>Example usage <a href="#examples">#</a>
+</h3>
+
+<p>
+The following examples illustrate how to build requests for some trivial
+and some more complex use cases.
+While Onionoo is designed mainly for developers and not end users, there
+may be cases when it's easier to quickly write a specific query Onionoo
+rather than to find an Onionoo client that provides the desired
+information.
+</p>
+
+<pre>https://onionoo.torproject.org/summary?limit=4</pre>
+
+<p>
+This first query returns the first four summary documents that Onionoo can
+find.
+The <code>limit</code> parameter should always be used while developing
+new queries to avoid downloading huge responses.
+</p>
+
+<pre>https://onionoo.torproject.org/summary?limit=4&search=moria</pre>
+
+<p>
+The second query restricts results to relays and bridges containing the
+string "moria" in one of a few searched fields.
+</p>
+
+<pre>https://onionoo.torproject.org/details?limit=4&search=moria</pre>
+
+<p>
+The third query switches from the short summary documents to the longer
+details documents containing, well, more details.
+</p>
+
+<pre>https://onionoo.torproject.org/details?limit=4&search=moria&fields=nickname</pre>
+
+<p>
+The fourth query adds the <code>fields</code> parameter which removes all
+fields except the specified ones from the result.
+This parameter is only implemented for details documents.
+</p>
+
+<pre>https://onionoo.torproject.org/details?limit=4&search=moria&fields=nickname&order=-consensus_weight</pre>
+
+<p>
+The fifth query sorts results by relay consensus weight from largest to
+smallest.
+</p>
+
+<p>
+Obviously, this query can be made even more complex by adding more
+parameters, and in some cases this is necessary and useful.
+Please refer to the protocol specification for details.
+</p>
 
 </div> <!-- box -->
 
