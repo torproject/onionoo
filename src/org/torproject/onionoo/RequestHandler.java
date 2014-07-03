@@ -104,6 +104,11 @@ public class RequestHandler {
         lastSeenDays.length);
   }
 
+  private String family;
+  public void setFamily(String family) {
+    this.family = family;
+  }
+
   private Map<String, NodeStatus> filteredRelays =
       new HashMap<String, NodeStatus>();
 
@@ -127,6 +132,7 @@ public class RequestHandler {
     this.filterNodesByFirstSeenDays();
     this.filterNodesByLastSeenDays();
     this.filterByContact();
+    this.filterByFamily();
     this.order();
     this.offset();
     this.limit();
@@ -435,6 +441,23 @@ public class RequestHandler {
           break;
         }
       }
+    }
+    for (String fingerprint : removeRelays) {
+      this.filteredRelays.remove(fingerprint);
+    }
+    this.filteredBridges.clear();
+  }
+
+  private void filterByFamily() {
+    if (this.family == null) {
+      return;
+    }
+    Set<String> removeRelays = new HashSet<String>(
+        this.filteredRelays.keySet());
+    removeRelays.remove(this.family);
+    if (this.nodeIndex.getRelaysByFamily().containsKey(this.family)) {
+      removeRelays.removeAll(this.nodeIndex.getRelaysByFamily().
+          get(this.family));
     }
     for (String fingerprint : removeRelays) {
       this.filteredRelays.remove(fingerprint);

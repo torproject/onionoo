@@ -148,7 +148,7 @@ public class ResourceServlet extends HttpServlet {
     Set<String> knownParameters = new HashSet<String>(Arrays.asList((
         "type,running,search,lookup,fingerprint,country,as,flag,"
         + "first_seen_days,last_seen_days,contact,order,limit,offset,"
-        + "fields").split(",")));
+        + "fields,family").split(",")));
     for (String parameterKey : parameterMap.keySet()) {
       if (!knownParameters.contains(parameterKey)) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -302,6 +302,16 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       rh.setLimit(limitParameter);
+    }
+    if (parameterMap.containsKey("family")) {
+      String familyParameter = this.parseFingerprintParameter(
+          parameterMap.get("family"));
+      if (familyParameter == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      String family = familyParameter.toUpperCase();
+      rh.setFamily(family);
     }
     rh.handleRequest();
 

@@ -283,7 +283,7 @@ public class DocumentStore {
           aSNumber = null, contact = null;
       SortedSet<String> orAddressesAndPorts = new TreeSet<String>(),
           exitAddresses = new TreeSet<String>(),
-          relayFlags = new TreeSet<String>();
+          relayFlags = new TreeSet<String>(), family = null;
       long lastSeenMillis = -1L, consensusWeight = -1L,
           lastRdnsLookup = -1L, firstSeenMillis = -1L,
           lastChangedAddresses = -1L;
@@ -342,7 +342,7 @@ public class DocumentStore {
           lastSeenMillis, orPort, dirPort, relayFlags, consensusWeight,
           countryCode, hostName, lastRdnsLookup, defaultPolicy, portList,
           firstSeenMillis, lastChangedAddresses, aSNumber, contact,
-          recommendedVersion);
+          recommendedVersion, family);
       nodeStatus.setRunning(running);
       return nodeStatus;
     } catch (Exception e) {

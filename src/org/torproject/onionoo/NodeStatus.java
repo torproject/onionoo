@@ -294,6 +294,15 @@ public class NodeStatus extends Document {
     return this.recommendedVersion;
   }
 
+  private SortedSet<String> familyFingerprints;
+  public void setFamilyFingerprints(
+      SortedSet<String> familyFingerprints) {
+    this.familyFingerprints = familyFingerprints;
+  }
+  public SortedSet<String> getFamilyFingerprints() {
+    return this.familyFingerprints;
+  }
+
   public NodeStatus(boolean isRelay, String nickname, String fingerprint,
       String address, SortedSet<String> orAddressesAndPorts,
       SortedSet<String> exitAddresses, long lastSeenMillis, int orPort,
@@ -301,7 +310,7 @@ public class NodeStatus extends Document {
       String countryCode, String hostName, long lastRdnsLookup,
       String defaultPolicy, String portList, long firstSeenMillis,
       long lastChangedAddresses, String aSNumber, String contact,
-      Boolean recommendedVersion) {
+      Boolean recommendedVersion, SortedSet<String> familyFingerprints) {
     this.isRelay = isRelay;
     this.nickname = nickname;
     this.fingerprint = fingerprint;
@@ -348,6 +357,7 @@ public class NodeStatus extends Document {
     this.aSNumber = aSNumber;
     this.contact = contact;
     this.recommendedVersion = recommendedVersion;
+    this.familyFingerprints = familyFingerprints;
   }
 
   public static NodeStatus fromString(String documentString) {
@@ -356,7 +366,7 @@ public class NodeStatus extends Document {
         countryCode = null, hostName = null, defaultPolicy = null,
         portList = null, aSNumber = null, contact = null;
     SortedSet<String> orAddressesAndPorts = null, exitAddresses = null,
-        relayFlags = null;
+        relayFlags = null, familyFingerprints = null;
     long lastSeenMillis = -1L, consensusWeight = -1L,
         lastRdnsLookup = -1L, firstSeenMillis = -1L,
         lastChangedAddresses = -1L;
@@ -455,6 +465,10 @@ public class NodeStatus extends Document {
         recommendedVersion = parts[21].equals("null") ? null :
             parts[21].equals("true");
       }
+      if (parts.length > 22 && !parts[22].equals("null")) {
+        familyFingerprints = new TreeSet<String>(Arrays.asList(
+            parts[22].split(";")));
+      }
     } catch (NumberFormatException e) {
       System.err.println("Number format exception while parsing node "
           + "status line '" + documentString + "': " + e.getMessage()
@@ -473,7 +487,7 @@ public class NodeStatus extends Document {
         lastSeenMillis, orPort, dirPort, relayFlags, consensusWeight,
         countryCode, hostName, lastRdnsLookup, defaultPolicy, portList,
         firstSeenMillis, lastChangedAddresses, aSNumber, contact,
-        recommendedVersion);
+        recommendedVersion, familyFingerprints);
     return newNodeStatus;
   }
 
@@ -551,6 +565,16 @@ public class NodeStatus extends Document {
     sb.append("\t" + (this.contact != null ? this.contact : ""));
     sb.append("\t" + (this.recommendedVersion == null ? "null" :
         this.recommendedVersion ? "true" : "false"));
+    if (this.familyFingerprints == null ||
+        this.familyFingerprints.isEmpty()) {
+      sb.append("\tnull");
+    } else {
+      sb.append("\t");
+      written = 0;
+      for (String familyFingerprint : this.familyFingerprints) {
+        sb.append((written++ > 0 ? ";" : "") + familyFingerprint);
+      }
+    }
     return sb.toString();
   }
 }

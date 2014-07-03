@@ -102,9 +102,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     Logger.printStatusTime("Started reverse domain name lookups");
     this.lookUpCitiesAndASes();
     Logger.printStatusTime("Looked up cities and ASes");
-    this.setRunningBitsContactsAndExitAddresses();
-    Logger.printStatusTime("Set running bits, contacts, and exit "
-        + "addresses");
+    this.setDescriptorPartsOfNodeStatus();
+    Logger.printStatusTime("Set descriptor parts of node statuses.");
     this.calculatePathSelectionProbabilities();
     Logger.printStatusTime("Calculated path selection probabilities");
     this.finishReverseDomainNameLookups();
@@ -154,7 +153,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           fingerprint, address, orAddressesAndPorts, null,
           validAfterMillis, orPort, dirPort, relayFlags, consensusWeight,
           null, null, -1L, defaultPolicy, portList, validAfterMillis,
-          validAfterMillis, null, null, recommendedVersion);
+          validAfterMillis, null, null, recommendedVersion, null);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
       } else {
@@ -184,7 +183,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       NodeStatus newNodeStatus = new NodeStatus(false, nickname,
           fingerprint, address, orAddressesAndPorts, null,
           publishedMillis, orPort, dirPort, relayFlags, -1L, "??", null,
-          -1L, null, null, publishedMillis, -1L, null, null, null);
+          -1L, null, null, publishedMillis, -1L, null, null, null, null);
       if (this.knownNodes.containsKey(fingerprint)) {
         this.knownNodes.get(fingerprint).update(newNodeStatus);
       } else {
@@ -215,7 +214,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
-  private void setRunningBitsContactsAndExitAddresses() {
+  private void setDescriptorPartsOfNodeStatus() {
     for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
       String fingerprint = e.getKey();
       NodeStatus node = e.getValue();
@@ -234,6 +233,19 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
               if (ea.getValue() >= this.now - DateTimeHelper.ONE_DAY) {
                 node.addExitAddress(ea.getKey());
               }
+            }
+          }
+          if (detailsStatus.getFamily() != null &&
+              !detailsStatus.getFamily().isEmpty()) {
+            SortedSet<String> familyFingerprints = new TreeSet<String>();
+            for (String familyMember : detailsStatus.getFamily()) {
+              if (familyMember.startsWith("$") &&
+                  familyMember.length() == 41) {
+                familyFingerprints.add(familyMember.substring(1));
+              }
+            }
+            if (!familyFingerprints.isEmpty()) {
+              node.setFamilyFingerprints(familyFingerprints);
             }
           }
         }

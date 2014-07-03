@@ -358,6 +358,23 @@ Comparisons are case-insensitive.
 </p>
 </li>
 
+<li>
+<font color="blue"><b>family</b></font>
+<p>
+Return only the relay whose fingerprint matches the parameter value and
+all relays that this relay has listed in its family by fingerprint and
+that in turn have listed this relay in their family by fingerprint.
+If relays have listed other relays in their family by nickname, those
+family relationships will not be considered, regardless of whether they
+have the Named flag or not.
+The provided relay fingerprint must consist of 40 hex characters where
+case does not matter, and it must not be hashed using SHA-1.
+Bridges are not contained in the result, regardless of whether they define
+a family.
+<font color="blue">Added on July 4, 2014.</font>
+</p>
+</li>
+
 </ul>
 
 <p>

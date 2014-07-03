@@ -105,6 +105,14 @@ class NodeIndex {
     return relaysByContact;
   }
 
+  private Map<String, Set<String>> relaysByFamily = null;
+  public void setRelaysByFamily(Map<String, Set<String>> relaysByFamily) {
+    this.relaysByFamily = relaysByFamily;
+  }
+  public Map<String, Set<String>> getRelaysByFamily() {
+    return this.relaysByFamily;
+  }
+
   private SortedMap<Integer, Set<String>> relaysByFirstSeenDays;
   public void setRelaysByFirstSeenDays(
       SortedMap<Integer, Set<String>> relaysByFirstSeenDays) {
@@ -241,7 +249,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByASNumber = new HashMap<String, Set<String>>(),
         newRelaysByFlag = new HashMap<String, Set<String>>(),
         newBridgesByFlag = new HashMap<String, Set<String>>(),
-        newRelaysByContact = new HashMap<String, Set<String>>();
+        newRelaysByContact = new HashMap<String, Set<String>>(),
+        newRelaysByFamily = new HashMap<String, Set<String>>();
     SortedMap<Integer, Set<String>>
         newRelaysByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
         newBridgesByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
@@ -305,6 +314,9 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByFlag.get(flagLowerCase).add(fingerprint);
         newRelaysByFlag.get(flagLowerCase).add(hashedFingerprint);
       }
+      if (entry.getFamilyFingerprints() != null) {
+        newRelaysByFamily.put(fingerprint, entry.getFamilyFingerprints());
+      }
       int daysSinceFirstSeen = (int) ((time.currentTimeMillis()
           - entry.getFirstSeenMillis()) / DateTimeHelper.ONE_DAY);
       if (!newRelaysByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
@@ -334,6 +346,19 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     newRelaysByConsensusWeight = new ArrayList<String>();
     for (String relay : orderRelaysByConsensusWeight) {
       newRelaysByConsensusWeight.add(relay.split(" ")[1]);
+    }
+    for (Map.Entry<String, Set<String>> e :
+        newRelaysByFamily.entrySet()) {
+      String fingerprint = e.getKey();
+      Set<String> inMutualFamilyRelation = new HashSet<String>();
+      for (String otherFingerprint : e.getValue()) {
+        if (newRelaysByFamily.containsKey(otherFingerprint) &&
+            newRelaysByFamily.get(otherFingerprint).contains(
+                fingerprint)) {
+          inMutualFamilyRelation.add(otherFingerprint);
+        }
+      }
+      e.getValue().retainAll(inMutualFamilyRelation);
     }
     for (NodeStatus entry : currentBridges) {
       String hashedFingerprint = entry.getFingerprint().toUpperCase();
@@ -385,6 +410,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     newNodeIndex.setRelaysByFlag(newRelaysByFlag);
     newNodeIndex.setBridgesByFlag(newBridgesByFlag);
     newNodeIndex.setRelaysByContact(newRelaysByContact);
+    newNodeIndex.setRelaysByFamily(newRelaysByFamily);
     newNodeIndex.setRelaysByFirstSeenDays(newRelaysByFirstSeenDays);
     newNodeIndex.setRelaysByLastSeenDays(newRelaysByLastSeenDays);
     newNodeIndex.setBridgesByFirstSeenDays(newBridgesByFirstSeenDays);
