@@ -18,7 +18,7 @@ public class Main {
     if (lf.acquireLock()) {
       Logger.printStatusTime("Acquired lock");
     } else {
-      Logger.printStatusTime("Could not acquire lock.  Is Onionoo "
+      Logger.printErrorTime("Could not acquire lock.  Is Onionoo "
           + "already running?  Terminating");
       return;
     }
@@ -107,7 +107,7 @@ public class Main {
     if (lf.releaseLock()) {
       Logger.printStatusTime("Released lock");
     } else {
-      Logger.printStatusTime("Could not release lock.  The next "
+      Logger.printErrorTime("Could not release lock.  The next "
           + "execution may not start as expected");
     }
 

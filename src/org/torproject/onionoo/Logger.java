@@ -56,11 +56,25 @@ public class Logger {
   }
 
   public static void printStatusTime(String message) {
+    printStatusOrErrorTime(message, false);
+  }
+
+  public static void printErrorTime(String message) {
+    printStatusOrErrorTime(message, true);
+  }
+
+  private static void printStatusOrErrorTime(String message,
+      boolean printToSystemErr) {
     long now = currentTimeMillis();
     long millis = printedLastStatusMessage < 0 ? 0 :
         now - printedLastStatusMessage;
-    System.out.println("  " + message + " (" + Logger.formatMillis(millis)
-        + ").");
+    String line = "  " + message + " (" + Logger.formatMillis(millis)
+        + ").";
+    if (printToSystemErr) {
+      System.err.println(line);
+    } else {
+      System.out.println(line);
+    }
     printedLastStatusMessage = now;
   }
 }

@@ -1,3 +1,3 @@
 #!/bin/bash
-ant run >> log
+ant run >> log && cat errors
 
