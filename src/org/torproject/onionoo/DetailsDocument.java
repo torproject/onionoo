@@ -288,7 +288,9 @@ class DetailsDocument extends Document {
   private Float advertised_bandwidth_fraction;
   public void setAdvertisedBandwidthFraction(
       Float advertisedBandwidthFraction) {
-    this.advertised_bandwidth_fraction = advertisedBandwidthFraction;
+    if (advertisedBandwidthFraction >= 0.0) {
+      this.advertised_bandwidth_fraction = advertisedBandwidthFraction;
+    }
   }
   public Float getAdvertisedBandwidthFraction() {
     return this.advertised_bandwidth_fraction;
@@ -296,7 +298,9 @@ class DetailsDocument extends Document {
 
   private Float consensus_weight_fraction;
   public void setConsensusWeightFraction(Float consensusWeightFraction) {
-    this.consensus_weight_fraction = consensusWeightFraction;
+    if (consensusWeightFraction >= 0.0) {
+      this.consensus_weight_fraction = consensusWeightFraction;
+    }
   }
   public Float getConsensusWeightFraction() {
     return this.consensus_weight_fraction;
@@ -304,7 +308,9 @@ class DetailsDocument extends Document {
 
   private Float guard_probability;
   public void setGuardProbability(Float guardProbability) {
-    this.guard_probability = guardProbability;
+    if (guardProbability >= 0.0) {
+      this.guard_probability = guardProbability;
+    }
   }
   public Float getGuardProbability() {
     return this.guard_probability;
@@ -312,7 +318,9 @@ class DetailsDocument extends Document {
 
   private Float middle_probability;
   public void setMiddleProbability(Float middleProbability) {
-    this.middle_probability = middleProbability;
+    if (middleProbability >= 0.0) {
+      this.middle_probability = middleProbability;
+    }
   }
   public Float getMiddleProbability() {
     return this.middle_probability;
@@ -320,7 +328,9 @@ class DetailsDocument extends Document {
 
   private Float exit_probability;
   public void setExitProbability(Float exitProbability) {
-    this.exit_probability = exitProbability;
+    if (exitProbability >= 0.0) {
+      this.exit_probability = exitProbability;
+    }
   }
   public Float getExitProbability() {
     return this.exit_probability;
