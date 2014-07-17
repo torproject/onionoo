@@ -77,217 +77,19 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   }
 
   public void processDescriptor(Descriptor descriptor, boolean relay) {
-    if (descriptor instanceof RelayNetworkStatusConsensus) {
+    if (descriptor instanceof ServerDescriptor && relay) {
+      this.processRelayServerDescriptor((ServerDescriptor) descriptor);
+    } else if (descriptor instanceof ExitList) {
+      this.processExitList((ExitList) descriptor);
+    } else if (descriptor instanceof RelayNetworkStatusConsensus) {
       this.processRelayNetworkStatusConsensus(
           (RelayNetworkStatusConsensus) descriptor);
-    } else if (descriptor instanceof ServerDescriptor && relay) {
-      this.processRelayServerDescriptor((ServerDescriptor) descriptor);
-    } else if (descriptor instanceof BridgeNetworkStatus) {
-      this.processBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
     } else if (descriptor instanceof ServerDescriptor && !relay) {
       this.processBridgeServerDescriptor((ServerDescriptor) descriptor);
     } else if (descriptor instanceof BridgePoolAssignment) {
       this.processBridgePoolAssignment((BridgePoolAssignment) descriptor);
-    } else if (descriptor instanceof ExitList) {
-      this.processExitList((ExitList) descriptor);
-    }
-  }
-
-  public void updateStatuses() {
-    this.readStatusSummary();
-    Logger.printStatusTime("Read status summary");
-    this.setCurrentNodes();
-    Logger.printStatusTime("Set current node fingerprints");
-    this.startReverseDomainNameLookups();
-    Logger.printStatusTime("Started reverse domain name lookups");
-    this.lookUpCitiesAndASes();
-    Logger.printStatusTime("Looked up cities and ASes");
-    this.setDescriptorPartsOfNodeStatus();
-    Logger.printStatusTime("Set descriptor parts of node statuses.");
-    this.calculatePathSelectionProbabilities();
-    Logger.printStatusTime("Calculated path selection probabilities");
-    this.finishReverseDomainNameLookups();
-    Logger.printStatusTime("Finished reverse domain name lookups");
-    this.writeStatusSummary();
-    Logger.printStatusTime("Wrote status summary");
-    this.updateDetailsStatuses();
-    Logger.printStatusTime("Updated exit addresses in details statuses");
-  }
-
-  private void processRelayNetworkStatusConsensus(
-      RelayNetworkStatusConsensus consensus) {
-    long validAfterMillis = consensus.getValidAfterMillis();
-    if (validAfterMillis > this.relaysLastValidAfterMillis) {
-      this.relaysLastValidAfterMillis = validAfterMillis;
-    }
-    Set<String> recommendedVersions = null;
-    if (consensus.getRecommendedServerVersions() != null) {
-      recommendedVersions = new HashSet<String>();
-      for (String recommendedVersion :
-          consensus.getRecommendedServerVersions()) {
-        recommendedVersions.add("Tor " + recommendedVersion);
-      }
-    }
-    for (NetworkStatusEntry entry :
-        consensus.getStatusEntries().values()) {
-      String nickname = entry.getNickname();
-      String fingerprint = entry.getFingerprint();
-      String address = entry.getAddress();
-      SortedSet<String> orAddressesAndPorts = new TreeSet<String>(
-          entry.getOrAddresses());
-      int orPort = entry.getOrPort();
-      int dirPort = entry.getDirPort();
-      SortedSet<String> relayFlags = entry.getFlags();
-      long consensusWeight = entry.getBandwidth();
-      String defaultPolicy = entry.getDefaultPolicy();
-      String portList = entry.getPortList();
-      Boolean recommendedVersion = (recommendedVersions == null ||
-          entry.getVersion() == null) ? null :
-          recommendedVersions.contains(entry.getVersion());
-      NodeStatus newNodeStatus = new NodeStatus(true, nickname,
-          fingerprint, address, orAddressesAndPorts, null,
-          validAfterMillis, orPort, dirPort, relayFlags, consensusWeight,
-          null, null, -1L, defaultPolicy, portList, validAfterMillis,
-          validAfterMillis, null, null, recommendedVersion, null);
-      if (this.knownNodes.containsKey(fingerprint)) {
-        this.knownNodes.get(fingerprint).update(newNodeStatus);
-      } else {
-        this.knownNodes.put(fingerprint, newNodeStatus);
-      }
-    }
-    this.relayConsensusesProcessed++;
-    if (this.relaysLastValidAfterMillis == validAfterMillis) {
-      this.lastBandwidthWeights = consensus.getBandwidthWeights();
-    }
-  }
-
-  private void processBridgeNetworkStatus(BridgeNetworkStatus status) {
-    long publishedMillis = status.getPublishedMillis();
-    if (publishedMillis > this.bridgesLastPublishedMillis) {
-      this.bridgesLastPublishedMillis = publishedMillis;
-    }
-    for (NetworkStatusEntry entry : status.getStatusEntries().values()) {
-      String nickname = entry.getNickname();
-      String fingerprint = entry.getFingerprint();
-      String address = entry.getAddress();
-      SortedSet<String> orAddressesAndPorts = new TreeSet<String>(
-          entry.getOrAddresses());
-      int orPort = entry.getOrPort();
-      int dirPort = entry.getDirPort();
-      SortedSet<String> relayFlags = entry.getFlags();
-      NodeStatus newNodeStatus = new NodeStatus(false, nickname,
-          fingerprint, address, orAddressesAndPorts, null,
-          publishedMillis, orPort, dirPort, relayFlags, -1L, "??", null,
-          -1L, null, null, publishedMillis, -1L, null, null, null, null);
-      if (this.knownNodes.containsKey(fingerprint)) {
-        this.knownNodes.get(fingerprint).update(newNodeStatus);
-      } else {
-        this.knownNodes.put(fingerprint, newNodeStatus);
-      }
-    }
-    this.bridgeStatusesProcessed++;
-  }
-
-  private void readStatusSummary() {
-    SortedSet<String> fingerprints = this.documentStore.list(
-        NodeStatus.class, true);
-    for (String fingerprint : fingerprints) {
-      NodeStatus node = this.documentStore.retrieve(NodeStatus.class,
-          true, fingerprint);
-      if (node.isRelay()) {
-        this.relaysLastValidAfterMillis = Math.max(
-            this.relaysLastValidAfterMillis, node.getLastSeenMillis());
-      } else {
-        this.bridgesLastPublishedMillis = Math.max(
-            this.bridgesLastPublishedMillis, node.getLastSeenMillis());
-      }
-      if (this.knownNodes.containsKey(fingerprint)) {
-        this.knownNodes.get(fingerprint).update(node);
-      } else {
-        this.knownNodes.put(fingerprint, node);
-      }
-    }
-  }
-
-  private void setDescriptorPartsOfNodeStatus() {
-    for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
-      String fingerprint = e.getKey();
-      NodeStatus node = e.getValue();
-      if (node.isRelay()) {
-        if (node.getRelayFlags().contains("Running") &&
-            node.getLastSeenMillis() == this.relaysLastValidAfterMillis) {
-          node.setRunning(true);
-        }
-        DetailsStatus detailsStatus = this.documentStore.retrieve(
-            DetailsStatus.class, true, fingerprint);
-        if (detailsStatus != null) {
-          node.setContact(detailsStatus.getContact());
-          if (detailsStatus.getExitAddresses() != null) {
-            for (Map.Entry<String, Long> ea :
-                detailsStatus.getExitAddresses().entrySet()) {
-              if (ea.getValue() >= this.now - DateTimeHelper.ONE_DAY) {
-                node.addExitAddress(ea.getKey());
-              }
-            }
-          }
-          if (detailsStatus.getFamily() != null &&
-              !detailsStatus.getFamily().isEmpty()) {
-            SortedSet<String> familyFingerprints = new TreeSet<String>();
-            for (String familyMember : detailsStatus.getFamily()) {
-              if (familyMember.startsWith("$") &&
-                  familyMember.length() == 41) {
-                familyFingerprints.add(familyMember.substring(1));
-              }
-            }
-            if (!familyFingerprints.isEmpty()) {
-              node.setFamilyFingerprints(familyFingerprints);
-            }
-          }
-        }
-      }
-      if (!node.isRelay() && node.getRelayFlags().contains("Running") &&
-          node.getLastSeenMillis() == this.bridgesLastPublishedMillis) {
-        node.setRunning(true);
-      }
-    }
-  }
-
-  private void lookUpCitiesAndASes() {
-    SortedSet<String> addressStrings = new TreeSet<String>();
-    for (NodeStatus node : this.knownNodes.values()) {
-      if (node.isRelay()) {
-        addressStrings.add(node.getAddress());
-      }
-    }
-    if (addressStrings.isEmpty()) {
-      System.err.println("No relay IP addresses to resolve to cities or "
-          + "ASN.");
-      return;
-    }
-    SortedMap<String, LookupResult> lookupResults =
-        this.lookupService.lookup(addressStrings);
-    for (NodeStatus node : knownNodes.values()) {
-      if (!node.isRelay()) {
-        continue;
-      }
-      String addressString = node.getAddress();
-      if (lookupResults.containsKey(addressString)) {
-        LookupResult lookupResult = lookupResults.get(addressString);
-        node.setCountryCode(lookupResult.getCountryCode());
-        node.setCountryName(lookupResult.getCountryName());
-        node.setRegionName(lookupResult.getRegionName());
-        node.setCityName(lookupResult.getCityName());
-        node.setLatitude(lookupResult.getLatitude());
-        node.setLongitude(lookupResult.getLongitude());
-        node.setASNumber(lookupResult.getAsNumber());
-        node.setASName(lookupResult.getAsName());
-      }
-    }
-  }
-
-  private void writeStatusSummary() {
-    for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
-      this.documentStore.store(e.getValue(), e.getKey());
+    } else if (descriptor instanceof BridgeNetworkStatus) {
+      this.processBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
     }
   }
 
@@ -341,6 +143,78 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.documentStore.store(detailsStatus, fingerprint);
   }
 
+  private Map<String, Map<String, Long>> exitListEntries =
+      new HashMap<String, Map<String, Long>>();
+
+  private void processExitList(ExitList exitList) {
+    for (ExitListEntry exitListEntry : exitList.getExitListEntries()) {
+      String fingerprint = exitListEntry.getFingerprint();
+      if (exitListEntry.getScanMillis() <
+          this.now - DateTimeHelper.ONE_DAY) {
+        continue;
+      }
+      if (!this.exitListEntries.containsKey(fingerprint)) {
+        this.exitListEntries.put(fingerprint,
+            new HashMap<String, Long>());
+      }
+      String exitAddress = exitListEntry.getExitAddress();
+      long scanMillis = exitListEntry.getScanMillis();
+      if (!this.exitListEntries.get(fingerprint).containsKey(exitAddress)
+          || this.exitListEntries.get(fingerprint).get(exitAddress)
+          < scanMillis) {
+        this.exitListEntries.get(fingerprint).put(exitAddress,
+            scanMillis);
+      }
+    }
+  }
+
+  private void processRelayNetworkStatusConsensus(
+      RelayNetworkStatusConsensus consensus) {
+    long validAfterMillis = consensus.getValidAfterMillis();
+    if (validAfterMillis > this.relaysLastValidAfterMillis) {
+      this.relaysLastValidAfterMillis = validAfterMillis;
+    }
+    Set<String> recommendedVersions = null;
+    if (consensus.getRecommendedServerVersions() != null) {
+      recommendedVersions = new HashSet<String>();
+      for (String recommendedVersion :
+          consensus.getRecommendedServerVersions()) {
+        recommendedVersions.add("Tor " + recommendedVersion);
+      }
+    }
+    for (NetworkStatusEntry entry :
+        consensus.getStatusEntries().values()) {
+      String nickname = entry.getNickname();
+      String fingerprint = entry.getFingerprint();
+      String address = entry.getAddress();
+      SortedSet<String> orAddressesAndPorts = new TreeSet<String>(
+          entry.getOrAddresses());
+      int orPort = entry.getOrPort();
+      int dirPort = entry.getDirPort();
+      SortedSet<String> relayFlags = entry.getFlags();
+      long consensusWeight = entry.getBandwidth();
+      String defaultPolicy = entry.getDefaultPolicy();
+      String portList = entry.getPortList();
+      Boolean recommendedVersion = (recommendedVersions == null ||
+          entry.getVersion() == null) ? null :
+          recommendedVersions.contains(entry.getVersion());
+      NodeStatus newNodeStatus = new NodeStatus(true, nickname,
+          fingerprint, address, orAddressesAndPorts, null,
+          validAfterMillis, orPort, dirPort, relayFlags, consensusWeight,
+          null, null, -1L, defaultPolicy, portList, validAfterMillis,
+          validAfterMillis, null, null, recommendedVersion, null);
+      if (this.knownNodes.containsKey(fingerprint)) {
+        this.knownNodes.get(fingerprint).update(newNodeStatus);
+      } else {
+        this.knownNodes.put(fingerprint, newNodeStatus);
+      }
+    }
+    this.relayConsensusesProcessed++;
+    if (this.relaysLastValidAfterMillis == validAfterMillis) {
+      this.lastBandwidthWeights = consensus.getBandwidthWeights();
+    }
+  }
+
   private void processBridgeServerDescriptor(
       ServerDescriptor descriptor) {
     String fingerprint = descriptor.getFingerprint();
@@ -386,6 +260,75 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
+  private void processBridgeNetworkStatus(BridgeNetworkStatus status) {
+    long publishedMillis = status.getPublishedMillis();
+    if (publishedMillis > this.bridgesLastPublishedMillis) {
+      this.bridgesLastPublishedMillis = publishedMillis;
+    }
+    for (NetworkStatusEntry entry : status.getStatusEntries().values()) {
+      String nickname = entry.getNickname();
+      String fingerprint = entry.getFingerprint();
+      String address = entry.getAddress();
+      SortedSet<String> orAddressesAndPorts = new TreeSet<String>(
+          entry.getOrAddresses());
+      int orPort = entry.getOrPort();
+      int dirPort = entry.getDirPort();
+      SortedSet<String> relayFlags = entry.getFlags();
+      NodeStatus newNodeStatus = new NodeStatus(false, nickname,
+          fingerprint, address, orAddressesAndPorts, null,
+          publishedMillis, orPort, dirPort, relayFlags, -1L, "??", null,
+          -1L, null, null, publishedMillis, -1L, null, null, null, null);
+      if (this.knownNodes.containsKey(fingerprint)) {
+        this.knownNodes.get(fingerprint).update(newNodeStatus);
+      } else {
+        this.knownNodes.put(fingerprint, newNodeStatus);
+      }
+    }
+    this.bridgeStatusesProcessed++;
+  }
+
+  public void updateStatuses() {
+    this.readStatusSummary();
+    Logger.printStatusTime("Read status summary");
+    this.setCurrentNodes();
+    Logger.printStatusTime("Set current node fingerprints");
+    this.startReverseDomainNameLookups();
+    Logger.printStatusTime("Started reverse domain name lookups");
+    this.lookUpCitiesAndASes();
+    Logger.printStatusTime("Looked up cities and ASes");
+    this.setDescriptorPartsOfNodeStatus();
+    Logger.printStatusTime("Set descriptor parts of node statuses.");
+    this.calculatePathSelectionProbabilities();
+    Logger.printStatusTime("Calculated path selection probabilities");
+    this.finishReverseDomainNameLookups();
+    Logger.printStatusTime("Finished reverse domain name lookups");
+    this.writeStatusSummary();
+    Logger.printStatusTime("Wrote status summary");
+    this.updateDetailsStatuses();
+    Logger.printStatusTime("Updated exit addresses in details statuses");
+  }
+
+  private void readStatusSummary() {
+    SortedSet<String> fingerprints = this.documentStore.list(
+        NodeStatus.class, true);
+    for (String fingerprint : fingerprints) {
+      NodeStatus node = this.documentStore.retrieve(NodeStatus.class,
+          true, fingerprint);
+      if (node.isRelay()) {
+        this.relaysLastValidAfterMillis = Math.max(
+            this.relaysLastValidAfterMillis, node.getLastSeenMillis());
+      } else {
+        this.bridgesLastPublishedMillis = Math.max(
+            this.bridgesLastPublishedMillis, node.getLastSeenMillis());
+      }
+      if (this.knownNodes.containsKey(fingerprint)) {
+        this.knownNodes.get(fingerprint).update(node);
+      } else {
+        this.knownNodes.put(fingerprint, node);
+      }
+    }
+  }
+
   private void setCurrentNodes() {
     long cutoff = Math.max(this.relaysLastValidAfterMillis,
         this.bridgesLastPublishedMillis) - 7L * 24L * 60L * 60L * 1000L;
@@ -407,31 +350,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
-  private Map<String, Map<String, Long>> exitListEntries =
-      new HashMap<String, Map<String, Long>>();
-
-  private void processExitList(ExitList exitList) {
-    for (ExitListEntry exitListEntry : exitList.getExitListEntries()) {
-      String fingerprint = exitListEntry.getFingerprint();
-      if (exitListEntry.getScanMillis() <
-          this.now - DateTimeHelper.ONE_DAY) {
-        continue;
-      }
-      if (!this.exitListEntries.containsKey(fingerprint)) {
-        this.exitListEntries.put(fingerprint,
-            new HashMap<String, Long>());
-      }
-      String exitAddress = exitListEntry.getExitAddress();
-      long scanMillis = exitListEntry.getScanMillis();
-      if (!this.exitListEntries.get(fingerprint).containsKey(exitAddress)
-          || this.exitListEntries.get(fingerprint).get(exitAddress)
-          < scanMillis) {
-        this.exitListEntries.get(fingerprint).put(exitAddress,
-            scanMillis);
-      }
-    }
-  }
-
   private void startReverseDomainNameLookups() {
     Map<String, Long> addressLastLookupTimes =
         new HashMap<String, Long>();
@@ -443,16 +361,78 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.reverseDomainNameResolver.startReverseDomainNameLookups();
   }
 
-  private void finishReverseDomainNameLookups() {
-    this.reverseDomainNameResolver.finishReverseDomainNameLookups();
-    Map<String, String> lookupResults =
-        this.reverseDomainNameResolver.getLookupResults();
-    long startedRdnsLookups =
-        this.reverseDomainNameResolver.getLookupStartMillis();
-    for (NodeStatus relay : relays.values()) {
-      if (lookupResults.containsKey(relay.getAddress())) {
-        relay.setHostName(lookupResults.get(relay.getAddress()));
-        relay.setLastRdnsLookup(startedRdnsLookups);
+  private void lookUpCitiesAndASes() {
+    SortedSet<String> addressStrings = new TreeSet<String>();
+    for (NodeStatus node : this.knownNodes.values()) {
+      if (node.isRelay()) {
+        addressStrings.add(node.getAddress());
+      }
+    }
+    if (addressStrings.isEmpty()) {
+      System.err.println("No relay IP addresses to resolve to cities or "
+          + "ASN.");
+      return;
+    }
+    SortedMap<String, LookupResult> lookupResults =
+        this.lookupService.lookup(addressStrings);
+    for (NodeStatus node : knownNodes.values()) {
+      if (!node.isRelay()) {
+        continue;
+      }
+      String addressString = node.getAddress();
+      if (lookupResults.containsKey(addressString)) {
+        LookupResult lookupResult = lookupResults.get(addressString);
+        node.setCountryCode(lookupResult.getCountryCode());
+        node.setCountryName(lookupResult.getCountryName());
+        node.setRegionName(lookupResult.getRegionName());
+        node.setCityName(lookupResult.getCityName());
+        node.setLatitude(lookupResult.getLatitude());
+        node.setLongitude(lookupResult.getLongitude());
+        node.setASNumber(lookupResult.getAsNumber());
+        node.setASName(lookupResult.getAsName());
+      }
+    }
+  }
+
+  private void setDescriptorPartsOfNodeStatus() {
+    for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
+      String fingerprint = e.getKey();
+      NodeStatus node = e.getValue();
+      if (node.isRelay()) {
+        if (node.getRelayFlags().contains("Running") &&
+            node.getLastSeenMillis() == this.relaysLastValidAfterMillis) {
+          node.setRunning(true);
+        }
+        DetailsStatus detailsStatus = this.documentStore.retrieve(
+            DetailsStatus.class, true, fingerprint);
+        if (detailsStatus != null) {
+          node.setContact(detailsStatus.getContact());
+          if (detailsStatus.getExitAddresses() != null) {
+            for (Map.Entry<String, Long> ea :
+                detailsStatus.getExitAddresses().entrySet()) {
+              if (ea.getValue() >= this.now - DateTimeHelper.ONE_DAY) {
+                node.addExitAddress(ea.getKey());
+              }
+            }
+          }
+          if (detailsStatus.getFamily() != null &&
+              !detailsStatus.getFamily().isEmpty()) {
+            SortedSet<String> familyFingerprints = new TreeSet<String>();
+            for (String familyMember : detailsStatus.getFamily()) {
+              if (familyMember.startsWith("$") &&
+                  familyMember.length() == 41) {
+                familyFingerprints.add(familyMember.substring(1));
+              }
+            }
+            if (!familyFingerprints.isEmpty()) {
+              node.setFamilyFingerprints(familyFingerprints);
+            }
+          }
+        }
+      }
+      if (!node.isRelay() && node.getRelayFlags().contains("Running") &&
+          node.getLastSeenMillis() == this.bridgesLastPublishedMillis) {
+        node.setRunning(true);
       }
     }
   }
@@ -567,6 +547,26 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         relay.setExitProbability(exitWeights.get(fingerprint)
             / totalExitWeight);
       }
+    }
+  }
+
+  private void finishReverseDomainNameLookups() {
+    this.reverseDomainNameResolver.finishReverseDomainNameLookups();
+    Map<String, String> lookupResults =
+        this.reverseDomainNameResolver.getLookupResults();
+    long startedRdnsLookups =
+        this.reverseDomainNameResolver.getLookupStartMillis();
+    for (NodeStatus relay : relays.values()) {
+      if (lookupResults.containsKey(relay.getAddress())) {
+        relay.setHostName(lookupResults.get(relay.getAddress()));
+        relay.setLastRdnsLookup(startedRdnsLookups);
+      }
+    }
+  }
+
+  private void writeStatusSummary() {
+    for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
+      this.documentStore.store(e.getValue(), e.getKey());
     }
   }
 
