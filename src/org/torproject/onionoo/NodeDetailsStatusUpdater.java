@@ -1,4 +1,4 @@
-/* Copyright 2011, 2012 The Tor Project
+/* Copyright 2011--2014 The Tor Project
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
@@ -110,11 +110,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     Logger.printStatusTime("Finished reverse domain name lookups");
     this.writeStatusSummary();
     Logger.printStatusTime("Wrote status summary");
-    /* TODO Does anything break if we take the following out?
-     * Like, does DocumentStore make sure there's a status/summary with
-     * all node statuses and an out/summary with only recent ones?
-    this.writeOutSummary();
-    Logger.printStatusTime("Wrote out summary");*/
     this.updateDetailsStatuses();
     Logger.printStatusTime("Updated exit addresses in details statuses");
   }
@@ -291,28 +286,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   }
 
   private void writeStatusSummary() {
-    this.writeSummary(true);
-  }
-
-  private void writeSummary(boolean includeArchive) {
-    SortedMap<String, NodeStatus> nodes = includeArchive
-        ? this.knownNodes : this.getCurrentNodes();
-    for (Map.Entry<String, NodeStatus> e : nodes.entrySet()) {
+    for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
       this.documentStore.store(e.getValue(), e.getKey());
     }
-  }
-
-  private SortedMap<String, NodeStatus> getCurrentNodes() {
-    long cutoff = Math.max(this.relaysLastValidAfterMillis,
-        this.bridgesLastPublishedMillis) - 7L * 24L * 60L * 60L * 1000L;
-    SortedMap<String, NodeStatus> currentNodes =
-        new TreeMap<String, NodeStatus>();
-    for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
-      if (e.getValue().getLastSeenMillis() >= cutoff) {
-        currentNodes.put(e.getKey(), e.getValue());
-      }
-    }
-    return currentNodes;
   }
 
   private void processRelayServerDescriptor(
@@ -411,7 +387,15 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   }
 
   private void setCurrentNodes() {
-    SortedMap<String, NodeStatus> currentNodes = this.getCurrentNodes();
+    long cutoff = Math.max(this.relaysLastValidAfterMillis,
+        this.bridgesLastPublishedMillis) - 7L * 24L * 60L * 60L * 1000L;
+    SortedMap<String, NodeStatus> currentNodes =
+        new TreeMap<String, NodeStatus>();
+    for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
+      if (e.getValue().getLastSeenMillis() >= cutoff) {
+        currentNodes.put(e.getKey(), e.getValue());
+      }
+    }
     this.relays = new TreeMap<String, NodeStatus>();
     this.bridges = new TreeMap<String, NodeStatus>();
     for (Map.Entry<String, NodeStatus> e : currentNodes.entrySet()) {
