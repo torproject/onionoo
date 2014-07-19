@@ -288,7 +288,8 @@ class DetailsDocument extends Document {
   private Float advertised_bandwidth_fraction;
   public void setAdvertisedBandwidthFraction(
       Float advertisedBandwidthFraction) {
-    if (advertisedBandwidthFraction >= 0.0) {
+    if (advertisedBandwidthFraction == null ||
+        advertisedBandwidthFraction >= 0.0) {
       this.advertised_bandwidth_fraction = advertisedBandwidthFraction;
     }
   }
@@ -298,7 +299,8 @@ class DetailsDocument extends Document {
 
   private Float consensus_weight_fraction;
   public void setConsensusWeightFraction(Float consensusWeightFraction) {
-    if (consensusWeightFraction >= 0.0) {
+    if (consensusWeightFraction == null ||
+        consensusWeightFraction >= 0.0) {
       this.consensus_weight_fraction = consensusWeightFraction;
     }
   }
@@ -308,7 +310,7 @@ class DetailsDocument extends Document {
 
   private Float guard_probability;
   public void setGuardProbability(Float guardProbability) {
-    if (guardProbability >= 0.0) {
+    if (guardProbability == null || guardProbability >= 0.0) {
       this.guard_probability = guardProbability;
     }
   }
@@ -318,7 +320,7 @@ class DetailsDocument extends Document {
 
   private Float middle_probability;
   public void setMiddleProbability(Float middleProbability) {
-    if (middleProbability >= 0.0) {
+    if (middleProbability == null || middleProbability >= 0.0) {
       this.middle_probability = middleProbability;
     }
   }
@@ -328,7 +330,7 @@ class DetailsDocument extends Document {
 
   private Float exit_probability;
   public void setExitProbability(Float exitProbability) {
-    if (exitProbability >= 0.0) {
+    if (exitProbability == null || exitProbability >= 0.0) {
       this.exit_probability = exitProbability;
     }
   }
