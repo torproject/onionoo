@@ -66,6 +66,20 @@ public class DocumentStore {
   }
 
   private SortedSet<String> listNodeStatuses(boolean includeArchive) {
+    if ((includeArchive && listedCurrentNodeStatuses) ||
+        (!includeArchive && listedArchivedNodeStatuses)) {
+      System.err.println("Listing node statuses is only permitted "
+          + "including the archive or excluding the archive, but not "
+          + "both.  Returning empty list.");
+      return new TreeSet<String>();
+    }
+    if (this.cachedNodeStatuses == null) {
+      this.cacheNodeStatuses(includeArchive);
+    }
+    return new TreeSet<String>(this.cachedNodeStatuses.keySet());
+  }
+
+  private void cacheNodeStatuses(boolean includeArchive) {
     SortedMap<String, NodeStatus> parsedNodeStatuses =
         new TreeMap<String, NodeStatus>();
     File directory = includeArchive ? this.statusDir : this.outDir;
@@ -92,7 +106,6 @@ public class DocumentStore {
           System.err.println("Could not read file '"
               + summaryFile.getAbsolutePath() + "'.");
           e.printStackTrace();
-          return null;
         }
       }
     }
@@ -102,7 +115,6 @@ public class DocumentStore {
       this.listedCurrentNodeStatuses = true;
     }
     this.cachedNodeStatuses = parsedNodeStatuses;
-    return new TreeSet<String>(this.cachedNodeStatuses.keySet());
   }
 
   private <T extends Document> SortedSet<String> listDocumentFiles(
@@ -173,6 +185,9 @@ public class DocumentStore {
 
   private <T extends Document> boolean storeNodeStatus(
       NodeStatus nodeStatus, String fingerprint) {
+    if (this.cachedNodeStatuses == null) {
+      this.cacheNodeStatuses(true);
+    }
     this.cachedNodeStatuses.put(fingerprint, nodeStatus);
     return true;
   }
@@ -261,6 +276,9 @@ public class DocumentStore {
   }
 
   private NodeStatus retrieveNodeStatus(String fingerprint) {
+    if (this.cachedNodeStatuses == null) {
+      this.cacheNodeStatuses(true);
+    }
     if (this.cachedNodeStatuses.containsKey(fingerprint)) {
       return this.cachedNodeStatuses.get(fingerprint);
     } else if (this.listedArchivedNodeStatuses) {
@@ -436,10 +454,17 @@ public class DocumentStore {
   public <T extends Document> boolean remove(Class<T> documentType,
       String fingerprint) {
     if (documentType.equals(NodeStatus.class)) {
-      return this.cachedNodeStatuses.remove(fingerprint) != null;
+      return this.removeNodeStatus(fingerprint);
     } else {
       return this.removeDocumentFile(documentType, fingerprint);
     }
+  }
+
+  private boolean removeNodeStatus(String fingerprint) {
+    if (this.cachedNodeStatuses == null) {
+      this.cacheNodeStatuses(true);
+    }
+    return this.cachedNodeStatuses.remove(fingerprint) != null;
   }
 
   private <T extends Document> boolean removeDocumentFile(
