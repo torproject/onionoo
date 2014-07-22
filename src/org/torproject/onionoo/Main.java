@@ -45,6 +45,8 @@ public class Main {
     StatusUpdater[] sus = new StatusUpdater[] { ndsu, bsu, wsu, csu,
         usu };
 
+    SummaryDocumentWriter sdw = new SummaryDocumentWriter();
+    Logger.printStatusTime("Initialized summary document writer");
     DetailsDocumentWriter ddw = new DetailsDocumentWriter();
     Logger.printStatusTime("Initialized details document writer");
     BandwidthDocumentWriter bdw = new BandwidthDocumentWriter();
@@ -55,7 +57,7 @@ public class Main {
     Logger.printStatusTime("Initialized clients document writer");
     UptimeDocumentWriter udw = new UptimeDocumentWriter();
     Logger.printStatusTime("Initialized uptime document writer");
-    DocumentWriter[] dws = new DocumentWriter[] { ddw, bdw, wdw, cdw,
+    DocumentWriter[] dws = new DocumentWriter[] { sdw, ddw, bdw, wdw, cdw,
         udw };
 
     Logger.printStatus("Downloading descriptors.");

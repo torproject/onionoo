@@ -44,21 +44,21 @@ class NodeIndex {
   }
 
 
-  private Map<String, NodeStatus> relayFingerprintSummaryLines;
+  private Map<String, SummaryDocument> relayFingerprintSummaryLines;
   public void setRelayFingerprintSummaryLines(
-      Map<String, NodeStatus> relayFingerprintSummaryLines) {
+      Map<String, SummaryDocument> relayFingerprintSummaryLines) {
     this.relayFingerprintSummaryLines = relayFingerprintSummaryLines;
   }
-  public Map<String, NodeStatus> getRelayFingerprintSummaryLines() {
+  public Map<String, SummaryDocument> getRelayFingerprintSummaryLines() {
     return this.relayFingerprintSummaryLines;
   }
 
-  private Map<String, NodeStatus> bridgeFingerprintSummaryLines;
+  private Map<String, SummaryDocument> bridgeFingerprintSummaryLines;
   public void setBridgeFingerprintSummaryLines(
-      Map<String, NodeStatus> bridgeFingerprintSummaryLines) {
+      Map<String, SummaryDocument> bridgeFingerprintSummaryLines) {
     this.bridgeFingerprintSummaryLines = bridgeFingerprintSummaryLines;
   }
-  public Map<String, NodeStatus> getBridgeFingerprintSummaryLines() {
+  public Map<String, SummaryDocument> getBridgeFingerprintSummaryLines() {
     return this.bridgeFingerprintSummaryLines;
   }
 
@@ -239,11 +239,11 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       }
     }
     List<String> newRelaysByConsensusWeight = new ArrayList<String>();
-    Map<String, NodeStatus>
+    Map<String, SummaryDocument>
         newRelayFingerprintSummaryLines =
-        new HashMap<String, NodeStatus>(),
+        new HashMap<String, SummaryDocument>(),
         newBridgeFingerprintSummaryLines =
-        new HashMap<String, NodeStatus>();
+        new HashMap<String, SummaryDocument>();
     Map<String, Set<String>>
         newRelaysByCountryCode = new HashMap<String, Set<String>>(),
         newRelaysByASNumber = new HashMap<String, Set<String>>(),
@@ -256,14 +256,14 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newBridgesByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
         newRelaysByLastSeenDays = new TreeMap<Integer, Set<String>>(),
         newBridgesByLastSeenDays = new TreeMap<Integer, Set<String>>();
-    Set<NodeStatus> currentRelays = new HashSet<NodeStatus>(),
-        currentBridges = new HashSet<NodeStatus>();
-    SortedSet<String> fingerprints = documentStore.list(NodeStatus.class,
-        false);
+    Set<SummaryDocument> currentRelays = new HashSet<SummaryDocument>(),
+        currentBridges = new HashSet<SummaryDocument>();
+    SortedSet<String> fingerprints = documentStore.list(
+        SummaryDocument.class);
     long relaysLastValidAfterMillis = 0L, bridgesLastPublishedMillis = 0L;
     for (String fingerprint : fingerprints) {
-      NodeStatus node = documentStore.retrieve(NodeStatus.class, true,
-          fingerprint);
+      SummaryDocument node = documentStore.retrieve(SummaryDocument.class,
+          true, fingerprint);
       if (node.isRelay()) {
         relaysLastValidAfterMillis = Math.max(
             relaysLastValidAfterMillis, node.getLastSeenMillis());
@@ -276,12 +276,10 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
     Time time = ApplicationFactory.getTime();
     List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
-    for (NodeStatus entry : currentRelays) {
+    for (SummaryDocument entry : currentRelays) {
       String fingerprint = entry.getFingerprint().toUpperCase();
       String hashedFingerprint = entry.getHashedFingerprint().
           toUpperCase();
-      entry.setRunning(entry.getLastSeenMillis() ==
-          relaysLastValidAfterMillis);
       newRelayFingerprintSummaryLines.put(fingerprint, entry);
       newRelayFingerprintSummaryLines.put(hashedFingerprint, entry);
       long consensusWeight = entry.getConsensusWeight();
@@ -360,12 +358,10 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       }
       e.getValue().retainAll(inMutualFamilyRelation);
     }
-    for (NodeStatus entry : currentBridges) {
+    for (SummaryDocument entry : currentBridges) {
       String hashedFingerprint = entry.getFingerprint().toUpperCase();
       String hashedHashedFingerprint = entry.getHashedFingerprint().
           toUpperCase();
-      entry.setRunning(entry.getRelayFlags().contains("Running") &&
-          entry.getLastSeenMillis() == bridgesLastPublishedMillis);
       newBridgeFingerprintSummaryLines.put(hashedFingerprint, entry);
       newBridgeFingerprintSummaryLines.put(hashedHashedFingerprint,
           entry);

@@ -310,7 +310,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   private void readStatusSummary() {
     SortedSet<String> fingerprints = this.documentStore.list(
-        NodeStatus.class, true);
+        NodeStatus.class);
     for (String fingerprint : fingerprints) {
       NodeStatus node = this.documentStore.retrieve(NodeStatus.class,
           true, fingerprint);

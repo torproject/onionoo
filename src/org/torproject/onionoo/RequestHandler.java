@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 
 public class RequestHandler {
 
@@ -109,11 +110,11 @@ public class RequestHandler {
     this.family = family;
   }
 
-  private Map<String, NodeStatus> filteredRelays =
-      new HashMap<String, NodeStatus>();
+  private Map<String, SummaryDocument> filteredRelays =
+      new HashMap<String, SummaryDocument>();
 
-  private Map<String, NodeStatus> filteredBridges =
-      new HashMap<String, NodeStatus>();
+  private Map<String, SummaryDocument> filteredBridges =
+      new HashMap<String, SummaryDocument>();
 
   public void handleRequest() {
     this.filteredRelays.putAll(
@@ -164,8 +165,9 @@ public class RequestHandler {
     }
     boolean runningRequested = this.running.equals("true");
     Set<String> removeRelays = new HashSet<String>();
-    for (Map.Entry<String, NodeStatus> e : filteredRelays.entrySet()) {
-      if (e.getValue().getRunning() != runningRequested) {
+    for (Map.Entry<String, SummaryDocument> e :
+        filteredRelays.entrySet()) {
+      if (e.getValue().isRunning() != runningRequested) {
         removeRelays.add(e.getKey());
       }
     }
@@ -173,8 +175,9 @@ public class RequestHandler {
       this.filteredRelays.remove(fingerprint);
     }
     Set<String> removeBridges = new HashSet<String>();
-    for (Map.Entry<String, NodeStatus> e : filteredBridges.entrySet()) {
-      if (e.getValue().getRunning() != runningRequested) {
+    for (Map.Entry<String, SummaryDocument> e :
+        filteredBridges.entrySet()) {
+      if (e.getValue().isRunning() != runningRequested) {
         removeBridges.add(e.getKey());
       }
     }
@@ -194,9 +197,10 @@ public class RequestHandler {
 
   private void filterBySearchTerm(String searchTerm) {
     Set<String> removeRelays = new HashSet<String>();
-    for (Map.Entry<String, NodeStatus> e : filteredRelays.entrySet()) {
+    for (Map.Entry<String, SummaryDocument> e :
+        filteredRelays.entrySet()) {
       String fingerprint = e.getKey();
-      NodeStatus entry = e.getValue();
+      SummaryDocument entry = e.getValue();
       boolean lineMatches = false;
       String nickname = entry.getNickname() != null ?
           entry.getNickname().toLowerCase() : "unnamed";
@@ -214,14 +218,7 @@ public class RequestHandler {
         /* Non-$-prefixed fingerprint matches. */
         lineMatches = true;
       } else {
-        List<String> addresses = new ArrayList<String>();
-        addresses.add(entry.getAddress().toLowerCase());
-        for (String orAddress : entry.getOrAddresses()) {
-          addresses.add(orAddress.toLowerCase());
-        }
-        for (String exitAddress : entry.getExitAddresses()) {
-          addresses.add(exitAddress.toLowerCase());
-        }
+        List<String> addresses = entry.getAddresses();
         for (String address : addresses) {
           if (address.startsWith(searchTerm.toLowerCase())) {
             /* Address matches. */
@@ -238,9 +235,10 @@ public class RequestHandler {
       this.filteredRelays.remove(fingerprint);
     }
     Set<String> removeBridges = new HashSet<String>();
-    for (Map.Entry<String, NodeStatus> e : filteredBridges.entrySet()) {
+    for (Map.Entry<String, SummaryDocument> e :
+        filteredBridges.entrySet()) {
       String hashedFingerprint = e.getKey();
-      NodeStatus entry = e.getValue();
+      SummaryDocument entry = e.getValue();
       boolean lineMatches = false;
       String nickname = entry.getNickname() != null ?
           entry.getNickname().toLowerCase() : "unnamed";
@@ -272,12 +270,12 @@ public class RequestHandler {
       return;
     }
     String fingerprint = this.lookup;
-    NodeStatus relayLine = this.filteredRelays.get(fingerprint);
+    SummaryDocument relayLine = this.filteredRelays.get(fingerprint);
     this.filteredRelays.clear();
     if (relayLine != null) {
       this.filteredRelays.put(fingerprint, relayLine);
     }
-    NodeStatus bridgeLine = this.filteredBridges.get(fingerprint);
+    SummaryDocument bridgeLine = this.filteredBridges.get(fingerprint);
     this.filteredBridges.clear();
     if (bridgeLine != null) {
       this.filteredBridges.put(fingerprint, bridgeLine);
@@ -291,8 +289,8 @@ public class RequestHandler {
     this.filteredRelays.clear();
     this.filteredBridges.clear();
     String fingerprint = this.fingerprint;
-    NodeStatus entry = this.documentStore.retrieve(NodeStatus.class, true,
-        fingerprint);
+    SummaryDocument entry = this.documentStore.retrieve(
+        SummaryDocument.class, true, fingerprint);
     if (entry != null) {
       if (entry.isRelay()) {
         this.filteredRelays.put(fingerprint, entry);
@@ -409,7 +407,8 @@ public class RequestHandler {
         this.nodeIndex.getBridgesByLastSeenDays(), this.lastSeenDays);
   }
 
-  private void filterNodesByDays(Map<String, NodeStatus> filteredNodes,
+  private void filterNodesByDays(
+      Map<String, SummaryDocument> filteredNodes,
       SortedMap<Integer, Set<String>> nodesByDays, int[] days) {
     Set<String> removeNodes = new HashSet<String>();
     for (Set<String> nodes : nodesByDays.headMap(days[0]).values()) {
@@ -483,14 +482,14 @@ public class RequestHandler {
           this.orderedRelays.add(this.filteredRelays.remove(relay));
         }
       }
-      Set<NodeStatus> uniqueBridges = new HashSet<NodeStatus>(
+      Set<SummaryDocument> uniqueBridges = new HashSet<SummaryDocument>(
           this.filteredBridges.values());
       this.orderedBridges.addAll(uniqueBridges);
     } else {
-      Set<NodeStatus> uniqueRelays = new HashSet<NodeStatus>(
+      Set<SummaryDocument> uniqueRelays = new HashSet<SummaryDocument>(
           this.filteredRelays.values());
       this.orderedRelays.addAll(uniqueRelays);
-      Set<NodeStatus> uniqueBridges = new HashSet<NodeStatus>(
+      Set<SummaryDocument> uniqueBridges = new HashSet<SummaryDocument>(
           this.filteredBridges.values());
       this.orderedBridges.addAll(uniqueBridges);
     }
@@ -528,13 +527,15 @@ public class RequestHandler {
     }
   }
 
-  private List<NodeStatus> orderedRelays = new ArrayList<NodeStatus>();
-  public List<NodeStatus> getOrderedRelays() {
+  private List<SummaryDocument> orderedRelays =
+      new ArrayList<SummaryDocument>();
+  public List<SummaryDocument> getOrderedRelays() {
     return this.orderedRelays;
   }
 
-  private List<NodeStatus> orderedBridges = new ArrayList<NodeStatus>();
-  public List<NodeStatus> getOrderedBridges() {
+  private List<SummaryDocument> orderedBridges =
+      new ArrayList<SummaryDocument>();
+  public List<SummaryDocument> getOrderedBridges() {
     return this.orderedBridges;
   }
 

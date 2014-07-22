@@ -11,7 +11,9 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -43,46 +45,39 @@ public class DocumentStore {
     this.time = ApplicationFactory.getTime();
   }
 
-  private boolean listedArchivedNodeStatuses = false,
-      listedCurrentNodeStatuses = false;
-
   private long listOperations = 0L, listedFiles = 0L, storedFiles = 0L,
       storedBytes = 0L, retrievedFiles = 0L, retrievedBytes = 0L,
       removedFiles = 0L;
 
-  /* Node statuses are cached in memory, as opposed to all other document
-   * types.  This cache is initialized when listing NodeStatus documents,
-   * either including or excluding archived node statuses.  Later retrieve
-   * operations depend on which NodeStatus documents were listed. */
+  /* Node statuses and summary documents are cached in memory, as opposed
+   * to all other document types.  These caches are initialized when first
+   * accessing or modifying a NodeStatus or SummaryDocument document,
+   * respectively. */
   private SortedMap<String, NodeStatus> cachedNodeStatuses;
+  private SortedMap<String, SummaryDocument> cachedSummaryDocuments;
 
   public <T extends Document> SortedSet<String> list(
-      Class<T> documentType, boolean includeArchive) {
+      Class<T> documentType) {
     if (documentType.equals(NodeStatus.class)) {
-      return this.listNodeStatuses(includeArchive);
+      return this.listNodeStatuses();
+    } else if (documentType.equals(SummaryDocument.class)) {
+      return this.listSummaryDocuments();
     } else {
       return this.listDocumentFiles(documentType);
     }
   }
 
-  private SortedSet<String> listNodeStatuses(boolean includeArchive) {
-    if ((includeArchive && listedCurrentNodeStatuses) ||
-        (!includeArchive && listedArchivedNodeStatuses)) {
-      System.err.println("Listing node statuses is only permitted "
-          + "including the archive or excluding the archive, but not "
-          + "both.  Returning empty list.");
-      return new TreeSet<String>();
-    }
+  private SortedSet<String> listNodeStatuses() {
     if (this.cachedNodeStatuses == null) {
-      this.cacheNodeStatuses(includeArchive);
+      this.cacheNodeStatuses();
     }
     return new TreeSet<String>(this.cachedNodeStatuses.keySet());
   }
 
-  private void cacheNodeStatuses(boolean includeArchive) {
+  private void cacheNodeStatuses() {
     SortedMap<String, NodeStatus> parsedNodeStatuses =
         new TreeMap<String, NodeStatus>();
-    File directory = includeArchive ? this.statusDir : this.outDir;
+    File directory = this.statusDir;
     if (directory != null) {
       File summaryFile = new File(directory, "summary");
       if (summaryFile.exists()) {
@@ -109,12 +104,54 @@ public class DocumentStore {
         }
       }
     }
-    if (includeArchive) {
-      this.listedArchivedNodeStatuses = true;
-    } else {
-      this.listedCurrentNodeStatuses = true;
-    }
     this.cachedNodeStatuses = parsedNodeStatuses;
+  }
+
+  private SortedSet<String> listSummaryDocuments() {
+    if (this.cachedSummaryDocuments == null) {
+      this.cacheSummaryDocuments();
+    }
+    return new TreeSet<String>(this.cachedSummaryDocuments.keySet());
+  }
+
+  private void cacheSummaryDocuments() {
+    SortedMap<String, SummaryDocument> parsedSummaryDocuments =
+        new TreeMap<String, SummaryDocument>();
+    File directory = this.outDir;
+    if (directory != null) {
+      File summaryFile = new File(directory, "summary");
+      if (summaryFile.exists()) {
+        String line = null;
+        try {
+          Gson gson = new Gson();
+          BufferedReader br = new BufferedReader(new FileReader(
+              summaryFile));
+          while ((line = br.readLine()) != null) {
+            if (line.length() == 0) {
+              continue;
+            }
+            SummaryDocument summaryDocument = gson.fromJson(line,
+                SummaryDocument.class);
+            if (summaryDocument != null) {
+              parsedSummaryDocuments.put(summaryDocument.getFingerprint(),
+                  summaryDocument);
+            }
+          }
+          br.close();
+          this.listedFiles += parsedSummaryDocuments.size();
+          this.listOperations++;
+        } catch (IOException e) {
+          System.err.println("Could not read file '"
+              + summaryFile.getAbsolutePath() + "'.");
+          e.printStackTrace();
+        } catch (JsonParseException e) {
+          System.err.println("Could not parse summary document '" + line
+              + "' in file '" + summaryFile.getAbsolutePath() + "'.");
+          e.printStackTrace();
+        }
+      }
+    }
+    this.cachedSummaryDocuments = parsedSummaryDocuments;
   }
 
   private <T extends Document> SortedSet<String> listDocumentFiles(
@@ -178,6 +215,9 @@ public class DocumentStore {
       String fingerprint) {
     if (document instanceof NodeStatus) {
       return this.storeNodeStatus((NodeStatus) document, fingerprint);
+    } else if (document instanceof SummaryDocument) {
+      return this.storeSummaryDocument((SummaryDocument) document,
+          fingerprint);
     } else {
       return this.storeDocumentFile(document, fingerprint);
     }
@@ -186,9 +226,18 @@ public class DocumentStore {
   private <T extends Document> boolean storeNodeStatus(
       NodeStatus nodeStatus, String fingerprint) {
     if (this.cachedNodeStatuses == null) {
-      this.cacheNodeStatuses(true);
+      this.cacheNodeStatuses();
     }
     this.cachedNodeStatuses.put(fingerprint, nodeStatus);
+    return true;
+  }
+
+  private <T extends Document> boolean storeSummaryDocument(
+      SummaryDocument summaryDocument, String fingerprint) {
+    if (this.cachedSummaryDocuments == null) {
+      this.cacheSummaryDocuments();
+    }
+    this.cachedSummaryDocuments.put(fingerprint, summaryDocument);
     return true;
   }
 
@@ -270,6 +319,8 @@ public class DocumentStore {
       boolean parse, String fingerprint) {
     if (documentType.equals(NodeStatus.class)) {
       return documentType.cast(this.retrieveNodeStatus(fingerprint));
+    } else if (documentType.equals(SummaryDocument.class)) {
+      return documentType.cast(this.retrieveSummaryDocument(fingerprint));
     } else {
       return this.retrieveDocumentFile(documentType, parse, fingerprint);
     }
@@ -277,12 +328,17 @@ public class DocumentStore {
 
   private NodeStatus retrieveNodeStatus(String fingerprint) {
     if (this.cachedNodeStatuses == null) {
-      this.cacheNodeStatuses(true);
+      this.cacheNodeStatuses();
     }
-    if (this.cachedNodeStatuses.containsKey(fingerprint)) {
-      return this.cachedNodeStatuses.get(fingerprint);
-    } else if (this.listedArchivedNodeStatuses) {
-      return null;
+    return this.cachedNodeStatuses.get(fingerprint);
+  }
+
+  private SummaryDocument retrieveSummaryDocument(String fingerprint) {
+    if (this.cachedSummaryDocuments == null) {
+      this.cacheSummaryDocuments();
+    }
+    if (this.cachedSummaryDocuments.containsKey(fingerprint)) {
+      return this.cachedSummaryDocuments.get(fingerprint);
     }
     /* TODO This is an evil hack to support looking up relays or bridges
      * that haven't been running for a week without having to load
@@ -294,39 +350,35 @@ public class DocumentStore {
       return null;
     }
     boolean isRelay = detailsDocument.getHashedFingerprint() == null;
+    boolean running = false;
     String nickname = detailsDocument.getNickname();
-    String address = null, countryCode = null, hostName = null,
-        defaultPolicy = null, portList = null, aSNumber = null,
-        contact = null;
-    SortedSet<String> orAddressesAndPorts = new TreeSet<String>();
+    List<String> addresses = new ArrayList<String>();
+    String countryCode = null, aSNumber = null, contact = null;
     for (String orAddressAndPort : detailsDocument.getOrAddresses()) {
-      if (address == null) {
-        if (!orAddressAndPort.contains(":")) {
-          return null;
-        }
-        address = orAddressAndPort.substring(0,
-            orAddressAndPort.lastIndexOf(":"));
-      } else {
-        orAddressesAndPorts.add(orAddressAndPort);
+      if (!orAddressAndPort.contains(":")) {
+        return null;
+      }
+      String orAddress = orAddressAndPort.substring(0,
+          orAddressAndPort.lastIndexOf(":"));
+      if (!addresses.contains(orAddress)) {
+        addresses.add(orAddress);
       }
     }
-    SortedSet<String> exitAddresses = new TreeSet<String>();
     if (detailsDocument.getExitAddresses() != null) {
-      exitAddresses.addAll(detailsDocument.getExitAddresses());
+      for (String exitAddress : detailsDocument.getExitAddresses()) {
+        if (!addresses.contains(exitAddress)) {
+          addresses.add(exitAddress);
+        }
+      }
     }
     SortedSet<String> relayFlags = new TreeSet<String>(), family = null;
     long lastSeenMillis = -1L, consensusWeight = -1L,
-        lastRdnsLookup = -1L, firstSeenMillis = -1L,
-        lastChangedAddresses = -1L;
-    int orPort = 0, dirPort = 0;
-    Boolean recommendedVersion = null;
-    NodeStatus nodeStatus = new NodeStatus(isRelay, nickname, fingerprint,
-        address, orAddressesAndPorts, exitAddresses, lastSeenMillis,
-        orPort, dirPort, relayFlags, consensusWeight, countryCode,
-        hostName, lastRdnsLookup, defaultPolicy, portList,
-        firstSeenMillis, lastChangedAddresses, aSNumber, contact,
-        recommendedVersion, family);
-    return nodeStatus;
+        firstSeenMillis = -1L;
+    SummaryDocument summaryDocument = new SummaryDocument(isRelay,
+        nickname, fingerprint, addresses, lastSeenMillis, running,
+        relayFlags, consensusWeight, countryCode, firstSeenMillis,
+        aSNumber, contact, family);
+    return summaryDocument;
   }
 
   private <T extends Document> T retrieveDocumentFile(
@@ -455,6 +507,8 @@ public class DocumentStore {
       String fingerprint) {
     if (documentType.equals(NodeStatus.class)) {
       return this.removeNodeStatus(fingerprint);
+    } else if (documentType.equals(SummaryDocument.class)) {
+      return this.removeSummaryDocument(fingerprint);
     } else {
       return this.removeDocumentFile(documentType, fingerprint);
     }
@@ -462,9 +516,16 @@ public class DocumentStore {
 
   private boolean removeNodeStatus(String fingerprint) {
     if (this.cachedNodeStatuses == null) {
-      this.cacheNodeStatuses(true);
+      this.cacheNodeStatuses();
     }
     return this.cachedNodeStatuses.remove(fingerprint) != null;
+  }
+
+  private boolean removeSummaryDocument(String fingerprint) {
+    if (this.cachedSummaryDocuments == null) {
+      this.cacheSummaryDocuments();
+    }
+    return this.cachedSummaryDocuments.remove(fingerprint) != null;
   }
 
   private <T extends Document> boolean removeDocumentFile(
@@ -550,18 +611,20 @@ public class DocumentStore {
      * containing current time.  It's important to write the update file
      * now, not earlier, because the front-end should not read new node
      * statuses until all details, bandwidths, and weights are ready. */
-    if (this.listedArchivedNodeStatuses) {
-      this.writeNodeStatuses(false);
-      this.writeNodeStatuses(true);
-      this.writeUpdateStatus();
-    } else if (this.listedCurrentNodeStatuses) {
-      this.writeNodeStatuses(false);
+    if (this.cachedNodeStatuses != null ||
+        this.cachedSummaryDocuments != null) {
+      if (this.cachedNodeStatuses != null) {
+        this.writeNodeStatuses();
+      }
+      if (this.cachedSummaryDocuments != null) {
+        this.writeSummaryDocuments();
+      }
       this.writeUpdateStatus();
     }
   }
 
-  private void writeNodeStatuses(boolean includeArchive) {
-    File directory = includeArchive ? this.statusDir : this.outDir;
+  private void writeNodeStatuses() {
+    File directory = this.statusDir;
     if (directory == null) {
       return;
     }
@@ -569,21 +632,8 @@ public class DocumentStore {
     SortedMap<String, NodeStatus>
         cachedRelays = new TreeMap<String, NodeStatus>(),
         cachedBridges = new TreeMap<String, NodeStatus>();
-    long cutoff = 0L;
-    if (!includeArchive) {
-      long maxLastSeenMillis = 0L;
-      for (NodeStatus node : this.cachedNodeStatuses.values()) {
-        if (node.getLastSeenMillis() > maxLastSeenMillis) {
-          maxLastSeenMillis = node.getLastSeenMillis();
-        }
-      }
-      cutoff = maxLastSeenMillis - DateTimeHelper.ONE_WEEK;
-    }
     for (Map.Entry<String, NodeStatus> e :
         this.cachedNodeStatuses.entrySet()) {
-      if (e.getValue().getLastSeenMillis() < cutoff) {
-        continue;
-      }
       if (e.getValue().isRelay()) {
         cachedRelays.put(e.getKey(), e.getValue());
       } else {
@@ -610,6 +660,35 @@ public class DocumentStore {
       }
     }
     String documentString = sb.toString();
+    try {
+      summaryFile.getParentFile().mkdirs();
+      BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));
+      bw.write(documentString);
+      bw.close();
+      this.storedFiles++;
+      this.storedBytes += documentString.length();
+    } catch (IOException e) {
+      System.err.println("Could not write file '"
+          + summaryFile.getAbsolutePath() + "'.");
+      e.printStackTrace();
+    }
+  }
+
+  private void writeSummaryDocuments() {
+    StringBuilder sb = new StringBuilder();
+    Gson gson = new Gson();
+    for (SummaryDocument summaryDocument :
+        this.cachedSummaryDocuments.values()) {
+      String line = gson.toJson(summaryDocument);
+      if (line != null) {
+        sb.append(line + "\n");
+      } else {
+        System.err.println("Could not serialize relay summary document '"
+            + summaryDocument.getFingerprint() + "'");
+      }
+    }
+    String documentString = sb.toString();
+    File summaryFile = new File(this.outDir, "summary");
     try {
       summaryFile.getParentFile().mkdirs();
       BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));

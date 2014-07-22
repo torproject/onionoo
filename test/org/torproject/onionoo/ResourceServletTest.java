@@ -31,7 +31,8 @@ import com.google.gson.Gson;
  * which tests servlet specifics. */
 public class ResourceServletTest {
 
-  private SortedMap<String, NodeStatus> relays, bridges;
+  private SortedMap<String, org.torproject.onionoo.SummaryDocument>
+      relays, bridges;
 
   private long currentTimeMillis = DateTimeHelper.parse(
       "2013-04-24 12:22:22");
@@ -100,77 +101,73 @@ public class ResourceServletTest {
 
   @Before
   public void createSampleRelaysAndBridges() {
-    NodeStatus relayTorkaZ = new NodeStatus(true, "TorkaZ",
-        "000C5F55BD4814B917CC474BD537F1A3B33CCE2A", "62.216.201.221",
-        new TreeSet<String>(), new TreeSet<String>(Arrays.asList(
-        new String[] { "62.216.201.222", "62.216.201.223" })),
-        DateTimeHelper.parse("2013-04-19 05:00:00"), 9001, 0,
-        new TreeSet<String>(Arrays.asList(new String[] { "Running",
-        "Valid" })), 20L, "de", null, -1L, "reject", "1-65535",
-        DateTimeHelper.parse("2013-04-18 05:00:00"),
-        DateTimeHelper.parse("2013-04-19 05:00:00"), "AS8767",
+    org.torproject.onionoo.SummaryDocument relayTorkaZ =
+        new org.torproject.onionoo.SummaryDocument(true, "TorkaZ",
+        "000C5F55BD4814B917CC474BD537F1A3B33CCE2A", Arrays.asList(
+        new String[] { "62.216.201.221", "62.216.201.222",
+        "62.216.201.223" }), DateTimeHelper.parse("2013-04-19 05:00:00"),
+        false, new TreeSet<String>(Arrays.asList(new String[] { "Running",
+        "Valid" })), 20L, "de",
+        DateTimeHelper.parse("2013-04-18 05:00:00"), "AS8767",
         "torkaz <klaus dot zufall at gmx dot de> "
-        + "<fb-token:np5_g_83jmf=>", null, new TreeSet<String>(
-        Arrays.asList(new String[] {
-        "001C13B3A55A71B977CA65EC85539D79C653A3FC",
+        + "<fb-token:np5_g_83jmf=>", new TreeSet<String>(Arrays.asList(
+        new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC",
         "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B" })));
-    NodeStatus relayFerrari458 = new NodeStatus(true, "Ferrari458",
-        "001C13B3A55A71B977CA65EC85539D79C653A3FC", "68.38.171.200",
-        new TreeSet<String>(Arrays.asList(new String[] {
-        "[2001:4f8:3:2e::51]:9001" })), new TreeSet<String>(),
-        DateTimeHelper.parse("2013-04-24 12:00:00"), 9001, 9030,
+    org.torproject.onionoo.SummaryDocument relayFerrari458 =
+        new org.torproject.onionoo.SummaryDocument(true, "Ferrari458",
+        "001C13B3A55A71B977CA65EC85539D79C653A3FC", Arrays.asList(
+        new String[] { "68.38.171.200", "[2001:4f8:3:2e::51]" }),
+        DateTimeHelper.parse("2013-04-24 12:00:00"), true,
         new TreeSet<String>(Arrays.asList(new String[] { "Fast", "Named",
         "Running", "V2Dir", "Valid" })), 1140L, "us",
-        "c-68-38-171-200.hsd1.pa.comcast.net", 1366805763009L, "reject",
-        "1-65535", DateTimeHelper.parse("2013-02-12 16:00:00"),
-        DateTimeHelper.parse("2013-02-26 18:00:00"), "AS7922", null, null,
+        DateTimeHelper.parse("2013-02-12 16:00:00"), "AS7922", null,
         new TreeSet<String>(Arrays.asList(new String[] {
         "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })));
-    relayFerrari458.setRunning(true);
-    NodeStatus relayTimMayTribute = new NodeStatus(true, "TimMayTribute",
-        "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B", "89.69.68.246",
-        new TreeSet<String>(), new TreeSet<String>(),
-        DateTimeHelper.parse("2013-04-22 20:00:00"), 9001, 9030,
+    org.torproject.onionoo.SummaryDocument relayTimMayTribute =
+        new org.torproject.onionoo.SummaryDocument(true, "TimMayTribute",
+        "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B", Arrays.asList(
+        new String[] { "89.69.68.246" }),
+        DateTimeHelper.parse("2013-04-22 20:00:00"), false,
         new TreeSet<String>(Arrays.asList(new String[] { "Fast",
-        "Running", "Unnamed", "V2Dir", "Valid" })), 63L, "a1", null, -1L,
-        "reject", "1-65535", DateTimeHelper.parse("2013-04-16 18:00:00"),
+            "Running", "Unnamed", "V2Dir", "Valid" })), 63L, "a1",
         DateTimeHelper.parse("2013-04-16 18:00:00"), "AS6830",
         "1024D/51E2A1C7 steven j. murdoch "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>",
-        null, new TreeSet<String>());
-    NodeStatus bridgeec2bridgercc7f31fe = new NodeStatus(false,
+        new TreeSet<String>());
+    org.torproject.onionoo.SummaryDocument bridgeec2bridgercc7f31fe =
+        new org.torproject.onionoo.SummaryDocument(false,
         "ec2bridgercc7f31fe", "0000831B236DFF73D409AD17B40E2A728A53994F",
-        "10.199.7.176", new TreeSet<String>(), new TreeSet<String>(),
-        DateTimeHelper.parse("2013-04-21 18:07:03"), 443, 0,
+        Arrays.asList(new String[] { "10.199.7.176" }),
+        DateTimeHelper.parse("2013-04-21 18:07:03"), false,
         new TreeSet<String>(Arrays.asList(new String[] { "Valid" })), -1L,
-        "??", null, -1L, null, null,
-        DateTimeHelper.parse("2013-04-20 15:37:04"), -1L, null, null,
-        null, null);
-    NodeStatus bridgeUnnamed = new NodeStatus(false, "Unnamed",
-        "0002D9BDBBC230BD9C78FF502A16E0033EF87E0C", "10.0.52.84",
-        new TreeSet<String>(), new TreeSet<String>(),
-        DateTimeHelper.parse("2013-04-20 17:37:04"), 443, 0,
+        null, DateTimeHelper.parse("2013-04-20 15:37:04"), null, null,
+        null);
+    org.torproject.onionoo.SummaryDocument bridgeUnnamed =
+        new org.torproject.onionoo.SummaryDocument(false, "Unnamed",
+        "0002D9BDBBC230BD9C78FF502A16E0033EF87E0C", Arrays.asList(
+        new String[] { "10.0.52.84" }),
+        DateTimeHelper.parse("2013-04-20 17:37:04"), false,
         new TreeSet<String>(Arrays.asList(new String[] { "Valid" })), -1L,
-        "??", null, -1L, null, null,
-        DateTimeHelper.parse("2013-04-14 07:07:05"), -1L, null, null,
-        null, null);
-    NodeStatus bridgegummy = new NodeStatus(false, "gummy",
-        "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756", "10.63.169.98",
-        new TreeSet<String>(), new TreeSet<String>(),
-        DateTimeHelper.parse("2013-04-24 01:07:04"), 9001, 0,
+        null, DateTimeHelper.parse("2013-04-14 07:07:05"), null, null,
+        null);
+    org.torproject.onionoo.SummaryDocument bridgegummy =
+        new org.torproject.onionoo.SummaryDocument(false, "gummy",
+        "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756", Arrays.asList(
+        new String[] { "10.63.169.98" }),
+        DateTimeHelper.parse("2013-04-24 01:07:04"), true,
         new TreeSet<String>(Arrays.asList(new String[] { "Running",
-        "Valid" })), -1L, "??", null, -1L, null, null,
-        DateTimeHelper.parse("2013-01-16 21:07:04"), -1L, null, null,
-        null, null);
-    bridgegummy.setRunning(true);
-    this.relays = new TreeMap<String, NodeStatus>();
+        "Valid" })), -1L, null,
+        DateTimeHelper.parse("2013-01-16 21:07:04"), null, null, null);
+    this.relays =
+        new TreeMap<String, org.torproject.onionoo.SummaryDocument>();
     this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
         relayTorkaZ);
     this.relays.put("001C13B3A55A71B977CA65EC85539D79C653A3FC",
         relayFerrari458);
     this.relays.put("0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B",
         relayTimMayTribute);
-    this.bridges = new TreeMap<String, NodeStatus>();
+    this.bridges =
+        new TreeMap<String, org.torproject.onionoo.SummaryDocument>();
     this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
         bridgeec2bridgercc7f31fe);
     this.bridges.put("0002D9BDBBC230BD9C78FF502A16E0033EF87E0C",
@@ -203,10 +200,12 @@ public class ResourceServletTest {
     updateStatus.setDocumentString(String.valueOf(
         this.currentTimeMillis));
     documentStore.addDocument(updateStatus, null);
-    for (Map.Entry<String, NodeStatus> e : relays.entrySet()) {
+    for (Map.Entry<String, org.torproject.onionoo.SummaryDocument> e :
+        this.relays.entrySet()) {
       documentStore.addDocument(e.getValue(), e.getKey());
     }
-    for (Map.Entry<String, NodeStatus> e : bridges.entrySet()) {
+    for (Map.Entry<String, org.torproject.onionoo.SummaryDocument> e :
+        this.bridges.entrySet()) {
       documentStore.addDocument(e.getValue(), e.getKey());
     }
     ApplicationFactory.setDocumentStore(documentStore);

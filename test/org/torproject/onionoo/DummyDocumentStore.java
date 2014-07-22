@@ -51,7 +51,7 @@ public class DummyDocumentStore extends DocumentStore {
   }
 
   public <T extends Document> SortedSet<String> list(
-      Class<T> documentType, boolean includeArchive) {
+      Class<T> documentType) {
     this.performedListOperations++;
     return new TreeSet<String>(this.getStoredDocumentsByClass(
         documentType).keySet());

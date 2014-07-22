@@ -32,13 +32,15 @@ public class ResponseBuilder {
     this.bridgesPublishedString = bridgesPublishedString;
   }
 
-  private List<NodeStatus> orderedRelays = new ArrayList<NodeStatus>();
-  public void setOrderedRelays(List<NodeStatus> orderedRelays) {
+  private List<SummaryDocument> orderedRelays =
+      new ArrayList<SummaryDocument>();
+  public void setOrderedRelays(List<SummaryDocument> orderedRelays) {
     this.orderedRelays = orderedRelays;
   }
 
-  private List<NodeStatus> orderedBridges = new ArrayList<NodeStatus>();
-  public void setOrderedBridges(List<NodeStatus> orderedBridges) {
+  private List<SummaryDocument> orderedBridges =
+      new ArrayList<SummaryDocument>();
+  public void setOrderedBridges(List<SummaryDocument> orderedBridges) {
     this.orderedBridges = orderedBridges;
   }
 
@@ -53,11 +55,11 @@ public class ResponseBuilder {
     writeBridges(orderedBridges, pw);
   }
 
-  private void writeRelays(List<NodeStatus> relays, PrintWriter pw) {
+  private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
     pw.write("{\"relays_published\":\"" + relaysPublishedString
         + "\",\n\"relays\":[");
     int written = 0;
-    for (NodeStatus entry : relays) {
+    for (SummaryDocument entry : relays) {
       String lines = this.formatNodeStatus(entry);
       if (lines.length() > 0) {
         pw.print((written++ > 0 ? ",\n" : "\n") + lines);
@@ -66,11 +68,12 @@ public class ResponseBuilder {
     pw.print("\n],\n");
   }
 
-  private void writeBridges(List<NodeStatus> bridges, PrintWriter pw) {
+  private void writeBridges(List<SummaryDocument> bridges,
+      PrintWriter pw) {
     pw.write("\"bridges_published\":\"" + bridgesPublishedString
         + "\",\n\"bridges\":[");
     int written = 0;
-    for (NodeStatus entry : bridges) {
+    for (SummaryDocument entry : bridges) {
       String lines = this.formatNodeStatus(entry);
       if (lines.length() > 0) {
         pw.print((written++ > 0 ? ",\n" : "\n") + lines);
@@ -79,7 +82,7 @@ public class ResponseBuilder {
     pw.print("\n]}\n");
   }
 
-  private String formatNodeStatus(NodeStatus entry) {
+  private String formatNodeStatus(SummaryDocument entry) {
     if (this.resourceType == null) {
       return "";
     } else if (this.resourceType.equals("summary")) {
@@ -99,26 +102,17 @@ public class ResponseBuilder {
     }
   }
 
-  private String writeSummaryLine(NodeStatus entry) {
+  private String writeSummaryLine(SummaryDocument entry) {
     return entry.isRelay() ? writeRelaySummaryLine(entry)
         : writeBridgeSummaryLine(entry);
   }
 
-  private String writeRelaySummaryLine(NodeStatus entry) {
+  private String writeRelaySummaryLine(SummaryDocument entry) {
     String nickname = !entry.getNickname().equals("Unnamed") ?
         entry.getNickname() : null;
     String fingerprint = entry.getFingerprint();
-    String running = entry.getRunning() ? "true" : "false";
-    List<String> addresses = new ArrayList<String>();
-    addresses.add(entry.getAddress());
-    for (String orAddress : entry.getOrAddresses()) {
-      addresses.add(orAddress);
-    }
-    for (String exitAddress : entry.getExitAddresses()) {
-      if (!addresses.contains(exitAddress)) {
-        addresses.add(exitAddress);
-      }
-    }
+    String running = entry.isRunning() ? "true" : "false";
+    List<String> addresses = entry.getAddresses();
     StringBuilder addressesBuilder = new StringBuilder();
     int written = 0;
     for (String address : addresses) {
@@ -130,17 +124,17 @@ public class ResponseBuilder {
         fingerprint, addressesBuilder.toString(), running);
   }
 
-  private String writeBridgeSummaryLine(NodeStatus entry) {
+  private String writeBridgeSummaryLine(SummaryDocument entry) {
     String nickname = !entry.getNickname().equals("Unnamed") ?
         entry.getNickname() : null;
     String hashedFingerprint = entry.getFingerprint();
-    String running = entry.getRunning() ? "true" : "false";
+    String running = entry.isRunning() ? "true" : "false";
     return String.format("{%s\"h\":\"%s\",\"r\":%s}",
          (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
          hashedFingerprint, running);
   }
 
-  private String writeDetailsLines(NodeStatus entry) {
+  private String writeDetailsLines(SummaryDocument entry) {
     String fingerprint = entry.getFingerprint();
     if (this.fields != null) {
       /* TODO Maybe there's a more elegant way (more maintainable, more
@@ -267,7 +261,7 @@ public class ResponseBuilder {
     }
   }
 
-  private String writeBandwidthLines(NodeStatus entry) {
+  private String writeBandwidthLines(SummaryDocument entry) {
     String fingerprint = entry.getFingerprint();
     BandwidthDocument bandwidthDocument = this.documentStore.retrieve(
         BandwidthDocument.class, false, fingerprint);
@@ -279,7 +273,7 @@ public class ResponseBuilder {
     }
   }
 
-  private String writeWeightsLines(NodeStatus entry) {
+  private String writeWeightsLines(SummaryDocument entry) {
     String fingerprint = entry.getFingerprint();
     WeightsDocument weightsDocument = this.documentStore.retrieve(
         WeightsDocument.class, false, fingerprint);
@@ -291,7 +285,7 @@ public class ResponseBuilder {
     }
   }
 
-  private String writeClientsLines(NodeStatus entry) {
+  private String writeClientsLines(SummaryDocument entry) {
     String fingerprint = entry.getFingerprint();
     ClientsDocument clientsDocument = this.documentStore.retrieve(
         ClientsDocument.class, false, fingerprint);
@@ -303,7 +297,7 @@ public class ResponseBuilder {
     }
   }
 
-  private String writeUptimeLines(NodeStatus entry) {
+  private String writeUptimeLines(SummaryDocument entry) {
     String fingerprint = entry.getFingerprint();
     UptimeDocument uptimeDocument = this.documentStore.retrieve(
         UptimeDocument.class, false, fingerprint);
