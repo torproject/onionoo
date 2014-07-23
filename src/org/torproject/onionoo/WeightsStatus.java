@@ -7,7 +7,7 @@ import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-class WeightsStatus extends Document {
+public class WeightsStatus extends Document {
 
   private SortedMap<long[], double[]> history =
       new TreeMap<long[], double[]>(new Comparator<long[]>() {

@@ -6,7 +6,7 @@ import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-class BandwidthStatus extends Document {
+public class BandwidthStatus extends Document {
 
   private SortedMap<Long, long[]> writeHistory =
       new TreeMap<Long, long[]>();

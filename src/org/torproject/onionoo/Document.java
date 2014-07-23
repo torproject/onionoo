@@ -2,7 +2,7 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo;
 
-abstract class Document {
+public abstract class Document {
 
   private transient String documentString;
   public void setDocumentString(String documentString) {

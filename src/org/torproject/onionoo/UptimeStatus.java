@@ -93,7 +93,7 @@ class UptimeHistory
   }
 }
 
-class UptimeStatus extends Document {
+public class UptimeStatus extends Document {
 
   private transient String fingerprint;
 

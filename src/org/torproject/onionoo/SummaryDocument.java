@@ -14,7 +14,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
-class SummaryDocument extends Document {
+public class SummaryDocument extends Document {
 
   private boolean t;
   public void setRelay(boolean isRelay) {

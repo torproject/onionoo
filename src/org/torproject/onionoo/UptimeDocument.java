@@ -4,8 +4,9 @@ package org.torproject.onionoo;
 
 import java.util.Map;
 
-class UptimeDocument extends Document {
+public class UptimeDocument extends Document {
 
+  @SuppressWarnings("unused")
   private String fingerprint;
   public void setFingerprint(String fingerprint) {
     this.fingerprint = fingerprint;

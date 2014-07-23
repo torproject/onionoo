@@ -174,7 +174,7 @@ class ClientsHistory implements Comparable<ClientsHistory> {
   }
 }
 
-class ClientsStatus extends Document {
+public class ClientsStatus extends Document {
 
   private SortedSet<ClientsHistory> history =
       new TreeSet<ClientsHistory>();

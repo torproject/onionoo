@@ -51,6 +51,7 @@ public class ResourceServletTest {
     protected String getRequestURI() {
       return this.requestURI;
     }
+    @SuppressWarnings("rawtypes")
     protected Map getParameterMap() {
       return this.parameterMap;
     }

@@ -4,13 +4,15 @@ package org.torproject.onionoo;
 
 import java.util.Map;
 
-class ClientsDocument extends Document {
+public class ClientsDocument extends Document {
 
+  @SuppressWarnings("unused")
   private String fingerprint;
   public void setFingerprint(String fingerprint) {
     this.fingerprint = fingerprint;
   }
 
+  @SuppressWarnings("unused")
   private Map<String, ClientsGraphHistory> average_clients;
   public void setAverageClients(
       Map<String, ClientsGraphHistory> averageClients) {

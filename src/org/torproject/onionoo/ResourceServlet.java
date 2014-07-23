@@ -48,6 +48,7 @@ public class ResourceServlet extends HttpServlet {
     protected String getRequestURI() {
       return this.request.getRequestURI();
     }
+    @SuppressWarnings("rawtypes")
     protected Map getParameterMap() {
       return this.request.getParameterMap();
     }

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
-class DetailsStatus extends Document {
+public class DetailsStatus extends Document {
 
   /* We must ensure that details files only contain ASCII characters
    * and no UTF-8 characters.  While UTF-8 characters are perfectly
