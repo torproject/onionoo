@@ -22,6 +22,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.torproject.onionoo.updater.LookupResult;
+import org.torproject.onionoo.updater.LookupService;
 
 public class LookupServiceTest {
 

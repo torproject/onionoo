@@ -10,6 +10,13 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.torproject.onionoo.docs.GraphHistory;
+import org.torproject.onionoo.docs.UptimeDocument;
+import org.torproject.onionoo.docs.UptimeStatus;
+import org.torproject.onionoo.updater.DescriptorType;
+import org.torproject.onionoo.util.ApplicationFactory;
+import org.torproject.onionoo.util.DateTimeHelper;
+import org.torproject.onionoo.writer.UptimeDocumentWriter;
 
 public class UptimeDocumentWriterTest {
 

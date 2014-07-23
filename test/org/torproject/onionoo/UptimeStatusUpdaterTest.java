@@ -6,6 +6,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.torproject.onionoo.docs.UptimeHistory;
+import org.torproject.onionoo.docs.UptimeStatus;
+import org.torproject.onionoo.updater.DescriptorType;
+import org.torproject.onionoo.updater.UptimeStatusUpdater;
+import org.torproject.onionoo.util.ApplicationFactory;
+import org.torproject.onionoo.util.DateTimeHelper;
 
 public class UptimeStatusUpdaterTest {
 

@@ -7,6 +7,9 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.torproject.onionoo.docs.Document;
+import org.torproject.onionoo.docs.DocumentStore;
+
 public class DummyDocumentStore extends DocumentStore {
 
   private Map<Class<? extends Document>, SortedMap<String, Document>>

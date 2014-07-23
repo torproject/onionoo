@@ -9,6 +9,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.torproject.descriptor.Descriptor;
+import org.torproject.onionoo.updater.DescriptorListener;
+import org.torproject.onionoo.updater.DescriptorSource;
+import org.torproject.onionoo.updater.DescriptorType;
+import org.torproject.onionoo.updater.FingerprintListener;
 
 public class DummyDescriptorSource extends DescriptorSource {
 
