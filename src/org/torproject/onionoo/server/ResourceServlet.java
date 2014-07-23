@@ -43,45 +43,6 @@ public class ResourceServlet extends HttpServlet {
     }
   }
 
-  public static class HttpServletRequestWrapper {
-    private HttpServletRequest request;
-    protected HttpServletRequestWrapper(HttpServletRequest request) {
-      this.request = request;
-    }
-    protected String getRequestURI() {
-      return this.request.getRequestURI();
-    }
-    @SuppressWarnings("rawtypes")
-    protected Map getParameterMap() {
-      return this.request.getParameterMap();
-    }
-    protected String[] getParameterValues(String parameterKey) {
-      return this.request.getParameterValues(parameterKey);
-    }
-  }
-
-  public static class HttpServletResponseWrapper {
-    private HttpServletResponse response = null;
-    protected HttpServletResponseWrapper(HttpServletResponse response) {
-      this.response = response;
-    }
-    protected void sendError(int errorStatusCode) throws IOException {
-      this.response.sendError(errorStatusCode);
-    }
-    protected void setHeader(String headerName, String headerValue) {
-      this.response.setHeader(headerName, headerValue);
-    }
-    protected void setContentType(String contentType) {
-      this.response.setContentType(contentType);
-    }
-    protected void setCharacterEncoding(String characterEncoding) {
-      this.response.setCharacterEncoding(characterEncoding);
-    }
-    protected PrintWriter getWriter() throws IOException {
-      return this.response.getWriter();
-    }
-  }
-
   public void doGet(HttpServletRequest request,
       HttpServletResponse response) throws IOException, ServletException {
     HttpServletRequestWrapper requestWrapper =
