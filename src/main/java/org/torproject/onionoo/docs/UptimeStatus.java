@@ -6,14 +6,17 @@ import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 
 public class UptimeStatus extends Document {
 
-  private transient String fingerprint;
-
   private transient boolean isDirty = false;
+  public boolean isDirty() {
+    return this.isDirty;
+  }
+  public void clearDirty() {
+    this.isDirty = false;
+  }
 
   private SortedSet<UptimeHistory> relayHistory =
       new TreeSet<UptimeHistory>();
@@ -31,19 +34,6 @@ public class UptimeStatus extends Document {
   }
   public SortedSet<UptimeHistory> getBridgeHistory() {
     return this.bridgeHistory;
-  }
-
-  public static UptimeStatus loadOrCreate(String fingerprint) {
-    UptimeStatus uptimeStatus = (fingerprint == null) ?
-        ApplicationFactory.getDocumentStore().retrieve(
-            UptimeStatus.class, true) :
-        ApplicationFactory.getDocumentStore().retrieve(
-            UptimeStatus.class, true, fingerprint);
-    if (uptimeStatus == null) {
-      uptimeStatus = new UptimeStatus();
-    }
-    uptimeStatus.fingerprint = fingerprint;
-    return uptimeStatus;
   }
 
   public void fromDocumentString(String documentString) {
@@ -91,18 +81,9 @@ public class UptimeStatus extends Document {
     }
   }
 
-  public void storeIfChanged() {
-    if (this.isDirty) {
-      this.compressHistory(this.relayHistory);
-      this.compressHistory(this.bridgeHistory);
-      if (fingerprint == null) {
-        ApplicationFactory.getDocumentStore().store(this);
-      } else {
-        ApplicationFactory.getDocumentStore().store(this,
-            this.fingerprint);
-      }
-      this.isDirty = false;
-    }
+  public void compressHistory() {
+    this.compressHistory(this.relayHistory);
+    this.compressHistory(this.bridgeHistory);
   }
 
   private void compressHistory(SortedSet<UptimeHistory> history) {

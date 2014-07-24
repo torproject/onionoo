@@ -12,6 +12,7 @@ import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
+import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.UptimeStatus;
 import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
@@ -22,8 +23,11 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private DescriptorSource descriptorSource;
 
+  private DocumentStore documentStore;
+
   public UptimeStatusUpdater() {
     this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.documentStore = ApplicationFactory.getDocumentStore();
     this.registerDescriptorListeners();
   }
 
@@ -108,9 +112,24 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private void updateStatus(boolean relay, String fingerprint,
       SortedSet<Long> newUptimeHours) {
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(fingerprint);
+    UptimeStatus uptimeStatus = (fingerprint == null) ?
+        ApplicationFactory.getDocumentStore().retrieve(
+            UptimeStatus.class, true) :
+        ApplicationFactory.getDocumentStore().retrieve(
+            UptimeStatus.class, true, fingerprint);
+    if (uptimeStatus == null) {
+      uptimeStatus = new UptimeStatus();
+    }
     uptimeStatus.addToHistory(relay, newUptimeHours);
-    uptimeStatus.storeIfChanged();
+    if (uptimeStatus.isDirty()) {
+      uptimeStatus.compressHistory();
+      if (fingerprint == null) {
+        this.documentStore.store(uptimeStatus);
+      } else {
+        this.documentStore.store(uptimeStatus, fingerprint);
+      }
+      uptimeStatus.clearDirty();
+    }
   }
 
   public String getStatsString() {

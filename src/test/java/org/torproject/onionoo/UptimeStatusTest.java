@@ -3,6 +3,9 @@
 package org.torproject.onionoo;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.TreeSet;
@@ -29,23 +32,25 @@ public class UptimeStatusTest {
 
   @Test()
   public void testEmptyStatusNoWriteToDisk() {
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        MORIA1_FINGERPRINT);
-    uptimeStatus.storeIfChanged();
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, MORIA1_FINGERPRINT);
     assertEquals("Should make one retrieve attempt.", 1,
         this.documentStore.getPerformedRetrieveOperations());
-    assertEquals("Newly created uptime status with empty history should "
-        + "not be written to disk.", 0,
-        this.documentStore.getPerformedStoreOperations());
+    assertNull("Uptime status should not exist.", uptimeStatus);
+    uptimeStatus = new UptimeStatus();
+    assertFalse("Newly created uptime status should not be dirty.",
+        uptimeStatus.isDirty());
   }
 
   @Test()
   public void testSingleHourWriteToDisk() {
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        MORIA1_FINGERPRINT);
+    UptimeStatus uptimeStatus = new UptimeStatus();
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-12-20 00:00:00") })));
-    uptimeStatus.storeIfChanged();
+    uptimeStatus.compressHistory();
+    assertTrue("Changed uptime status should say it's dirty.",
+        uptimeStatus.isDirty());
+    this.documentStore.store(uptimeStatus, MORIA1_FINGERPRINT);
     assertEquals("History must contain single entry.", 1,
         uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
@@ -64,12 +69,12 @@ public class UptimeStatusTest {
 
   @Test()
   public void testTwoConsecutiveHours() {
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        MORIA1_FINGERPRINT);
+    UptimeStatus uptimeStatus = new UptimeStatus();
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-12-20 00:00:00"),
         DateTimeHelper.parse("2013-12-20 01:00:00") })));
-    uptimeStatus.storeIfChanged();
+    uptimeStatus.compressHistory();
+    this.documentStore.store(uptimeStatus, MORIA1_FINGERPRINT);
     assertEquals("History must contain single entry.", 1,
         uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
@@ -100,14 +105,15 @@ public class UptimeStatusTest {
   @Test()
   public void testGabelmooFillInGaps() {
     this.addGabelmooUptimeSample();
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        GABELMOO_FINGERPRINT);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, GABELMOO_FINGERPRINT);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-09-09 02:00:00"),
         DateTimeHelper.parse("2013-12-20 00:00:00") })));
     assertEquals("Uncompressed history must contain five entries.", 5,
         uptimeStatus.getRelayHistory().size());
-    uptimeStatus.storeIfChanged();
+    uptimeStatus.compressHistory();
+    this.documentStore.store(uptimeStatus, GABELMOO_FINGERPRINT);
     assertEquals("Compressed history must contain one entry.", 1,
         uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
@@ -124,36 +130,39 @@ public class UptimeStatusTest {
   @Test()
   public void testAddExistingHourToIntervalStart() {
     this.addGabelmooUptimeSample();
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        GABELMOO_FINGERPRINT);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, GABELMOO_FINGERPRINT);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-07-22 17:00:00") })));
-    uptimeStatus.storeIfChanged();
-    assertEquals("Unchanged history should not be written to disk.", 0,
-        this.documentStore.getPerformedStoreOperations());
+    uptimeStatus.compressHistory();
+    this.documentStore.store(uptimeStatus, GABELMOO_FINGERPRINT);
+    assertFalse("Unchanged history should not make uptime status dirty.",
+        uptimeStatus.isDirty());
   }
 
   @Test()
   public void testAddExistingHourToIntervalEnd() {
     this.addGabelmooUptimeSample();
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        GABELMOO_FINGERPRINT);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, GABELMOO_FINGERPRINT);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-09-09 01:00:00") })));
-    uptimeStatus.storeIfChanged();
-    assertEquals("Unchanged history should not be written to disk.", 0,
-        this.documentStore.getPerformedStoreOperations());
+    uptimeStatus.compressHistory();
+    this.documentStore.store(uptimeStatus, GABELMOO_FINGERPRINT);
+    assertFalse("Unchanged history should not make uptime status dirty.",
+        uptimeStatus.isDirty());
   }
 
   @Test()
   public void testTwoHoursOverlappingWithIntervalStart() {
     this.addGabelmooUptimeSample();
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        GABELMOO_FINGERPRINT);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, GABELMOO_FINGERPRINT);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-07-22 16:00:00"),
         DateTimeHelper.parse("2013-07-22 17:00:00")})));
-    uptimeStatus.storeIfChanged();
+    uptimeStatus.compressHistory();
+    this.documentStore.store(uptimeStatus, GABELMOO_FINGERPRINT);
     assertEquals("Compressed history must still contain three entries.",
         3, uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
@@ -170,12 +179,13 @@ public class UptimeStatusTest {
   @Test()
   public void testTwoHoursOverlappingWithIntervalEnd() {
     this.addGabelmooUptimeSample();
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        GABELMOO_FINGERPRINT);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, GABELMOO_FINGERPRINT);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-09-09 01:00:00"),
         DateTimeHelper.parse("2013-09-09 02:00:00")})));
-    uptimeStatus.storeIfChanged();
+    uptimeStatus.compressHistory();
+    this.documentStore.store(uptimeStatus, GABELMOO_FINGERPRINT);
     assertEquals("Compressed history must now contain two entries.",
         2, uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
@@ -205,12 +215,14 @@ public class UptimeStatusTest {
   @Test()
   public void testAddRelayUptimeHours() {
     this.addAllRelaysAndBridgesUptimeSample();
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-07-22 16:00:00"),
         DateTimeHelper.parse("2014-03-21 20:00:00")})));
-    uptimeStatus.storeIfChanged();
+    uptimeStatus.compressHistory();
+    this.documentStore.store(uptimeStatus,
+        ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
     assertEquals("Compressed relay history must still contain one entry.",
         1, uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
@@ -227,12 +239,14 @@ public class UptimeStatusTest {
   @Test()
   public void testAddBridgeUptimeHours() {
     this.addAllRelaysAndBridgesUptimeSample();
-    UptimeStatus uptimeStatus = UptimeStatus.loadOrCreate(
-        ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
+    UptimeStatus uptimeStatus = this.documentStore.retrieve(
+        UptimeStatus.class, true, ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
     uptimeStatus.addToHistory(false, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-07-22 16:00:00"),
         DateTimeHelper.parse("2014-03-21 20:00:00")})));
-    uptimeStatus.storeIfChanged();
+    uptimeStatus.compressHistory();
+    this.documentStore.store(uptimeStatus,
+        ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
     assertEquals("Compressed bridge history must still contain one "
         + "entry.", 1, uptimeStatus.getBridgeHistory().size());
     UptimeHistory newUptimeHistory =
