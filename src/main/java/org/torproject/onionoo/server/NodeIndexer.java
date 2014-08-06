@@ -111,6 +111,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         return;
       }
     }
+    documentStore.invalidateDocumentCache();
     List<String> newRelaysByConsensusWeight = new ArrayList<String>();
     Map<String, SummaryDocument>
         newRelayFingerprintSummaryLines =

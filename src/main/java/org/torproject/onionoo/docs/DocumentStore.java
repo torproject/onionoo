@@ -627,6 +627,11 @@ public class DocumentStore {
     }
   }
 
+  public void invalidateDocumentCache() {
+    this.cachedNodeStatuses = null;
+    this.cachedSummaryDocuments = null;
+  }
+
   private void writeNodeStatuses() {
     File directory = this.statusDir;
     if (directory == null) {
