@@ -64,31 +64,46 @@ public class ResponseBuilder {
     writeBridges(orderedBridges, pw);
   }
 
+  private int charsWritten = 0;
+  public int getCharsWritten() {
+    return this.charsWritten;
+  }
+
   private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
-    pw.write("{\"relays_published\":\"" + relaysPublishedString
-        + "\",\n\"relays\":[");
+    String header = "{\"relays_published\":\"" + relaysPublishedString
+        + "\",\n\"relays\":[";
+    this.charsWritten += header.length();
+    pw.write(header);
     int written = 0;
     for (SummaryDocument entry : relays) {
       String lines = this.formatNodeStatus(entry);
       if (lines.length() > 0) {
+        this.charsWritten += (written > 0 ? 2 : 1) + lines.length();
         pw.print((written++ > 0 ? ",\n" : "\n") + lines);
       }
     }
-    pw.print("\n],\n");
+    String footer = "\n],\n";
+    this.charsWritten += footer.length();
+    pw.print(footer);
   }
 
   private void writeBridges(List<SummaryDocument> bridges,
       PrintWriter pw) {
-    pw.write("\"bridges_published\":\"" + bridgesPublishedString
-        + "\",\n\"bridges\":[");
+    String header = "\"bridges_published\":\"" + bridgesPublishedString
+        + "\",\n\"bridges\":[";
+    this.charsWritten += header.length();
+    pw.write(header);
     int written = 0;
     for (SummaryDocument entry : bridges) {
       String lines = this.formatNodeStatus(entry);
       if (lines.length() > 0) {
+        this.charsWritten += (written > 0 ? 2 : 1) + lines.length();
         pw.print((written++ > 0 ? ",\n" : "\n") + lines);
       }
     }
-    pw.print("\n]}\n");
+    String footer = "\n]}\n";
+    this.charsWritten += footer.length();
+    pw.print(footer);
   }
 
   private String formatNodeStatus(SummaryDocument entry) {

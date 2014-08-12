@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
+import org.torproject.onionoo.util.Time;
 
 public class ResourceServlet extends HttpServlet {
 
@@ -73,6 +74,9 @@ public class ResourceServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
+
+    Time time = ApplicationFactory.getTime();
+    long receivedRequestMillis = time.currentTimeMillis();
 
     String uri = request.getRequestURI();
     if (uri.startsWith("/onionoo/")) {
@@ -279,6 +283,7 @@ public class ResourceServlet extends HttpServlet {
       rh.setFamily(family);
     }
     rh.handleRequest();
+    long parsedRequestMillis = time.currentTimeMillis();
 
     ResponseBuilder rb = new ResponseBuilder();
     rb.setResourceType(resourceType);
@@ -301,8 +306,15 @@ public class ResourceServlet extends HttpServlet {
     response.setCharacterEncoding("utf-8");
     PrintWriter pw = response.getWriter();
     rb.buildResponse(pw);
+    int relayDocumentsWritten = rh.getOrderedRelays().size();
+    int bridgeDocumentsWritten = rh.getOrderedBridges().size();
+    int charsWritten = rb.getCharsWritten();
     pw.flush();
     pw.close();
+    long writtenResponseMillis = time.currentTimeMillis();
+    PerformanceMetrics.logStatistics(receivedRequestMillis, resourceType,
+        parameterMap.keySet(), parsedRequestMillis, relayDocumentsWritten,
+        bridgeDocumentsWritten, charsWritten, writtenResponseMillis);
   }
 
   private static Pattern searchParameterPattern =
