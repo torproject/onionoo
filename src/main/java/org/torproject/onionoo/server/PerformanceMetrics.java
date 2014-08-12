@@ -152,7 +152,7 @@ public class PerformanceMetrics {
           LOG_INTERVAL) {
         System.err.println("Request statistics ("
             + DateTimeHelper.format(lastLoggedMillis + LOG_INTERVAL)
-            + ", " + LOG_INTERVAL + " s):");
+            + ", " + (LOG_INTERVAL / DateTimeHelper.ONE_SECOND) + " s):");
         System.err.println("  Total processed requests: "
             + totalProcessedRequests);
         System.err.println("  Most frequently requested resource: "
