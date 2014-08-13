@@ -61,12 +61,18 @@ public class ResourceServlet extends HttpServlet {
       return;
     }
 
-    if (ApplicationFactory.getNodeIndexer().getLastIndexed(
-        DateTimeHelper.TEN_SECONDS) + DateTimeHelper.SIX_HOURS
-        < ApplicationFactory.getTime().currentTimeMillis()) {
+    long nowMillis = ApplicationFactory.getTime().currentTimeMillis();
+    long indexWrittenMillis =
+        ApplicationFactory.getNodeIndexer().getLastIndexed(
+        DateTimeHelper.TEN_SECONDS);
+    long indexAgeMillis = nowMillis - indexWrittenMillis;
+    if (indexAgeMillis > DateTimeHelper.SIX_HOURS) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
+    long cacheMaxAgeMillis = Math.max(DateTimeHelper.FIVE_MINUTES,
+        ((DateTimeHelper.FOURTY_FIVE_MINUTES - indexAgeMillis)
+        / DateTimeHelper.FIVE_MINUTES) * DateTimeHelper.FIVE_MINUTES);
 
     NodeIndex nodeIndex = ApplicationFactory.getNodeIndexer().
         getLatestNodeIndex(DateTimeHelper.TEN_SECONDS);
@@ -304,6 +310,8 @@ public class ResourceServlet extends HttpServlet {
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setContentType("application/json");
     response.setCharacterEncoding("utf-8");
+    response.setHeader("Cache-Control", "public, max-age="
+        + (cacheMaxAgeMillis / DateTimeHelper.ONE_SECOND));
     PrintWriter pw = response.getWriter();
     rb.buildResponse(pw);
     int relayDocumentsWritten = rh.getOrderedRelays().size();
