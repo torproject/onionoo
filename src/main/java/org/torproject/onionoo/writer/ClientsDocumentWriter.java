@@ -16,12 +16,14 @@ import org.torproject.onionoo.docs.ClientsGraphHistory;
 import org.torproject.onionoo.docs.ClientsHistory;
 import org.torproject.onionoo.docs.ClientsStatus;
 import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.updater.DescriptorSource;
+import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DescriptorType;
 import org.torproject.onionoo.updater.FingerprintListener;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.TimeFactory;
 
 /*
  * Clients status file produced as intermediate output:
@@ -56,9 +58,9 @@ public class ClientsDocumentWriter implements FingerprintListener,
   private long now;
 
   public ClientsDocumentWriter() {
-    this.descriptorSource = ApplicationFactory.getDescriptorSource();
-    this.documentStore = ApplicationFactory.getDocumentStore();
-    this.now = ApplicationFactory.getTime().currentTimeMillis();
+    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
+    this.documentStore = DocumentStoreFactory.getDocumentStore();
+    this.now = TimeFactory.getTime().currentTimeMillis();
     this.registerFingerprintListeners();
   }
 

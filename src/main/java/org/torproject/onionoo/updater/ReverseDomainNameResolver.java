@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
 
 public class ReverseDomainNameResolver {
 
   Time time;
 
   public ReverseDomainNameResolver() {
-    this.time = ApplicationFactory.getTime();
+    this.time = TimeFactory.getTime();
   }
 
   static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS =

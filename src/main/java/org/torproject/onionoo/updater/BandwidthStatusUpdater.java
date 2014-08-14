@@ -9,8 +9,9 @@ import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExtraInfoDescriptor;
 import org.torproject.onionoo.docs.BandwidthStatus;
 import org.torproject.onionoo.docs.DocumentStore;
-import org.torproject.onionoo.util.ApplicationFactory;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
+import org.torproject.onionoo.util.TimeFactory;
 
 public class BandwidthStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -22,9 +23,9 @@ public class BandwidthStatusUpdater implements DescriptorListener,
   private long now;
 
   public BandwidthStatusUpdater() {
-    this.descriptorSource = ApplicationFactory.getDescriptorSource();
-    this.documentStore = ApplicationFactory.getDocumentStore();
-    this.now = ApplicationFactory.getTime().currentTimeMillis();
+    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
+    this.documentStore = DocumentStoreFactory.getDocumentStore();
+    this.now = TimeFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

@@ -17,9 +17,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
 
 public class ResourceServlet extends HttpServlet {
 
@@ -39,7 +39,7 @@ public class ResourceServlet extends HttpServlet {
     if (this.maintenanceMode) {
       return super.getLastModified(request);
     } else {
-      return ApplicationFactory.getNodeIndexer().getLastIndexed(
+      return NodeIndexerFactory.getNodeIndexer().getLastIndexed(
           DateTimeHelper.TEN_SECONDS);
     }
   }
@@ -61,9 +61,9 @@ public class ResourceServlet extends HttpServlet {
       return;
     }
 
-    long nowMillis = ApplicationFactory.getTime().currentTimeMillis();
+    long nowMillis = TimeFactory.getTime().currentTimeMillis();
     long indexWrittenMillis =
-        ApplicationFactory.getNodeIndexer().getLastIndexed(
+        NodeIndexerFactory.getNodeIndexer().getLastIndexed(
         DateTimeHelper.TEN_SECONDS);
     long indexAgeMillis = nowMillis - indexWrittenMillis;
     if (indexAgeMillis > DateTimeHelper.SIX_HOURS) {
@@ -74,14 +74,14 @@ public class ResourceServlet extends HttpServlet {
         ((DateTimeHelper.FOURTY_FIVE_MINUTES - indexAgeMillis)
         / DateTimeHelper.FIVE_MINUTES) * DateTimeHelper.FIVE_MINUTES);
 
-    NodeIndex nodeIndex = ApplicationFactory.getNodeIndexer().
+    NodeIndex nodeIndex = NodeIndexerFactory.getNodeIndexer().
         getLatestNodeIndex(DateTimeHelper.TEN_SECONDS);
     if (nodeIndex == null) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
 
-    Time time = ApplicationFactory.getTime();
+    Time time = TimeFactory.getTime();
     long receivedRequestMillis = time.currentTimeMillis();
 
     String uri = request.getRequestURI();

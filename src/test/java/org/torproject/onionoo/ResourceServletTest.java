@@ -21,14 +21,16 @@ import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.server.HttpServletRequestWrapper;
 import org.torproject.onionoo.server.HttpServletResponseWrapper;
 import org.torproject.onionoo.server.NodeIndexer;
+import org.torproject.onionoo.server.NodeIndexerFactory;
 import org.torproject.onionoo.server.ResourceServlet;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
 
 import com.google.gson.Gson;
 
@@ -198,7 +200,7 @@ public class ResourceServletTest {
 
   private void createDummyTime() {
     Time dummyTime = new DummyTime(this.currentTimeMillis);
-    ApplicationFactory.setTime(dummyTime);
+    TimeFactory.setTime(dummyTime);
   }
 
   private void createDummyDocumentStore() {
@@ -215,13 +217,13 @@ public class ResourceServletTest {
         this.bridges.entrySet()) {
       documentStore.addDocument(e.getValue(), e.getKey());
     }
-    ApplicationFactory.setDocumentStore(documentStore);
+    DocumentStoreFactory.setDocumentStore(documentStore);
   }
 
   private void createNodeIndexer() {
     NodeIndexer newNodeIndexer = new NodeIndexer();
     newNodeIndexer.startIndexing();
-    ApplicationFactory.setNodeIndexer(newNodeIndexer);
+    NodeIndexerFactory.setNodeIndexer(newNodeIndexer);
   }
 
   private void makeRequest(String requestURI,

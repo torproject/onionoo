@@ -3,9 +3,10 @@
 package org.torproject.onionoo.cron;
 
 import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.updater.DescriptorSource;
+import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.StatusUpdateRunner;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.LockFile;
 import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.writer.DocumentWriterRunner;
@@ -29,9 +30,9 @@ public class Main {
       return;
     }
 
-    DescriptorSource dso = ApplicationFactory.getDescriptorSource();
+    DescriptorSource dso = DescriptorSourceFactory.getDescriptorSource();
     Logger.printStatusTime("Initialized descriptor source");
-    DocumentStore ds = ApplicationFactory.getDocumentStore();
+    DocumentStore ds = DocumentStoreFactory.getDocumentStore();
     Logger.printStatusTime("Initialized document store");
     StatusUpdateRunner sur = new StatusUpdateRunner();
     Logger.printStatusTime("Initialized status update runner");

@@ -10,12 +10,14 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.UptimeStatus;
+import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DescriptorType;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
+import org.torproject.onionoo.util.TimeFactory;
 import org.torproject.onionoo.writer.UptimeDocumentWriter;
 
 public class UptimeDocumentWriterTest {
@@ -28,7 +30,7 @@ public class UptimeDocumentWriterTest {
   @Before
   public void createDummyTime() {
     this.dummyTime = new DummyTime(TEST_TIME);
-    ApplicationFactory.setTime(this.dummyTime);
+    TimeFactory.setTime(this.dummyTime);
   }
 
   private DummyDescriptorSource descriptorSource;
@@ -36,7 +38,7 @@ public class UptimeDocumentWriterTest {
   @Before
   public void createDummyDescriptorSource() {
     this.descriptorSource = new DummyDescriptorSource();
-    ApplicationFactory.setDescriptorSource(this.descriptorSource);
+    DescriptorSourceFactory.setDescriptorSource(this.descriptorSource);
   }
 
   private DummyDocumentStore documentStore;
@@ -44,7 +46,7 @@ public class UptimeDocumentWriterTest {
   @Before
   public void createDummyDocumentStore() {
     this.documentStore = new DummyDocumentStore();
-    ApplicationFactory.setDocumentStore(this.documentStore);
+    DocumentStoreFactory.setDocumentStore(this.documentStore);
   }
 
   @Test
@@ -122,7 +124,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-11 1\n",
         "r 2014-03-23-11 1\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
@@ -137,7 +139,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-10 2\n",
         "r 2014-03-23-10 2\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
@@ -152,7 +154,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-09 1\nr 2014-03-23-11 1\n",
         "r 2014-03-23-09 1\nr 2014-03-23-11 1\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
@@ -167,7 +169,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-09 3\n",
         "r 2014-03-23-09 1\nr 2014-03-23-11 1\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
@@ -183,7 +185,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-09 3\n",
         "r 2014-03-23-09 2\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
@@ -199,7 +201,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-16-12 168\n",
         "r 2014-03-16-12 168\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
@@ -214,7 +216,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-16-11 169\n",
         "r 2014-03-16-11 169\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
@@ -231,7 +233,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-16-08 8\n",
         "r 2014-03-16-11 5\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
@@ -246,7 +248,7 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-16-08 8\n",
         "r 2014-03-16-10 1\nr 2014-03-16-12 1\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());

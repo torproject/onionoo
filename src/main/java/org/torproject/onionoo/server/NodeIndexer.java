@@ -17,22 +17,23 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
 import org.torproject.onionoo.docs.UpdateStatus;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
 
 public class NodeIndexer implements ServletContextListener, Runnable {
 
   public void contextInitialized(ServletContextEvent contextEvent) {
     ServletContext servletContext = contextEvent.getServletContext();
     File outDir = new File(servletContext.getInitParameter("outDir"));
-    DocumentStore documentStore = ApplicationFactory.getDocumentStore();
+    DocumentStore documentStore = DocumentStoreFactory.getDocumentStore();
     documentStore.setOutDir(outDir);
     /* The servlet container created us, and we need to avoid that
      * ApplicationFactory creates another instance of us. */
-    ApplicationFactory.setNodeIndexer(this);
+    NodeIndexerFactory.setNodeIndexer(this);
     this.startIndexing();
   }
 
@@ -94,7 +95,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
 
   private void indexNodeStatuses() {
     long updateStatusMillis = -1L;
-    DocumentStore documentStore = ApplicationFactory.getDocumentStore();
+    DocumentStore documentStore = DocumentStoreFactory.getDocumentStore();
     UpdateStatus updateStatus = documentStore.retrieve(UpdateStatus.class,
         false);
     if (updateStatus != null &&
@@ -148,7 +149,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         currentBridges.add(node);
       }
     }
-    Time time = ApplicationFactory.getTime();
+    Time time = TimeFactory.getTime();
     List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
     for (SummaryDocument entry : currentRelays) {
       String fingerprint = entry.getFingerprint().toUpperCase();

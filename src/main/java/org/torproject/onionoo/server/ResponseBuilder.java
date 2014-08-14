@@ -10,10 +10,10 @@ import org.torproject.onionoo.docs.BandwidthDocument;
 import org.torproject.onionoo.docs.ClientsDocument;
 import org.torproject.onionoo.docs.DetailsDocument;
 import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.WeightsDocument;
-import org.torproject.onionoo.util.ApplicationFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,7 +23,7 @@ public class ResponseBuilder {
   private DocumentStore documentStore;
 
   public ResponseBuilder() {
-    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.documentStore = DocumentStoreFactory.getDocumentStore();
   }
 
   private String resourceType;

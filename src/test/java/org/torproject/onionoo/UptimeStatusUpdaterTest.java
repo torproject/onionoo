@@ -6,11 +6,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UptimeHistory;
 import org.torproject.onionoo.docs.UptimeStatus;
+import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DescriptorType;
 import org.torproject.onionoo.updater.UptimeStatusUpdater;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 
 public class UptimeStatusUpdaterTest {
@@ -20,7 +21,7 @@ public class UptimeStatusUpdaterTest {
   @Before
   public void createDummyDescriptorSource() {
     this.descriptorSource = new DummyDescriptorSource();
-    ApplicationFactory.setDescriptorSource(this.descriptorSource);
+    DescriptorSourceFactory.setDescriptorSource(this.descriptorSource);
   }
 
   private DummyDocumentStore documentStore;
@@ -28,13 +29,13 @@ public class UptimeStatusUpdaterTest {
   @Before
   public void createDummyDocumentStore() {
     this.documentStore = new DummyDocumentStore();
-    ApplicationFactory.setDocumentStore(this.documentStore);
+    DocumentStoreFactory.setDocumentStore(this.documentStore);
   }
 
   @Test
   public void testNoDescriptorsNoStatusFiles() {
     UptimeStatusUpdater updater = new UptimeStatusUpdater();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     updater.updateStatuses();
     assertEquals("Without providing any data, nothing should be written "
         + "to disk.", 0,
@@ -62,7 +63,7 @@ public class UptimeStatusUpdaterTest {
   public void testOneConsensusNoStatusFiles() {
     this.addConsensusSample();
     UptimeStatusUpdater updater = new UptimeStatusUpdater();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     updater.updateStatuses();
     assertEquals("Two status files should have been written to disk.",
         2, this.documentStore.getPerformedStoreOperations());
@@ -99,7 +100,7 @@ public class UptimeStatusUpdaterTest {
     this.addAllRelaysAndBridgesUptimeSample();
     this.addConsensusSample();
     UptimeStatusUpdater updater = new UptimeStatusUpdater();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     updater.updateStatuses();
     assertEquals("Two status files should have been written to disk.",
         2, this.documentStore.getPerformedStoreOperations());
@@ -137,7 +138,7 @@ public class UptimeStatusUpdaterTest {
   public void testOneBridgeStatusNoStatusFiles() {
     this.addBridgeStatusSample();
     UptimeStatusUpdater updater = new UptimeStatusUpdater();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     updater.updateStatuses();
     assertEquals("Two status files should have been written to disk.",
         2, this.documentStore.getPerformedStoreOperations());
@@ -162,7 +163,7 @@ public class UptimeStatusUpdaterTest {
     this.addAllRelaysAndBridgesUptimeSample();
     this.addBridgeStatusSample();
     UptimeStatusUpdater updater = new UptimeStatusUpdater();
-    ApplicationFactory.getDescriptorSource().readDescriptors();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     updater.updateStatuses();
     assertEquals("Two status files should have been written to disk.",
         2, this.documentStore.getPerformedStoreOperations());

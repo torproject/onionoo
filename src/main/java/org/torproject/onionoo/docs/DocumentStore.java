@@ -21,9 +21,9 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -46,7 +46,7 @@ public class DocumentStore {
   private Time time;
 
   public DocumentStore() {
-    this.time = ApplicationFactory.getTime();
+    this.time = TimeFactory.getTime();
   }
 
   private long listOperations = 0L, listedFiles = 0L, storedFiles = 0L,

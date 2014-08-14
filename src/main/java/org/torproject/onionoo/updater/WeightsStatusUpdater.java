@@ -14,9 +14,10 @@ import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
 import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.WeightsStatus;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
+import org.torproject.onionoo.util.TimeFactory;
 
 public class WeightsStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -28,9 +29,9 @@ public class WeightsStatusUpdater implements DescriptorListener,
   private long now;
 
   public WeightsStatusUpdater() {
-    this.descriptorSource = ApplicationFactory.getDescriptorSource();
-    this.documentStore = ApplicationFactory.getDocumentStore();
-    this.now = ApplicationFactory.getTime().currentTimeMillis();
+    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
+    this.documentStore = DocumentStoreFactory.getDocumentStore();
+    this.now = TimeFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

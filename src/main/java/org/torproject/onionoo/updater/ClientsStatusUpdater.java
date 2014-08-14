@@ -13,9 +13,10 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
 import org.torproject.onionoo.docs.ClientsHistory;
 import org.torproject.onionoo.docs.ClientsStatus;
 import org.torproject.onionoo.docs.DocumentStore;
-import org.torproject.onionoo.util.ApplicationFactory;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.TimeFactory;
 
 /*
  * Example extra-info descriptor used as input:
@@ -45,9 +46,9 @@ public class ClientsStatusUpdater implements DescriptorListener,
   private long now;
 
   public ClientsStatusUpdater() {
-    this.descriptorSource = ApplicationFactory.getDescriptorSource();
-    this.documentStore = ApplicationFactory.getDocumentStore();
-    this.now = ApplicationFactory.getTime().currentTimeMillis();
+    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
+    this.documentStore = DocumentStoreFactory.getDocumentStore();
+    this.now = TimeFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

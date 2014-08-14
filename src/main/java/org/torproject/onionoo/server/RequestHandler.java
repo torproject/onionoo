@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
-import org.torproject.onionoo.util.ApplicationFactory;
 
 public class RequestHandler {
 
@@ -23,7 +23,7 @@ public class RequestHandler {
 
   public RequestHandler(NodeIndex nodeIndex) {
     this.nodeIndex = nodeIndex;
-    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.documentStore = DocumentStoreFactory.getDocumentStore();
   }
 
   private String resourceType;

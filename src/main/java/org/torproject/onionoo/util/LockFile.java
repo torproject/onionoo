@@ -12,7 +12,7 @@ public class LockFile {
   private final File lockFile = new File("lock");
 
   public boolean acquireLock() {
-    Time time = ApplicationFactory.getTime();
+    Time time = TimeFactory.getTime();
     try {
       if (this.lockFile.exists()) {
         return false;

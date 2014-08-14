@@ -12,7 +12,7 @@ public class Logger {
   private static Time time;
 
   public static void setTime() {
-    time = ApplicationFactory.getTime();
+    time = TimeFactory.getTime();
   }
 
   private static long currentTimeMillis() {

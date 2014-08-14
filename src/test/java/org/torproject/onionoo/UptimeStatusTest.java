@@ -12,9 +12,9 @@ import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UptimeHistory;
 import org.torproject.onionoo.docs.UptimeStatus;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 
 public class UptimeStatusTest {
@@ -24,7 +24,7 @@ public class UptimeStatusTest {
   @Before
   public void createDummyDocumentStore() {
     this.documentStore = new DummyDocumentStore();
-    ApplicationFactory.setDocumentStore(this.documentStore);
+    DocumentStoreFactory.setDocumentStore(this.documentStore);
   }
 
   private static final String MORIA1_FINGERPRINT =

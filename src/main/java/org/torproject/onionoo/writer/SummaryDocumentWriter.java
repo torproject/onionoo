@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.SortedSet;
 
 import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.SummaryDocument;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
 
@@ -18,7 +18,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
   private DocumentStore documentStore;
 
   public SummaryDocumentWriter() {
-    this.documentStore = ApplicationFactory.getDocumentStore();
+    this.documentStore = DocumentStoreFactory.getDocumentStore();
   }
 
   private int writtenDocuments = 0, deletedDocuments = 0;

@@ -23,10 +23,11 @@ import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
 import org.torproject.onionoo.docs.DetailsStatus;
 import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.NodeStatus;
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.TimeFactory;
 
 public class NodeDetailsStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -59,11 +60,11 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   public NodeDetailsStatusUpdater(
       ReverseDomainNameResolver reverseDomainNameResolver,
       LookupService lookupService) {
-    this.descriptorSource = ApplicationFactory.getDescriptorSource();
+    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.reverseDomainNameResolver = reverseDomainNameResolver;
     this.lookupService = lookupService;
-    this.documentStore = ApplicationFactory.getDocumentStore();
-    this.now = ApplicationFactory.getTime().currentTimeMillis();
+    this.documentStore = DocumentStoreFactory.getDocumentStore();
+    this.now = TimeFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

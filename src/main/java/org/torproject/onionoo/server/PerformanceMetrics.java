@@ -12,9 +12,9 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.torproject.onionoo.util.ApplicationFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
 
 class Counter {
   int value = 0;
@@ -144,7 +144,7 @@ public class PerformanceMetrics {
       long writtenResponseMillis) {
     synchronized (lock) {
       if (time == null) {
-        time = ApplicationFactory.getTime();
+        time = TimeFactory.getTime();
       }
       if (lastLoggedMillis < 0L) {
         lastLoggedMillis = time.currentTimeMillis();
