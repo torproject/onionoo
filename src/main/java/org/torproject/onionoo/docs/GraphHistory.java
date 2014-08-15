@@ -4,22 +4,24 @@ package org.torproject.onionoo.docs;
 
 import java.util.List;
 
+import org.torproject.onionoo.util.DateTimeHelper;
+
 public class GraphHistory {
 
   private String first;
-  public void setFirst(String first) {
-    this.first = first;
+  public void setFirst(long first) {
+    this.first = DateTimeHelper.format(first);
   }
-  public String getFirst() {
-    return this.first;
+  public long getFirst() {
+    return DateTimeHelper.parse(this.first);
   }
 
   private String last;
-  public void setLast(String last) {
-    this.last = last;
+  public void setLast(long last) {
+    this.last = DateTimeHelper.format(last);
   }
-  public String getLast() {
-    return this.last;
+  public long getLast() {
+    return DateTimeHelper.parse(this.last);
   }
 
   private Integer interval;

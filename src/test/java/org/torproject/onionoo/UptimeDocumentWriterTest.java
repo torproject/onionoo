@@ -97,10 +97,10 @@ public class UptimeDocumentWriterTest {
     assertTrue("Should contain a graph for " + graphName + ".",
         document.getUptime().containsKey(graphName));
     GraphHistory history = document.getUptime().get(graphName);
-    assertEquals("First data point should be " + first + ".", first,
-        history.getFirst());
-    assertEquals("Last data point should be " + last + ".", last,
-        history.getLast());
+    assertEquals("First data point should be " + first + ".",
+        DateTimeHelper.parse(first), history.getFirst());
+    assertEquals("Last data point should be " + last + ".",
+        DateTimeHelper.parse(last), history.getLast());
     assertEquals("Interval should be " + interval + " seconds.", interval,
         (int) history.getInterval());
     assertEquals("Factor should be 1.0 / 999.0.", 1.0 / 999.0,

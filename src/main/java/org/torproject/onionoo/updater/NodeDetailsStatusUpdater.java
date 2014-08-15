@@ -105,25 +105,21 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     String fingerprint = descriptor.getFingerprint();
     DetailsStatus detailsStatus = this.documentStore.retrieve(
         DetailsStatus.class, true, fingerprint);
-    String publishedDateTime =
-        DateTimeHelper.format(descriptor.getPublishedMillis());
     if (detailsStatus == null) {
       detailsStatus = new DetailsStatus();
-    } else if (detailsStatus.getDescPublished() != null &&
-        publishedDateTime.compareTo(
-            detailsStatus.getDescPublished()) <= 0) {
+    } else if (descriptor.getPublishedMillis() >
+        detailsStatus.getDescPublished()) {
       return;
     }
-    String lastRestartedString = DateTimeHelper.format(
-        descriptor.getPublishedMillis() - descriptor.getUptime()
-        * DateTimeHelper.ONE_SECOND);
+    long lastRestartedMillis = descriptor.getPublishedMillis()
+        - descriptor.getUptime() * DateTimeHelper.ONE_SECOND;
     int bandwidthRate = descriptor.getBandwidthRate();
     int bandwidthBurst = descriptor.getBandwidthBurst();
     int observedBandwidth = descriptor.getBandwidthObserved();
     int advertisedBandwidth = Math.min(bandwidthRate,
         Math.min(bandwidthBurst, observedBandwidth));
-    detailsStatus.setDescPublished(publishedDateTime);
-    detailsStatus.setLastRestarted(lastRestartedString);
+    detailsStatus.setDescPublished(descriptor.getPublishedMillis());
+    detailsStatus.setLastRestarted(lastRestartedMillis);
     detailsStatus.setBandwidthRate(bandwidthRate);
     detailsStatus.setBandwidthBurst(bandwidthBurst);
     detailsStatus.setObservedBandwidth(observedBandwidth);
@@ -227,23 +223,19 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     String fingerprint = descriptor.getFingerprint();
     DetailsStatus detailsStatus = this.documentStore.retrieve(
         DetailsStatus.class, true, fingerprint);
-    String publishedDateTime =
-        DateTimeHelper.format(descriptor.getPublishedMillis());
     if (detailsStatus == null) {
       detailsStatus = new DetailsStatus();
-    } else if (detailsStatus.getDescPublished() != null &&
-        publishedDateTime.compareTo(
-            detailsStatus.getDescPublished()) <= 0) {
+    } else if (detailsStatus.getDescPublished() >
+        descriptor.getPublishedMillis()) {
       return;
     }
-    String lastRestartedString = DateTimeHelper.format(
-        descriptor.getPublishedMillis() - descriptor.getUptime()
-        * DateTimeHelper.ONE_SECOND);
+    long lastRestartedMillis = descriptor.getPublishedMillis()
+        - descriptor.getUptime() * DateTimeHelper.ONE_SECOND;
     int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
         Math.min(descriptor.getBandwidthBurst(),
         descriptor.getBandwidthObserved()));
-    detailsStatus.setDescPublished(publishedDateTime);
-    detailsStatus.setLastRestarted(lastRestartedString);
+    detailsStatus.setDescPublished(descriptor.getPublishedMillis());
+    detailsStatus.setLastRestarted(lastRestartedMillis);
     detailsStatus.setAdvertisedBandwidth(advertisedBandwidth);
     detailsStatus.setPlatform(descriptor.getPlatform());
     this.documentStore.store(detailsStatus, fingerprint);

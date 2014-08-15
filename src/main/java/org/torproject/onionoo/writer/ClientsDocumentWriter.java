@@ -227,8 +227,8 @@ public class ClientsDocumentWriter implements FingerprintListener,
     double factor = ((double) maxValue) / 999.0;
     int count = lastNonNullIndex - firstNonNullIndex + 1;
     ClientsGraphHistory graphHistory = new ClientsGraphHistory();
-    graphHistory.setFirst(DateTimeHelper.format(firstDataPointMillis));
-    graphHistory.setLast(DateTimeHelper.format(lastDataPointMillis));
+    graphHistory.setFirst(firstDataPointMillis);
+    graphHistory.setLast(lastDataPointMillis);
     graphHistory.setInterval((int) (dataPointInterval
         / DateTimeHelper.ONE_SECOND));
     graphHistory.setFactor(factor);

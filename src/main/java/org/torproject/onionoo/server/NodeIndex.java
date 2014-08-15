@@ -6,20 +6,23 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import org.torproject.onionoo.docs.SummaryDocument;
+import org.torproject.onionoo.util.DateTimeHelper;
 
 class NodeIndex {
 
   private String relaysPublishedString;
-  public void setRelaysPublishedString(String relaysPublishedString) {
-    this.relaysPublishedString = relaysPublishedString;
+  public void setRelaysPublishedMillis(long relaysPublishedMillis) {
+    this.relaysPublishedString =
+        DateTimeHelper.format(relaysPublishedMillis);
   }
   public String getRelaysPublishedString() {
     return relaysPublishedString;
   }
 
   private String bridgesPublishedString;
-  public void setBridgesPublishedString(String bridgesPublishedString) {
-    this.bridgesPublishedString = bridgesPublishedString;
+  public void setBridgesPublishedMillis(long bridgesPublishedMillis) {
+    this.bridgesPublishedString =
+        DateTimeHelper.format(bridgesPublishedMillis);
   }
   public String getBridgesPublishedString() {
     return bridgesPublishedString;

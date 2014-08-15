@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.torproject.onionoo.util.DateTimeHelper;
 
 public class DetailsStatus extends Document {
 
@@ -27,19 +28,19 @@ public class DetailsStatus extends Document {
   }
 
   private String desc_published;
-  public void setDescPublished(String descPublished) {
-    this.desc_published = descPublished;
+  public void setDescPublished(long descPublished) {
+    this.desc_published = DateTimeHelper.format(descPublished);
   }
-  public String getDescPublished() {
-    return this.desc_published;
+  public long getDescPublished() {
+    return DateTimeHelper.parse(this.desc_published);
   }
 
   private String last_restarted;
-  public void setLastRestarted(String lastRestarted) {
-    this.last_restarted = lastRestarted;
+  public void setLastRestarted(long lastRestarted) {
+    this.last_restarted = DateTimeHelper.format(lastRestarted);
   }
-  public String getLastRestarted() {
-    return this.last_restarted;
+  public long getLastRestarted() {
+    return DateTimeHelper.parse(this.last_restarted);
   }
 
   private Integer bandwidth_rate;

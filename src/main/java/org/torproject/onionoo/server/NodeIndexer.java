@@ -286,10 +286,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     newNodeIndex.setRelaysByLastSeenDays(newRelaysByLastSeenDays);
     newNodeIndex.setBridgesByFirstSeenDays(newBridgesByFirstSeenDays);
     newNodeIndex.setBridgesByLastSeenDays(newBridgesByLastSeenDays);
-    newNodeIndex.setRelaysPublishedString(DateTimeHelper.format(
-        relaysLastValidAfterMillis));
-    newNodeIndex.setBridgesPublishedString(DateTimeHelper.format(
-        bridgesLastPublishedMillis));
+    newNodeIndex.setRelaysPublishedMillis(relaysLastValidAfterMillis);
+    newNodeIndex.setBridgesPublishedMillis(bridgesLastPublishedMillis);
     synchronized (this) {
       this.lastIndexed = updateStatusMillis;
       this.latestNodeIndex = newNodeIndex;

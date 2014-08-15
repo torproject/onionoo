@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.torproject.onionoo.util.DateTimeHelper;
 
 public class DetailsDocument extends Document {
 
@@ -75,28 +76,29 @@ public class DetailsDocument extends Document {
   }
 
   private String last_seen;
-  public void setLastSeen(String lastSeen) {
-    this.last_seen = lastSeen;
+  public void setLastSeen(long lastSeen) {
+    this.last_seen = DateTimeHelper.format(lastSeen);
   }
-  public String getLastSeen() {
-    return this.last_seen;
+  public long getLastSeen() {
+    return DateTimeHelper.parse(this.last_seen);
   }
 
   private String last_changed_address_or_port;
   public void setLastChangedAddressOrPort(
-      String lastChangedAddressOrPort) {
-    this.last_changed_address_or_port = lastChangedAddressOrPort;
+      long lastChangedAddressOrPort) {
+    this.last_changed_address_or_port = DateTimeHelper.format(
+        lastChangedAddressOrPort);
   }
-  public String getLastChangedAddressOrPort() {
-    return this.last_changed_address_or_port;
+  public long getLastChangedAddressOrPort() {
+    return DateTimeHelper.parse(this.last_changed_address_or_port);
   }
 
   private String first_seen;
-  public void setFirstSeen(String firstSeen) {
-    this.first_seen = firstSeen;
+  public void setFirstSeen(long firstSeen) {
+    this.first_seen = DateTimeHelper.format(firstSeen);
   }
-  public String getFirstSeen() {
-    return this.first_seen;
+  public long getFirstSeen() {
+    return DateTimeHelper.parse(this.first_seen);
   }
 
   private Boolean running;
@@ -196,11 +198,11 @@ public class DetailsDocument extends Document {
   }
 
   private String last_restarted;
-  public void setLastRestarted(String lastRestarted) {
-    this.last_restarted = lastRestarted;
+  public void setLastRestarted(long lastRestarted) {
+    this.last_restarted = DateTimeHelper.format(lastRestarted);
   }
-  public String getLastRestarted() {
-    return this.last_restarted;
+  public long getLastRestarted() {
+    return DateTimeHelper.parse(this.last_restarted);
   }
 
   private Integer bandwidth_rate;

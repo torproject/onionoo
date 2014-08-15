@@ -267,8 +267,8 @@ public class UptimeDocumentWriter implements FingerprintListener,
         + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
     int count = lastNonNullIndex - firstNonNullIndex + 1;
     GraphHistory graphHistory = new GraphHistory();
-    graphHistory.setFirst(DateTimeHelper.format(firstDataPointMillis));
-    graphHistory.setLast(DateTimeHelper.format(lastDataPointMillis));
+    graphHistory.setFirst(firstDataPointMillis);
+    graphHistory.setLast(lastDataPointMillis);
     graphHistory.setInterval((int) (dataPointInterval
         / DateTimeHelper.ONE_SECOND));
     graphHistory.setFactor(1.0 / 999.0);

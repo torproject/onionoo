@@ -92,12 +92,10 @@ public class DetailsDocumentWriter implements FingerprintListener,
         detailsDocument.setDirAddress(entry.getAddress() + ":"
             + entry.getDirPort());
       }
-      detailsDocument.setLastSeen(DateTimeHelper.format(
-          entry.getLastSeenMillis()));
-      detailsDocument.setFirstSeen(DateTimeHelper.format(
-          entry.getFirstSeenMillis()));
+      detailsDocument.setLastSeen(entry.getLastSeenMillis());
+      detailsDocument.setFirstSeen(entry.getFirstSeenMillis());
       detailsDocument.setLastChangedAddressOrPort(
-          DateTimeHelper.format(entry.getLastChangedOrAddress()));
+          entry.getLastChangedOrAddress());
       detailsDocument.setRunning(entry.getRunning());
       if (!entry.getRelayFlags().isEmpty()) {
         detailsDocument.setFlags(new ArrayList<String>(
@@ -202,10 +200,8 @@ public class DetailsDocumentWriter implements FingerprintListener,
         orAddresses.add(orAddress.toLowerCase());
       }
       detailsDocument.setOrAddresses(orAddresses);
-      detailsDocument.setLastSeen(DateTimeHelper.format(
-          entry.getLastSeenMillis()));
-      detailsDocument.setFirstSeen(DateTimeHelper.format(
-          entry.getFirstSeenMillis()));
+      detailsDocument.setLastSeen(entry.getLastSeenMillis());
+      detailsDocument.setFirstSeen(entry.getFirstSeenMillis());
       detailsDocument.setRunning(entry.getRunning());
       detailsDocument.setFlags(new ArrayList<String>(
           entry.getRelayFlags()));
