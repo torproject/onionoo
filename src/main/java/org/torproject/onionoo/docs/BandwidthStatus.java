@@ -2,13 +2,24 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.docs;
 
+import java.util.Map;
 import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.torproject.descriptor.BandwidthHistory;
 import org.torproject.onionoo.util.DateTimeHelper;
+import org.torproject.onionoo.util.TimeFactory;
 
 public class BandwidthStatus extends Document {
+
+  private transient boolean isDirty = false;
+  public boolean isDirty() {
+    return this.isDirty;
+  }
+  public void clearDirty() {
+    this.isDirty = false;
+  }
 
   private SortedMap<Long, long[]> writeHistory =
       new TreeMap<Long, long[]>();
@@ -60,6 +71,87 @@ public class BandwidthStatus extends Document {
       }
     }
     s.close();
+  }
+
+  public void addToWriteHistory(BandwidthHistory bandwidthHistory) {
+    this.addToHistory(this.writeHistory, bandwidthHistory);
+  }
+
+  public void addToReadHistory(BandwidthHistory bandwidthHistory) {
+    this.addToHistory(this.readHistory, bandwidthHistory);
+  }
+
+  private void addToHistory(SortedMap<Long, long[]> history,
+      BandwidthHistory bandwidthHistory) {
+    long intervalMillis = bandwidthHistory.getIntervalLength()
+        * DateTimeHelper.ONE_SECOND;
+    for (Map.Entry<Long, Long> e :
+        bandwidthHistory.getBandwidthValues().entrySet()) {
+      long endMillis = e.getKey(),
+          startMillis = endMillis - intervalMillis;
+      long bandwidthValue = e.getValue();
+      /* TODO Should we first check whether an interval is already
+       * contained in history? */
+      history.put(startMillis, new long[] { startMillis, endMillis,
+          bandwidthValue });
+      this.isDirty = true;
+    }
+  }
+
+  public void compressHistory() {
+    this.compressHistory(this.writeHistory);
+    this.compressHistory(this.readHistory);
+  }
+
+  private void compressHistory(SortedMap<Long, long[]> history) {
+    SortedMap<Long, long[]> uncompressedHistory =
+        new TreeMap<Long, long[]>(history);
+    history.clear();
+    long lastStartMillis = 0L, lastEndMillis = 0L, lastBandwidth = 0L;
+    String lastMonthString = "1970-01";
+    long now = TimeFactory.getTime().currentTimeMillis();
+    for (long[] v : uncompressedHistory.values()) {
+      long startMillis = v[0], endMillis = v[1], bandwidth = v[2];
+      long intervalLengthMillis;
+      if (now - endMillis <= DateTimeHelper.THREE_DAYS) {
+        intervalLengthMillis = DateTimeHelper.FIFTEEN_MINUTES;
+      } else if (now - endMillis <= DateTimeHelper.ONE_WEEK) {
+        intervalLengthMillis = DateTimeHelper.ONE_HOUR;
+      } else if (now - endMillis <=
+          DateTimeHelper.ROUGHLY_ONE_MONTH) {
+        intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
+      } else if (now - endMillis <=
+          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+        intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
+      } else if (now - endMillis <=
+          DateTimeHelper.ROUGHLY_ONE_YEAR) {
+        intervalLengthMillis = DateTimeHelper.TWO_DAYS;
+      } else {
+        intervalLengthMillis = DateTimeHelper.TEN_DAYS;
+      }
+      String monthString = DateTimeHelper.format(startMillis,
+          DateTimeHelper.ISO_YEARMONTH_FORMAT);
+      if (lastEndMillis == startMillis &&
+          ((lastEndMillis - 1L) / intervalLengthMillis) ==
+          ((endMillis - 1L) / intervalLengthMillis) &&
+          lastMonthString.equals(monthString)) {
+        lastEndMillis = endMillis;
+        lastBandwidth += bandwidth;
+      } else {
+        if (lastStartMillis > 0L) {
+          history.put(lastStartMillis, new long[] { lastStartMillis,
+              lastEndMillis, lastBandwidth });
+        }
+        lastStartMillis = startMillis;
+        lastEndMillis = endMillis;
+        lastBandwidth = bandwidth;
+      }
+      lastMonthString = monthString;
+    }
+    if (lastStartMillis > 0L) {
+      history.put(lastStartMillis, new long[] { lastStartMillis,
+          lastEndMillis, lastBandwidth });
+    }
   }
 
   public String toDocumentString() {
