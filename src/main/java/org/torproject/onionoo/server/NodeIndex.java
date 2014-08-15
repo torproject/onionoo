@@ -1,19 +1,23 @@
 package org.torproject.onionoo.server;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TimeZone;
 
 import org.torproject.onionoo.docs.SummaryDocument;
-import org.torproject.onionoo.util.DateTimeHelper;
 
 class NodeIndex {
 
   private String relaysPublishedString;
   public void setRelaysPublishedMillis(long relaysPublishedMillis) {
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.relaysPublishedString =
-        DateTimeHelper.format(relaysPublishedMillis);
+        dateTimeFormat.format(relaysPublishedMillis);
   }
   public String getRelaysPublishedString() {
     return relaysPublishedString;
@@ -21,8 +25,11 @@ class NodeIndex {
 
   private String bridgesPublishedString;
   public void setBridgesPublishedMillis(long bridgesPublishedMillis) {
+    SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss");
+    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.bridgesPublishedString =
-        DateTimeHelper.format(bridgesPublishedMillis);
+        dateTimeFormat.format(bridgesPublishedMillis);
   }
   public String getBridgesPublishedString() {
     return bridgesPublishedString;
