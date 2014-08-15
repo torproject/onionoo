@@ -87,21 +87,13 @@ public class WeightsStatusUpdater implements DescriptorListener,
   private void updateWeightsHistory(long validAfterMillis,
       long freshUntilMillis,
       SortedMap<String, double[]> pathSelectionWeights) {
-    String fingerprint = null;
-    double[] weights = null;
-    do {
-      fingerprint = null;
-      synchronized (pathSelectionWeights) {
-        if (!pathSelectionWeights.isEmpty()) {
-          fingerprint = pathSelectionWeights.firstKey();
-          weights = pathSelectionWeights.remove(fingerprint);
-        }
-      }
-      if (fingerprint != null) {
-        this.addToHistory(fingerprint, validAfterMillis,
-            freshUntilMillis, weights);
-      }
-    } while (fingerprint != null);
+    for (Map.Entry<String, double[]> e
+        : pathSelectionWeights.entrySet()) {
+      String fingerprint = e.getKey();
+      double[] weights = e.getValue();
+      this.addToHistory(fingerprint, validAfterMillis, freshUntilMillis,
+          weights);
+    }
   }
 
   private SortedMap<String, double[]> calculatePathSelectionProbabilities(
