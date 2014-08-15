@@ -16,7 +16,6 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
-import org.torproject.onionoo.util.TimeFactory;
 
 /*
  * Example extra-info descriptor used as input:
@@ -43,12 +42,9 @@ public class ClientsStatusUpdater implements DescriptorListener,
 
   private DocumentStore documentStore;
 
-  private long now;
-
   public ClientsStatusUpdater() {
     this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = TimeFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 
@@ -152,65 +148,13 @@ public class ClientsStatusUpdater implements DescriptorListener,
       if (clientsStatus == null) {
         clientsStatus = new ClientsStatus();
       }
-      this.addToHistory(clientsStatus, e.getValue());
-      this.compressHistory(clientsStatus);
-      this.documentStore.store(clientsStatus, hashedFingerprint);
-    }
-  }
-
-  private void addToHistory(ClientsStatus clientsStatus,
-      SortedSet<ClientsHistory> newIntervals) {
-    SortedSet<ClientsHistory> history = clientsStatus.getHistory();
-    for (ClientsHistory interval : newIntervals) {
-      if ((history.headSet(interval).isEmpty() ||
-          history.headSet(interval).last().getEndMillis() <=
-          interval.getStartMillis()) &&
-          (history.tailSet(interval).isEmpty() ||
-          history.tailSet(interval).first().getStartMillis() >=
-          interval.getEndMillis())) {
-        history.add(interval);
+      clientsStatus.addToHistory(e.getValue());
+      if (clientsStatus.isDirty()) {
+        clientsStatus.compressHistory();
+        this.documentStore.store(clientsStatus, hashedFingerprint);
+        clientsStatus.clearDirty();
       }
     }
-  }
-
-  private void compressHistory(ClientsStatus clientsStatus) {
-    SortedSet<ClientsHistory> history = clientsStatus.getHistory();
-    SortedSet<ClientsHistory> compressedHistory =
-        new TreeSet<ClientsHistory>();
-    ClientsHistory lastResponses = null;
-    String lastMonthString = "1970-01";
-    for (ClientsHistory responses : history) {
-      long intervalLengthMillis;
-      if (this.now - responses.getEndMillis() <=
-          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
-        intervalLengthMillis = DateTimeHelper.ONE_DAY;
-      } else if (this.now - responses.getEndMillis() <=
-          DateTimeHelper.ROUGHLY_ONE_YEAR) {
-        intervalLengthMillis = DateTimeHelper.TWO_DAYS;
-      } else {
-        intervalLengthMillis = DateTimeHelper.TEN_DAYS;
-      }
-      String monthString = DateTimeHelper.format(
-          responses.getStartMillis(),
-          DateTimeHelper.ISO_YEARMONTH_FORMAT);
-      if (lastResponses != null &&
-          lastResponses.getEndMillis() == responses.getStartMillis() &&
-          ((lastResponses.getEndMillis() - 1L) / intervalLengthMillis) ==
-          ((responses.getEndMillis() - 1L) / intervalLengthMillis) &&
-          lastMonthString.equals(monthString)) {
-        lastResponses.addResponses(responses);
-      } else {
-        if (lastResponses != null) {
-          compressedHistory.add(lastResponses);
-        }
-        lastResponses = responses;
-      }
-      lastMonthString = monthString;
-    }
-    if (lastResponses != null) {
-      compressedHistory.add(lastResponses);
-    }
-    clientsStatus.setHistory(compressedHistory);
   }
 
   public String getStatsString() {

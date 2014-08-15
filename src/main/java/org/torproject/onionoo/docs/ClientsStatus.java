@@ -6,7 +6,18 @@ import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.torproject.onionoo.util.DateTimeHelper;
+import org.torproject.onionoo.util.TimeFactory;
+
 public class ClientsStatus extends Document {
+
+  private transient boolean isDirty = false;
+  public boolean isDirty() {
+    return this.isDirty;
+  }
+  public void clearDirty() {
+    this.isDirty = false;
+  }
 
   private SortedSet<ClientsHistory> history =
       new TreeSet<ClientsHistory>();
@@ -30,6 +41,60 @@ public class ClientsStatus extends Document {
       }
     }
     s.close();
+  }
+
+  public void addToHistory(SortedSet<ClientsHistory> newIntervals) {
+    for (ClientsHistory interval : newIntervals) {
+      if ((this.history.headSet(interval).isEmpty() ||
+          this.history.headSet(interval).last().getEndMillis() <=
+          interval.getStartMillis()) &&
+          (this.history.tailSet(interval).isEmpty() ||
+          this.history.tailSet(interval).first().getStartMillis() >=
+          interval.getEndMillis())) {
+        this.history.add(interval);
+        this.isDirty = true;
+      }
+    }
+  }
+
+  public void compressHistory() {
+    SortedSet<ClientsHistory> uncompressedHistory =
+        new TreeSet<ClientsHistory>(this.history);
+    history.clear();
+    ClientsHistory lastResponses = null;
+    String lastMonthString = "1970-01";
+    long now = TimeFactory.getTime().currentTimeMillis();
+    for (ClientsHistory responses : uncompressedHistory) {
+      long intervalLengthMillis;
+      if (now - responses.getEndMillis() <=
+          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+        intervalLengthMillis = DateTimeHelper.ONE_DAY;
+      } else if (now - responses.getEndMillis() <=
+          DateTimeHelper.ROUGHLY_ONE_YEAR) {
+        intervalLengthMillis = DateTimeHelper.TWO_DAYS;
+      } else {
+        intervalLengthMillis = DateTimeHelper.TEN_DAYS;
+      }
+      String monthString = DateTimeHelper.format(
+          responses.getStartMillis(),
+          DateTimeHelper.ISO_YEARMONTH_FORMAT);
+      if (lastResponses != null &&
+          lastResponses.getEndMillis() == responses.getStartMillis() &&
+          ((lastResponses.getEndMillis() - 1L) / intervalLengthMillis) ==
+          ((responses.getEndMillis() - 1L) / intervalLengthMillis) &&
+          lastMonthString.equals(monthString)) {
+        lastResponses.addResponses(responses);
+      } else {
+        if (lastResponses != null) {
+          this.history.add(lastResponses);
+        }
+        lastResponses = responses;
+      }
+      lastMonthString = monthString;
+    }
+    if (lastResponses != null) {
+      this.history.add(lastResponses);
+    }
   }
 
   public String toDocumentString() {
