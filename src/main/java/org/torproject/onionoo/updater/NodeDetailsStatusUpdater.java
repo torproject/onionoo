@@ -111,7 +111,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       detailsStatus = new DetailsStatus();
     } else if (detailsStatus.getDescPublished() != null &&
         publishedDateTime.compareTo(
-            detailsStatus.getDescPublished()) < 0) {
+            detailsStatus.getDescPublished()) <= 0) {
       return;
     }
     String lastRestartedString = DateTimeHelper.format(
@@ -233,7 +233,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       detailsStatus = new DetailsStatus();
     } else if (detailsStatus.getDescPublished() != null &&
         publishedDateTime.compareTo(
-            detailsStatus.getDescPublished()) < 0) {
+            detailsStatus.getDescPublished()) <= 0) {
       return;
     }
     String lastRestartedString = DateTimeHelper.format(
