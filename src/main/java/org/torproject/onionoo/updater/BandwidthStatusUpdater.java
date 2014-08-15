@@ -2,9 +2,11 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.updater;
 
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.torproject.descriptor.BandwidthHistory;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExtraInfoDescriptor;
 import org.torproject.onionoo.docs.BandwidthStatus;
@@ -54,11 +56,11 @@ public class BandwidthStatusUpdater implements DescriptorListener,
       bandwidthStatus = new BandwidthStatus();
     }
     if (descriptor.getWriteHistory() != null) {
-      parseHistoryLine(descriptor.getWriteHistory().getLine(),
+      this.parseHistory(descriptor.getWriteHistory(),
           bandwidthStatus.getWriteHistory());
     }
     if (descriptor.getReadHistory() != null) {
-      parseHistoryLine(descriptor.getReadHistory().getLine(),
+      this.parseHistory(descriptor.getReadHistory(),
           bandwidthStatus.getReadHistory());
     }
     this.compressHistory(bandwidthStatus.getWriteHistory());
@@ -66,29 +68,19 @@ public class BandwidthStatusUpdater implements DescriptorListener,
     this.documentStore.store(bandwidthStatus, fingerprint);
   }
 
-  private void parseHistoryLine(String line,
+  private void parseHistory(BandwidthHistory bandwidthHistory,
       SortedMap<Long, long[]> history) {
-    String[] parts = line.split(" ");
-    if (parts.length < 6) {
-      return;
-    }
-    long endMillis = DateTimeHelper.parse(parts[1] + " " + parts[2]);
-    if (endMillis < 0L) {
-      System.err.println("Could not parse timestamp in line '" + line
-          + "'.  Skipping.");
-      return;
-    }
-    long intervalMillis = Long.parseLong(parts[3].substring(1))
+    long intervalMillis = bandwidthHistory.getIntervalLength()
         * DateTimeHelper.ONE_SECOND;
-    String[] values = parts[5].split(",");
-    for (int i = values.length - 1; i >= 0; i--) {
-      long bandwidthValue = Long.parseLong(values[i]);
-      long startMillis = endMillis - intervalMillis;
+    for (Map.Entry<Long, Long> e :
+        bandwidthHistory.getBandwidthValues().entrySet()) {
+      long endMillis = e.getKey(),
+          startMillis = endMillis - intervalMillis;
+      long bandwidthValue = e.getValue();
       /* TODO Should we first check whether an interval is already
        * contained in history? */
       history.put(startMillis, new long[] { startMillis, endMillis,
           bandwidthValue });
-      endMillis -= intervalMillis;
     }
   }
 
