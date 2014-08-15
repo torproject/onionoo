@@ -8,8 +8,17 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.torproject.onionoo.util.DateTimeHelper;
+import org.torproject.onionoo.util.TimeFactory;
 
 public class WeightsStatus extends Document {
+
+  private transient boolean isDirty = false;
+  public boolean isDirty() {
+    return this.isDirty;
+  }
+  public void clearDirty() {
+    this.isDirty = false;
+  }
 
   private SortedMap<long[], double[]> history =
       new TreeMap<long[], double[]>(new Comparator<long[]>() {
@@ -75,6 +84,90 @@ public class WeightsStatus extends Document {
       this.history.put(interval, weights);
     }
     s.close();
+  }
+
+  public void addToHistory(long validAfterMillis, long freshUntilMillis,
+      double[] weights) {
+    long[] interval = new long[] { validAfterMillis, freshUntilMillis };
+    if ((this.history.headMap(interval).isEmpty() ||
+        this.history.headMap(interval).lastKey()[1] <=
+        validAfterMillis) &&
+        (this.history.tailMap(interval).isEmpty() ||
+        this.history.tailMap(interval).firstKey()[0] >=
+        freshUntilMillis)) {
+      this.history.put(interval, weights);
+      this.isDirty = true;
+    }
+  }
+
+  public void compressHistory() {
+    SortedMap<long[], double[]> uncompressedHistory =
+        new TreeMap<long[], double[]>(this.history);
+    history.clear();
+    long lastStartMillis = 0L, lastEndMillis = 0L;
+    double[] lastWeights = null;
+    String lastMonthString = "1970-01";
+    int lastMissingValues = -1;
+    long now = TimeFactory.getTime().currentTimeMillis();
+    for (Map.Entry<long[], double[]> e : uncompressedHistory.entrySet()) {
+      long startMillis = e.getKey()[0], endMillis = e.getKey()[1];
+      double[] weights = e.getValue();
+      long intervalLengthMillis;
+      if (now - endMillis <= DateTimeHelper.ONE_WEEK) {
+        intervalLengthMillis = DateTimeHelper.ONE_HOUR;
+      } else if (now - endMillis <=
+          DateTimeHelper.ROUGHLY_ONE_MONTH) {
+        intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
+      } else if (now - endMillis <=
+          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+        intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
+      } else if (now - endMillis <=
+          DateTimeHelper.ROUGHLY_ONE_YEAR) {
+        intervalLengthMillis = DateTimeHelper.TWO_DAYS;
+      } else {
+        intervalLengthMillis = DateTimeHelper.TEN_DAYS;
+      }
+      String monthString = DateTimeHelper.format(startMillis,
+          DateTimeHelper.ISO_YEARMONTH_FORMAT);
+      int missingValues = 0;
+      for (int i = 0; i < weights.length; i++) {
+        if (weights[i] < -0.5) {
+          missingValues += 1 << i;
+        }
+      }
+      if (lastEndMillis == startMillis &&
+          ((lastEndMillis - 1L) / intervalLengthMillis) ==
+          ((endMillis - 1L) / intervalLengthMillis) &&
+          lastMonthString.equals(monthString) &&
+          lastMissingValues == missingValues) {
+        double lastIntervalInHours = (double) ((lastEndMillis
+            - lastStartMillis) / DateTimeHelper.ONE_HOUR);
+        double currentIntervalInHours = (double) ((endMillis
+            - startMillis) / DateTimeHelper.ONE_HOUR);
+        double newIntervalInHours = (double) ((endMillis
+            - lastStartMillis) / DateTimeHelper.ONE_HOUR);
+        for (int i = 0; i < lastWeights.length; i++) {
+          lastWeights[i] *= lastIntervalInHours;
+          lastWeights[i] += weights[i] * currentIntervalInHours;
+          lastWeights[i] /= newIntervalInHours;
+        }
+        lastEndMillis = endMillis;
+      } else {
+        if (lastStartMillis > 0L) {
+          this.history.put(new long[] { lastStartMillis, lastEndMillis },
+              lastWeights);
+        }
+        lastStartMillis = startMillis;
+        lastEndMillis = endMillis;
+        lastWeights = weights;
+      }
+      lastMonthString = monthString;
+      lastMissingValues = missingValues;
+    }
+    if (lastStartMillis > 0L) {
+      this.history.put(new long[] { lastStartMillis, lastEndMillis },
+          lastWeights);
+    }
   }
 
   public String toDocumentString() {

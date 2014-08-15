@@ -16,8 +16,6 @@ import org.torproject.descriptor.ServerDescriptor;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.WeightsStatus;
-import org.torproject.onionoo.util.DateTimeHelper;
-import org.torproject.onionoo.util.TimeFactory;
 
 public class WeightsStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -26,12 +24,9 @@ public class WeightsStatusUpdater implements DescriptorListener,
 
   private DocumentStore documentStore;
 
-  private long now;
-
   public WeightsStatusUpdater() {
     this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = TimeFactory.getTime().currentTimeMillis();
     this.registerDescriptorListeners();
   }
 
@@ -90,9 +85,19 @@ public class WeightsStatusUpdater implements DescriptorListener,
     for (Map.Entry<String, double[]> e
         : pathSelectionWeights.entrySet()) {
       String fingerprint = e.getKey();
+      WeightsStatus weightsStatus = this.documentStore.retrieve(
+          WeightsStatus.class, true, fingerprint);
+      if (weightsStatus == null) {
+        weightsStatus = new WeightsStatus();
+      }
       double[] weights = e.getValue();
-      this.addToHistory(fingerprint, validAfterMillis, freshUntilMillis,
+      weightsStatus.addToHistory(validAfterMillis, freshUntilMillis,
           weights);
+      if (weightsStatus.isDirty()) {
+        weightsStatus.compressHistory();
+        this.documentStore.store(weightsStatus, fingerprint);
+        weightsStatus.clearDirty();
+      }
     }
   }
 
@@ -226,95 +231,6 @@ public class WeightsStatusUpdater implements DescriptorListener,
       pathSelectionProbabilities.put(fingerprint, probabilities);
     }
     return pathSelectionProbabilities;
-  }
-
-  private void addToHistory(String fingerprint, long validAfterMillis,
-      long freshUntilMillis, double[] weights) {
-    WeightsStatus weightsStatus = this.documentStore.retrieve(
-        WeightsStatus.class, true, fingerprint);
-    if (weightsStatus == null) {
-      weightsStatus = new WeightsStatus();
-    }
-    SortedMap<long[], double[]> history = weightsStatus.getHistory();
-    long[] interval = new long[] { validAfterMillis, freshUntilMillis };
-    if ((history.headMap(interval).isEmpty() ||
-        history.headMap(interval).lastKey()[1] <= validAfterMillis) &&
-        (history.tailMap(interval).isEmpty() ||
-        history.tailMap(interval).firstKey()[0] >= freshUntilMillis)) {
-      history.put(interval, weights);
-      this.compressHistory(weightsStatus);
-      this.documentStore.store(weightsStatus, fingerprint);
-    }
-  }
-
-  private void compressHistory(WeightsStatus weightsStatus) {
-    SortedMap<long[], double[]> history = weightsStatus.getHistory();
-    SortedMap<long[], double[]> compressedHistory =
-        new TreeMap<long[], double[]>(history.comparator());
-    long lastStartMillis = 0L, lastEndMillis = 0L;
-    double[] lastWeights = null;
-    String lastMonthString = "1970-01";
-    int lastMissingValues = -1;
-    for (Map.Entry<long[], double[]> e : history.entrySet()) {
-      long startMillis = e.getKey()[0], endMillis = e.getKey()[1];
-      double[] weights = e.getValue();
-      long intervalLengthMillis;
-      if (this.now - endMillis <= DateTimeHelper.ONE_WEEK) {
-        intervalLengthMillis = DateTimeHelper.ONE_HOUR;
-      } else if (this.now - endMillis <=
-          DateTimeHelper.ROUGHLY_ONE_MONTH) {
-        intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
-      } else if (this.now - endMillis <=
-          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
-        intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
-      } else if (this.now - endMillis <=
-          DateTimeHelper.ROUGHLY_ONE_YEAR) {
-        intervalLengthMillis = DateTimeHelper.TWO_DAYS;
-      } else {
-        intervalLengthMillis = DateTimeHelper.TEN_DAYS;
-      }
-      String monthString = DateTimeHelper.format(startMillis,
-          DateTimeHelper.ISO_YEARMONTH_FORMAT);
-      int missingValues = 0;
-      for (int i = 0; i < weights.length; i++) {
-        if (weights[i] < -0.5) {
-          missingValues += 1 << i;
-        }
-      }
-      if (lastEndMillis == startMillis &&
-          ((lastEndMillis - 1L) / intervalLengthMillis) ==
-          ((endMillis - 1L) / intervalLengthMillis) &&
-          lastMonthString.equals(monthString) &&
-          lastMissingValues == missingValues) {
-        double lastIntervalInHours = (double) ((lastEndMillis
-            - lastStartMillis) / DateTimeHelper.ONE_HOUR);
-        double currentIntervalInHours = (double) ((endMillis
-            - startMillis) / DateTimeHelper.ONE_HOUR);
-        double newIntervalInHours = (double) ((endMillis
-            - lastStartMillis) / DateTimeHelper.ONE_HOUR);
-        for (int i = 0; i < lastWeights.length; i++) {
-          lastWeights[i] *= lastIntervalInHours;
-          lastWeights[i] += weights[i] * currentIntervalInHours;
-          lastWeights[i] /= newIntervalInHours;
-        }
-        lastEndMillis = endMillis;
-      } else {
-        if (lastStartMillis > 0L) {
-          compressedHistory.put(new long[] { lastStartMillis,
-              lastEndMillis }, lastWeights);
-        }
-        lastStartMillis = startMillis;
-        lastEndMillis = endMillis;
-        lastWeights = weights;
-      }
-      lastMonthString = monthString;
-      lastMissingValues = missingValues;
-    }
-    if (lastStartMillis > 0L) {
-      compressedHistory.put(new long[] { lastStartMillis, lastEndMillis },
-          lastWeights);
-    }
-    weightsStatus.setHistory(compressedHistory);
   }
 
   public String getStatsString() {
