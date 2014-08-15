@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
 
@@ -35,12 +34,14 @@ public class ResourceServlet extends HttpServlet {
         config.getInitParameter("maintenance").equals("1");
   }
 
+  private static final long INDEX_WAITING_TIME = 10L * 1000L;
+
   public long getLastModified(HttpServletRequest request) {
     if (this.maintenanceMode) {
       return super.getLastModified(request);
     } else {
       return NodeIndexerFactory.getNodeIndexer().getLastIndexed(
-          DateTimeHelper.TEN_SECONDS);
+          INDEX_WAITING_TIME);
     }
   }
 
@@ -53,6 +54,11 @@ public class ResourceServlet extends HttpServlet {
     this.doGet(requestWrapper, responseWrapper);
   }
 
+  private static final long INDEX_MAX_AGE = 6L * 60L * 60L * 1000L,
+      CACHE_MIN_TIME = 5L * 60L * 1000L,
+      CACHE_MAX_TIME = 45L * 60L * 1000L,
+      CACHE_INTERVAL = 5L * 60L * 1000L;
+
   public void doGet(HttpServletRequestWrapper request,
       HttpServletResponseWrapper response) throws IOException {
 
@@ -64,18 +70,18 @@ public class ResourceServlet extends HttpServlet {
     long nowMillis = TimeFactory.getTime().currentTimeMillis();
     long indexWrittenMillis =
         NodeIndexerFactory.getNodeIndexer().getLastIndexed(
-        DateTimeHelper.TEN_SECONDS);
+        INDEX_WAITING_TIME);
     long indexAgeMillis = nowMillis - indexWrittenMillis;
-    if (indexAgeMillis > DateTimeHelper.SIX_HOURS) {
+    if (indexAgeMillis > INDEX_MAX_AGE) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
-    long cacheMaxAgeMillis = Math.max(DateTimeHelper.FIVE_MINUTES,
-        ((DateTimeHelper.FOURTY_FIVE_MINUTES - indexAgeMillis)
-        / DateTimeHelper.FIVE_MINUTES) * DateTimeHelper.FIVE_MINUTES);
+    long cacheMaxAgeMillis = Math.max(CACHE_MIN_TIME,
+        ((CACHE_MAX_TIME - indexAgeMillis)
+        / CACHE_INTERVAL) * CACHE_INTERVAL);
 
     NodeIndex nodeIndex = NodeIndexerFactory.getNodeIndexer().
-        getLatestNodeIndex(DateTimeHelper.TEN_SECONDS);
+        getLatestNodeIndex(INDEX_WAITING_TIME);
     if (nodeIndex == null) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
@@ -311,7 +317,7 @@ public class ResourceServlet extends HttpServlet {
     response.setContentType("application/json");
     response.setCharacterEncoding("utf-8");
     response.setHeader("Cache-Control", "public, max-age="
-        + (cacheMaxAgeMillis / DateTimeHelper.ONE_SECOND));
+        + (cacheMaxAgeMillis / 1000L));
     PrintWriter pw = response.getWriter();
     rb.buildResponse(pw);
     int relayDocumentsWritten = rh.getOrderedRelays().size();

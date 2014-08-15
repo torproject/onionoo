@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
@@ -23,12 +22,10 @@ public class ReverseDomainNameResolver {
     this.time = TimeFactory.getTime();
   }
 
-  static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS =
-      DateTimeHelper.TEN_SECONDS;
-  static final long RDNS_LOOKUP_MAX_DURATION_MILLIS =
-      DateTimeHelper.FIVE_MINUTES;
+  static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS = 10L * 1000L;
+  static final long RDNS_LOOKUP_MAX_DURATION_MILLIS = 5L * 60L * 1000L;
   private static final long RDNS_LOOKUP_MAX_AGE_MILLIS =
-      DateTimeHelper.TWELVE_HOURS;
+      12L * 60L * 60L * 1000L;
   private static final int RDNS_LOOKUP_WORKERS_NUM = 5;
 
   private Map<String, Long> addressLastLookupTimes;

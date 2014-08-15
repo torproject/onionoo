@@ -27,11 +27,12 @@ public class Logger {
     return String.format("%,d", decimalNumber);
   }
 
+  private static final long ONE_SECOND = 1000L,
+      ONE_MINUTE = 60L * ONE_SECOND;
+
   public static String formatMillis(long millis) {
-    return String.format("%02d:%02d.%03d minutes",
-        millis / DateTimeHelper.ONE_MINUTE,
-        (millis % DateTimeHelper.ONE_MINUTE) / DateTimeHelper.ONE_SECOND,
-        millis % DateTimeHelper.ONE_SECOND);
+    return String.format("%02d:%02d.%03d minutes", millis / ONE_MINUTE,
+        (millis % ONE_MINUTE) / ONE_SECOND, millis % ONE_SECOND);
   }
 
   public static String formatBytes(long bytes) {

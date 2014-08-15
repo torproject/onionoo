@@ -75,18 +75,19 @@ public class UptimeDocumentWriterTest {
         GABELMOO_FINGERPRINT);
   }
 
+  private static final long ONE_SECOND = 1000L,
+      ONE_HOUR = 60L * 60L * ONE_SECOND, FOUR_HOURS = 4L * ONE_HOUR;
+
   private void assertOneWeekGraph(UptimeDocument document, int graphs,
       String first, String last, int count, List<Integer> values) {
     this.assertGraph(document, graphs, "1_week", first, last,
-        (int) (DateTimeHelper.ONE_HOUR / DateTimeHelper.ONE_SECOND),
-        count, values);
+        (int) (ONE_HOUR / ONE_SECOND), count, values);
   }
 
   private void assertOneMonthGraph(UptimeDocument document, int graphs,
       String first, String last, int count, List<Integer> values) {
     this.assertGraph(document, graphs, "1_month", first, last,
-        (int) (DateTimeHelper.FOUR_HOURS / DateTimeHelper.ONE_SECOND),
-        count, values);
+        (int) (FOUR_HOURS / ONE_SECOND), count, values);
   }
 
   private void assertGraph(UptimeDocument document, int graphs,

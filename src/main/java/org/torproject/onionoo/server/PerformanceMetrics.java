@@ -14,7 +14,6 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
 
@@ -124,7 +123,8 @@ public class PerformanceMetrics {
 
   private static long lastLoggedMillis = -1L;
 
-  private static final long LOG_INTERVAL = DateTimeHelper.ONE_HOUR;
+  private static final long LOG_INTERVAL_SECONDS = 60L * 60L,
+      LOG_INTERVAL_MILLIS = LOG_INTERVAL_SECONDS * 1000L;
 
   private static Counter totalProcessedRequests = new Counter();
 
@@ -151,13 +151,14 @@ public class PerformanceMetrics {
       if (lastLoggedMillis < 0L) {
         lastLoggedMillis = time.currentTimeMillis();
       } else if (receivedRequestMillis - lastLoggedMillis >
-          LOG_INTERVAL) {
+          LOG_INTERVAL_MILLIS) {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         System.err.println("Request statistics ("
-            + dateTimeFormat.format(lastLoggedMillis + LOG_INTERVAL)
-            + ", " + (LOG_INTERVAL / DateTimeHelper.ONE_SECOND) + " s):");
+            + dateTimeFormat.format(lastLoggedMillis
+            + LOG_INTERVAL_MILLIS) + ", " + (LOG_INTERVAL_SECONDS)
+            + " s):");
         System.err.println("  Total processed requests: "
             + totalProcessedRequests);
         System.err.println("  Most frequently requested resource: "
@@ -183,8 +184,9 @@ public class PerformanceMetrics {
         handleRequestMillis.clear();
         buildResponseMillis.clear();
         do {
-          lastLoggedMillis += LOG_INTERVAL;
-        } while (receivedRequestMillis - lastLoggedMillis > LOG_INTERVAL);
+          lastLoggedMillis += LOG_INTERVAL_MILLIS;
+        } while (receivedRequestMillis - lastLoggedMillis >
+            LOG_INTERVAL_MILLIS);
       }
       totalProcessedRequests.increment();
       handleRequestMillis.addLong(parsedRequestMillis

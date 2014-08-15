@@ -20,7 +20,6 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
 import org.torproject.onionoo.docs.UpdateStatus;
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
 
@@ -77,11 +76,14 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
   }
 
+  private static final long ONE_MINUTE = 60L * 1000L,
+      ONE_DAY = 24L * 60L * ONE_MINUTE;
+
   public void run() {
     while (this.nodeIndexerThread != null) {
       this.indexNodeStatuses();
       try {
-        Thread.sleep(DateTimeHelper.ONE_MINUTE);
+        Thread.sleep(ONE_MINUTE);
       } catch (InterruptedException e) {
       }
     }
@@ -191,7 +193,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByFamily.put(fingerprint, entry.getFamilyFingerprints());
       }
       int daysSinceFirstSeen = (int) ((time.currentTimeMillis()
-          - entry.getFirstSeenMillis()) / DateTimeHelper.ONE_DAY);
+          - entry.getFirstSeenMillis()) / ONE_DAY);
       if (!newRelaysByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
         newRelaysByFirstSeenDays.put(daysSinceFirstSeen,
             new HashSet<String>());
@@ -200,7 +202,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       newRelaysByFirstSeenDays.get(daysSinceFirstSeen).add(
           hashedFingerprint);
       int daysSinceLastSeen = (int) ((time.currentTimeMillis()
-          - entry.getLastSeenMillis()) / DateTimeHelper.ONE_DAY);
+          - entry.getLastSeenMillis()) / ONE_DAY);
       if (!newRelaysByLastSeenDays.containsKey(daysSinceLastSeen)) {
         newRelaysByLastSeenDays.put(daysSinceLastSeen,
             new HashSet<String>());
@@ -250,7 +252,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
             hashedHashedFingerprint);
       }
       int daysSinceFirstSeen = (int) ((time.currentTimeMillis()
-          - entry.getFirstSeenMillis()) / DateTimeHelper.ONE_DAY);
+          - entry.getFirstSeenMillis()) / ONE_DAY);
       if (!newBridgesByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
         newBridgesByFirstSeenDays.put(daysSinceFirstSeen,
             new HashSet<String>());
@@ -260,7 +262,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       newBridgesByFirstSeenDays.get(daysSinceFirstSeen).add(
           hashedHashedFingerprint);
       int daysSinceLastSeen = (int) ((time.currentTimeMillis()
-          - entry.getLastSeenMillis()) / DateTimeHelper.ONE_DAY);
+          - entry.getLastSeenMillis()) / ONE_DAY);
       if (!newBridgesByLastSeenDays.containsKey(daysSinceLastSeen)) {
         newBridgesByLastSeenDays.put(daysSinceLastSeen,
             new HashSet<String>());
