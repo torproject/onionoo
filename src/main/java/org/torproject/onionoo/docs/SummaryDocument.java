@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.torproject.onionoo.util.DateTimeHelper;
 
 public class SummaryDocument extends Document {
 

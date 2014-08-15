@@ -6,8 +6,6 @@ import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.torproject.onionoo.util.DateTimeHelper;
-
 public class UptimeStatus extends Document {
 
   private transient boolean isDirty = false;

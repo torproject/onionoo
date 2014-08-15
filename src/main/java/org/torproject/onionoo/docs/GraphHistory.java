@@ -4,8 +4,6 @@ package org.torproject.onionoo.docs;
 
 import java.util.List;
 
-import org.torproject.onionoo.util.DateTimeHelper;
-
 public class GraphHistory {
 
   private String first;

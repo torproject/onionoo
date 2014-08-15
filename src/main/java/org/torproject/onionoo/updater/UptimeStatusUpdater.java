@@ -12,10 +12,10 @@ import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
+import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UptimeStatus;
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
 
 public class UptimeStatusUpdater implements DescriptorListener,

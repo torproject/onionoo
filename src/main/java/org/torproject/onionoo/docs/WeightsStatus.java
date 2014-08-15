@@ -7,7 +7,6 @@ import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class WeightsStatus extends Document {

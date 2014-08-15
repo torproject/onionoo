@@ -15,7 +15,6 @@ import java.util.TreeSet;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.torproject.onionoo.util.DateTimeHelper;
 
 /* Store search data of a single relay that was running in the past seven
  * days. */

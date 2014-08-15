@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
@@ -19,7 +20,6 @@ import org.torproject.onionoo.updater.DescriptorSource;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DescriptorType;
 import org.torproject.onionoo.updater.FingerprintListener;
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.util.TimeFactory;
 

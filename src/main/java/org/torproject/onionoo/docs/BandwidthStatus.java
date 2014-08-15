@@ -8,7 +8,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.torproject.descriptor.BandwidthHistory;
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class BandwidthStatus extends Document {

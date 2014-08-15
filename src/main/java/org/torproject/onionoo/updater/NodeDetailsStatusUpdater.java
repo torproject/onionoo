@@ -21,11 +21,11 @@ import org.torproject.descriptor.ExitListEntry;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
+import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DetailsStatus;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.NodeStatus;
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.util.TimeFactory;
 

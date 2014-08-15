@@ -1,6 +1,5 @@
 package org.torproject.onionoo.docs;
 
-import org.torproject.onionoo.util.DateTimeHelper;
 
 public class UptimeHistory
     implements Comparable<UptimeHistory> {

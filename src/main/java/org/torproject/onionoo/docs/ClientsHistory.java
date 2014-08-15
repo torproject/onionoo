@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.torproject.onionoo.util.DateTimeHelper;
-
 public class ClientsHistory implements Comparable<ClientsHistory> {
 
   private long startMillis;

@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 
-import org.torproject.onionoo.util.DateTimeHelper;
-
 public class ClientsGraphHistory {
 
   private String first;

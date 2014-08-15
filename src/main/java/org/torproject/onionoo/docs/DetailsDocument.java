@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.torproject.onionoo.util.DateTimeHelper;
 
 public class DetailsDocument extends Document {
 

@@ -12,9 +12,9 @@ import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExtraInfoDescriptor;
 import org.torproject.onionoo.docs.ClientsHistory;
 import org.torproject.onionoo.docs.ClientsStatus;
+import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
 
 /*

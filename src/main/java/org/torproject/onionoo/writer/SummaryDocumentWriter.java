@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
+import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.SummaryDocument;
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Logger;
 
 public class SummaryDocumentWriter implements DocumentWriter {

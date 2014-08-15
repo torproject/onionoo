@@ -6,7 +6,6 @@ import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class ClientsStatus extends Document {

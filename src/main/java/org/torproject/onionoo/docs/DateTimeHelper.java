@@ -1,6 +1,6 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
-package org.torproject.onionoo.util;
+package org.torproject.onionoo.docs;
 
 import java.text.DateFormat;
 import java.text.ParseException;

@@ -21,6 +21,7 @@ import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.server.HttpServletRequestWrapper;
@@ -28,7 +29,6 @@ import org.torproject.onionoo.server.HttpServletResponseWrapper;
 import org.torproject.onionoo.server.NodeIndexer;
 import org.torproject.onionoo.server.NodeIndexerFactory;
 import org.torproject.onionoo.server.ResourceServlet;
-import org.torproject.onionoo.util.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
 
