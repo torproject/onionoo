@@ -107,7 +107,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         DetailsStatus.class, true, fingerprint);
     if (detailsStatus == null) {
       detailsStatus = new DetailsStatus();
-    } else if (descriptor.getPublishedMillis() >
+    } else if (descriptor.getPublishedMillis() <=
         detailsStatus.getDescPublished()) {
       return;
     }
@@ -225,7 +225,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         DetailsStatus.class, true, fingerprint);
     if (detailsStatus == null) {
       detailsStatus = new DetailsStatus();
-    } else if (detailsStatus.getDescPublished() >
+    } else if (detailsStatus.getDescPublished() <=
         descriptor.getPublishedMillis()) {
       return;
     }
