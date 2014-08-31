@@ -11,7 +11,7 @@ $ git clone https://git.torproject.org/onionoo.git /srv/onionoo/
 $ cd /srv/onionoo
 
 
-Install Java 1.5 or higher, ant 1.8 or higher, and Tomcat 6
+Install Java 1.6 or higher, ant 1.8 or higher, and Tomcat 6
 -----------------------------------------------------------
 
 $ javac -version
@@ -109,6 +109,9 @@ Test the hourly data processing process
 ---------------------------------------
 
 Run the data processing process that will afterwards be run once per hour.
+Currently, memory is set to 4G.  If you have more or less RAM to spare,
+change the value for the maxmemory.value property near the top of the
+build.xml file.
 The initial run may take a while:
 
 $ ant run
@@ -127,8 +130,10 @@ one:
 Configure Tomcat
 ----------------
 
-The following file may be a useful Tomcat configuration file.  Put it in
-/etc/tomcat6/server.xml:
+The following file may be a useful Tomcat configuration file.
+Make changes according to your server setup, i.e. replace ${your-host-ip}
+with your ip address and the like (ports, lognames and paths).
+Put it in /etc/tomcat6/server.xml:
 
 <Server port="8005" shutdown="SHUTDOWN">
   <Service name="Catalina">
@@ -139,11 +144,11 @@ The following file may be a useful Tomcat configuration file.  Put it in
                compression="on" compressionMinSize="2048"
                noCompressionUserAgents="gozilla, traviata"
                compressableMimeType="text/html,application/json" />
-    <Engine name="Catalina" defaultHost="85.214.195.203">
-      <Host name="84.214.195.203" appBase="webapps"
+    <Engine name="Catalina" defaultHost="${your-host-ip}">
+      <Host name="${your-host-ip}" appBase="webapps"
             unpackWARs="true" autoDeploy="true"
             xmlValidation="false" xmlNamespaceAware="false">
-        <Alias>85.214.195.203</Alias>
+        <Alias>${your-host-ip}</Alias>
         <Valve className="org.apache.catalina.valves.AccessLogValve"
                directory="logs" prefix="onionoo_access_log." suffix=".txt"
                pattern="%l %u %t %r %s %b" resolveHosts="false"/>

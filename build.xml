@@ -1,4 +1,5 @@
 <project default="run" name="onionoo" basedir=".">
+  <property name="maxmemory.value" value="4g"/>
   <property name="javasources" value="src/main/java"/>
   <property name="tests" value="src/test/java"/>
   <property name="classes" value="classes"/>
@@ -92,7 +93,7 @@
   </target>
   <target name="run" depends="compile">
     <java fork="true"
-          maxmemory="4g"
+          maxmemory="${maxmemory.value}"
           classname="org.torproject.onionoo.cron.Main"
           error="errors">
       <classpath refid="classpath"/>
