@@ -69,8 +69,11 @@ public class ResponseBuilder {
     return this.charsWritten;
   }
 
+  private static final String PROTOCOL_VERSION = "1.0";
+
   private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
-    String header = "{\"relays_published\":\"" + relaysPublishedString
+    String header = "{\"version\":\"" + PROTOCOL_VERSION
+        + "\",\n\"relays_published\":\"" + relaysPublishedString
         + "\",\n\"relays\":[";
     this.charsWritten += header.length();
     pw.write(header);

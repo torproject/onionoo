@@ -120,7 +120,7 @@ Only file a bug report if this problem persists.
 
 </ul>
 
-<h4>Protocol changes</h4>
+<h4>Protocol versions</h4>
 <p>
 There are plenty of reasons why we may have
 to change the protocol described here.
@@ -135,8 +135,25 @@ If you want to be informed of upcoming protocol changes, subscribe to the
 mailing list.
 </p>
 
-<p>The Onionoo API is described by resource types and available methods
-below.</p>
+<p>All responses contain a "version" string that indicates whether clients
+know whether they can parse the document or not.
+Version strings consist of a major and a minor version number.
+The major version number is raised when previously required fields are
+dropped or turned into optional fields, when request parameters or
+response documents are removed, or when there are structural changes.
+The minor version number is raised when new fields, request parameters, or
+response documents are added or optional fields are dropped.
+If clients support the same major version given in a response but only a
+lower minor version, they should be able to parse the document but may not
+understand all fields.
+If clients support a lower major version, they should not attempt to parse
+a document, because there may be backward-incompatible changes.
+The following versions have been used in the past six months:</p>
+
+<ul>
+<li><strong>1.0</strong>: First assigned version number on August 31,
+2014.</li>
+</ul>
 
 </div> <!-- box -->
 
@@ -476,6 +493,16 @@ Summary documents contain the following fields:</p>
 <ul class="properties">
 
 <li>
+<font color="blue"><b>version</b></font>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Onionoo protocol version string.
+<font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
+
+<li>
 <b>relays_published</b>
 <code class="typeof">string</code>
 <span class="required-true">required</span>
@@ -627,6 +654,16 @@ Details documents contain the following fields:
 </p>
 
 <ul class="properties">
+
+<li>
+<font color="blue"><b>version</b></font>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Onionoo protocol version string.
+<font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
 
 <li>
 <b>relays_published</b>
@@ -1404,6 +1441,16 @@ Bandwidth documents contain the following fields:
 <ul class="properties">
 
 <li>
+<font color="blue"><b>version</b></font>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Onionoo protocol version string.
+<font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
+
+<li>
 <b>relays_published</b>
 <code class="typeof">string</code>
 <span class="required-true">required</span>
@@ -1565,6 +1612,16 @@ Weights documents contain the following fields:
 </p>
 
 <ul class="properties">
+
+<li>
+<font color="blue"><b>version</b></font>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Onionoo protocol version string.
+<font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
 
 <li>
 <b>relays_published</b>
@@ -1762,6 +1819,16 @@ Clients documents contain the following fields:
 <ul class="properties">
 
 <li>
+<font color="blue"><b>version</b></font>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Onionoo protocol version string.
+<font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
+
+<li>
 <b>relays_published</b>
 <code class="typeof">string</code>
 <span class="required-true">required</span>
@@ -1928,6 +1995,16 @@ Uptime documents contain the following fields:
 </p>
 
 <ul class="properties">
+
+<li>
+<font color="blue"><b>version</b></font>
+<code class="typeof">string</code>
+<span class="required-true">required</span>
+<p>
+Onionoo protocol version string.
+<font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
 
 <li>
 <b>relays_published</b>
