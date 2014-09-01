@@ -1,0 +1,57 @@
+<configuration debug="false">
+
+  <!-- don't forget the trailing slash! -->
+  <property name="logfile-base" value="/var/log/tomcat6/" />
+  <property name="utc-date-pattern" value="%date{yyyy-MM-dd HH:mm:ss, UTC}" />
+
+  <appender name="FILEALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${logfile-base}onionoo-all.log</file>
+    <encoder>
+      <pattern>${utc-date-pattern} %level %logger{25}:%line %msg%n</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- rollover daily -->
+      <FileNamePattern>${logfile-base}onionoo-all.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+      <maxHistory>10</maxHistory>
+      <timeBasedFileNamingAndTriggeringPolicy
+            class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- or whenever the file size reaches 1MB -->
+        <maxFileSize>1MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+  </appender>
+
+  <appender name="FILEERR" class="ch.qos.logback.core.FileAppender">
+    <file>${logfile-base}onionoo-err.log</file>
+    <encoder>
+      <pattern>%date %level %logger{30}(%line): %msg%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+  </appender>
+  <appender name="FILESTATISTICS" class="ch.qos.logback.core.FileAppender">
+    <file>${logfile-base}onionoo-statistics.log</file>
+    <encoder>
+      <pattern>${utc-date-pattern} %msg%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+
+  <logger name="org.torproject" >
+    <appender-ref ref="FILEERR" />
+  </logger>
+  <logger name="org.torproject.onionoo.server.PerformanceMetrics" >
+    <appender-ref ref="FILESTATISTICS" />
+  </logger>
+  <logger name="statistics"  >
+    <appender-ref ref="FILESTATISTICS" />
+  </logger>
+
+  <root level="ALL">
+    <appender-ref ref="FILEALL" />
+  </root>
+</configuration>
+

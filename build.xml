@@ -12,6 +12,7 @@
             value="${config}/web.xml.template"/>
   <property name="webxml" value="${config}/web.xml"/>
   <property name="warfile" value="onionoo.war"/>
+  <property name="source-and-target-java-version" value="1.6" />
   <path id="classpath">
     <pathelement path="${classes}"/>
     <fileset dir="/usr/share/java">
@@ -21,25 +22,41 @@
       <include name="gson.jar"/>
       <include name="junit4.jar"/>
       <include name="servlet-api-3.0.jar"/>
+      <include name="logback-classic.jar"/>
+      <include name="logback-core.jar"/>
+      <include name="slf4j-api.jar"/>
     </fileset>
     <fileset dir="deps/metrics-lib">
       <include name="descriptor.jar"/>
     </fileset>
+    <fileset dir="${config}">
+      <include name="logback.xml"/>
+    </fileset>
   </path>
+
   <target name="init">
     <copy file="${contextxmltemplate}" tofile="${contextxml}"/>
     <copy file="${webxmltemplate}" tofile="${webxml}"/>
     <mkdir dir="${classes}"/>
   </target>
+
+  <target name="clean" >
+    <delete includeEmptyDirs="true">
+      <fileset dir="${classes}" defaultexcludes="false" includes="**" />
+    </delete>
+    <delete file="${warfile}"/>
+  </target>
+
   <target name="metrics-lib">
     <ant dir="deps/metrics-lib"/>
   </target>
+
   <target name="compile"
           depends="metrics-lib, init">
     <javac destdir="${classes}"
            srcdir="${javasources}"
-           source="1.5"
-           target="1.5"
+           source="${source-and-target-java-version}"
+           target="${source-and-target-java-version}"
            debug="true"
            deprecation="true"
            optimize="false"
@@ -48,11 +65,12 @@
       <classpath refid="classpath"/>
     </javac>
   </target>
+
   <target name="test" depends="compile">
     <javac destdir="${classes}"
            srcdir="${tests}"
-           source="1.5"
-           target="1.5"
+           source="${source-and-target-java-version}"
+           target="${source-and-target-java-version}"
            debug="true"
            deprecation="true"
            optimize="false"
@@ -78,6 +96,9 @@
         <include name="descriptor.jar"/>
       </lib>
       <lib dir="/usr/share/java">
+        <include name="slf4j-api.jar"/>
+        <include name="logback-classic.jar"/>
+        <include name="logback-core.jar"/>
         <include name="commons-codec.jar"/>
         <include name="commons-compress.jar"/>
         <include name="commons-lang.jar"/>
@@ -86,16 +107,16 @@
       <classes dir="${classes}"/>
       <zipfileset dir="${config}"
                   prefix="WEB-INF/classes"
-                  includes="logging.properties"/>
+                  includes="logback.xml"/>
       <metainf dir="${config}"
                includes="context.xml"/>
     </war>
   </target>
   <target name="run" depends="compile">
+    <copy file="logback.xml" todir="${classes}" />
     <java fork="true"
           maxmemory="${maxmemory.value}"
-          classname="org.torproject.onionoo.cron.Main"
-          error="errors">
+          classname="org.torproject.onionoo.cron.Main">
       <classpath refid="classpath"/>
     </java>
   </target>

@@ -1,0 +1,66 @@
+<configuration debug="false">
+
+  <!-- don't forget the trailing slash! -->
+  <property name="logfile-base" value="/srv/onionoo.torproject.org/onionoo/" />
+  <property name="utc-date-pattern" value="%date{yyyy-MM-dd HH:mm:ss, UTC}" />
+
+  <appender name="FILEALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${logfile-base}onionoo-all.log</file>
+    <encoder>
+      <pattern>${utc-date-pattern} %level [runtime: %r] %logger{20}:%line %msg%n</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- rollover daily -->
+      <FileNamePattern>${logfile-base}onionoo-all.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+      <maxHistory>10</maxHistory>
+      <timeBasedFileNamingAndTriggeringPolicy
+            class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- or whenever the file size reaches 1MB -->
+        <maxFileSize>1MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+  </appender>
+
+  <appender name="FILEERR" class="ch.qos.logback.core.FileAppender">
+    <file>${logfile-base}onionoo-err.log</file>
+    <encoder>
+      <pattern>${utc-date-pattern} %level %logger{30}(%line): %msg%n</pattern>
+    </encoder>
+
+    <!-- ERROR or worse -->
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+  </appender>
+
+  <appender name="FILESTATISTICS" class="ch.qos.logback.core.FileAppender">
+    <file>${logfile-base}onionoo-statistics.log</file>
+    <encoder>
+      <pattern>${utc-date-pattern} [runtime: %r] %msg%n</pattern>
+    </encoder>
+
+    <!-- only INFO level -->
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>INFO</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+  </appender>
+
+  <logger name="org.torproject" >
+    <appender-ref ref="FILEERR" />
+  </logger>
+  <logger name="org.torproject.onionoo.cron.Main" >
+    <appender-ref ref="FILESTATISTICS" />
+  </logger>
+
+  <!-- a named logger -->
+  <logger name="statistics" >
+    <appender-ref ref="FILESTATISTICS" />
+  </logger>
+
+  <root level="ALL">
+    <appender-ref ref="FILEALL" />
+  </root>
+</configuration>
+

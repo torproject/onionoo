@@ -9,7 +9,7 @@ apt-get -y upgrade
 echo "Installing required packages."
 apt-get install -y libcommons-codec-java libcommons-compress-java \
 libcommons-lang-java libgoogle-gson-java junit4 libservlet3.0-java \
-openjdk-6-jdk ant liblog4j1.2-java tomcat6
+openjdk-6-jdk ant tomcat6 libslf4j-java liblogback-java
 
 echo "Setting up paths and creating symbolic links."
 mkdir -p /srv/onionoo.torproject.org/onionoo/
@@ -21,6 +21,7 @@ ln -s /vagrant/etc
 ln -s /vagrant/geoip
 ln -s /vagrant/src
 ln -s /vagrant/web
+ln -s /vagrant/logback.xml
 ln -s /srv/onionoo.torproject.org/onionoo/onionoo.war \
 /var/lib/tomcat6/webapps/onionoo.war
 chown -R vagrant:vagrant /srv/onionoo.torproject.org/
