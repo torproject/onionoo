@@ -6,14 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.SummaryDocument;
-import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.FormattingUtils;
 
 public class SummaryDocumentWriter implements DocumentWriter {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      SummaryDocumentWriter.class);
 
   private DocumentStore documentStore;
 
@@ -80,15 +85,15 @@ public class SummaryDocumentWriter implements DocumentWriter {
         this.writtenDocuments++;
       };
     }
-    Logger.printStatusTime("Wrote summary document files");
+    log.info("Wrote summary document files");
   }
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + Logger.formatDecimalNumber(this.writtenDocuments)
-        + " summary document files written\n");
-    sb.append("    " + Logger.formatDecimalNumber(this.deletedDocuments)
-        + " summary document files deleted\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        this.writtenDocuments) + " summary document files written\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        this.deletedDocuments) + " summary document files deleted\n");
     return sb.toString();
   }
 }

@@ -6,9 +6,14 @@ import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class ClientsStatus extends Document {
+
+  private static Logger log = LoggerFactory.getLogger(
+      ClientsStatus.class);
 
   private transient boolean isDirty = false;
   public boolean isDirty() {
@@ -35,7 +40,7 @@ public class ClientsStatus extends Document {
       if (parsedLine != null) {
         this.history.add(parsedLine);
       } else {
-        System.err.println("Could not parse clients history line '"
+        log.error("Could not parse clients history line '"
             + line + "'.  Skipping.");
       }
     }

@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
@@ -20,9 +22,12 @@ import org.torproject.descriptor.ExitListEntry;
 import org.torproject.descriptor.ExtraInfoDescriptor;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
-import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.FormattingUtils;
 
 public class DescriptorSource {
+
+  private static final Logger log = LoggerFactory.getLogger(
+      DescriptorSource.class);
 
   private final File inDir = new File("in/recent");
 
@@ -77,6 +82,7 @@ public class DescriptorSource {
 
   public void downloadDescriptors() {
     for (DescriptorType descriptorType : DescriptorType.values()) {
+      log.info("Loading: " + descriptorType);
       this.downloadDescriptors(descriptorType);
     }
   }
@@ -101,20 +107,32 @@ public class DescriptorSource {
   public void readDescriptors() {
     /* Careful when changing the order of parsing descriptor types!  The
      * various status updaters may base assumptions on this order. */
+
+    log.debug("Reading " + DescriptorType.RELAY_SERVER_DESCRIPTORS
+        + " ...");
     this.readDescriptors(DescriptorType.RELAY_SERVER_DESCRIPTORS,
         DescriptorHistory.RELAY_SERVER_HISTORY, true);
+    log.debug("Reading " + DescriptorType.RELAY_EXTRA_INFOS + " ...");
     this.readDescriptors(DescriptorType.RELAY_EXTRA_INFOS,
         DescriptorHistory.RELAY_EXTRAINFO_HISTORY, true);
+    log.debug("Reading " + DescriptorType.EXIT_LISTS + " ...");
     this.readDescriptors(DescriptorType.EXIT_LISTS,
         DescriptorHistory.EXIT_LIST_HISTORY, true);
+    log.debug("Reading " + DescriptorType.RELAY_CONSENSUSES + " ...");
     this.readDescriptors(DescriptorType.RELAY_CONSENSUSES,
         DescriptorHistory.RELAY_CONSENSUS_HISTORY, true);
+    log.debug("Reading " + DescriptorType.BRIDGE_SERVER_DESCRIPTORS
+        + " ...");
     this.readDescriptors(DescriptorType.BRIDGE_SERVER_DESCRIPTORS,
         DescriptorHistory.BRIDGE_SERVER_HISTORY, false);
+    log.debug("Reading " + DescriptorType.BRIDGE_EXTRA_INFOS + " ...");
     this.readDescriptors(DescriptorType.BRIDGE_EXTRA_INFOS,
         DescriptorHistory.BRIDGE_EXTRAINFO_HISTORY, false);
+    log.debug("Reading " + DescriptorType.BRIDGE_POOL_ASSIGNMENTS
+        + " ...");
     this.readDescriptors(DescriptorType.BRIDGE_POOL_ASSIGNMENTS,
         DescriptorHistory.BRIDGE_POOLASSIGN_HISTORY, false);
+    log.debug("Reading " + DescriptorType.BRIDGE_STATUSES + " ...");
     this.readDescriptors(DescriptorType.BRIDGE_STATUSES,
         DescriptorHistory.BRIDGE_STATUS_HISTORY, false);
   }
@@ -185,33 +203,34 @@ public class DescriptorSource {
     }
     switch (descriptorType) {
     case RELAY_CONSENSUSES:
-      Logger.printStatusTime("Read relay network consensuses");
+      log.info("Read relay network consensuses");
       break;
     case RELAY_SERVER_DESCRIPTORS:
-      Logger.printStatusTime("Read relay server descriptors");
+      log.info("Read relay server descriptors");
       break;
     case RELAY_EXTRA_INFOS:
-      Logger.printStatusTime("Read relay extra-info descriptors");
+      log.info("Read relay extra-info descriptors");
       break;
     case EXIT_LISTS:
-      Logger.printStatusTime("Read exit lists");
+      log.info("Read exit lists");
       break;
     case BRIDGE_STATUSES:
-      Logger.printStatusTime("Read bridge network statuses");
+      log.info("Read bridge network statuses");
       break;
     case BRIDGE_SERVER_DESCRIPTORS:
-      Logger.printStatusTime("Read bridge server descriptors");
+      log.info("Read bridge server descriptors");
       break;
     case BRIDGE_EXTRA_INFOS:
-      Logger.printStatusTime("Read bridge extra-info descriptors");
+      log.info("Read bridge extra-info descriptors");
       break;
     case BRIDGE_POOL_ASSIGNMENTS:
-      Logger.printStatusTime("Read bridge-pool assignments");
+      log.info("Read bridge-pool assignments");
       break;
     }
   }
 
   public void writeHistoryFiles() {
+    log.debug("Writing history ");
     for (DescriptorQueue descriptorQueue : this.descriptorQueues) {
       descriptorQueue.writeHistoryFile();
     }
@@ -237,13 +256,16 @@ public class DescriptorSource {
       descriptors += descriptorQueue.getReturnedDescriptors();
       bytes += descriptorQueue.getReturnedBytes();
     }
-    sb.append("    " + Logger.formatDecimalNumber(historySizeBefore)
-        + " descriptors excluded from this execution\n");
-    sb.append("    " + Logger.formatDecimalNumber(descriptors)
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        historySizeBefore) + " descriptors excluded from this "
+        + "execution\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(descriptors)
         + " descriptors provided\n");
-    sb.append("    " + Logger.formatBytes(bytes) + " provided\n");
-    sb.append("    " + Logger.formatDecimalNumber(historySizeAfter)
-        + " descriptors excluded from next execution\n");
+    sb.append("    " + FormattingUtils.formatBytes(bytes)
+        + " provided\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        historySizeAfter) + " descriptors excluded from next "
+        + "execution\n");
     return sb.toString();
   }
 }

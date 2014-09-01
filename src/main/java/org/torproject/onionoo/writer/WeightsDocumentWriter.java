@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
@@ -21,11 +23,13 @@ import org.torproject.onionoo.updater.DescriptorSource;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DescriptorType;
 import org.torproject.onionoo.updater.FingerprintListener;
-import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class WeightsDocumentWriter implements FingerprintListener,
     DocumentWriter {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      WeightsDocumentWriter.class);
 
   private DescriptorSource descriptorSource;
 
@@ -58,7 +62,7 @@ public class WeightsDocumentWriter implements FingerprintListener,
 
   public void writeDocuments() {
     this.writeWeightsDataFiles();
-    Logger.printStatusTime("Wrote weights document files");
+    log.info("Wrote weights document files");
   }
 
   private void writeWeightsDataFiles() {
@@ -73,7 +77,7 @@ public class WeightsDocumentWriter implements FingerprintListener,
           fingerprint, history);
       this.documentStore.store(weightsDocument, fingerprint);
     }
-    Logger.printStatusTime("Wrote weights document files");
+    log.info("Wrote weights document files");
   }
 
   private String[] graphNames = new String[] {

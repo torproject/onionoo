@@ -4,9 +4,13 @@ package org.torproject.onionoo.updater;
 
 import java.io.File;
 
-import org.torproject.onionoo.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatusUpdateRunner {
+
+  private static final Logger log = LoggerFactory.getLogger(
+      StatusUpdateRunner.class);
 
   private LookupService ls;
 
@@ -29,8 +33,9 @@ public class StatusUpdateRunner {
 
   public void updateStatuses() {
     for (StatusUpdater su : this.statusUpdaters) {
+      log.debug("Begin update of " + su.getClass().getSimpleName());
       su.updateStatuses();
-      Logger.printStatusTime(su.getClass().getSimpleName()
+      log.info(su.getClass().getSimpleName()
           + " updated status files");
     }
   }
@@ -39,13 +44,13 @@ public class StatusUpdateRunner {
     for (StatusUpdater su : this.statusUpdaters) {
       String statsString = su.getStatsString();
       if (statsString != null) {
-        Logger.printStatistics(su.getClass().getSimpleName(),
-            statsString);
+        LoggerFactory.getLogger("statistics").info(
+            su.getClass().getSimpleName(), statsString);
       }
     }
-    Logger.printStatistics("GeoIP lookup service",
+    LoggerFactory.getLogger("statistics").info("GeoIP lookup service",
         this.ls.getStatsString());
-    Logger.printStatistics("Reverse domain name resolver",
-        this.rdnr.getStatsString());
+    LoggerFactory.getLogger("statistics").info("Reverse domain name "
+        + "resolver", this.rdnr.getStatsString());
   }
 }

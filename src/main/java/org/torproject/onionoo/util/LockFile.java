@@ -7,7 +7,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class LockFile {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      LockFile.class);
 
   private final File lockFile = new File("lock");
 
@@ -26,9 +32,7 @@ public class LockFile {
       bw.close();
       return true;
     } catch (IOException e) {
-      System.err.println("Caught exception while trying to acquire "
-          + "lock!");
-      e.printStackTrace();
+      log.error("Caught exception while trying to acquire lock!", e);
       return false;
     }
   }

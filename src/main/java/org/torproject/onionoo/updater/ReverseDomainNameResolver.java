@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
 
@@ -88,16 +88,18 @@ public class ReverseDomainNameResolver {
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + Logger.formatDecimalNumber(rdnsLookupMillis.size())
-        + " lookups performed\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        rdnsLookupMillis.size()) + " lookups performed\n");
     if (rdnsLookupMillis.size() > 0) {
       Collections.sort(rdnsLookupMillis);
-      sb.append("    " + Logger.formatMillis(rdnsLookupMillis.get(0))
-          + " minimum lookup time\n");
-      sb.append("    " + Logger.formatMillis(rdnsLookupMillis.get(
-          rdnsLookupMillis.size() / 2)) + " median lookup time\n");
-      sb.append("    " + Logger.formatMillis(rdnsLookupMillis.get(
-          rdnsLookupMillis.size() - 1)) + " maximum lookup time\n");
+      sb.append("    " + FormattingUtils.formatMillis(
+          rdnsLookupMillis.get(0)) + " minimum lookup time\n");
+      sb.append("    " + FormattingUtils.formatMillis(
+          rdnsLookupMillis.get(rdnsLookupMillis.size() / 2))
+          + " median lookup time\n");
+      sb.append("    " + FormattingUtils.formatMillis(
+          rdnsLookupMillis.get(rdnsLookupMillis.size() - 1))
+          + " maximum lookup time\n");
     }
     return sb.toString();
   }

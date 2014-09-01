@@ -16,7 +16,7 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UptimeStatus;
-import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.FormattingUtils;
 
 public class UptimeStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -133,13 +133,13 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + Logger.formatDecimalNumber(
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
             this.newRelayStatuses.size()) + " hours of relay uptimes "
             + "processed\n");
-    sb.append("    " + Logger.formatDecimalNumber(
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
         this.newBridgeStatuses.size()) + " hours of bridge uptimes "
         + "processed\n");
-    sb.append("    " + Logger.formatDecimalNumber(
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
         this.newRunningRelays.size() + this.newRunningBridges.size())
         + " uptime status files updated\n");
     return sb.toString();

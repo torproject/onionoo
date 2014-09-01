@@ -7,9 +7,14 @@ import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class WeightsStatus extends Document {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      WeightsStatus.class);
 
   private transient boolean isDirty = false;
   public boolean isDirty() {
@@ -51,7 +56,7 @@ public class WeightsStatus extends Document {
         continue;
       }
       if (parts.length != 9 && parts.length != 11) {
-        System.err.println("Illegal line '" + line + "' in weights "
+        log.error("Illegal line '" + line + "' in weights "
               + "status file.  Skipping this line.");
         continue;
       }
@@ -65,7 +70,7 @@ public class WeightsStatus extends Document {
       long freshUntilMillis = DateTimeHelper.parse(parts[2] + " "
           + parts[3]);
       if (validAfterMillis < 0L || freshUntilMillis < 0L) {
-        System.err.println("Could not parse timestamp while reading "
+        log.error("Could not parse timestamp while reading "
             + "weights status file.  Skipping.");
         break;
       }

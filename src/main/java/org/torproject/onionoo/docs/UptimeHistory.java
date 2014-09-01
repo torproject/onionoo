@@ -39,7 +39,7 @@ public class UptimeHistory
     }
     long startMillis = DateTimeHelper.parse(parts[1],
           DateTimeHelper.DATEHOUR_NOSPACE_FORMAT);
-    if (startMillis < 0L) {
+    if (DateTimeHelper.NO_TIME_AVAILABLE == startMillis) {
       return null;
     }
     int uptimeHours = -1;

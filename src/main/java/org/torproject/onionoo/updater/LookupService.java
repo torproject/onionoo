@@ -17,9 +17,14 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import org.torproject.onionoo.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.torproject.onionoo.util.FormattingUtils;
 
 public class LookupService {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      LookupService.class);
 
   private File geoipDir;
   private File geoLite2CityBlocksCsvFile;
@@ -36,19 +41,19 @@ public class LookupService {
     this.geoLite2CityBlocksCsvFile = new File(this.geoipDir,
         "GeoLite2-City-Blocks.csv");
     if (!this.geoLite2CityBlocksCsvFile.exists()) {
-      System.err.println("No GeoLite2-City-Blocks.csv file in geoip/.");
+      log.error("No GeoLite2-City-Blocks.csv file in geoip/.");
       return;
     }
     this.geoLite2CityLocationsCsvFile = new File(this.geoipDir,
         "GeoLite2-City-Locations.csv");
     if (!this.geoLite2CityLocationsCsvFile.exists()) {
-      System.err.println("No GeoLite2-City-Locations.csv file in "
+      log.error("No GeoLite2-City-Locations.csv file in "
           + "geoip/.");
       return;
     }
     this.geoIPASNum2CsvFile = new File(this.geoipDir, "GeoIPASNum2.csv");
     if (!this.geoIPASNum2CsvFile.exists()) {
-      System.err.println("No GeoIPASNum2.csv file in geoip/.");
+      log.error("No GeoIPASNum2.csv file in geoip/.");
       return;
     }
     this.hasAllFiles = true;
@@ -119,7 +124,7 @@ public class LookupService {
         }
         String[] parts = line.replaceAll("\"", "").split(",", 10);
         if (parts.length != 10) {
-          System.err.println("Illegal line '" + line + "' in "
+          log.error("Illegal line '" + line + "' in "
               + geoLite2CityBlocksCsvFile.getAbsolutePath() + ".");
           br.close();
           return lookupResults;
@@ -128,7 +133,7 @@ public class LookupService {
           String startAddressString = parts[0].substring(7); /* ::ffff: */
           long startIpNum = this.parseAddressString(startAddressString);
           if (startIpNum < 0L) {
-            System.err.println("Illegal IP address in '" + line
+            log.error("Illegal IP address in '" + line
                 + "' in " + geoLite2CityBlocksCsvFile.getAbsolutePath()
                 + ".");
             br.close();
@@ -136,7 +141,7 @@ public class LookupService {
           }
           int networkMaskLength = Integer.parseInt(parts[1]);
           if (networkMaskLength < 96 || networkMaskLength > 128) {
-            System.err.println("Illegal network mask in '" + line
+            log.error("Illegal network mask in '" + line
                 + "' in " + geoLite2CityBlocksCsvFile.getAbsolutePath()
                 + ".");
             br.close();
@@ -160,7 +165,7 @@ public class LookupService {
             }
           }
         } catch (NumberFormatException e) {
-          System.err.println("Number format exception while parsing line "
+          log.error("Number format exception while parsing line "
               + "'" + line + "' in "
               + geoLite2CityBlocksCsvFile.getAbsolutePath() + ".");
           br.close();
@@ -169,7 +174,7 @@ public class LookupService {
       }
       br.close();
     } catch (IOException e) {
-      System.err.println("I/O exception while reading "
+      log.error("I/O exception while reading "
           + geoLite2CityBlocksCsvFile.getAbsolutePath() + ".");
       return lookupResults;
     }
@@ -186,7 +191,7 @@ public class LookupService {
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 10);
         if (parts.length != 10) {
-          System.err.println("Illegal line '" + line + "' in "
+          log.error("Illegal line '" + line + "' in "
               + geoLite2CityLocationsCsvFile.getAbsolutePath() + ".");
           br.close();
           return lookupResults;
@@ -197,7 +202,7 @@ public class LookupService {
             blockLocations.put(locId, line);
           }
         } catch (NumberFormatException e) {
-          System.err.println("Number format exception while parsing line "
+          log.error("Number format exception while parsing line "
               + "'" + line + "' in "
               + geoLite2CityLocationsCsvFile.getAbsolutePath() + ".");
           br.close();
@@ -206,7 +211,7 @@ public class LookupService {
       }
       br.close();
     } catch (IOException e) {
-      System.err.println("I/O exception while reading "
+      log.error("I/O exception while reading "
           + geoLite2CityLocationsCsvFile.getAbsolutePath() + ".");
       return lookupResults;
     }
@@ -224,7 +229,7 @@ public class LookupService {
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 3);
         if (parts.length != 3) {
-          System.err.println("Illegal line '" + line + "' in "
+          log.error("Illegal line '" + line + "' in "
               + geoIPASNum2CsvFile.getAbsolutePath() + ".");
           br.close();
           return lookupResults;
@@ -232,7 +237,7 @@ public class LookupService {
         try {
           long startIpNum = Long.parseLong(parts[0]);
           if (startIpNum <= previousStartIpNum) {
-            System.err.println("Line '" + line + "' not sorted in "
+            log.error("Line '" + line + "' not sorted in "
                 + geoIPASNum2CsvFile.getAbsolutePath() + ".");
             br.close();
             return lookupResults;
@@ -264,9 +269,8 @@ public class LookupService {
           if (firstAddressNumber == -1L) {
             break;
           }
-        }
-        catch (NumberFormatException e) {
-          System.err.println("Number format exception while parsing line "
+        } catch (NumberFormatException e) {
+          log.error("Number format exception while parsing line "
               + "'" + line + "' in "
               + geoIPASNum2CsvFile.getAbsolutePath() + ".");
           br.close();
@@ -275,7 +279,7 @@ public class LookupService {
       }
       br.close();
     } catch (IOException e) {
-      System.err.println("I/O exception while reading "
+      log.error("I/O exception while reading "
           + geoIPASNum2CsvFile.getAbsolutePath() + ".");
       return lookupResults;
     }
@@ -334,10 +338,10 @@ public class LookupService {
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + Logger.formatDecimalNumber(addressesLookedUp)
-        + " addresses looked up\n");
-    sb.append("    " + Logger.formatDecimalNumber(addressesResolved)
-        + " addresses resolved\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        addressesLookedUp) + " addresses looked up\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        addressesResolved) + " addresses resolved\n");
     return sb.toString();
   }
 }

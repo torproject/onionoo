@@ -9,7 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DateTimeHelper {
+
+  public final static long NO_TIME_AVAILABLE = -1L;
+
+  private final static Logger log = LoggerFactory.getLogger(
+      DateTimeHelper.class);
 
   private DateTimeHelper() {
   }
@@ -79,10 +87,15 @@ public class DateTimeHelper {
   }
 
   public static long parse(String string, String format) {
+    if (null == string) {
+      log.warn("Date String was null.");
+      return NO_TIME_AVAILABLE;
+    }
     try {
       return getDateFormat(format).parse(string).getTime();
     } catch (ParseException e) {
-      return -1L;
+      log.warn(e.getMessage(), e);
+      return NO_TIME_AVAILABLE;
     }
   }
 

@@ -11,6 +11,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.ClientsDocument;
 import org.torproject.onionoo.docs.ClientsGraphHistory;
 import org.torproject.onionoo.docs.ClientsHistory;
@@ -22,7 +24,7 @@ import org.torproject.onionoo.updater.DescriptorSource;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DescriptorType;
 import org.torproject.onionoo.updater.FingerprintListener;
-import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.TimeFactory;
 
 /*
@@ -50,6 +52,9 @@ import org.torproject.onionoo.util.TimeFactory;
  */
 public class ClientsDocumentWriter implements FingerprintListener,
     DocumentWriter {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      ClientsDocumentWriter.class);
 
   private DescriptorSource descriptorSource;
 
@@ -93,7 +98,7 @@ public class ClientsDocumentWriter implements FingerprintListener,
       this.documentStore.store(clientsDocument, hashedFingerprint);
       this.writtenDocuments++;
     }
-    Logger.printStatusTime("Wrote clients document files");
+    log.info("Wrote clients document files");
   }
 
   private String[] graphNames = new String[] {
@@ -291,8 +296,8 @@ public class ClientsDocumentWriter implements FingerprintListener,
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + Logger.formatDecimalNumber(this.writtenDocuments)
-        + " clients document files updated\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        this.writtenDocuments) + " clients document files updated\n");
     return sb.toString();
   }
 }

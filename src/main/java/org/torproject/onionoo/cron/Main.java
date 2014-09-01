@@ -2,76 +2,79 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.cron;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.updater.DescriptorSource;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.StatusUpdateRunner;
 import org.torproject.onionoo.util.LockFile;
-import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.writer.DocumentWriterRunner;
 
 /* Update search data and status data files. */
 public class Main {
 
+  private static Logger log = LoggerFactory.getLogger(Main.class);
+
   private Main() {
   }
 
   public static void main(String[] args) {
-
+    log.debug("Started ...");
     LockFile lf = new LockFile();
-    Logger.setTime();
-    Logger.printStatus("Initializing.");
+    log.info("Initializing.");
     if (lf.acquireLock()) {
-      Logger.printStatusTime("Acquired lock");
+      log.info("Acquired lock");
     } else {
-      Logger.printErrorTime("Could not acquire lock.  Is Onionoo "
+      log.error("Could not acquire lock.  Is Onionoo "
           + "already running?  Terminating");
       return;
     }
+    log.debug(" ... running .... ");
 
     DescriptorSource dso = DescriptorSourceFactory.getDescriptorSource();
-    Logger.printStatusTime("Initialized descriptor source");
+    log.info("Initialized descriptor source");
     DocumentStore ds = DocumentStoreFactory.getDocumentStore();
-    Logger.printStatusTime("Initialized document store");
+    log.info("Initialized document store");
     StatusUpdateRunner sur = new StatusUpdateRunner();
-    Logger.printStatusTime("Initialized status update runner");
+    log.info("Initialized status update runner");
     DocumentWriterRunner dwr = new DocumentWriterRunner();
-    Logger.printStatusTime("Initialized document writer runner");
+    log.info("Initialized document writer runner");
 
-    Logger.printStatus("Downloading descriptors.");
+    log.info("Downloading descriptors.");
     dso.downloadDescriptors();
 
-    Logger.printStatus("Reading descriptors.");
+    log.info("Reading descriptors.");
     dso.readDescriptors();
 
-    Logger.printStatus("Updating internal status files.");
+    log.info("Updating internal status files.");
     sur.updateStatuses();
 
-    Logger.printStatus("Updating document files.");
+    log.info("Updating document files.");
     dwr.writeDocuments();
 
-    Logger.printStatus("Shutting down.");
+    log.info("Shutting down.");
     dso.writeHistoryFiles();
-    Logger.printStatusTime("Wrote parse histories");
+    log.info("Wrote parse histories");
     ds.flushDocumentCache();
-    Logger.printStatusTime("Flushed document cache");
+    log.info("Flushed document cache");
 
-    Logger.printStatus("Gathering statistics.");
+    log.info("Gathering statistics.");
     sur.logStatistics();
     dwr.logStatistics();
-    Logger.printStatistics("Descriptor source", dso.getStatsString());
-    Logger.printStatistics("Document store", ds.getStatsString());
+    log.info("Descriptor source", dso.getStatsString());
+    log.info("Document store", ds.getStatsString());
 
-    Logger.printStatus("Releasing lock.");
+    log.info("Releasing lock.");
     if (lf.releaseLock()) {
-      Logger.printStatusTime("Released lock");
+      log.info("Released lock");
     } else {
-      Logger.printErrorTime("Could not release lock.  The next "
+      log.error("Could not release lock.  The next "
           + "execution may not start as expected");
     }
 
-    Logger.printStatus("Terminating.");
+    log.info("Terminating.");
   }
 }
 

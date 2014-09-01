@@ -13,6 +13,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
@@ -26,11 +28,14 @@ import org.torproject.onionoo.docs.DetailsStatus;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.NodeStatus;
-import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class NodeDetailsStatusUpdater implements DescriptorListener,
     StatusUpdater {
+
+  private Logger log = LoggerFactory.getLogger(
+      NodeDetailsStatusUpdater.class);
 
   private DescriptorSource descriptorSource;
 
@@ -288,23 +293,23 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   public void updateStatuses() {
     this.readStatusSummary();
-    Logger.printStatusTime("Read status summary");
+    log.info("Read status summary");
     this.setCurrentNodes();
-    Logger.printStatusTime("Set current node fingerprints");
+    log.info("Set current node fingerprints");
     this.startReverseDomainNameLookups();
-    Logger.printStatusTime("Started reverse domain name lookups");
+    log.info("Started reverse domain name lookups");
     this.lookUpCitiesAndASes();
-    Logger.printStatusTime("Looked up cities and ASes");
+    log.info("Looked up cities and ASes");
     this.setDescriptorPartsOfNodeStatus();
-    Logger.printStatusTime("Set descriptor parts of node statuses.");
+    log.info("Set descriptor parts of node statuses.");
     this.calculatePathSelectionProbabilities();
-    Logger.printStatusTime("Calculated path selection probabilities");
+    log.info("Calculated path selection probabilities");
     this.finishReverseDomainNameLookups();
-    Logger.printStatusTime("Finished reverse domain name lookups");
+    log.info("Finished reverse domain name lookups");
     this.writeStatusSummary();
-    Logger.printStatusTime("Wrote status summary");
+    log.info("Wrote status summary");
     this.updateDetailsStatuses();
-    Logger.printStatusTime("Updated exit addresses in details statuses");
+    log.info("Updated exit addresses in details statuses");
   }
 
   private void readStatusSummary() {
@@ -368,7 +373,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       }
     }
     if (addressStrings.isEmpty()) {
-      System.err.println("No relay IP addresses to resolve to cities or "
+      log.error("No relay IP addresses to resolve to cities or "
           + "ASN.");
       return;
     }
@@ -456,7 +461,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         wed = ((double) this.lastBandwidthWeights.get("Wed")) / 10000.0;
       }
     } else {
-      System.err.println("Could not determine most recent Wxx parameter "
+      log.error("Could not determine most recent Wxx parameter "
           + "values, probably because we didn't parse a consensus in "
           + "this execution.  All relays' guard/middle/exit weights are "
           + "going to be 0.0.");
@@ -609,10 +614,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + Logger.formatDecimalNumber(
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
         relayConsensusesProcessed) + " relay consensuses processed\n");
-    sb.append("    " + Logger.formatDecimalNumber(bridgeStatusesProcessed)
-        + " bridge statuses processed\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        bridgeStatusesProcessed) + " bridge statuses processed\n");
     return sb.toString();
   }
 }

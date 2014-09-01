@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
@@ -20,11 +22,14 @@ import org.torproject.onionoo.updater.DescriptorSource;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DescriptorType;
 import org.torproject.onionoo.updater.FingerprintListener;
-import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class UptimeDocumentWriter implements FingerprintListener,
     DocumentWriter {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      UptimeDocumentWriter.class);
 
   private DescriptorSource descriptorSource;
 
@@ -72,7 +77,7 @@ public class UptimeDocumentWriter implements FingerprintListener,
       this.updateDocument(false, fingerprint,
           uptimeStatus.getBridgeHistory());
     }
-    Logger.printStatusTime("Wrote uptime document files");
+    log.info("Wrote uptime document files");
   }
 
   private int writtenDocuments = 0;
@@ -297,8 +302,8 @@ public class UptimeDocumentWriter implements FingerprintListener,
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + Logger.formatDecimalNumber(this.writtenDocuments)
-        + " uptime document files written\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(
+        this.writtenDocuments) + " uptime document files written\n");
     return sb.toString();
   }
 }

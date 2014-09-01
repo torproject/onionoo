@@ -15,7 +15,7 @@ import org.torproject.onionoo.docs.ClientsStatus;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.util.Logger;
+import org.torproject.onionoo.util.FormattingUtils;
 
 /*
  * Example extra-info descriptor used as input:
@@ -164,10 +164,10 @@ public class ClientsStatusUpdater implements DescriptorListener,
     }
     StringBuilder sb = new StringBuilder();
     sb.append("    "
-        + Logger.formatDecimalNumber(newIntervals / 2)
+        + FormattingUtils.formatDecimalNumber(newIntervals / 2)
         + " client statistics processed from extra-info descriptors\n");
     sb.append("    "
-        + Logger.formatDecimalNumber(this.newResponses.size())
+        + FormattingUtils.formatDecimalNumber(this.newResponses.size())
         + " client status files updated\n");
     return sb.toString();
   }

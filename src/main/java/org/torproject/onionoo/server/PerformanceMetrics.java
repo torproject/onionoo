@@ -14,6 +14,9 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
 
@@ -117,6 +120,9 @@ class IntegerDistribution {
 
 public class PerformanceMetrics {
 
+  private static final Logger log = LoggerFactory.getLogger(
+      PerformanceMetrics.class);
+
   private static final Object lock = new Object();
 
   private static Time time;
@@ -155,25 +161,25 @@ public class PerformanceMetrics {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        System.err.println("Request statistics ("
+        log.info("Request statistics ("
             + dateTimeFormat.format(lastLoggedMillis
             + LOG_INTERVAL_MILLIS) + ", " + (LOG_INTERVAL_SECONDS)
             + " s):");
-        System.err.println("  Total processed requests: "
+        log.info("  Total processed requests: "
             + totalProcessedRequests);
-        System.err.println("  Most frequently requested resource: "
+        log.info("  Most frequently requested resource: "
             + requestsByResourceType);
-        System.err.println("  Most frequently requested parameter "
+        log.info("  Most frequently requested parameter "
             + "combinations: " + requestsByParameters);
-        System.err.println("  Matching relays per request: "
+        log.info("  Matching relays per request: "
             + matchingRelayDocuments);
-        System.err.println("  Matching bridges per request: "
+        log.info("  Matching bridges per request: "
             + matchingBridgeDocuments);
-        System.err.println("  Written characters per response: "
+        log.info("  Written characters per response: "
             + writtenChars);
-        System.err.println("  Milliseconds to handle request: "
+        log.info("  Milliseconds to handle request: "
             + handleRequestMillis);
-        System.err.println("  Milliseconds to build response: "
+        log.info("  Milliseconds to build response: "
             + buildResponseMillis);
         totalProcessedRequests.clear();
         requestsByResourceType.clear();
@@ -189,15 +195,25 @@ public class PerformanceMetrics {
             LOG_INTERVAL_MILLIS);
       }
       totalProcessedRequests.increment();
-      handleRequestMillis.addLong(parsedRequestMillis
-          - receivedRequestMillis);
+      long handlingTime = parsedRequestMillis - receivedRequestMillis;
+      if (handlingTime > DateTimeHelper.ONE_SECOND) {
+        log.warn("longer request handling: " + handlingTime + " ms for "
+            + resourceType + " params: " + parameterKeys + " and "
+            + charsWritten + " chars.");
+      }
+      handleRequestMillis.addLong(handlingTime);
       requestsByResourceType.addString(resourceType);
       requestsByParameters.addString(parameterKeys.toString());
       matchingRelayDocuments.addLong(relayDocumentsWritten);
       matchingBridgeDocuments.addLong(bridgeDocumentsWritten);
       writtenChars.addLong(charsWritten);
-      buildResponseMillis.addLong(writtenResponseMillis
-          - parsedRequestMillis);
+      long responseTime = writtenResponseMillis - parsedRequestMillis;
+      if (responseTime > DateTimeHelper.ONE_SECOND) {
+        log.warn("longer response building: " + responseTime + " ms for "
+            + resourceType + " params: " + parameterKeys + " and "
+            + charsWritten + " chars.");
+      }
+      buildResponseMillis.addLong(responseTime);
     }
   }
 

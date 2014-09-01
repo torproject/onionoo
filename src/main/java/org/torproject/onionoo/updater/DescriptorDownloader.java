@@ -14,7 +14,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class DescriptorDownloader {
+
+  private static Logger log = LoggerFactory.getLogger(
+      DescriptorDownloader.class);
 
   private final String protocolHostNameResourcePrefix =
       "https://collector.torproject.org/recent/";
@@ -50,7 +56,7 @@ class DescriptorDownloader {
       this.directory = "bridge-pool-assignments/";
       break;
     default:
-      System.err.println("Unknown descriptor type.");
+      log.error("Unknown descriptor type.");
       return;
     }
   }
@@ -78,7 +84,7 @@ class DescriptorDownloader {
       huc.setRequestMethod("GET");
       huc.connect();
       if (huc.getResponseCode() != 200) {
-        System.err.println("Could not fetch " + directoryUrl
+        log.error("Could not fetch " + directoryUrl
             + ": " + huc.getResponseCode() + " "
             + huc.getResponseMessage() + ".  Skipping.");
         return 0;
@@ -104,8 +110,8 @@ class DescriptorDownloader {
       }
       br.close();
     } catch (IOException e) {
-      System.err.println("Could not fetch or parse " + directoryUrl
-          + ".  Skipping.");
+      log.error("Could not fetch or parse " + directoryUrl
+        + ".  Skipping. Reason: " + e.getMessage());
     }
     return this.remoteFiles.size();
   }
@@ -129,7 +135,7 @@ class DescriptorDownloader {
         huc.addRequestProperty("Accept-Encoding", "gzip");
         huc.connect();
         if (huc.getResponseCode() != 200) {
-          System.err.println("Could not fetch " + fileUrl
+          log.error("Could not fetch \n\t" + fileUrl
               + ": " + huc.getResponseCode() + " "
               + huc.getResponseMessage() + ".  Skipping.");
           continue;
@@ -158,8 +164,8 @@ class DescriptorDownloader {
         }
         fetchedFiles++;
       } catch (IOException e) {
-        System.err.println("Could not fetch or store " + fileUrl
-            + ".  Skipping.");
+        log.error("Could not fetch or store \n\t" + fileUrl
+            + ".  Skipping.\n\tReason: " + e.getMessage());
       }
     }
     return fetchedFiles;

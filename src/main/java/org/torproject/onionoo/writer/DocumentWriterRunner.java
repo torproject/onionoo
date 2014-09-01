@@ -2,9 +2,13 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.writer;
 
-import org.torproject.onionoo.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocumentWriterRunner {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      DocumentWriterRunner.class);
 
   private DocumentWriter[] documentWriters;
 
@@ -21,6 +25,7 @@ public class DocumentWriterRunner {
 
   public void writeDocuments() {
     for (DocumentWriter dw : this.documentWriters) {
+      log.debug("Writing " + dw.getClass().getSimpleName());
       dw.writeDocuments();
     }
   }
@@ -29,7 +34,7 @@ public class DocumentWriterRunner {
     for (DocumentWriter dw : this.documentWriters) {
       String statsString = dw.getStatsString();
       if (statsString != null) {
-        Logger.printStatistics(dw.getClass().getSimpleName(),
+        log.info(dw.getClass().getSimpleName(),
             statsString);
       }
     }

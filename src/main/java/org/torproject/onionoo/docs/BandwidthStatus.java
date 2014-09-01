@@ -7,10 +7,15 @@ import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.descriptor.BandwidthHistory;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class BandwidthStatus extends Document {
+
+  private static Logger log = LoggerFactory.getLogger(
+      BandwidthStatus.class);
 
   private transient boolean isDirty = false;
   public boolean isDirty() {
@@ -44,7 +49,7 @@ public class BandwidthStatus extends Document {
       String line = s.nextLine();
       String[] parts = line.split(" ");
       if (parts.length != 6) {
-        System.err.println("Illegal line '" + line + "' in bandwidth "
+        log.error("Illegal line '" + line + "' in bandwidth "
             + "history.  Skipping this line.");
         continue;
       }
@@ -53,7 +58,7 @@ public class BandwidthStatus extends Document {
       long startMillis = DateTimeHelper.parse(parts[1] + " " + parts[2]);
       long endMillis = DateTimeHelper.parse(parts[3] + " " + parts[4]);
       if (startMillis < 0L || endMillis < 0L) {
-        System.err.println("Could not parse timestamp while reading "
+        log.error("Could not parse timestamp while reading "
             + "bandwidth history.  Skipping.");
         break;
       }

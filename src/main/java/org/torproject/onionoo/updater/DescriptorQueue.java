@@ -12,12 +12,17 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.DescriptorFile;
 import org.torproject.descriptor.DescriptorReader;
 import org.torproject.descriptor.DescriptorSourceFactory;
 
 class DescriptorQueue {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      DescriptorQueue.class);
 
   private File inDir;
 
@@ -86,7 +91,7 @@ class DescriptorQueue {
       directoryName = "exit-lists";
       break;
     default:
-      System.err.println("Unknown descriptor type.  Not adding directory "
+      log.error("Unknown descriptor type.  Not adding directory "
           + "to descriptor reader.");
       return;
     }
@@ -95,7 +100,7 @@ class DescriptorQueue {
       this.descriptorReader.addDirectory(directory);
       this.descriptorReader.setMaxDescriptorFilesInQueue(1);
     } else {
-      System.err.println("Directory " + directory.getAbsolutePath()
+      log.error("Directory " + directory.getAbsolutePath()
           + " either does not exist or is not a directory.  Not adding "
           + "to descriptor reader.");
     }
@@ -129,7 +134,7 @@ class DescriptorQueue {
       historyFileName = "bridge-server-history";
       break;
     default:
-      System.err.println("Unknown descriptor history.  Not excluding "
+      log.error("Unknown descriptor history.  Not excluding "
           + "files.");
       return;
     }
@@ -145,16 +150,15 @@ class DescriptorQueue {
             String[] parts = line.split(" ", 2);
             excludedFiles.put(parts[1], Long.parseLong(parts[0]));
           } catch (NumberFormatException e) {
-            System.err.println("Illegal line '" + line + "' in parse "
+            log.error("Illegal line '" + line + "' in parse "
                 + "history.  Skipping line.");
           }
         }
         br.close();
       } catch (IOException e) {
-        System.err.println("Could not read history file '"
+        log.error("Could not read history file '"
             + this.historyFile.getAbsolutePath() + "'.  Not excluding "
-            + "descriptors in this execution.");
-        e.printStackTrace();
+            + "descriptors in this execution.", e);
         return;
       }
       this.historySizeBefore = excludedFiles.size();
@@ -184,7 +188,7 @@ class DescriptorQueue {
       }
       bw.close();
     } catch (IOException e) {
-      System.err.println("Could not write history file '"
+      log.error("Could not write history file '"
           + this.historyFile.getAbsolutePath() + "'.  Not excluding "
           + "descriptors in next execution.");
       return;
@@ -199,9 +203,8 @@ class DescriptorQueue {
     while (this.descriptors == null && this.descriptorFiles.hasNext()) {
       DescriptorFile descriptorFile = this.descriptorFiles.next();
       if (descriptorFile.getException() != null) {
-        System.err.println("Could not parse "
-            + descriptorFile.getFileName());
-        descriptorFile.getException().printStackTrace();
+        log.error("Could not parse " + descriptorFile.getFileName(), 
+            descriptorFile.getException());
       }
       if (descriptorFile.getDescriptors() != null &&
           !descriptorFile.getDescriptors().isEmpty()) {

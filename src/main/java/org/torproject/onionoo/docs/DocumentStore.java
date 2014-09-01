@@ -21,7 +21,9 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.torproject.onionoo.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
 
@@ -35,6 +37,9 @@ import com.google.gson.JsonParseException;
 // - move entirely to database once disk is "empty"
 // TODO Also look into simple key-value stores instead of real databases.
 public class DocumentStore {
+
+  private static Logger log = LoggerFactory.getLogger(
+      DocumentStore.class);
 
   private final File statusDir = new File("status");
 
@@ -102,9 +107,8 @@ public class DocumentStore {
           this.listedFiles += parsedNodeStatuses.size();
           this.listOperations++;
         } catch (IOException e) {
-          System.err.println("Could not read file '"
-              + summaryFile.getAbsolutePath() + "'.");
-          e.printStackTrace();
+          log.error("Could not read file '"
+              + summaryFile.getAbsolutePath() + "'.", e);
         }
       }
     }
@@ -145,13 +149,11 @@ public class DocumentStore {
           this.listedFiles += parsedSummaryDocuments.size();
           this.listOperations++;
         } catch (IOException e) {
-          System.err.println("Could not read file '"
-              + summaryFile.getAbsolutePath() + "'.");
-          e.printStackTrace();
+          log.error("Could not read file '"
+              + summaryFile.getAbsolutePath() + "'.", e);
         } catch (JsonParseException e) {
-          System.err.println("Could not parse summary document '" + line
-              + "' in file '" + summaryFile.getAbsolutePath() + "'.");
-          e.printStackTrace();
+          log.error("Could not parse summary document '" + line
+              + "' in file '" + summaryFile.getAbsolutePath() + "'.", e);
         }
       }
     }
@@ -289,7 +291,7 @@ public class DocumentStore {
         document instanceof UptimeStatus) {
       documentString = document.toDocumentString();
     } else {
-      System.err.println("Serializing is not supported for type "
+      log.error("Serializing is not supported for type "
           + document.getClass().getName() + ".");
       return false;
     }
@@ -306,9 +308,8 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      System.err.println("Could not write file '"
-          + documentFile.getAbsolutePath() + "'.");
-      e.printStackTrace();
+      log.error("Could not write file '"
+          + documentFile.getAbsolutePath() + "'.", e);
       return false;
     }
     return true;
@@ -391,7 +392,7 @@ public class DocumentStore {
     if (documentFile == null || !documentFile.exists()) {
       return null;
     } else if (documentFile.isDirectory()) {
-      System.err.println("Could not read file '"
+      log.error("Could not read file '"
           + documentFile.getAbsolutePath() + "', because it is a "
           + "directory.");
       return null;
@@ -415,9 +416,8 @@ public class DocumentStore {
       this.retrievedFiles++;
       this.retrievedBytes += documentString.length();
     } catch (IOException e) {
-      System.err.println("Could not read file '"
-          + documentFile.getAbsolutePath() + "'.");
-      e.printStackTrace();
+      log.error("Could not read file '"
+          + documentFile.getAbsolutePath() + "'.", e);
       return null;
     }
     T result = null;
@@ -440,7 +440,7 @@ public class DocumentStore {
       return this.retrieveParsedDocumentFile(documentType, "{"
           + documentString + "}");
     } else {
-      System.err.println("Parsing is not supported for type "
+      log.error("Parsing is not supported for type "
           + documentType.getName() + ".");
     }
     return result;
@@ -454,13 +454,13 @@ public class DocumentStore {
       result.fromDocumentString(documentString);
     } catch (InstantiationException e) {
       /* Handle below. */
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     } catch (IllegalAccessException e) {
       /* Handle below. */
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     }
     if (result == null) {
-      System.err.println("Could not initialize parsed status file of "
+      log.error("Could not initialize parsed status file of "
           + "type " + documentType.getName() + ".");
     }
     return result;
@@ -474,10 +474,10 @@ public class DocumentStore {
       result = gson.fromJson(documentString, documentType);
     } catch (JsonParseException e) {
       /* Handle below. */
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     }
     if (result == null) {
-      System.err.println("Could not initialize parsed document of type "
+      log.error("Could not initialize parsed document of type "
           + documentType.getName() + ".");
     }
     return result;
@@ -491,13 +491,13 @@ public class DocumentStore {
       result.setDocumentString(documentString);
     } catch (InstantiationException e) {
       /* Handle below. */
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     } catch (IllegalAccessException e) {
       /* Handle below. */
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     }
     if (result == null) {
-      System.err.println("Could not initialize unparsed document of type "
+      log.error("Could not initialize unparsed document of type "
           + documentType.getName() + ".");
     }
     return result;
@@ -536,7 +536,7 @@ public class DocumentStore {
       Class<T> documentType, String fingerprint) {
     File documentFile = this.getDocumentFile(documentType, fingerprint);
     if (documentFile == null || !documentFile.delete()) {
-      System.err.println("Could not delete file '"
+      log.error("Could not delete file '"
           + documentFile.getAbsolutePath() + "'.");
       return false;
     }
@@ -655,7 +655,7 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line + "\n");
       } else {
-        System.err.println("Could not serialize relay node status '"
+        log.error("Could not serialize relay node status '"
             + relay.getFingerprint() + "'");
       }
     }
@@ -664,7 +664,7 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line + "\n");
       } else {
-        System.err.println("Could not serialize bridge node status '"
+        log.error("Could not serialize bridge node status '"
             + bridge.getFingerprint() + "'");
       }
     }
@@ -677,9 +677,8 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      System.err.println("Could not write file '"
-          + summaryFile.getAbsolutePath() + "'.");
-      e.printStackTrace();
+      log.error("Could not write file '"
+          + summaryFile.getAbsolutePath() + "'.", e);
     }
   }
 
@@ -692,7 +691,7 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line + "\n");
       } else {
-        System.err.println("Could not serialize relay summary document '"
+        log.error("Could not serialize relay summary document '"
             + summaryDocument.getFingerprint() + "'");
       }
     }
@@ -706,9 +705,8 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      System.err.println("Could not write file '"
-          + summaryFile.getAbsolutePath() + "'.");
-      e.printStackTrace();
+      log.error("Could not write file '"
+          + summaryFile.getAbsolutePath() + "'.", e);
     }
   }
 
@@ -726,26 +724,26 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      System.err.println("Could not write file '"
-          + updateFile.getAbsolutePath() + "'.");
-      e.printStackTrace();
+      log.error("Could not write file '"
+          + updateFile.getAbsolutePath() + "'.", e);
     }
   }
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + Logger.formatDecimalNumber(listOperations)
+    sb.append("    " + FormattingUtils.formatDecimalNumber(listOperations)
         + " list operations performed\n");
-    sb.append("    " + Logger.formatDecimalNumber(listedFiles)
+    sb.append("    " + FormattingUtils.formatDecimalNumber(listedFiles)
         + " files listed\n");
-    sb.append("    " + Logger.formatDecimalNumber(storedFiles)
+    sb.append("    " + FormattingUtils.formatDecimalNumber(storedFiles)
         + " files stored\n");
-    sb.append("    " + Logger.formatBytes(storedBytes) + " stored\n");
-    sb.append("    " + Logger.formatDecimalNumber(retrievedFiles)
+    sb.append("    " + FormattingUtils.formatBytes(storedBytes)
+        + " stored\n");
+    sb.append("    " + FormattingUtils.formatDecimalNumber(retrievedFiles)
         + " files retrieved\n");
-    sb.append("    " + Logger.formatBytes(retrievedBytes)
+    sb.append("    " + FormattingUtils.formatBytes(retrievedBytes)
         + " retrieved\n");
-    sb.append("    " + Logger.formatDecimalNumber(removedFiles)
+    sb.append("    " + FormattingUtils.formatDecimalNumber(removedFiles)
         + " files removed\n");
     return sb.toString();
   }

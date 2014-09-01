@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.BandwidthDocument;
 import org.torproject.onionoo.docs.BandwidthStatus;
 import org.torproject.onionoo.docs.DateTimeHelper;
@@ -21,11 +23,13 @@ import org.torproject.onionoo.updater.DescriptorSource;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DescriptorType;
 import org.torproject.onionoo.updater.FingerprintListener;
-import org.torproject.onionoo.util.Logger;
 import org.torproject.onionoo.util.TimeFactory;
 
 public class BandwidthDocumentWriter implements FingerprintListener,
     DocumentWriter{
+
+  private static final Logger log = LoggerFactory.getLogger(
+      BandwidthDocumentWriter.class);
 
   private DescriptorSource descriptorSource;
 
@@ -65,7 +69,7 @@ public class BandwidthDocumentWriter implements FingerprintListener,
           fingerprint, bandwidthStatus);
       this.documentStore.store(bandwidthDocument, fingerprint);
     }
-    Logger.printStatusTime("Wrote bandwidth document files");
+    log.info("Wrote bandwidth document files");
   }
 
 

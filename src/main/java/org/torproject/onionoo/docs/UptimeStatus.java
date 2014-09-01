@@ -6,7 +6,13 @@ import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class UptimeStatus extends Document {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      UptimeStatus.class);
 
   private transient boolean isDirty = false;
   public boolean isDirty() {
@@ -46,7 +52,7 @@ public class UptimeStatus extends Document {
           this.bridgeHistory.add(parsedLine);
         }
       } else {
-        System.err.println("Could not parse uptime history line '"
+        log.error("Could not parse uptime history line '"
             + line + "'.  Skipping.");
       }
     }
