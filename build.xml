@@ -12,7 +12,7 @@
             value="${config}/web.xml.template"/>
   <property name="webxml" value="${config}/web.xml"/>
   <property name="warfile" value="onionoo.war"/>
-  <property name="source-and-target-java-version" value="1.6" />
+  <property name="source-and-target-java-version" value="1.7" />
   <path id="classpath">
     <pathelement path="${classes}"/>
     <fileset dir="/usr/share/java">
