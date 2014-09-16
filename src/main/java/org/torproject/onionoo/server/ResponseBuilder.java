@@ -69,12 +69,20 @@ public class ResponseBuilder {
     return this.charsWritten;
   }
 
-  private static final String PROTOCOL_VERSION = "1.0";
+  private static final String PROTOCOL_VERSION = "1.1";
+
+  private static final String NEXT_MAJOR_VERSION_SCHEDULED = null;
 
   private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
-    String header = "{\"version\":\"" + PROTOCOL_VERSION
-        + "\",\n\"relays_published\":\"" + relaysPublishedString
-        + "\",\n\"relays\":[";
+    String nextMajorVersionScheduledLine =
+        NEXT_MAJOR_VERSION_SCHEDULED == null
+        ? ""
+        : String.format("\"next_major_version_scheduled\":\"%s\",\n",
+          NEXT_MAJOR_VERSION_SCHEDULED);
+    String header = String.format("{\"version\":\"%s\",\n"
+        + "%s\"relays_published\":\"%s\",\n\"relays\":[",
+        PROTOCOL_VERSION, nextMajorVersionScheduledLine,
+        relaysPublishedString);
     this.charsWritten += header.length();
     pw.write(header);
     int written = 0;

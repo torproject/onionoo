@@ -1,6 +1,12 @@
 Changes in version ?.?.? - 2014-??-??
 
+  o Minor protocol changes:
+    - Add optional field "next_major_version_scheduled", changing protocol
+      version to 1.1.  Implements #12905.
+
 
 Changes in version 1.0.0 - 2014-09-16
- - First assigned version number.
+
+  o Major protocol changes.
+    - First assigned version number.
 

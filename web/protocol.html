@@ -135,8 +135,8 @@ If you want to be informed of upcoming protocol changes, subscribe to the
 mailing list.
 </p>
 
-<p>All responses contain a "version" string that indicates whether clients
-know whether they can parse the document or not.
+<p>All responses contain a <strong>"version"</strong> string that
+indicates whether clients can parse the document or not.
 Version strings consist of a major and a minor version number.
 The major version number is raised when previously required fields are
 dropped or turned into optional fields, when request parameters or
@@ -147,12 +147,22 @@ If clients support the same major version given in a response but only a
 lower minor version, they should be able to parse the document but may not
 understand all fields.
 If clients support a lower major version, they should not attempt to parse
-a document, because there may be backward-incompatible changes.
-The following versions have been used in the past six months:</p>
+a document, because there may be backward-incompatible changes.</p>
+
+<p>Responses may also contain the optional
+<strong>"next_major_version_scheduled"</strong> field that announces when
+the next major version is scheduled to be deployed.
+Clients should inform their users that they should upgrade to the next
+major protocol version before the provided date.</p>
+
+<p>The following versions have been used in the past six months or are
+scheduled to be deployed in the next months:</p>
 
 <ul>
 <li><strong>1.0</strong>: First assigned version number on August 31,
 2014.</li>
+<li><strong>1.1</strong>: Added optional "next_major_version_scheduled"
+field on September 16, 2014.</li>
 </ul>
 
 </div> <!-- box -->
@@ -502,6 +512,18 @@ Onionoo protocol version string.
 </li>
 
 <li>
+<font color="blue"><b>next_major_version_scheduled</b></font>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
+be deployed.
+Omitted if no major protocol changes are planned.
+<font color="blue">Added on September 16, 2014.</font>
+</p>
+</li>
+
+<li>
 <b>relays_published</b>
 <code class="typeof">string</code>
 <span class="required-true">required</span>
@@ -661,6 +683,18 @@ Details documents contain the following fields:
 <p>
 Onionoo protocol version string.
 <font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
+
+<li>
+<font color="blue"><b>next_major_version_scheduled</b></font>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
+be deployed.
+Omitted if no major protocol changes are planned.
+<font color="blue">Added on September 16, 2014.</font>
 </p>
 </li>
 
@@ -1450,6 +1484,18 @@ Onionoo protocol version string.
 </li>
 
 <li>
+<font color="blue"><b>next_major_version_scheduled</b></font>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
+be deployed.
+Omitted if no major protocol changes are planned.
+<font color="blue">Added on September 16, 2014.</font>
+</p>
+</li>
+
+<li>
 <b>relays_published</b>
 <code class="typeof">string</code>
 <span class="required-true">required</span>
@@ -1619,6 +1665,18 @@ Weights documents contain the following fields:
 <p>
 Onionoo protocol version string.
 <font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
+
+<li>
+<font color="blue"><b>next_major_version_scheduled</b></font>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
+be deployed.
+Omitted if no major protocol changes are planned.
+<font color="blue">Added on September 16, 2014.</font>
 </p>
 </li>
 
@@ -1828,6 +1886,18 @@ Onionoo protocol version string.
 </li>
 
 <li>
+<font color="blue"><b>next_major_version_scheduled</b></font>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
+be deployed.
+Omitted if no major protocol changes are planned.
+<font color="blue">Added on September 16, 2014.</font>
+</p>
+</li>
+
+<li>
 <b>relays_published</b>
 <code class="typeof">string</code>
 <span class="required-true">required</span>
@@ -2002,6 +2072,18 @@ Uptime documents contain the following fields:
 <p>
 Onionoo protocol version string.
 <font color="blue">Added on August 31, 2014.</font>
+</p>
+</li>
+
+<li>
+<font color="blue"><b>next_major_version_scheduled</b></font>
+<code class="typeof">string</code>
+<span class="required-false">optional</span>
+<p>
+UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
+be deployed.
+Omitted if no major protocol changes are planned.
+<font color="blue">Added on September 16, 2014.</font>
 </p>
 </li>
 
