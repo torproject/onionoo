@@ -7,6 +7,7 @@ It contains the following sections:
  - Whitespace conventions
  - Vagrant-based development environment
  - Documentation overview
+ - Versions
 
 ## Patch format
 
@@ -290,4 +291,22 @@ Last but not least, this document should be part of Onionoo's
 documentation.
 The purpose is that contributors know what documentation exists, or should
 not exist, and why.
+
+## Versions
+
+Onionoo uses version strings to indicate changes to the protocol or to the
+server implementation.
+A version string consists of three version numbers `x.y.z`:
+
+ - `x` is the major protocol version number and is raised when previously
+required fields are dropped or turned into optional fields, when request
+parameters or response documents are removed, or when there are structural
+changes.
+ - `y` is the minor protocol version number and is raised when new fields,
+request parameters, or response documents are added or optional fields are
+dropped.
+ - `z` is the server version number and is raised when the server
+implementation is changed without affecting the protocol specification.
+
+Changes are added to the `ChangeLog` file in the root directory.
 
