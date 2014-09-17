@@ -46,42 +46,21 @@ Download GeoIP and ASN database files
 Onionoo uses an IP-to-city database and an IP-to-ASN database to provide
 additional information about a relay's location.
 
-The IP-to-city database to be deployed with Onionoo needs to have its "A1"
-("Anonymous Proxy") entries fixed just like Tor's IP-to-country file.  See
-Tor's src/config/README.geoip for detailed information.
+First, create the geoip/ directory and change to it:
 
-First, change to the geoip/ directory:
-
+$ mkdir -p geoip
 $ cd geoip/
 
-Download the most recent MaxMind GeoLite City database and unzip it in the
-current directory, junking paths:
+Download the most recent MaxMind GeoLite2 City database and unzip it in
+the current directory, junking paths:
 
-$ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity_CSV/GeoLiteCity-latest.zip
-$ unzip -j GeoLiteCity-latest.zip
+$ wget https://geolite.maxmind.com/download/geoip/database/GeoLite2-City-CSV.zip
+$ unzip -j GeoLite2-City-CSV.zip
 
-Run deanonymind.py in the local directory:
+Download the most recent MaxMind GeoLite ASN database file and unzip it in
+the current directory:
 
-$ python deanonymind.py
-
-Review the output to learn about applied automatic/manual changes and
-watch out for any warnings.  Possibly edit geoip-manual to make
-more/fewer/different manual changes and re-run deanonymind.py.  To look at
-automatic and manual changes, run:
-
-$ diff -U1 GeoLiteCity-Blocks.csv Automatic-GeoLiteCity-Blocks.csv
-$ diff -U1 Automatic-GeoLiteCity-Blocks.csv Manual-GeoLiteCity-Blocks.csv
-
-Download MaxMind's country and region codes files to the current
-directory:
-
-$ wget http://dev.maxmind.com/static/csv/codes/iso3166.csv
-$ wget http://dev.maxmind.com/static/csv/codes/maxmind/region.csv
-
-Download the most recent MaxMind ASN database file and unzip it in the
-current directory:
-
-$ wget http://www.maxmind.com/download/geoip/database/asnum/GeoIPASNum2.zip
+$ wget https://www.maxmind.com/download/geoip/database/asnum/GeoIPASNum2.zip
 $ unzip GeoIPASNum2.zip
 
 Change back to the root working directory:
