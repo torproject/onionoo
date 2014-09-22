@@ -11,8 +11,8 @@ $ git clone https://git.torproject.org/onionoo.git /srv/onionoo/
 $ cd /srv/onionoo
 
 
-Install Java 1.7 or higher, ant 1.8 or higher, and Tomcat 6
------------------------------------------------------------
+Install Java 1.7 or higher and ant 1.8 or higher
+------------------------------------------------
 
 $ javac -version
 javac 1.7.0_65
@@ -67,73 +67,62 @@ Test the hourly data processing process
 ---------------------------------------
 
 Run the data processing process that will afterwards be run once per hour.
-Currently, memory is set to 4G.  If you have more or less RAM to spare,
-change the value for the maxmemory.value property near the top of the
-build.xml file.
+
+Create a .jar file:
+
+$ ant jar
+
 The initial run may take a while:
 
-$ ant run
+$ java -DLOGBASE=/path/to/logfiles -Xmx4g -jar dist/onionoo-<version>.jar
 
 
 Set up an hourly cronjob
 ------------------------
 
-Check the contents of bin/update.sh and whether they match the commands
-that worked for you.  Once they do, add a crontab line similar to this
-one:
+Add a crontab line similar to the command above:
 
-15 * * * * cd /srv/onionoo/ && bin/update.sh
-
-
-Configure Tomcat
-----------------
-
-The following file may be a useful Tomcat configuration file.
-Make changes according to your server setup, i.e. replace ${your-host-ip}
-with your ip address and the like (ports, lognames and paths).
-Put it in /etc/tomcat6/server.xml:
-
-<Server port="8005" shutdown="SHUTDOWN">
-  <Service name="Catalina">
-    <Connector port="8080" maxHttpHeaderSize="8192"
-               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
-               enableLookups="false" redirectPort="8443" acceptCount="100"
-               connectionTimeout="20000" disableUploadTimeout="true"
-               compression="on" compressionMinSize="2048"
-               noCompressionUserAgents="gozilla, traviata"
-               compressableMimeType="text/html,application/json" />
-    <Engine name="Catalina" defaultHost="${your-host-ip}">
-      <Host name="${your-host-ip}" appBase="webapps"
-            unpackWARs="true" autoDeploy="true"
-            xmlValidation="false" xmlNamespaceAware="false">
-        <Alias>${your-host-ip}</Alias>
-        <Valve className="org.apache.catalina.valves.AccessLogValve"
-               directory="logs" prefix="onionoo_access_log." suffix=".txt"
-               pattern="%l %u %t %r %s %b" resolveHosts="false"/>
-      </Host>
-    </Engine>
-  </Service>
-</Server>
-
-It may also be necessary to increase Tomcat's maximum heap space.  Do this
-by editing JAVA_OPTS in /etc/default/tomcat6 and change "-Xmx128m" to
-"-Xmx512m".
+15 * * * * cd /srv/onionoo/ && java -DLOGBASE=/path/to/logfiles \
+                                    -Xmx4g -jar dist/onionoo-<version>.jar
 
 
-Deploy the Tomcat application
------------------------------
+Run the web server
+------------------
 
 Create a .war file:
 
 $ ant war
 
-Create a symbolic link to the .war file, so that non-root users can
-re-deploy the application in the future.  Run the following commands as
-root:
+Start the Onionoo server
 
-# cd /var/lib/tomcat6/webapps/
-# ln -s /srv/onionoo/onionoo.war onionoo.war
+$ java -DLOGBASE=/path/to/logfiles -Xmx4g -jar dist/onionoo-<version>.war
 
 The Onionoo server should now be available at
-http://localhost:8080/onionoo/.
+http://localhost:8080/.
+
+
+Configure Embedded Jetty
+------------------------
+
+Settings for the embedded jetty can be found in etc/jetty.xml
+If you change anything, run
+
+$ ant clean war
+
+again.
+
+
+Configure logging
+-----------------
+
+Logging can be configured inside etc/logback.xml
+If you change anything, run
+
+$ ant clean war jar
+
+again.
+
+The command line option LOGBASE is the path for the log files.
+In case you forget to set it, you'll find the logs in the current
+path in the folder LOGBASE_IS_UNDEFINED/
 

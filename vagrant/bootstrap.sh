@@ -25,9 +25,6 @@ ln -s /vagrant/etc
 ln -s /vagrant/geoip
 ln -s /vagrant/src
 ln -s /vagrant/web
-ln -s /vagrant/logback.xml
-ln -s /srv/onionoo.torproject.org/onionoo/onionoo.war \
-/var/lib/tomcat6/webapps/onionoo.war
 chown -R vagrant:vagrant /srv/onionoo.torproject.org/
 
 echo "Done provisioning."

@@ -51,5 +51,28 @@
       org.torproject.onionoo.server.NodeIndexer
     </listener-class>
   </listener>
+
+  <filter>
+    <filter-name>GzipFilter</filter-name>
+    <filter-class>org.eclipse.jetty.servlets.GzipFilter</filter-class>
+    <init-param>
+      <param-name>mimeTypes</param-name>
+      <param-value>text/html,text/xml,text/plain,application/json</param-value>
+    </init-param>
+    <init-param>
+      <param-name>excludedAgents</param-name>
+      <param-value>gozilla,traviata</param-value>
+    </init-param>
+    <init-param>
+      <param-name>minGzipSize</param-name>
+      <param-value>2048</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>GzipFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
 </web-app>
 

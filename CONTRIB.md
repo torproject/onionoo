@@ -87,31 +87,6 @@ host system, which performs not really well.
 
 Read the INSTALL file and make the appropriate changes to adapt everything
 to your setup, e.g., memory settings.
-Compile Onionoo, run the unit tests and then the cron part of it:
-
-```
-ant compile
-ant test
-ant run
-```
-
-This step may take an hour or more.  Onionoo downloads the last three days
-of Tor descriptors, which is about 2 GiB, and processes them.
-
-Once these steps are done, deploy the servlet to the local Tomcat server:
-
-```
-ant war
-```
-
-Test the Onionoo service using a browser on the host (port 8080 on the
-guest is forwarded to the host).  Sample URL:
-
-http://localhost:8080/onionoo/summary?limit=2
-
-Note that Tomcat's default server.xml needs no changing for running in the
-development environment.
-See the INSTALL file for necessary changes in the production environment.
 
 ## Documentation overview
 

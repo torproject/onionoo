@@ -5,8 +5,7 @@ etc/context.xml
 etc/web.xml
 geoip/
 in/
-log
-onionoo.war
+dist/
 out/
 status/
 
