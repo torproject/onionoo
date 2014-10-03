@@ -166,7 +166,7 @@ field on September 16, 2014.</li>
 <li><strong>1.2</strong>: Added qualified search terms to "search"
 parameter on October 17, 2014.</li>
 <li><strong>2.0</strong>: Extended search parameter to base64-encoded
-fingerprints, scheduled for November 15, 2015.</li>
+fingerprints on November 15, 2015.</li>
 </ul>
 
 </div> <!-- box -->
@@ -272,20 +272,22 @@ Parameter values are case-insensitive.
 <p>
 Return only (1) relays with the parameter value
 matching (part of a) nickname, (possibly $-prefixed) beginning of a
-fingerprint, or beginning of an IP address, (2) bridges with (part of a)
-nickname or (possibly $-prefixed) beginning of a hashed fingerprint, and
-(3) relays and/or bridges matching a given qualified search term.
+hex-encoded fingerprint, beginning of a base64-encoded fingerprint
+without trailing equal signs, or beginning of an IP address, (2) bridges
+with (part of a) nickname or (possibly $-prefixed) beginning of a hashed
+hex-encoded fingerprint, and (3) relays and/or bridges matching a given
+qualified search term.
 Searches by relay IP address include all known addresses used for onion
 routing and for exiting to the Internet.
 Searches for beginnings of IP addresses are performed on textual
 representations of canonical IP address forms, so that searches using CIDR
 notation or non-canonical forms will return empty results.
-Searches are case-insensitive.
+Searches are case-insensitive, except for base64-encoded fingerprints.
 If multiple search terms are given, separated by spaces, the intersection
 of all relays and bridges matching all search terms will be returned.
-Full fingerprints should always be hashed using SHA-1, regardless of
-searching for a relay or a bridge, in order to not accidentally leak
-non-hashed bridge fingerprints in the URL.
+Complete hex-encoded fingerprints should always be hashed using SHA-1,
+regardless of searching for a relay or a bridge, in order to not
+accidentally leak non-hashed bridge fingerprints in the URL.
 <font color="blue">
 Qualified search terms have the form "key:value" (without double quotes)
 with "key" being one of the parameters listed here except for "search",

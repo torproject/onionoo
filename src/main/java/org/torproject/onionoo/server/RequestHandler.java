@@ -204,6 +204,8 @@ public class RequestHandler {
         filteredRelays.entrySet()) {
       String fingerprint = e.getKey();
       SummaryDocument entry = e.getValue();
+      String base64Fingerprint = entry.isRelay() ?
+          entry.getBase64Fingerprint() : null;
       boolean lineMatches = false;
       String nickname = entry.getNickname() != null ?
           entry.getNickname().toLowerCase() : "unnamed";
@@ -219,6 +221,10 @@ public class RequestHandler {
         lineMatches = true;
       } else if (fingerprint.startsWith(searchTerm.toUpperCase())) {
         /* Non-$-prefixed fingerprint matches. */
+        lineMatches = true;
+      } else if (base64Fingerprint != null &&
+          base64Fingerprint.startsWith(searchTerm)) {
+        /* Base64-encoded fingerprint matches. */
         lineMatches = true;
       } else {
         List<String> addresses = entry.getAddresses();

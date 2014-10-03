@@ -560,6 +560,51 @@ public class ResourceServletTest {
   }
 
   @Test()
+  public void testSearchBase64FingerprintAlphaNum() {
+    this.assertSummaryDocument(
+        "/summary?search=AAxfVb1IFLkXzEdL1Tfxo7M8zio", 1,
+        new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchBase64FingerprintSlash() {
+    this.assertSummaryDocument(
+        "/summary?search=ABwTs6Vacbl3ymXshVOdecZTo/w", 1,
+        new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchBase64FingerprintPlus() {
+    this.assertSummaryDocument(
+        "/summary?search=ACXBNsHzqe7+KuP5GPA7+iG1Bws", 1,
+        new String[] { "TimMayTribute" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchBase64FingerprintBridge() {
+    this.assertSummaryDocument(
+        "/summary?search=AACDGyNt/3PUCa0XtA4qcopTmU8", 0, null, 0, null);
+  }
+
+  @Test()
+  public void testSearchBase64FingerprintPartial() {
+    this.assertSummaryDocument(
+        "/summary?search=AAx", 1, new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchBase64HashedFingerprintTorkaZ() {
+    this.assertSummaryDocument(
+        "/summary?search=WqFMCNYpE+AFeprVhjtFjAzpTO4", 0, null, 0, null);
+  }
+
+  @Test()
+  public void testSearchBase64Fingerprint28() {
+    this.assertErrorStatusCode(
+        "/summary?search=AAAAAAAAAAAA//AAAAAAAAAAAAAA", 400);
+  }
+
+  @Test()
   public void testSearchIp() {
     this.assertSummaryDocument(
         "/summary?search=62.216.201.221", 1, new String[] { "TorkaZ" }, 0,

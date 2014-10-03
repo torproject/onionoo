@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -34,22 +35,37 @@ public class SummaryDocument extends Document {
       }
     }
     this.f = fingerprint;
+    this.hashedFingerprint = null;
+    this.base64Fingerprint = null;
   }
   public String getFingerprint() {
     return this.f;
   }
 
+  private transient String hashedFingerprint = null;
   public String getHashedFingerprint() {
-    String hashedFingerprint = null;
-    if (this.f != null) {
+    if (this.hashedFingerprint == null && this.f != null) {
       try {
-        hashedFingerprint = DigestUtils.shaHex(Hex.decodeHex(
+        this.hashedFingerprint = DigestUtils.shaHex(Hex.decodeHex(
             this.f.toCharArray())).toUpperCase();
       } catch (DecoderException e) {
         /* Format tested in setFingerprint(). */
       }
     }
-    return hashedFingerprint;
+    return this.hashedFingerprint;
+  }
+
+  private transient String base64Fingerprint = null;
+  public String getBase64Fingerprint() {
+    if (this.base64Fingerprint == null && this.f != null) {
+      try {
+        this.base64Fingerprint = Base64.encodeBase64String(Hex.decodeHex(
+            this.f.toCharArray())).replaceAll("=", "");
+      } catch (DecoderException e) {
+        /* Format tested in setFingerprint(). */
+      }
+    }
+    return this.base64Fingerprint;
   }
 
   private String n;

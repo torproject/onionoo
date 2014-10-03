@@ -363,7 +363,8 @@ public class ResourceServlet extends HttpServlet {
           + "search=([0-9a-zA-Z+/\\.: \\$\\[\\]]+)" // capture parameter
           + "(?:&.*)*"); // skip remaining parameters
   private static Pattern searchParameterPattern =
-      Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Fingerprint. */
+      Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Hex fingerprint. */
+      + "^[0-9a-zA-Z+/]{1,27}$|" /* Base64 fingerprint. */
       + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
       + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$|" /* IPv6 address. */
       + "^[a-zA-Z_]+:[0-9a-zA-Z_,-]+$" /* Qualified search term. */);
