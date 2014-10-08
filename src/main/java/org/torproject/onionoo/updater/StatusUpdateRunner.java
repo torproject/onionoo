@@ -45,12 +45,12 @@ public class StatusUpdateRunner {
       String statsString = su.getStatsString();
       if (statsString != null) {
         LoggerFactory.getLogger("statistics").info(
-            su.getClass().getSimpleName(), statsString);
+            su.getClass().getSimpleName() + "\n" + statsString);
       }
     }
-    LoggerFactory.getLogger("statistics").info("GeoIP lookup service",
+    LoggerFactory.getLogger("statistics").info("GeoIP lookup service\n" +
         this.ls.getStatsString());
     LoggerFactory.getLogger("statistics").info("Reverse domain name "
-        + "resolver", this.rdnr.getStatsString());
+        + "resolver\n" + this.rdnr.getStatsString());
   }
 }

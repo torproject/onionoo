@@ -34,7 +34,7 @@ public class DocumentWriterRunner {
     for (DocumentWriter dw : this.documentWriters) {
       String statsString = dw.getStatsString();
       if (statsString != null) {
-        log.info(dw.getClass().getSimpleName(),
+        log.info(dw.getClass().getSimpleName() + "\n" +
             statsString);
       }
     }

@@ -63,8 +63,8 @@ public class Main {
     log.info("Gathering statistics.");
     sur.logStatistics();
     dwr.logStatistics();
-    log.info("Descriptor source", dso.getStatsString());
-    log.info("Document store", ds.getStatsString());
+    log.info("Descriptor source\n" + dso.getStatsString());
+    log.info("Document store\n" + ds.getStatsString());
 
     log.info("Releasing lock.");
     if (lf.releaseLock()) {
