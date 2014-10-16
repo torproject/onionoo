@@ -667,8 +667,12 @@ running in the last bridge network status.
 </h3>
 
 <p>
-Details documents are based on the network statuses published by the Tor
-directories and the server descriptors published by relays and bridges.
+Details documents are based on network statuses published by the Tor
+directories, server descriptors published by relays and bridges, and data
+published by Tor network services TorDNSEL and BridgeDB.
+Details documents use the most recently published data from these sources,
+which may lead to contradictions between fields based on different sources
+in rare edge cases.
 Details documents contain the following fields:
 </p>
 
@@ -1070,6 +1074,9 @@ found.
 Array of exit-policy lines.
 Missing if router descriptor containing this information cannot be
 found.
+May contradict the <strong>"exit_policy_summary"</strong> field in a rare
+edge case: this happens when the relay changes its exit policy after the
+directory authorities summarized the previous exit policy.
 </p>
 </li>
 
@@ -1084,6 +1091,9 @@ version of the relay's exit policy containing a dictionary with either an
 If there is an "accept" ("reject") element, the relay accepts (rejects)
 all TCP ports or port ranges in the given list for most IP addresses and
 rejects (accepts) all other ports.
+May contradict the <strong>"exit_policy"</strong> field in a rare edge
+case: this happens when the relay changes its exit policy after the
+directory authorities summarized the previous exit policy.
 </p>
 </li>
 
@@ -1098,6 +1108,9 @@ If there is an "accept" ("reject") element, the relay accepts (rejects)
 all TCP ports or port ranges in the given list for most IP addresses and
 rejects (accepts) all other ports.
 Missing if the relay rejects all connections to IPv6 addresses.
+May contradict the <strong>"exit_policy_summary"</strong> field in a rare
+edge case: this happens when the relay changes its exit policy after the
+directory authorities summarized the previous exit policy.
 </p>
 </li>
 
