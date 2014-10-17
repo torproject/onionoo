@@ -4,9 +4,11 @@ package org.torproject.onionoo.server;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -58,6 +60,15 @@ public class ResourceServlet extends HttpServlet {
       CACHE_MIN_TIME = 5L * 60L * 1000L,
       CACHE_MAX_TIME = 45L * 60L * 1000L,
       CACHE_INTERVAL = 5L * 60L * 1000L;
+
+  private static Set<String> knownParameters = new HashSet<String>(
+      Arrays.asList(("type,running,search,lookup,fingerprint,country,as,"
+          + "flag,first_seen_days,last_seen_days,contact,order,limit,"
+          + "offset,fields,family").split(",")));
+
+  private static Set<String> illegalSearchQualifiers =
+      new HashSet<String>(Arrays.asList(("search,fingerprint,order,limit,"
+          + "offset,fields").split(",")));
 
   public void doGet(HttpServletRequestWrapper request,
       HttpServletResponseWrapper response) throws IOException {
@@ -126,10 +137,6 @@ public class ResourceServlet extends HttpServlet {
 
     /* Make sure that the request doesn't contain any unknown
      * parameters. */
-    Set<String> knownParameters = new HashSet<String>(Arrays.asList((
-        "type,running,search,lookup,fingerprint,country,as,flag,"
-        + "first_seen_days,last_seen_days,contact,order,limit,offset,"
-        + "fields,family").split(",")));
     for (String parameterKey : parameterMap.keySet()) {
       if (!knownParameters.contains(parameterKey)) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -138,6 +145,34 @@ public class ResourceServlet extends HttpServlet {
     }
 
     /* Filter relays and bridges matching the request. */
+    if (parameterMap.containsKey("search")) {
+      String[] searchTerms = this.parseSearchParameters(
+          parameterMap.get("search"));
+      if (searchTerms == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      List<String> unqualifiedSearchTerms = new ArrayList<String>();
+      for (String searchTerm : searchTerms) {
+        if (searchTerm.contains(":") && !searchTerm.startsWith("[")) {
+          String[] parts = searchTerm.split(":", 2);
+          String parameterKey = parts[0];
+          if (!knownParameters.contains(parameterKey) ||
+              illegalSearchQualifiers.contains(parameterKey)) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+          }
+          if (!parameterMap.containsKey(parameterKey)) {
+            String parameterValue = parts[1];
+            parameterMap.put(parameterKey, parameterValue);
+          }
+        } else {
+          unqualifiedSearchTerms.add(searchTerm);
+        }
+      }
+      rh.setSearch(unqualifiedSearchTerms.toArray(
+          new String[unqualifiedSearchTerms.size()]));
+    }
     if (parameterMap.containsKey("type")) {
       String typeParameterValue = parameterMap.get("type").toLowerCase();
       boolean relaysRequested = true;
@@ -160,15 +195,6 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       rh.setRunning(runningRequested ? "true" : "false");
-    }
-    if (parameterMap.containsKey("search")) {
-      String[] searchTerms = this.parseSearchParameters(
-          parameterMap.get("search"));
-      if (searchTerms == null) {
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        return;
-      }
-      rh.setSearch(searchTerms);
     }
     if (parameterMap.containsKey("lookup")) {
       String lookupParameter = this.parseFingerprintParameter(
@@ -334,7 +360,8 @@ public class ResourceServlet extends HttpServlet {
   private static Pattern searchParameterPattern =
       Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Fingerprint. */
       + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
-      + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$"); /* IPv6 address. */
+      + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$|" /* IPv6 address. */
+      + "^[a-zA-Z_]+:[0-9a-zA-Z_,-]+$" /* Qualified search term. */);
   private String[] parseSearchParameters(String parameter) {
     String[] searchParameters;
     if (parameter.contains(" ")) {

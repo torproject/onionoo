@@ -732,6 +732,51 @@ public class ResourceServletTest {
   }
 
   @Test()
+  public void testSearchTypeRelay() {
+    this.assertSummaryDocument("/summary?search=type:relay", 3, null, 0,
+        null);
+  }
+
+  @Test()
+  public void testSearchTypeRelayTorkaZ() {
+    this.assertSummaryDocument("/summary?search=type:relay TorkaZ", 1,
+        new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchTorkaZTypeRelay() {
+    this.assertSummaryDocument("/summary?search=TorkaZ type:relay", 1,
+        new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchTypeRelayTypeDirectory() {
+    this.assertSummaryDocument(
+        "/summary?search=type:relay type:directory", 3, null, 0, null);
+  }
+
+  @Test()
+  public void testSearchTypeDirectoryTypeRelay() {
+    this.assertErrorStatusCode(
+        "/summary?search=type:directory type:relay", 400);
+  }
+
+  @Test()
+  public void testSearchFooBar() {
+    this.assertErrorStatusCode("/summary?search=foo:bar", 400);
+  }
+
+  @Test()
+  public void testSearchSearchTorkaZ() {
+    this.assertErrorStatusCode("/summary?search=search:TorkaZ", 400);
+  }
+
+  @Test()
+  public void testSearchLimitOne() {
+    this.assertErrorStatusCode("/summary?search=limit:1", 400);
+  }
+
+  @Test()
   public void testLookupFingerprint() {
     this.assertSummaryDocument(
         "/summary?lookup=000C5F55BD4814B917CC474BD537F1A3B33CCE2A", 1,
