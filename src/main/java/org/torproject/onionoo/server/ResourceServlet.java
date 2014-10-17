@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
@@ -146,8 +147,8 @@ public class ResourceServlet extends HttpServlet {
 
     /* Filter relays and bridges matching the request. */
     if (parameterMap.containsKey("search")) {
-      String[] searchTerms = this.parseSearchParameters(
-          parameterMap.get("search"));
+      String[] searchTerms = parseSearchParameters(
+          request.getQueryString());
       if (searchTerms == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
@@ -357,12 +358,22 @@ public class ResourceServlet extends HttpServlet {
         bridgeDocumentsWritten, charsWritten, writtenResponseMillis);
   }
 
+  private static Pattern searchQueryStringPattern =
+      Pattern.compile("(?:.*[\\?&])*?" // lazily skip other parameters
+          + "search=([0-9a-zA-Z+/\\.: \\$\\[\\]]+)" // capture parameter
+          + "(?:&.*)*"); // skip remaining parameters
   private static Pattern searchParameterPattern =
       Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Fingerprint. */
       + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
       + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$|" /* IPv6 address. */
       + "^[a-zA-Z_]+:[0-9a-zA-Z_,-]+$" /* Qualified search term. */);
-  private String[] parseSearchParameters(String parameter) {
+  protected static String[] parseSearchParameters(String queryString) {
+    Matcher searchQueryStringMatcher = searchQueryStringPattern.matcher(
+        queryString);
+    if (!searchQueryStringMatcher.matches()) {
+      return null;
+    }
+    String parameter = searchQueryStringMatcher.group(1);
     String[] searchParameters;
     if (parameter.contains(" ")) {
       searchParameters = parameter.split(" ");

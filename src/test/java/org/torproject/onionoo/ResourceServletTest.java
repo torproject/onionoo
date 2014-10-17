@@ -48,11 +48,13 @@ public class ResourceServletTest {
   private class TestingHttpServletRequestWrapper
       extends HttpServletRequestWrapper {
     private String requestURI;
+    private String queryString;
     private Map<String, String[]> parameterMap;
     private TestingHttpServletRequestWrapper(String requestURI,
-        Map<String, String[]> parameterMap) {
+        String queryString, Map<String, String[]> parameterMap) {
       super(null);
       this.requestURI = requestURI;
+      this.queryString = queryString;
       this.parameterMap = parameterMap == null
           ? new HashMap<String, String[]>() : parameterMap;
     }
@@ -65,6 +67,9 @@ public class ResourceServletTest {
     }
     protected String[] getParameterValues(String parameterKey) {
       return this.parameterMap.get(parameterKey);
+    }
+    protected String getQueryString() {
+      return this.queryString;
     }
   }
 
@@ -185,13 +190,12 @@ public class ResourceServletTest {
         bridgegummy);
   }
 
-  private void runTest(String requestURI,
-      Map<String, String[]> parameterMap) {
+  private void runTest(String request) {
     try {
       this.createDummyTime();
       this.createDummyDocumentStore();
       this.createNodeIndexer();
-      this.makeRequest(requestURI, parameterMap);
+      this.makeRequest(request);
       this.parseResponse();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -226,11 +230,14 @@ public class ResourceServletTest {
     NodeIndexerFactory.setNodeIndexer(newNodeIndexer);
   }
 
-  private void makeRequest(String requestURI,
-      Map<String, String[]> parameterMap) throws IOException {
+  private void makeRequest(String request) throws IOException {
     ResourceServlet rs = new ResourceServlet();
-    this.request = new TestingHttpServletRequestWrapper(requestURI,
-       parameterMap);
+    String requestParts[] = request.split("\\?");
+    String path = requestParts[0];
+    String queryString = requestParts.length > 1 ? requestParts[1] : null;
+    Map<String, String[]> parameterMap = parseParameters(request);
+    this.request = new TestingHttpServletRequestWrapper(path, queryString,
+        parameterMap);
     this.response = new TestingHttpServletResponseWrapper();
     rs.doGet(this.request, this.response);
   }
@@ -246,18 +253,14 @@ public class ResourceServletTest {
 
   private void assertErrorStatusCode(String request,
       int errorStatusCode) {
-    String requestURI = parseRequestURI(request);
-    Map<String, String[]> parameters = parseParameters(request);
-    this.runTest(requestURI, parameters);
+    this.runTest(request);
     assertEquals(errorStatusCode, this.response.errorStatusCode);
   }
 
   private void assertSummaryDocument(String request,
       int expectedRelaysNumber, String[] expectedRelaysNicknames,
       int expectedBridgesNumber, String[] expectedBridgesNicknames) {
-    String requestURI = parseRequestURI(request);
-    Map<String, String[]> parameters = parseParameters(request);
-    this.runTest(requestURI, parameters);
+    this.runTest(request);
     assertNotNull(this.summaryDocument);
     assertEquals(expectedRelaysNumber,
         this.summaryDocument.relays.length);
@@ -275,10 +278,6 @@ public class ResourceServletTest {
             this.summaryDocument.bridges[i].n);
       }
     }
-  }
-
-  private String parseRequestURI(String request) {
-    return request.split("\\?")[0];
   }
 
   private Map<String, String[]> parseParameters(String request) {
@@ -327,7 +326,7 @@ public class ResourceServletTest {
 
   @Test()
   public void testValidSummaryRelay() throws IOException {
-    this.runTest("/summary", null);
+    this.runTest("/summary");
     assertEquals("2013-04-24 12:00:00",
         this.summaryDocument.relays_published);
     assertEquals(3, this.summaryDocument.relays.length);
@@ -347,7 +346,7 @@ public class ResourceServletTest {
 
   @Test()
   public void testValidSummaryBridge() {
-    this.runTest("/summary", null);
+    this.runTest("/summary");
     assertEquals("2013-04-24 01:07:04",
         this.summaryDocument.bridges_published);
     assertEquals(3, this.summaryDocument.bridges.length);

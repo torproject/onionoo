@@ -21,4 +21,7 @@ public class HttpServletRequestWrapper {
   protected String[] getParameterValues(String parameterKey) {
     return this.request.getParameterValues(parameterKey);
   }
+  protected String getQueryString() {
+    return this.request.getQueryString();
+  }
 }
