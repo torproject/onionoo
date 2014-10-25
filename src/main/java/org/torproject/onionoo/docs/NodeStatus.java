@@ -4,6 +4,7 @@ package org.torproject.onionoo.docs;
 
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -316,13 +317,33 @@ public class NodeStatus extends Document {
     return this.recommendedVersion;
   }
 
-  private SortedSet<String> familyFingerprints;
+  private String[] familyFingerprints;
   public void setFamilyFingerprints(
       SortedSet<String> familyFingerprints) {
-    this.familyFingerprints = familyFingerprints;
+    this.familyFingerprints = collectionToStringArray(familyFingerprints);
   }
   public SortedSet<String> getFamilyFingerprints() {
-    return this.familyFingerprints;
+    return stringArrayToSortedSet(this.familyFingerprints);
+  }
+
+  private static String[] collectionToStringArray(
+      Collection<String> collection) {
+    String[] stringArray = null;
+    if (collection != null && !collection.isEmpty()) {
+      stringArray = new String[collection.size()];
+      int i = 0;
+      for (String string : collection) {
+        stringArray[i++] = string;
+      }
+    }
+    return stringArray;
+  }
+  private SortedSet<String> stringArrayToSortedSet(String[] stringArray) {
+    SortedSet<String> sortedSet = new TreeSet<String>();
+    if (stringArray != null) {
+      sortedSet.addAll(Arrays.asList(stringArray));
+    }
+    return sortedSet;
   }
 
   public NodeStatus(boolean isRelay, String nickname, String fingerprint,
@@ -372,7 +393,7 @@ public class NodeStatus extends Document {
     this.aSNumber = aSNumber;
     this.contact = contact;
     this.recommendedVersion = recommendedVersion;
-    this.familyFingerprints = familyFingerprints;
+    this.setFamilyFingerprints(familyFingerprints);
   }
 
   public static NodeStatus fromString(String documentString) {
@@ -580,8 +601,7 @@ public class NodeStatus extends Document {
     sb.append("\t" + (this.contact != null ? this.contact : ""));
     sb.append("\t" + (this.recommendedVersion == null ? "null" :
         this.recommendedVersion ? "true" : "false"));
-    if (this.familyFingerprints == null ||
-        this.familyFingerprints.isEmpty()) {
+    if (this.familyFingerprints == null) {
       sb.append("\tnull");
     } else {
       sb.append("\t");
