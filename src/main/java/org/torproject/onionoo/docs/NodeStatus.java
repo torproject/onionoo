@@ -3,7 +3,9 @@
 package org.torproject.onionoo.docs;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -157,9 +159,32 @@ public class NodeStatus extends Document {
     return this.dirPort;
   }
 
-  private SortedSet<String> relayFlags;
+  private static Map<String, Integer> relayFlagIndexes =
+      new HashMap<String, Integer>();
+  private static Map<Integer, String> relayFlagStrings =
+      new HashMap<Integer, String>();
+
+  private BitSet relayFlags;
+  public void setRelayFlags(SortedSet<String> relayFlags) {
+    BitSet newRelayFlags = new BitSet(relayFlagIndexes.size());
+    for (String relayFlag : relayFlags) {
+      if (!relayFlagIndexes.containsKey(relayFlag)) {
+        relayFlagStrings.put(relayFlagIndexes.size(), relayFlag);
+        relayFlagIndexes.put(relayFlag, relayFlagIndexes.size());
+      }
+      newRelayFlags.set(relayFlagIndexes.get(relayFlag));
+    }
+    this.relayFlags = newRelayFlags;
+  }
   public SortedSet<String> getRelayFlags() {
-    return this.relayFlags;
+    SortedSet<String> result = new TreeSet<String>();
+    if (this.relayFlags != null) {
+      for (int i = this.relayFlags.nextSetBit(0); i >= 0;
+          i = this.relayFlags.nextSetBit(i + 1)) {
+        result.add(relayFlagStrings.get(i));
+      }
+    }
+    return result;
   }
 
   private long consensusWeight;
@@ -327,7 +352,7 @@ public class NodeStatus extends Document {
     this.lastSeenMillis = lastSeenMillis;
     this.orPort = orPort;
     this.dirPort = dirPort;
-    this.relayFlags = relayFlags;
+    this.setRelayFlags(relayFlags);
     this.consensusWeight = consensusWeight;
     this.countryCode = countryCode;
     this.hostName = hostName;
@@ -527,7 +552,7 @@ public class NodeStatus extends Document {
     sb.append("\t" + this.orPort);
     sb.append("\t" + this.dirPort + "\t");
     written = 0;
-    for (String relayFlag : this.relayFlags) {
+    for (String relayFlag : this.getRelayFlags()) {
       sb.append((written++ > 0 ? "," : "") + relayFlag);
     }
     if (this.isRelay) {
