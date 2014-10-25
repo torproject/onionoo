@@ -12,9 +12,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +30,6 @@ public class NodeStatus extends Document {
   private String fingerprint;
   public String getFingerprint() {
     return this.fingerprint;
-  }
-
-  private String hashedFingerprint;
-  public String getHashedFingerprint() {
-    return this.hashedFingerprint;
   }
 
   private String nickname;
@@ -319,13 +311,6 @@ public class NodeStatus extends Document {
     this.isRelay = isRelay;
     this.nickname = nickname;
     this.fingerprint = fingerprint;
-    try {
-      this.hashedFingerprint = DigestUtils.shaHex(Hex.decodeHex(
-          this.fingerprint.toCharArray())).toUpperCase();
-    } catch (DecoderException e) {
-      throw new IllegalArgumentException("Fingerprint '" + fingerprint
-          + "' is not a valid fingerprint.", e);
-    }
     this.address = address;
     this.exitAddresses = new TreeSet<String>();
     if (exitAddresses != null) {
