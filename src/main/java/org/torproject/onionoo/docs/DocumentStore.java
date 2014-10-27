@@ -21,6 +21,7 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.util.FormattingUtils;
@@ -275,8 +276,8 @@ public class DocumentStore {
        * objects are escaped JSON, e.g., \u00F2.  When Gson serlializes
        * this string, it escapes the \ to \\, hence writes \\u00F2.  We
        * need to undo this and change \\u00F2 back to \u00F2. */
-      documentString = gson.toJson(document).replaceAll("\\\\\\\\u",
-          "\\\\u");
+      documentString = StringUtils.replace(gson.toJson(document),
+          "\\\\\\\\u", "\\\\u");
       /* Existing details statuses don't contain opening and closing curly
        * brackets, so we should remove them from new details statuses,
        * too. */

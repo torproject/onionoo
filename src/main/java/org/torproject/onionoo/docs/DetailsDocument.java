@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 
 public class DetailsDocument extends Document {
 
@@ -18,12 +19,12 @@ public class DetailsDocument extends Document {
    * we'll have to do is to change back the '\\' that Gson writes for the
    * '\'. */
   private static String escapeJSON(String s) {
-    return s == null ? null :
-        StringEscapeUtils.escapeJavaScript(s).replaceAll("\\\\'", "'");
+    return StringUtils.replaceEach(StringEscapeUtils.escapeJavaScript(s),
+        new String[] { "\\\\'" }, new String[] { "'" });
   }
   private static String unescapeJSON(String s) {
-    return s == null ? null :
-        StringEscapeUtils.unescapeJavaScript(s.replaceAll("'", "\\'"));
+    return StringEscapeUtils.unescapeJavaScript(StringUtils.replaceEach(s,
+        new String[] { "'" }, new String[] { "\\'" }));
   }
 
   private String nickname;
