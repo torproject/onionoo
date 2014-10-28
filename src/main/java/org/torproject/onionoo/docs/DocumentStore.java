@@ -66,22 +66,41 @@ public class DocumentStore {
   private SortedMap<String, NodeStatus> cachedNodeStatuses;
   private SortedMap<String, SummaryDocument> cachedSummaryDocuments;
 
+  /* Last-modified timestamp of cached network statuses and summary
+   * documents when reading them from disk. */
+  private long lastModifiedNodeStatuses = 0L;
+  private long lastModifiedSummaryDocuments = 0L;
+
+  /* Fingerprints of updated node statuses and summary documents that are
+   * not yet written to disk. */
+  private SortedSet<String> updatedNodeStatuses;
+  private SortedSet<String> updatedSummaryDocuments;
+
   public <T extends Document> SortedSet<String> list(
       Class<T> documentType) {
+    return this.list(documentType, 0L);
+  }
+
+  public <T extends Document> SortedSet<String> list(
+      Class<T> documentType, long updatedAfter) {
     if (documentType.equals(NodeStatus.class)) {
-      return this.listNodeStatuses();
+      return this.listNodeStatuses(updatedAfter);
     } else if (documentType.equals(SummaryDocument.class)) {
-      return this.listSummaryDocuments();
+      return this.listSummaryDocuments(updatedAfter);
     } else {
-      return this.listDocumentFiles(documentType);
+      return this.listDocumentFiles(documentType, updatedAfter);
     }
   }
 
-  private SortedSet<String> listNodeStatuses() {
+  private SortedSet<String> listNodeStatuses(long updatedAfter) {
     if (this.cachedNodeStatuses == null) {
       this.cacheNodeStatuses();
     }
-    return new TreeSet<String>(this.cachedNodeStatuses.keySet());
+    if (updatedAfter >= this.lastModifiedNodeStatuses) {
+      return new TreeSet<String>(this.updatedNodeStatuses);
+    } else {
+      return new TreeSet<String>(this.cachedNodeStatuses.keySet());
+    }
   }
 
   private void cacheNodeStatuses() {
@@ -105,6 +124,7 @@ public class DocumentStore {
             }
           }
           br.close();
+          this.lastModifiedNodeStatuses = summaryFile.lastModified();
           this.listedFiles += parsedNodeStatuses.size();
           this.listOperations++;
         } catch (IOException e) {
@@ -114,13 +134,18 @@ public class DocumentStore {
       }
     }
     this.cachedNodeStatuses = parsedNodeStatuses;
+    this.updatedNodeStatuses = new TreeSet<String>();
   }
 
-  private SortedSet<String> listSummaryDocuments() {
+  private SortedSet<String> listSummaryDocuments(long updatedAfter) {
     if (this.cachedSummaryDocuments == null) {
       this.cacheSummaryDocuments();
     }
-    return new TreeSet<String>(this.cachedSummaryDocuments.keySet());
+    if (updatedAfter >= this.lastModifiedSummaryDocuments) {
+      return new TreeSet<String>(this.updatedSummaryDocuments);
+    } else {
+      return new TreeSet<String>(this.cachedSummaryDocuments.keySet());
+    }
   }
 
   private void cacheSummaryDocuments() {
@@ -147,6 +172,7 @@ public class DocumentStore {
             }
           }
           br.close();
+          this.lastModifiedSummaryDocuments = summaryFile.lastModified();
           this.listedFiles += parsedSummaryDocuments.size();
           this.listOperations++;
         } catch (IOException e) {
@@ -159,10 +185,11 @@ public class DocumentStore {
       }
     }
     this.cachedSummaryDocuments = parsedSummaryDocuments;
+    this.updatedSummaryDocuments = new TreeSet<String>();
   }
 
   private <T extends Document> SortedSet<String> listDocumentFiles(
-      Class<T> documentType) {
+      Class<T> documentType, long updatedAfter) {
     SortedSet<String> fingerprints = new TreeSet<String>();
     File directory = null;
     String subdirectory = null;
@@ -204,8 +231,9 @@ public class DocumentStore {
         File file = files.pop();
         if (file.isDirectory()) {
           files.addAll(Arrays.asList(file.listFiles()));
-        } else if (file.getName().length() == 40) {
-            fingerprints.add(file.getName());
+        } else if (file.getName().length() == 40 &&
+            (updatedAfter == 0L || file.lastModified() > updatedAfter)) {
+          fingerprints.add(file.getName());
         }
       }
     }
@@ -235,6 +263,7 @@ public class DocumentStore {
     if (this.cachedNodeStatuses == null) {
       this.cacheNodeStatuses();
     }
+    this.updatedNodeStatuses.add(fingerprint);
     this.cachedNodeStatuses.put(fingerprint, nodeStatus);
     return true;
   }
@@ -244,6 +273,7 @@ public class DocumentStore {
     if (this.cachedSummaryDocuments == null) {
       this.cacheSummaryDocuments();
     }
+    this.updatedSummaryDocuments.add(fingerprint);
     this.cachedSummaryDocuments.put(fingerprint, summaryDocument);
     return true;
   }
@@ -289,7 +319,8 @@ public class DocumentStore {
     } else if (document instanceof BandwidthStatus ||
         document instanceof WeightsStatus ||
         document instanceof ClientsStatus ||
-        document instanceof UptimeStatus) {
+        document instanceof UptimeStatus ||
+        document instanceof UpdateStatus) {
       documentString = document.toDocumentString();
     } else {
       log.error("Serializing is not supported for type "
@@ -435,7 +466,8 @@ public class DocumentStore {
     } else if (documentType.equals(BandwidthStatus.class) ||
         documentType.equals(WeightsStatus.class) ||
         documentType.equals(ClientsStatus.class) ||
-        documentType.equals(UptimeStatus.class)) {
+        documentType.equals(UptimeStatus.class) ||
+        documentType.equals(UpdateStatus.class)) {
       return this.retrieveParsedStatusFile(documentType, documentString);
     } else if (documentType.equals(DetailsStatus.class)) {
       return this.retrieveParsedDocumentFile(documentType, "{"
@@ -523,6 +555,7 @@ public class DocumentStore {
     if (this.cachedNodeStatuses == null) {
       this.cacheNodeStatuses();
     }
+    this.updatedNodeStatuses.remove(fingerprint);
     return this.cachedNodeStatuses.remove(fingerprint) != null;
   }
 
@@ -530,6 +563,7 @@ public class DocumentStore {
     if (this.cachedSummaryDocuments == null) {
       this.cacheSummaryDocuments();
     }
+    this.updatedSummaryDocuments.remove(fingerprint);
     return this.cachedSummaryDocuments.remove(fingerprint) != null;
   }
 
@@ -550,9 +584,6 @@ public class DocumentStore {
     File documentFile = null;
     if (fingerprint == null && !documentType.equals(UpdateStatus.class) &&
         !documentType.equals(UptimeStatus.class)) {
-      // TODO Instead of using the update file workaround, add new method
-      // lastModified(Class<T> documentType) that serves a similar
-      // purpose.
       return null;
     }
     File directory = null;
@@ -631,6 +662,10 @@ public class DocumentStore {
   public void invalidateDocumentCache() {
     this.cachedNodeStatuses = null;
     this.cachedSummaryDocuments = null;
+    this.lastModifiedNodeStatuses = 0L;
+    this.lastModifiedSummaryDocuments = 0L;
+    this.updatedNodeStatuses = null;
+    this.updatedSummaryDocuments = null;
   }
 
   private void writeNodeStatuses() {
@@ -675,6 +710,8 @@ public class DocumentStore {
       BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));
       bw.write(documentString);
       bw.close();
+      this.lastModifiedNodeStatuses = summaryFile.lastModified();
+      this.updatedNodeStatuses.clear();
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
@@ -703,6 +740,8 @@ public class DocumentStore {
       BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));
       bw.write(documentString);
       bw.close();
+      this.lastModifiedSummaryDocuments = summaryFile.lastModified();
+      this.updatedSummaryDocuments.clear();
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
@@ -715,19 +754,9 @@ public class DocumentStore {
     if (this.outDir == null) {
       return;
     }
-    File updateFile = new File(this.outDir, "update");
-    String documentString = String.valueOf(this.time.currentTimeMillis());
-    try {
-      updateFile.getParentFile().mkdirs();
-      BufferedWriter bw = new BufferedWriter(new FileWriter(updateFile));
-      bw.write(documentString);
-      bw.close();
-      this.storedFiles++;
-      this.storedBytes += documentString.length();
-    } catch (IOException e) {
-      log.error("Could not write file '"
-          + updateFile.getAbsolutePath() + "'.", e);
-    }
+    UpdateStatus updateStatus = new UpdateStatus();
+    updateStatus.setUpdatedMillis(this.time.currentTimeMillis());
+    this.store(updateStatus);
   }
 
   public String getStatsString() {

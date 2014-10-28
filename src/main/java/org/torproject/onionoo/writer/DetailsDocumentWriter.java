@@ -16,59 +16,55 @@ import org.torproject.onionoo.docs.DetailsStatus;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.NodeStatus;
-import org.torproject.onionoo.updater.DescriptorSource;
-import org.torproject.onionoo.updater.DescriptorSourceFactory;
-import org.torproject.onionoo.updater.DescriptorType;
-import org.torproject.onionoo.updater.FingerprintListener;
+import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.TimeFactory;
 
-public class DetailsDocumentWriter implements FingerprintListener,
-    DocumentWriter {
+public class DetailsDocumentWriter implements DocumentWriter {
 
   private final static Logger log = LoggerFactory.getLogger(
       DetailsDocumentWriter.class);
-
-  private DescriptorSource descriptorSource;
 
   private DocumentStore documentStore;
 
   private long now;
 
   public DetailsDocumentWriter() {
-    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
     this.now = TimeFactory.getTime().currentTimeMillis();
-    this.registerFingerprintListeners();
-  }
-
-  private void registerFingerprintListeners() {
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.RELAY_CONSENSUSES);
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.RELAY_SERVER_DESCRIPTORS);
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.BRIDGE_STATUSES);
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.EXIT_LISTS);
   }
 
   private SortedSet<String> newRelays = new TreeSet<String>(),
       newBridges = new TreeSet<String>();
 
-  public void processFingerprints(SortedSet<String> fingerprints,
-      boolean relay) {
-    if (relay) {
-      this.newRelays.addAll(fingerprints);
-    } else {
-      this.newBridges.addAll(fingerprints);
-    }
-  }
-
   public void writeDocuments() {
+    UpdateStatus updateStatus = this.documentStore.retrieve(
+        UpdateStatus.class, true);
+    long updatedMillis = updateStatus != null ?
+        updateStatus.getUpdatedMillis() : 0L;
+    SortedSet<String> updatedNodeStatuses = this.documentStore.list(
+        NodeStatus.class, updatedMillis);
+    for (String fingerprint : updatedNodeStatuses) {
+      NodeStatus nodeStatus = this.documentStore.retrieve(
+          NodeStatus.class, true, fingerprint);
+      if (nodeStatus.isRelay()) {
+        newRelays.add(fingerprint);
+      } else {
+        newBridges.add(fingerprint);
+      }
+    }
+    SortedSet<String> updatedDetailsStatuses = this.documentStore.list(
+        DetailsStatus.class, updatedMillis);
+    for (String fingerprint : updatedDetailsStatuses) {
+      NodeStatus nodeStatus = this.documentStore.retrieve(
+          NodeStatus.class, true, fingerprint);
+      if (nodeStatus == null) {
+        continue;
+      } else if (nodeStatus.isRelay()) {
+        newRelays.add(fingerprint);
+      } else {
+        newBridges.add(fingerprint);
+      }
+    }
     this.updateRelayDetailsFiles();
     this.updateBridgeDetailsFiles();
     log.info("Wrote details document files");

@@ -54,10 +54,17 @@ public class DummyDocumentStore extends DocumentStore {
   }
 
   public <T extends Document> SortedSet<String> list(
+      Class<T> documentType, long modifiedAfter) {
+    return this.list(documentType);
+  }
+
+  public <T extends Document> SortedSet<String> list(
       Class<T> documentType) {
     this.performedListOperations++;
-    return new TreeSet<String>(this.getStoredDocumentsByClass(
-        documentType).keySet());
+    SortedSet<String> fingerprints = new TreeSet<String>(
+        this.getStoredDocumentsByClass(documentType).keySet());
+    fingerprints.remove(FINGERPRINT_NULL);
+    return fingerprints;
   }
 
   private int performedRemoveOperations = 0;

@@ -99,15 +99,9 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     long updateStatusMillis = -1L;
     DocumentStore documentStore = DocumentStoreFactory.getDocumentStore();
     UpdateStatus updateStatus = documentStore.retrieve(UpdateStatus.class,
-        false);
-    if (updateStatus != null &&
-        updateStatus.getDocumentString() != null) {
-      String updateString = updateStatus.getDocumentString();
-      try {
-        updateStatusMillis = Long.parseLong(updateString.trim());
-      } catch (NumberFormatException e) {
-        /* Handle below. */
-      }
+        true);
+    if (updateStatus != null) {
+      updateStatusMillis = updateStatus.getUpdatedMillis();
     }
     synchronized (this) {
       if (updateStatusMillis <= this.lastIndexed) {

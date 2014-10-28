@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,52 +14,25 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
+import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.UptimeHistory;
 import org.torproject.onionoo.docs.UptimeStatus;
-import org.torproject.onionoo.updater.DescriptorSource;
-import org.torproject.onionoo.updater.DescriptorSourceFactory;
-import org.torproject.onionoo.updater.DescriptorType;
-import org.torproject.onionoo.updater.FingerprintListener;
 import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.TimeFactory;
 
-public class UptimeDocumentWriter implements FingerprintListener,
-    DocumentWriter {
+public class UptimeDocumentWriter implements DocumentWriter {
 
   private final static Logger log = LoggerFactory.getLogger(
       UptimeDocumentWriter.class);
-
-  private DescriptorSource descriptorSource;
 
   private DocumentStore documentStore;
 
   private long now;
 
   public UptimeDocumentWriter() {
-    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
     this.now = TimeFactory.getTime().currentTimeMillis();
-    this.registerFingerprintListeners();
-  }
-
-  private void registerFingerprintListeners() {
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.RELAY_CONSENSUSES);
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.BRIDGE_STATUSES);
-  }
-
-  private SortedSet<String> newRelayFingerprints = new TreeSet<String>(),
-      newBridgeFingerprints = new TreeSet<String>();
-
-  public void processFingerprints(SortedSet<String> fingerprints,
-      boolean relay) {
-    if (relay) {
-      this.newRelayFingerprints.addAll(fingerprints);
-    } else {
-      this.newBridgeFingerprints.addAll(fingerprints);
-    }
   }
 
   public void writeDocuments() {
@@ -69,29 +41,34 @@ public class UptimeDocumentWriter implements FingerprintListener,
     if (uptimeStatus == null) {
       return;
     }
-    for (String fingerprint : this.newRelayFingerprints) {
-      this.updateDocument(true, fingerprint,
-          uptimeStatus.getRelayHistory());
-    }
-    for (String fingerprint : this.newBridgeFingerprints) {
-      this.updateDocument(false, fingerprint,
-          uptimeStatus.getBridgeHistory());
+    UpdateStatus updateStatus = this.documentStore.retrieve(
+        UpdateStatus.class, true);
+    long updatedMillis = updateStatus != null ?
+        updateStatus.getUpdatedMillis() : 0L;
+    SortedSet<String> updatedUptimeStatuses = this.documentStore.list(
+        UptimeStatus.class, updatedMillis);
+    for (String fingerprint : updatedUptimeStatuses) {
+      this.updateDocument(fingerprint, uptimeStatus);
     }
     log.info("Wrote uptime document files");
   }
 
   private int writtenDocuments = 0;
 
-  private void updateDocument(boolean relay, String fingerprint,
-      SortedSet<UptimeHistory> knownStatuses) {
+  private void updateDocument(String fingerprint,
+      UptimeStatus knownStatuses) {
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true, fingerprint);
     if (uptimeStatus != null) {
+      boolean relay = uptimeStatus.getBridgeHistory().isEmpty();
       SortedSet<UptimeHistory> history = relay
           ? uptimeStatus.getRelayHistory()
           : uptimeStatus.getBridgeHistory();
+      SortedSet<UptimeHistory> knownStatusesHistory = relay
+          ? knownStatuses.getRelayHistory()
+          : knownStatuses.getBridgeHistory();
       UptimeDocument uptimeDocument = this.compileUptimeDocument(relay,
-          fingerprint, history, knownStatuses);
+          fingerprint, history, knownStatusesHistory);
       this.documentStore.store(uptimeDocument, fingerprint);
       this.writtenDocuments++;
     }

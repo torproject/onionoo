@@ -16,7 +16,6 @@ import org.torproject.onionoo.docs.GraphHistory;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.UptimeStatus;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
-import org.torproject.onionoo.updater.DescriptorType;
 import org.torproject.onionoo.util.TimeFactory;
 import org.torproject.onionoo.writer.UptimeDocumentWriter;
 
@@ -71,8 +70,6 @@ public class UptimeDocumentWriterTest {
     status = new UptimeStatus();
     status.setFromDocumentString(gabelmooUptime);
     this.documentStore.addDocument(status, GABELMOO_FINGERPRINT);
-    this.descriptorSource.addFingerprint(DescriptorType.RELAY_CONSENSUSES,
-        GABELMOO_FINGERPRINT);
   }
 
   private static final long ONE_SECOND = 1000L,

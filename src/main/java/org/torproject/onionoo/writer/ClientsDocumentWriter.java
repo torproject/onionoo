@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +19,7 @@ import org.torproject.onionoo.docs.ClientsStatus;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.updater.DescriptorSource;
-import org.torproject.onionoo.updater.DescriptorSourceFactory;
-import org.torproject.onionoo.updater.DescriptorType;
-import org.torproject.onionoo.updater.FingerprintListener;
+import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.TimeFactory;
 
@@ -50,43 +46,30 @@ import org.torproject.onionoo.util.TimeFactory;
  *   "transports":{"obfs2":0.4581},
  *   "versions":{"v4":1.0000}}
  */
-public class ClientsDocumentWriter implements FingerprintListener,
-    DocumentWriter {
+public class ClientsDocumentWriter implements DocumentWriter {
 
   private final static Logger log = LoggerFactory.getLogger(
       ClientsDocumentWriter.class);
-
-  private DescriptorSource descriptorSource;
 
   private DocumentStore documentStore;
 
   private long now;
 
   public ClientsDocumentWriter() {
-    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
     this.now = TimeFactory.getTime().currentTimeMillis();
-    this.registerFingerprintListeners();
-  }
-
-  private void registerFingerprintListeners() {
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.BRIDGE_EXTRA_INFOS);
-  }
-
-  private SortedSet<String> updateDocuments = new TreeSet<String>();
-
-  public void processFingerprints(SortedSet<String> fingerprints,
-      boolean relay) {
-    if (!relay) {
-      this.updateDocuments.addAll(fingerprints);
-    }
   }
 
   private int writtenDocuments = 0;
 
   public void writeDocuments() {
-    for (String hashedFingerprint : this.updateDocuments) {
+    UpdateStatus updateStatus = this.documentStore.retrieve(
+        UpdateStatus.class, true);
+    long updatedMillis = updateStatus != null ?
+        updateStatus.getUpdatedMillis() : 0L;
+    SortedSet<String> updateDocuments = this.documentStore.list(
+        ClientsStatus.class, updatedMillis);
+    for (String hashedFingerprint : updateDocuments) {
       ClientsStatus clientsStatus = this.documentStore.retrieve(
           ClientsStatus.class, true, hashedFingerprint);
       if (clientsStatus == null) {

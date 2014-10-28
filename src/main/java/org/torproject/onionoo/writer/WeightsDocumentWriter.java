@@ -3,11 +3,9 @@
 package org.torproject.onionoo.writer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
@@ -17,56 +15,33 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
+import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.docs.WeightsDocument;
 import org.torproject.onionoo.docs.WeightsStatus;
-import org.torproject.onionoo.updater.DescriptorSource;
-import org.torproject.onionoo.updater.DescriptorSourceFactory;
-import org.torproject.onionoo.updater.DescriptorType;
-import org.torproject.onionoo.updater.FingerprintListener;
 import org.torproject.onionoo.util.TimeFactory;
 
-public class WeightsDocumentWriter implements FingerprintListener,
-    DocumentWriter {
+public class WeightsDocumentWriter implements DocumentWriter {
 
   private final static Logger log = LoggerFactory.getLogger(
       WeightsDocumentWriter.class);
-
-  private DescriptorSource descriptorSource;
 
   private DocumentStore documentStore;
 
   private long now;
 
   public WeightsDocumentWriter() {
-    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
     this.now = TimeFactory.getTime().currentTimeMillis();
-    this.registerFingerprintListeners();
-  }
-
-  private void registerFingerprintListeners() {
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.RELAY_CONSENSUSES);
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.RELAY_SERVER_DESCRIPTORS);
-  }
-
-  private Set<String> updateWeightsDocuments = new HashSet<String>();
-
-  public void processFingerprints(SortedSet<String> fingerprints,
-      boolean relay) {
-    if (relay) {
-      this.updateWeightsDocuments.addAll(fingerprints);
-    }
   }
 
   public void writeDocuments() {
-    this.writeWeightsDataFiles();
-    log.info("Wrote weights document files");
-  }
-
-  private void writeWeightsDataFiles() {
-    for (String fingerprint : this.updateWeightsDocuments) {
+    UpdateStatus updateStatus = this.documentStore.retrieve(
+        UpdateStatus.class, true);
+    long updatedMillis = updateStatus != null ?
+        updateStatus.getUpdatedMillis() : 0L;
+    SortedSet<String> updateWeightsDocuments = this.documentStore.list(
+        WeightsStatus.class, updatedMillis);
+    for (String fingerprint : updateWeightsDocuments) {
       WeightsStatus weightsStatus = this.documentStore.retrieve(
           WeightsStatus.class, true, fingerprint);
       if (weightsStatus == null) {

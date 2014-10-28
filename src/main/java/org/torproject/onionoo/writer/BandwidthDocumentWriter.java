@@ -3,11 +3,9 @@
 package org.torproject.onionoo.writer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
@@ -19,47 +17,31 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
-import org.torproject.onionoo.updater.DescriptorSource;
-import org.torproject.onionoo.updater.DescriptorSourceFactory;
-import org.torproject.onionoo.updater.DescriptorType;
-import org.torproject.onionoo.updater.FingerprintListener;
+import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.TimeFactory;
 
-public class BandwidthDocumentWriter implements FingerprintListener,
-    DocumentWriter{
+public class BandwidthDocumentWriter implements DocumentWriter {
 
   private static final Logger log = LoggerFactory.getLogger(
       BandwidthDocumentWriter.class);
-
-  private DescriptorSource descriptorSource;
 
   private DocumentStore documentStore;
 
   private long now;
 
   public BandwidthDocumentWriter() {
-    this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
     this.now = TimeFactory.getTime().currentTimeMillis();
-    this.registerFingerprintListeners();
-  }
-
-  private void registerFingerprintListeners() {
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.RELAY_EXTRA_INFOS);
-    this.descriptorSource.registerFingerprintListener(this,
-        DescriptorType.BRIDGE_EXTRA_INFOS);
-  }
-
-  private Set<String> updateBandwidthDocuments = new HashSet<String>();
-
-  public void processFingerprints(SortedSet<String> fingerprints,
-      boolean relay) {
-    this.updateBandwidthDocuments.addAll(fingerprints);
   }
 
   public void writeDocuments() {
-    for (String fingerprint : this.updateBandwidthDocuments) {
+    UpdateStatus updateStatus = this.documentStore.retrieve(
+        UpdateStatus.class, true);
+    long updatedMillis = updateStatus != null ?
+        updateStatus.getUpdatedMillis() : 0L;
+    SortedSet<String> updateBandwidthDocuments = this.documentStore.list(
+        BandwidthStatus.class, updatedMillis);
+    for (String fingerprint : updateBandwidthDocuments) {
       BandwidthStatus bandwidthStatus = this.documentStore.retrieve(
           BandwidthStatus.class, true, fingerprint);
       if (bandwidthStatus == null) {

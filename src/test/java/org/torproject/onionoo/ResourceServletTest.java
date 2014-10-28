@@ -210,8 +210,7 @@ public class ResourceServletTest {
   private void createDummyDocumentStore() {
     DummyDocumentStore documentStore = new DummyDocumentStore();
     UpdateStatus updateStatus = new UpdateStatus();
-    updateStatus.setDocumentString(String.valueOf(
-        this.currentTimeMillis));
+    updateStatus.setUpdatedMillis(this.currentTimeMillis);
     documentStore.addDocument(updateStatus, null);
     for (Map.Entry<String, org.torproject.onionoo.docs.SummaryDocument> e :
         this.relays.entrySet()) {
