@@ -18,7 +18,7 @@
     <fileset dir="/usr/share/java">
       <include name="commons-codec-1.6.jar"/>
       <include name="commons-compress-1.4.1.jar"/>
-      <include name="commons-lang-2.6.jar"/>
+      <include name="commons-lang3-3.1.jar"/>
       <include name="gson-2.1.jar"/>
       <include name="junit4-4.10.jar"/>
       <include name="servlet-api-3.0.jar"/>
@@ -101,7 +101,7 @@
         <include name="logback-core-1.0.4.jar"/>
         <include name="commons-codec-1.6.jar"/>
         <include name="commons-compress-1.4.1.jar"/>
-        <include name="commons-lang-2.6.jar"/>
+        <include name="commons-lang3-3.1.jar"/>
         <include name="gson-2.1.jar"/>
       </lib>
       <classes dir="${classes}"/>

@@ -12,7 +12,7 @@ apt-get purge -y openjdk-6-jdk default-jre
 echo "Installing required packages."
 apt-get install -y openjdk-7-jdk
 apt-get install -y libcommons-codec-java libcommons-compress-java \
-libcommons-lang-java libgoogle-gson-java junit4 libservlet3.0-java \
+libcommons-lang3-java libgoogle-gson-java junit4 libservlet3.0-java \
 ant tomcat6 libslf4j-java liblogback-java unzip
 
 echo "Setting up paths and creating symbolic links."
