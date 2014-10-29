@@ -29,16 +29,23 @@ public class SummaryDocumentWriter implements DocumentWriter {
   private int writtenDocuments = 0, deletedDocuments = 0;
 
   public void writeDocuments() {
-    long maxLastSeenMillis = 0L;
+    long relaysLastValidAfterMillis = -1L,
+        bridgesLastPublishedMillis = -1L;
     for (String fingerprint : this.documentStore.list(NodeStatus.class)) {
       NodeStatus nodeStatus = this.documentStore.retrieve(
           NodeStatus.class, true, fingerprint);
-      if (nodeStatus != null &&
-          nodeStatus.getLastSeenMillis() > maxLastSeenMillis) {
-        maxLastSeenMillis = nodeStatus.getLastSeenMillis();
+      if (nodeStatus != null) {
+        if (nodeStatus.isRelay()) {
+          relaysLastValidAfterMillis = Math.max(
+              relaysLastValidAfterMillis, nodeStatus.getLastSeenMillis());
+        } else {
+          bridgesLastPublishedMillis = Math.max(
+              bridgesLastPublishedMillis, nodeStatus.getLastSeenMillis());
+        }
       }
     }
-    long cutoff = maxLastSeenMillis - DateTimeHelper.ONE_WEEK;
+    long cutoff = Math.max(relaysLastValidAfterMillis,
+        bridgesLastPublishedMillis) - DateTimeHelper.ONE_WEEK;
     for (String fingerprint : this.documentStore.list(NodeStatus.class)) {
       NodeStatus nodeStatus = this.documentStore.retrieve(
           NodeStatus.class,
@@ -68,8 +75,10 @@ public class SummaryDocumentWriter implements DocumentWriter {
         }
       }
       long lastSeenMillis = nodeStatus.getLastSeenMillis();
-      boolean running = nodeStatus.getRunning();
       SortedSet<String> relayFlags = nodeStatus.getRelayFlags();
+      boolean running = relayFlags.contains("Running") && (isRelay ?
+          lastSeenMillis == relaysLastValidAfterMillis :
+          lastSeenMillis == bridgesLastPublishedMillis);
       long consensusWeight = nodeStatus.getConsensusWeight();
       String countryCode = nodeStatus.getCountryCode();
       long firstSeenMillis = nodeStatus.getFirstSeenMillis();

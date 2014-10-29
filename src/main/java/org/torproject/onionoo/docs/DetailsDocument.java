@@ -2,8 +2,10 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.docs;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -61,10 +63,11 @@ public class DetailsDocument extends Document {
 
   private List<String> exit_addresses;
   public void setExitAddresses(List<String> exitAddresses) {
-    this.exit_addresses = exitAddresses;
+    this.exit_addresses = !exitAddresses.isEmpty() ? exitAddresses : null;
   }
   public List<String> getExitAddresses() {
-    return this.exit_addresses;
+    return this.exit_addresses == null ? new ArrayList<String>()
+        : this.exit_addresses;
   }
 
   private String dir_address;
@@ -109,11 +112,11 @@ public class DetailsDocument extends Document {
     return this.running;
   }
 
-  private List<String> flags;
-  public void setFlags(List<String> flags) {
+  private SortedSet<String> flags;
+  public void setFlags(SortedSet<String> flags) {
     this.flags = flags;
   }
-  public List<String> getFlags() {
+  public SortedSet<String> getFlags() {
     return this.flags;
   }
 
@@ -198,11 +201,13 @@ public class DetailsDocument extends Document {
   }
 
   private String last_restarted;
-  public void setLastRestarted(long lastRestarted) {
-    this.last_restarted = DateTimeHelper.format(lastRestarted);
+  public void setLastRestarted(Long lastRestarted) {
+    this.last_restarted = (lastRestarted == null ? null :
+        DateTimeHelper.format(lastRestarted));
   }
-  public long getLastRestarted() {
-    return DateTimeHelper.parse(this.last_restarted);
+  public Long getLastRestarted() {
+    return this.last_restarted == null ? null :
+        DateTimeHelper.parse(this.last_restarted);
   }
 
   private Integer bandwidth_rate;
