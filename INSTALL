@@ -11,11 +11,11 @@ $ git clone https://git.torproject.org/onionoo.git /srv/onionoo/
 $ cd /srv/onionoo
 
 
-Install Java 1.6 or higher, ant 1.8 or higher, and Tomcat 6
+Install Java 1.7 or higher, ant 1.8 or higher, and Tomcat 6
 -----------------------------------------------------------
 
 $ javac -version
-javac 1.6.0_26
+javac 1.7.0_65
 
 $ ant -version
 Apache Ant version 1.8.0 compiled on March 11 2010
@@ -24,15 +24,10 @@ Apache Ant version 1.8.0 compiled on March 11 2010
 Provide required .jar files
 ---------------------------
 
-Download or build the following .jar files and put them in the lib/
-directory:
-
-- Apache Commons Codec 1.4
-- Apache Commons Compress 1.4.1
-- Apache Commons Lang 2.6
-- Servlet API, e.g., from Tomcat 6
-- Tor Metrics Descriptor Library, metrics-lib
-- Gson 2.2.3
+Download .jar files listed in the build.xml classpath.  Onionoo usually
+uses Debian stable provided libraries; see vagrant/bootstrap.sh for Debian
+package names.  If you download .jar files elsewhere, please edit the
+corresponding paths in build.xml.
 
 Attempt to compile the Java sources to make sure that everything works
 correctly:
@@ -66,22 +61,6 @@ $ unzip GeoIPASNum2.zip
 Change back to the root working directory:
 
 $ cd ../
-
-
-Test the rsync of descriptors from metrics.torproject.org
----------------------------------------------------------
-
-Run the initial rsync:
-
-$ rsync -arz metrics.torproject.org::metrics-recent in
-
-The result should be around 1G of data in the in/ directory, as of January
-2012.
-
-(If you want to pre-populate bandwidth and weights data with archived
-data, download the tarballs from https://metrics.torproject.org/data.html
-and process them one after the other.  There is no requirement to process
-data in any given order.)
 
 
 Test the hourly data processing process
