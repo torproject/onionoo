@@ -230,8 +230,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         DetailsStatus.class, true, fingerprint);
     if (detailsStatus == null) {
       detailsStatus = new DetailsStatus();
-    } else if (detailsStatus.getDescPublished() <=
-        descriptor.getPublishedMillis()) {
+    } else if (descriptor.getPublishedMillis() <=
+        detailsStatus.getDescPublished()) {
       return;
     }
     long lastRestartedMillis = descriptor.getPublishedMillis()
