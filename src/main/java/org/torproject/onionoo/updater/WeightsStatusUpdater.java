@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
-import org.torproject.descriptor.ServerDescriptor;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.WeightsStatus;
@@ -33,14 +32,10 @@ public class WeightsStatusUpdater implements DescriptorListener,
   private void registerDescriptorListeners() {
     this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.RELAY_CONSENSUSES);
-    this.descriptorSource.registerDescriptorListener(this,
-        DescriptorType.RELAY_SERVER_DESCRIPTORS);
   }
 
   public void processDescriptor(Descriptor descriptor, boolean relay) {
-    if (descriptor instanceof ServerDescriptor) {
-      this.processRelayServerDescriptor((ServerDescriptor) descriptor);
-    } else if (descriptor instanceof RelayNetworkStatusConsensus) {
+    if (descriptor instanceof RelayNetworkStatusConsensus) {
       this.processRelayNetworkConsensus(
           (RelayNetworkStatusConsensus) descriptor);
     }
@@ -59,25 +54,6 @@ public class WeightsStatusUpdater implements DescriptorListener,
     this.updateWeightsHistory(validAfterMillis, freshUntilMillis,
         pathSelectionWeights);
   }
-
-  private void processRelayServerDescriptor(
-      ServerDescriptor serverDescriptor) {
-    String digest = serverDescriptor.getServerDescriptorDigest().
-        toUpperCase();
-    int advertisedBandwidth = Math.min(Math.min(
-        serverDescriptor.getBandwidthBurst(),
-        serverDescriptor.getBandwidthObserved()),
-        serverDescriptor.getBandwidthRate());
-    String fingerprint = serverDescriptor.getFingerprint();
-    WeightsStatus weightsStatus = this.documentStore.retrieve(
-        WeightsStatus.class, true, fingerprint);
-    if (weightsStatus == null) {
-      weightsStatus = new WeightsStatus();
-    }
-    weightsStatus.getAdvertisedBandwidths().put(digest,
-        advertisedBandwidth);
-    this.documentStore.store(weightsStatus, fingerprint);
-}
 
   private void updateWeightsHistory(long validAfterMillis,
       long freshUntilMillis,
@@ -125,12 +101,10 @@ public class WeightsStatusUpdater implements DescriptorListener,
       }
     }
     SortedMap<String, Double>
-        advertisedBandwidths = new TreeMap<String, Double>(),
         consensusWeights = new TreeMap<String, Double>(),
         guardWeights = new TreeMap<String, Double>(),
         middleWeights = new TreeMap<String, Double>(),
         exitWeights = new TreeMap<String, Double>();
-    double totalAdvertisedBandwidth = 0.0;
     double totalConsensusWeight = 0.0;
     double totalGuardWeight = 0.0;
     double totalMiddleWeight = 0.0;
@@ -140,21 +114,6 @@ public class WeightsStatusUpdater implements DescriptorListener,
       String fingerprint = relay.getFingerprint();
       if (!relay.getFlags().contains("Running")) {
         continue;
-      }
-      String digest = relay.getDescriptor().toUpperCase();
-      WeightsStatus weightsStatus = this.documentStore.retrieve(
-          WeightsStatus.class, true, fingerprint);
-      if (weightsStatus != null &&
-          weightsStatus.getAdvertisedBandwidths() != null &&
-          weightsStatus.getAdvertisedBandwidths().containsKey(digest)) {
-        /* Read advertised bandwidth from weights status file.  Server
-         * descriptors are parsed before consensuses, so we're sure that
-         * if there's a server descriptor for this relay, it'll be
-         * contained in the weights status file by now. */
-        double advertisedBandwidth =
-            (double) weightsStatus.getAdvertisedBandwidths().get(digest);
-        advertisedBandwidths.put(fingerprint, advertisedBandwidth);
-        totalAdvertisedBandwidth += advertisedBandwidth;
       }
       if (relay.getBandwidth() >= 0L) {
         double consensusWeight = (double) relay.getBandwidth();
@@ -195,10 +154,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
     }
     SortedMap<String, double[]> pathSelectionProbabilities =
         new TreeMap<String, double[]>();
-    SortedSet<String> fingerprints = new TreeSet<String>();
-    fingerprints.addAll(consensusWeights.keySet());
-    fingerprints.addAll(advertisedBandwidths.keySet());
-    for (String fingerprint : fingerprints) {
+    for (String fingerprint : consensusWeights.keySet()) {
       double[] probabilities = new double[] { -1.0, -1.0, -1.0, -1.0,
           -1.0, -1.0, -1.0 };
       if (consensusWeights.containsKey(fingerprint) &&
@@ -221,12 +177,6 @@ public class WeightsStatusUpdater implements DescriptorListener,
           totalExitWeight > 0.0) {
         probabilities[4] = exitWeights.get(fingerprint) /
             totalExitWeight;
-      }
-      if (advertisedBandwidths.containsKey(fingerprint) &&
-          totalAdvertisedBandwidth > 0.0) {
-        probabilities[0] = advertisedBandwidths.get(fingerprint)
-            / totalAdvertisedBandwidth;
-        probabilities[5] = advertisedBandwidths.get(fingerprint);
       }
       pathSelectionProbabilities.put(fingerprint, probabilities);
     }

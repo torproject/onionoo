@@ -106,7 +106,8 @@ public class DescriptorSource {
 
   public void readDescriptors() {
     /* Careful when changing the order of parsing descriptor types!  The
-     * various status updaters may base assumptions on this order. */
+     * various status updaters may base assumptions on this order.  With
+     * #13674 being implemented, this may not be the case anymore. */
 
     log.debug("Reading " + DescriptorType.RELAY_SERVER_DESCRIPTORS
         + " ...");

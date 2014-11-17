@@ -13,13 +13,6 @@ public class WeightsDocument extends Document {
   }
 
   @SuppressWarnings("unused")
-  private Map<String, GraphHistory> advertised_bandwidth_fraction;
-  public void setAdvertisedBandwidthFraction(
-      Map<String, GraphHistory> advertisedBandwidthFraction) {
-    this.advertised_bandwidth_fraction = advertisedBandwidthFraction;
-  }
-
-  @SuppressWarnings("unused")
   private Map<String, GraphHistory> consensus_weight_fraction;
   public void setConsensusWeightFraction(
       Map<String, GraphHistory> consensusWeightFraction) {
@@ -45,13 +38,6 @@ public class WeightsDocument extends Document {
   public void setExitProbability(
       Map<String, GraphHistory> exitProbability) {
     this.exit_probability = exitProbability;
-  }
-
-  @SuppressWarnings("unused")
-  private Map<String, GraphHistory> advertised_bandwidth;
-  public void setAdvertisedBandwidth(
-      Map<String, GraphHistory> advertisedBandwidth) {
-    this.advertised_bandwidth = advertisedBandwidth;
   }
 
   @SuppressWarnings("unused")

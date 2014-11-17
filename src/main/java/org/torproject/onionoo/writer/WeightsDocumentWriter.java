@@ -105,8 +105,6 @@ public class WeightsDocumentWriter implements FingerprintListener,
       SortedMap<long[], double[]> history) {
     WeightsDocument weightsDocument = new WeightsDocument();
     weightsDocument.setFingerprint(fingerprint);
-    weightsDocument.setAdvertisedBandwidthFraction(
-        this.compileGraphType(history, 0));
     weightsDocument.setConsensusWeightFraction(
         this.compileGraphType(history, 1));
     weightsDocument.setGuardProbability(
@@ -115,8 +113,6 @@ public class WeightsDocumentWriter implements FingerprintListener,
         this.compileGraphType(history, 3));
     weightsDocument.setExitProbability(
         this.compileGraphType(history, 4));
-    weightsDocument.setAdvertisedBandwidth(
-        this.compileGraphType(history, 5));
     weightsDocument.setConsensusWeight(
         this.compileGraphType(history, 6));
     return weightsDocument;

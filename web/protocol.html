@@ -1762,7 +1762,7 @@ hexadecimal characters.
 </li>
 
 <li>
-<b>advertised_bandwidth_fraction</b>
+<b><font color="red">advertised_bandwidth_fraction</font></b>
 <code class="typeof">object</code>
 <span class="required-false">optional</span>
 <p>
@@ -1771,6 +1771,20 @@ of this relay compared to the total advertised bandwidth in the network.
 If there were no bandwidth authorities, this fraction would be a very
 rough approximation of the probability of this relay to be selected by
 clients.
+<font color="red">This field was removed on November 16, 2014.</font>
+</p>
+</li>
+
+<li>
+<b>consensus_weight_fraction</b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+History object containing the
+fraction of this relay's consensus weight compared to the sum of all
+consensus weights in the network.
+This fraction is a very rough approximation of the probability of this
+relay to be selected by clients.
 Keys are string representation of the time period covered by the graph
 history object.
 Keys are fixed strings <strong>"1_week"</strong>,
@@ -1788,21 +1802,6 @@ running less than 20% of a given time period.
 </li>
 
 <li>
-<b>consensus_weight_fraction</b>
-<code class="typeof">object</code>
-<span class="required-false">optional</span>
-<p>
-History object containing the
-fraction of this relay's consensus weight compared to the sum of all
-consensus weights in the network.
-This fraction is a very rough approximation of the probability of this
-relay to be selected by clients.
-The specification of this history object is similar to that in the
-<strong>advertised_bandwidth_fraction</strong> field above.
-</p>
-</li>
-
-<li>
 <b>guard_probability</b>
 <code class="typeof">object</code>
 <span class="required-false">optional</span>
@@ -1814,7 +1813,7 @@ and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
 The specification of this history object is similar to that in the
-<strong>advertised_bandwidth_fraction</strong> field above.
+<strong>consensus_weight_fraction</strong> field above.
 </p>
 </li>
 
@@ -1830,7 +1829,7 @@ and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
 The specification of this history object is similar to that in the
-<strong>advertised_bandwidth_fraction</strong> field above.
+<strong>consensus_weight_fraction</strong> field above.
 </p>
 </li>
 
@@ -1846,18 +1845,19 @@ and bandwidth weights in the consensus.
 Path selection depends on more factors, so that this probability can only
 be an approximation.
 The specification of this history object is similar to that in the
-<strong>advertised_bandwidth_fraction</strong> field above.
+<strong>consensus_weight_fraction</strong> field above.
 </p>
 </li>
 
 <li>
-<b>advertised_bandwidth</b>
+<b><font color="red">advertised_bandwidth</font></b>
 <code class="typeof">object</code>
 <span class="required-false">optional</span>
 <p>
 History object containing the absolute advertised bandwidth of this relay.
 The specification of this history object is similar to that in the
-<strong>advertised_bandwidth_fraction</strong> field above.
+<strong>consensus_weight_fraction</strong> field above.
+<font color="red">This field was removed on November 16, 2014.</font>
 </p>
 </li>
 
@@ -1868,7 +1868,7 @@ The specification of this history object is similar to that in the
 <p>
 History object containing the absolute consensus weight of this relay.
 The specification of this history object is similar to that in the
-<strong>advertised_bandwidth_fraction</strong> field above.
+<strong>consensus_weight_fraction</strong> field above.
 </p>
 </li>
 

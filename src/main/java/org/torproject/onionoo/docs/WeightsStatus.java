@@ -1,7 +1,6 @@
 package org.torproject.onionoo.docs;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.SortedMap;
@@ -37,22 +36,14 @@ public class WeightsStatus extends Document {
     return this.history;
   }
 
-  private Map<String, Integer> advertisedBandwidths =
-      new HashMap<String, Integer>();
-  public Map<String, Integer> getAdvertisedBandwidths() {
-    return this.advertisedBandwidths;
-  }
-
   public void fromDocumentString(String documentString) {
     Scanner s = new Scanner(documentString);
     while (s.hasNextLine()) {
       String line = s.nextLine();
       String[] parts = line.split(" ");
       if (parts.length == 2) {
-        String descriptorDigest = parts[0];
-        int advertisedBandwidth = Integer.parseInt(parts[1]);
-        this.advertisedBandwidths.put(descriptorDigest,
-            advertisedBandwidth);
+        /* Skip lines containing descriptor digest and advertised
+         * bandwidth. */
         continue;
       }
       if (parts.length != 9 && parts.length != 11) {
@@ -75,14 +66,12 @@ public class WeightsStatus extends Document {
         break;
       }
       long[] interval = new long[] { validAfterMillis, freshUntilMillis };
-      double[] weights = new double[] {
-          Double.parseDouble(parts[4]),
+      double[] weights = new double[] { -1.0,
           Double.parseDouble(parts[5]),
           Double.parseDouble(parts[6]),
           Double.parseDouble(parts[7]),
           Double.parseDouble(parts[8]), -1.0, -1.0 };
       if (parts.length == 11) {
-        weights[5] = Double.parseDouble(parts[9]);
         weights[6] = Double.parseDouble(parts[10]);
       }
       this.history.put(interval, weights);
@@ -176,17 +165,16 @@ public class WeightsStatus extends Document {
 
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
-    for (Map.Entry<String, Integer> e :
-        this.advertisedBandwidths.entrySet()) {
-      sb.append(e.getKey() + " " + String.valueOf(e.getValue()) + "\n");
-    }
     for (Map.Entry<long[], double[]> e : history.entrySet()) {
       long[] fresh = e.getKey();
       double[] weights = e.getValue();
       sb.append(DateTimeHelper.format(fresh[0]) + " "
           + DateTimeHelper.format(fresh[1]));
-      for (double weight : weights) {
-        sb.append(String.format(" %.12f", weight));
+      for (int i = 0; i < weights.length; i++) {
+        sb.append(" ");
+        if (i != 0 && i != 5) {
+          sb.append(String.format("%.12f", weights[i]));
+        }
       }
       sb.append("\n");
     }
