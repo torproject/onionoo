@@ -217,15 +217,6 @@ public class NodeStatus extends Document {
     return this.lastRdnsLookup;
   }
 
-  private double advertisedBandwidthFraction = -1.0;
-  public void setAdvertisedBandwidthFraction(
-      double advertisedBandwidthFraction) {
-    this.advertisedBandwidthFraction = advertisedBandwidthFraction;
-  }
-  public double getAdvertisedBandwidthFraction() {
-    return this.advertisedBandwidthFraction;
-  }
-
   private double consensusWeightFraction = -1.0;
   public void setConsensusWeightFraction(double consensusWeightFraction) {
     this.consensusWeightFraction = consensusWeightFraction;

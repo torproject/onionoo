@@ -249,9 +249,6 @@ public class ResponseBuilder {
             dd.setPlatform(detailsDocument.getPlatform());
           } else if (field.equals("family")) {
             dd.setFamily(detailsDocument.getFamily());
-          } else if (field.equals("advertised_bandwidth_fraction")) {
-            dd.setAdvertisedBandwidthFraction(
-                detailsDocument.getAdvertisedBandwidthFraction());
           } else if (field.equals("consensus_weight_fraction")) {
             dd.setConsensusWeightFraction(
                 detailsDocument.getConsensusWeightFraction());

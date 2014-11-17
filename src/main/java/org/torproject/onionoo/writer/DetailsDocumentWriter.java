@@ -115,8 +115,6 @@ public class DetailsDocumentWriter implements FingerprintListener,
       detailsDocument.setAsName(entry.getASName());
       detailsDocument.setConsensusWeight(entry.getConsensusWeight());
       detailsDocument.setHostName(entry.getHostName());
-      detailsDocument.setAdvertisedBandwidthFraction(
-          (float) entry.getAdvertisedBandwidthFraction());
       detailsDocument.setConsensusWeightFraction(
           (float) entry.getConsensusWeightFraction());
       detailsDocument.setGuardProbability(

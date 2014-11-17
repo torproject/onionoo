@@ -287,18 +287,6 @@ public class DetailsDocument extends Document {
     return this.family;
   }
 
-  private Float advertised_bandwidth_fraction;
-  public void setAdvertisedBandwidthFraction(
-      Float advertisedBandwidthFraction) {
-    if (advertisedBandwidthFraction == null ||
-        advertisedBandwidthFraction >= 0.0) {
-      this.advertised_bandwidth_fraction = advertisedBandwidthFraction;
-    }
-  }
-  public Float getAdvertisedBandwidthFraction() {
-    return this.advertised_bandwidth_fraction;
-  }
-
   private Float consensus_weight_fraction;
   public void setConsensusWeightFraction(Float consensusWeightFraction) {
     if (consensusWeightFraction == null ||

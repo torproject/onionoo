@@ -467,12 +467,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           + "going to be 0.0.");
     }
     SortedMap<String, Double>
-        advertisedBandwidths = new TreeMap<String, Double>(),
         consensusWeights = new TreeMap<String, Double>(),
         guardWeights = new TreeMap<String, Double>(),
         middleWeights = new TreeMap<String, Double>(),
         exitWeights = new TreeMap<String, Double>();
-    double totalAdvertisedBandwidth = 0.0;
     double totalConsensusWeight = 0.0;
     double totalGuardWeight = 0.0;
     double totalMiddleWeight = 0.0;
@@ -486,16 +484,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       boolean isExit = relay.getRelayFlags().contains("Exit") &&
           !relay.getRelayFlags().contains("BadExit");
       boolean isGuard = relay.getRelayFlags().contains("Guard");
-      DetailsStatus detailsStatus = this.documentStore.retrieve(
-          DetailsStatus.class, true, fingerprint);
-      if (detailsStatus != null) {
-        double advertisedBandwidth =
-            detailsStatus.getAdvertisedBandwidth();
-        if (advertisedBandwidth >= 0.0) {
-          advertisedBandwidths.put(fingerprint, advertisedBandwidth);
-          totalAdvertisedBandwidth += advertisedBandwidth;
-        }
-      }
       double consensusWeight = (double) relay.getConsensusWeight();
       consensusWeights.put(fingerprint, consensusWeight);
       totalConsensusWeight += consensusWeight;
@@ -531,10 +519,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     for (Map.Entry<String, NodeStatus> e : this.relays.entrySet()) {
       String fingerprint = e.getKey();
       NodeStatus relay = e.getValue();
-      if (advertisedBandwidths.containsKey(fingerprint)) {
-        relay.setAdvertisedBandwidthFraction(advertisedBandwidths.get(
-            fingerprint) / totalAdvertisedBandwidth);
-      }
       if (consensusWeights.containsKey(fingerprint)) {
         relay.setConsensusWeightFraction(consensusWeights.get(fingerprint)
             / totalConsensusWeight);
