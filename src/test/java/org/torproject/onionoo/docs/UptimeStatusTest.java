@@ -72,7 +72,7 @@ public class UptimeStatusTest {
   @Test()
   public void testGabelmooFillInGaps() {
     UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.fromDocumentString(RELAY_UPTIME_SAMPLE);
+    uptimeStatus.setFromDocumentString(RELAY_UPTIME_SAMPLE);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-09-09 02:00:00"),
         DateTimeHelper.parse("2013-12-20 00:00:00") })));
@@ -95,7 +95,7 @@ public class UptimeStatusTest {
   @Test()
   public void testAddExistingHourToIntervalStart() {
     UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.fromDocumentString(RELAY_UPTIME_SAMPLE);
+    uptimeStatus.setFromDocumentString(RELAY_UPTIME_SAMPLE);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-07-22 17:00:00") })));
     uptimeStatus.compressHistory();
@@ -106,7 +106,7 @@ public class UptimeStatusTest {
   @Test()
   public void testAddExistingHourToIntervalEnd() {
     UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.fromDocumentString(RELAY_UPTIME_SAMPLE);
+    uptimeStatus.setFromDocumentString(RELAY_UPTIME_SAMPLE);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-09-09 01:00:00") })));
     uptimeStatus.compressHistory();
@@ -117,7 +117,7 @@ public class UptimeStatusTest {
   @Test()
   public void testTwoHoursOverlappingWithIntervalStart() {
     UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.fromDocumentString(RELAY_UPTIME_SAMPLE);
+    uptimeStatus.setFromDocumentString(RELAY_UPTIME_SAMPLE);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-07-22 16:00:00"),
         DateTimeHelper.parse("2013-07-22 17:00:00")})));
@@ -138,7 +138,7 @@ public class UptimeStatusTest {
   @Test()
   public void testTwoHoursOverlappingWithIntervalEnd() {
     UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.fromDocumentString(RELAY_UPTIME_SAMPLE);
+    uptimeStatus.setFromDocumentString(RELAY_UPTIME_SAMPLE);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-09-09 01:00:00"),
         DateTimeHelper.parse("2013-09-09 02:00:00")})));
@@ -163,7 +163,7 @@ public class UptimeStatusTest {
   @Test()
   public void testAddRelayUptimeHours() {
     UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.fromDocumentString(RELAYS_AND_BRIDGES_UPTIME_SAMPLE);
+    uptimeStatus.setFromDocumentString(RELAYS_AND_BRIDGES_UPTIME_SAMPLE);
     uptimeStatus.addToHistory(true, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-07-22 16:00:00"),
         DateTimeHelper.parse("2014-03-21 20:00:00")})));
@@ -184,7 +184,7 @@ public class UptimeStatusTest {
   @Test()
   public void testAddBridgeUptimeHours() {
     UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.fromDocumentString(RELAYS_AND_BRIDGES_UPTIME_SAMPLE);
+    uptimeStatus.setFromDocumentString(RELAYS_AND_BRIDGES_UPTIME_SAMPLE);
     uptimeStatus.addToHistory(false, new TreeSet<Long>(Arrays.asList(
         new Long[] { DateTimeHelper.parse("2013-07-22 16:00:00"),
         DateTimeHelper.parse("2014-03-21 20:00:00")})));

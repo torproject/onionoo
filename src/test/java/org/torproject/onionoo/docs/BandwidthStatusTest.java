@@ -99,7 +99,7 @@ public class BandwidthStatusTest {
     String existingLines =
         "w 2014-07-31 23:52:22 2014-08-01 00:07:22 4096\n"
         + "w 2014-08-01 00:07:22 2014-08-01 00:22:22 30720\n";
-    bandwidthStatus.fromDocumentString(existingLines);
+    bandwidthStatus.setFromDocumentString(existingLines);
     bandwidthStatus.addToWriteHistory(new DummyBandwidthHistory(
         "write-history 2014-08-01 00:37:22 (900 s) 0"));
     assertEquals("New interval should be appended.",
@@ -113,7 +113,7 @@ public class BandwidthStatusTest {
     String existingLines =
         "w 2014-08-01 00:07:22 2014-08-01 00:22:22 30720\n"
         + "w 2014-08-01 00:22:22 2014-08-01 00:37:22 4096\n";
-    bandwidthStatus.fromDocumentString(existingLines);
+    bandwidthStatus.setFromDocumentString(existingLines);
     bandwidthStatus.compressHistory();
     assertEquals("Two recent intervals should not be compressed.",
         existingLines, bandwidthStatus.toDocumentString());
@@ -122,7 +122,7 @@ public class BandwidthStatusTest {
   @Test()
   public void testCompressOldIntervals() {
     BandwidthStatus bandwidthStatus = new BandwidthStatus();
-    bandwidthStatus.fromDocumentString(
+    bandwidthStatus.setFromDocumentString(
         "w 2013-08-01 00:07:22 2013-08-01 00:22:22 30720\n"
         + "w 2013-08-01 00:22:22 2013-08-01 00:37:22 4096\n");
     bandwidthStatus.compressHistory();
@@ -137,7 +137,7 @@ public class BandwidthStatusTest {
     String statusLines =
         "w 2013-07-31 23:52:22 2013-08-01 00:07:22 4096\n"
         + "w 2013-08-01 00:07:22 2013-08-01 00:22:22 30720\n";
-    bandwidthStatus.fromDocumentString(statusLines);
+    bandwidthStatus.setFromDocumentString(statusLines);
     bandwidthStatus.compressHistory();
     assertEquals("Two old intervals should not be merged over month end.",
         statusLines, bandwidthStatus.toDocumentString());

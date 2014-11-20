@@ -36,7 +36,7 @@ public class WeightsStatus extends Document {
     return this.history;
   }
 
-  public void fromDocumentString(String documentString) {
+  public void setFromDocumentString(String documentString) {
     Scanner s = new Scanner(documentString);
     while (s.hasNextLine()) {
       String line = s.nextLine();

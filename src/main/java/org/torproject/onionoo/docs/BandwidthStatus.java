@@ -43,7 +43,7 @@ public class BandwidthStatus extends Document {
     return this.readHistory;
   }
 
-  public void fromDocumentString(String documentString) {
+  public void setFromDocumentString(String documentString) {
     Scanner s = new Scanner(documentString);
     while (s.hasNextLine()) {
       String line = s.nextLine();

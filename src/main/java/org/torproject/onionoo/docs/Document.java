@@ -12,7 +12,7 @@ public abstract class Document {
     return this.documentString;
   }
 
-  public void fromDocumentString(String documentString) {
+  public void setFromDocumentString(String documentString) {
     /* Subclasses may override this method to parse documentString. */
   }
 

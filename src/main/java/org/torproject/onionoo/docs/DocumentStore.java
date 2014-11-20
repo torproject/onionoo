@@ -452,7 +452,7 @@ public class DocumentStore {
     T result = null;
     try {
       result = documentType.newInstance();
-      result.fromDocumentString(documentString);
+      result.setFromDocumentString(documentString);
     } catch (InstantiationException e) {
       /* Handle below. */
       log.error(e.getMessage(), e);

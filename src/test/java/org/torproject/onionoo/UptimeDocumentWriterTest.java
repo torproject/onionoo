@@ -66,10 +66,10 @@ public class UptimeDocumentWriterTest {
   private void addStatusOneWeekSample(String allRelaysUptime,
       String gabelmooUptime) {
     UptimeStatus status = new UptimeStatus();
-    status.fromDocumentString(allRelaysUptime);
+    status.setFromDocumentString(allRelaysUptime);
     this.documentStore.addDocument(status, ALL_RELAYS_FINGERPRINT);
     status = new UptimeStatus();
-    status.fromDocumentString(gabelmooUptime);
+    status.setFromDocumentString(gabelmooUptime);
     this.documentStore.addDocument(status, GABELMOO_FINGERPRINT);
     this.descriptorSource.addFingerprint(DescriptorType.RELAY_CONSENSUSES,
         GABELMOO_FINGERPRINT);

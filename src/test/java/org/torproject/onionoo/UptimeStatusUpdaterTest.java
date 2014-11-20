@@ -90,7 +90,8 @@ public class UptimeStatusUpdaterTest {
 
   private void addAllRelaysAndBridgesUptimeSample() {
     UptimeStatus uptimeStatus = new UptimeStatus();
-    uptimeStatus.fromDocumentString(ALL_RELAYS_AND_BRIDGES_UPTIME_SAMPLE);
+    uptimeStatus.setFromDocumentString(
+        ALL_RELAYS_AND_BRIDGES_UPTIME_SAMPLE);
     this.documentStore.addDocument(uptimeStatus,
         ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
   }

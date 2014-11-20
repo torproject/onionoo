@@ -40,7 +40,7 @@ public class UptimeStatus extends Document {
     return this.bridgeHistory;
   }
 
-  public void fromDocumentString(String documentString) {
+  public void setFromDocumentString(String documentString) {
     Scanner s = new Scanner(documentString);
     while (s.hasNextLine()) {
       String line = s.nextLine();
