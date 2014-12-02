@@ -130,6 +130,25 @@ public class DetailsStatus extends Document {
     return this.hibernating;
   }
 
+  /* From most recently published extra-info descriptor: */
+
+  private Long extra_info_desc_published;
+  public void setExtraInfoDescPublished(Long extraInfoDescPublished) {
+    this.extra_info_desc_published = extraInfoDescPublished;
+  }
+  public Long getExtraInfoDescPublished() {
+    return this.extra_info_desc_published;
+  }
+
+  private List<String> transports;
+  public void setTransports(List<String> transports) {
+    this.transports = (transports != null && !transports.isEmpty()) ?
+        transports : null;
+  }
+  public List<String> getTransports() {
+    return this.transports;
+  }
+
   /* From network status entries: */
 
   private boolean is_relay;

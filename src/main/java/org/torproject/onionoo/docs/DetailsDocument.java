@@ -356,5 +356,14 @@ public class DetailsDocument extends Document {
   public String getPoolAssignment() {
     return this.pool_assignment;
   }
+
+  private List<String> transports;
+  public void setTransports(List<String> transports) {
+    this.transports = (transports != null && !transports.isEmpty()) ?
+        transports : null;
+  }
+  public List<String> getTransports() {
+    return this.transports;
+  }
 }
 

@@ -20,6 +20,7 @@ import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExitList;
 import org.torproject.descriptor.ExitListEntry;
+import org.torproject.descriptor.ExtraInfoDescriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.descriptor.ServerDescriptor;
@@ -113,6 +114,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
     this.descriptorSource.registerDescriptorListener(this,
+        DescriptorType.BRIDGE_EXTRA_INFOS);
+    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
     this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.EXIT_LISTS);
@@ -132,6 +135,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           (RelayNetworkStatusConsensus) descriptor);
     } else if (descriptor instanceof ServerDescriptor && !relay) {
       this.processBridgeServerDescriptor((ServerDescriptor) descriptor);
+    } else if (descriptor instanceof ExtraInfoDescriptor && !relay) {
+      this.processBridgeExtraInfoDescriptor(
+          (ExtraInfoDescriptor) descriptor);
     } else if (descriptor instanceof BridgePoolAssignment) {
       this.processBridgePoolAssignment((BridgePoolAssignment) descriptor);
     } else if (descriptor instanceof BridgeNetworkStatus) {
@@ -287,6 +293,24 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     detailsStatus.setPlatform(descriptor.getPlatform());
     this.documentStore.store(detailsStatus, fingerprint);
     this.updatedNodes.add(fingerprint);
+  }
+
+  private void processBridgeExtraInfoDescriptor(
+      ExtraInfoDescriptor descriptor) {
+    String fingerprint = descriptor.getFingerprint();
+    DetailsStatus detailsStatus = this.documentStore.retrieve(
+        DetailsStatus.class, true, fingerprint);
+    if (detailsStatus == null) {
+      detailsStatus = new DetailsStatus();
+    } else if (null == detailsStatus.getExtraInfoDescPublished() ||
+        descriptor.getPublishedMillis() >
+        detailsStatus.getExtraInfoDescPublished()) {
+      detailsStatus.setExtraInfoDescPublished(
+          descriptor.getPublishedMillis());
+      detailsStatus.setTransports(descriptor.getTransports());
+      this.documentStore.store(detailsStatus, fingerprint);
+      this.updatedNodes.add(fingerprint);
+    }
   }
 
   private Map<String, String> bridgePoolAssignments =
