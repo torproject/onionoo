@@ -16,7 +16,6 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.torproject.descriptor.BridgeNetworkStatus;
-import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExitList;
 import org.torproject.descriptor.ExitListEntry;
@@ -116,8 +115,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.BRIDGE_EXTRA_INFOS);
     this.descriptorSource.registerDescriptorListener(this,
-        DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
-    this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.EXIT_LISTS);
   }
 
@@ -138,8 +135,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     } else if (descriptor instanceof ExtraInfoDescriptor && !relay) {
       this.processBridgeExtraInfoDescriptor(
           (ExtraInfoDescriptor) descriptor);
-    } else if (descriptor instanceof BridgePoolAssignment) {
-      this.processBridgePoolAssignment((BridgePoolAssignment) descriptor);
     } else if (descriptor instanceof BridgeNetworkStatus) {
       this.processBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
     }
@@ -311,14 +306,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       this.documentStore.store(detailsStatus, fingerprint);
       this.updatedNodes.add(fingerprint);
     }
-  }
-
-  private Map<String, String> bridgePoolAssignments =
-      new HashMap<String, String>();
-
-  private void processBridgePoolAssignment(
-      BridgePoolAssignment bridgePoolAssignment) {
-    this.bridgePoolAssignments.putAll(bridgePoolAssignment.getEntries());
   }
 
   private void processBridgeNetworkStatus(BridgeNetworkStatus status) {
@@ -731,11 +718,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         String hostName = this.rdnsLookupResults.get(fingerprint);
         detailsStatus.setHostName(hostName);
         nodeStatus.setLastRdnsLookup(this.startedRdnsLookups);
-      }
-
-      if (this.bridgePoolAssignments.containsKey(fingerprint)) {
-        detailsStatus.setPoolAssignment(
-            this.bridgePoolAssignments.get(fingerprint));
       }
 
       detailsStatus.setRelay(nodeStatus.isRelay());

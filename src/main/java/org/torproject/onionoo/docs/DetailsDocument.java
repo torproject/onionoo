@@ -349,14 +349,6 @@ public class DetailsDocument extends Document {
     return this.hibernating;
   }
 
-  private String pool_assignment;
-  public void setPoolAssignment(String poolAssignment) {
-    this.pool_assignment = poolAssignment;
-  }
-  public String getPoolAssignment() {
-    return this.pool_assignment;
-  }
-
   private List<String> transports;
   public void setTransports(List<String> transports) {
     this.transports = (transports != null && !transports.isEmpty()) ?

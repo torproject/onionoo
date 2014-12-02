@@ -290,16 +290,6 @@ public class DetailsStatus extends Document {
     return this.recommended_version;
   }
 
-  /* From bridge pool assignments: */
-
-  private String pool_assignment;
-  public void setPoolAssignment(String poolAssignment) {
-    this.pool_assignment = poolAssignment;
-  }
-  public String getPoolAssignment() {
-    return this.pool_assignment;
-  }
-
   /* From exit lists: */
 
   private Map<String, Long> exit_addresses;

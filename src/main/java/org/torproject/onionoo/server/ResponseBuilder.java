@@ -264,8 +264,6 @@ public class ResponseBuilder {
                 detailsDocument.getRecommendedVersion());
           } else if (field.equals("hibernating")) {
             dd.setHibernating(detailsDocument.getHibernating());
-          } else if (field.equals("pool_assignment")) {
-            dd.setPoolAssignment(detailsDocument.getPoolAssignment());
           } else if (field.equals("transports")) {
             dd.setTransports(detailsDocument.getTransports());
           }

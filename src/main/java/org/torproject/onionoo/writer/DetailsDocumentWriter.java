@@ -150,7 +150,6 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setAdvertisedBandwidth(
         detailsStatus.getAdvertisedBandwidth());
     detailsDocument.setPlatform(detailsStatus.getPlatform());
-    detailsDocument.setPoolAssignment(detailsStatus.getPoolAssignment());
     detailsDocument.setTransports(detailsStatus.getTransports());
     this.documentStore.store(detailsDocument, fingerprint);
   }
