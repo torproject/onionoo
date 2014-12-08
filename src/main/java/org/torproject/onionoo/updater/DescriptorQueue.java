@@ -168,6 +168,8 @@ class DescriptorQueue {
 
   public void writeHistoryFile() {
     if (this.historyFile == null) {
+      log.error("Unable to write history file, possibly because of an "
+          + "unknown descriptor type.  Skipping.");
       return;
     }
     SortedMap<String, Long> excludedAndParsedFiles =

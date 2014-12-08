@@ -6,7 +6,13 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ClientsHistory implements Comparable<ClientsHistory> {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      ClientsHistory.class);
 
   private long startMillis;
   public long getStartMillis() {
@@ -55,20 +61,29 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
       String responseHistoryString) {
     String[] parts = responseHistoryString.split(" ", 8);
     if (parts.length != 8) {
+      log.warn("Invalid number of space-separated strings in clients "
+          + "history: '" + responseHistoryString + "'.  Skipping");
       return null;
     }
     long startMillis = DateTimeHelper.parse(parts[0] + " " + parts[1]);
     long endMillis = DateTimeHelper.parse(parts[2] + " " + parts[3]);
     if (startMillis < 0L || endMillis < 0L) {
+      log.warn("Invalid start or end timestamp in clients history: '"
+          + responseHistoryString + "'.  Skipping.");
       return null;
     }
     if (startMillis >= endMillis) {
+      log.warn("Start timestamp must be smaller than end timestamp in "
+          + "clients history: '" + responseHistoryString
+          + "'.  Skipping.");
       return null;
     }
     double totalResponses = 0.0;
     try {
       totalResponses = Double.parseDouble(parts[4]);
     } catch (NumberFormatException e) {
+      log.warn("Invalid response number format in clients history: '"
+          + responseHistoryString + "'.  Skipping.");
       return null;
     }
     SortedMap<String, Double> responsesByCountry =
@@ -79,6 +94,9 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
         parseResponses(parts[7]);
     if (responsesByCountry == null || responsesByTransport == null ||
         responsesByVersion == null) {
+      log.warn("Invalid format of responses by country, transport, or "
+          + "version in clients history: '" + responseHistoryString
+          + "'.  Skipping.");
       return null;
     }
     return new ClientsHistory(startMillis, endMillis, totalResponses,
@@ -92,12 +110,14 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
       for (String pair : responsesString.split(",")) {
         String[] keyValue = pair.split("=");
         if (keyValue.length != 2) {
+          /* Logged by caller */
           return null;
         }
         double value = 0.0;
         try {
           value = Double.parseDouble(keyValue[1]);
         } catch (NumberFormatException e) {
+          /* Logged by caller */
           return null;
         }
         responses.put(keyValue[0], value);

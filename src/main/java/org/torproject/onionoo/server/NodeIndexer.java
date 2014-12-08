@@ -105,6 +105,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
     synchronized (this) {
       if (updateStatusMillis <= this.lastIndexed) {
+        /* Index on disk is no more recent than the one in memory. */
         return;
       }
     }

@@ -150,6 +150,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     } else if (detailsStatus.getDescPublished() != null &&
         detailsStatus.getDescPublished() >=
         descriptor.getPublishedMillis()) {
+      /* Already parsed more recent server descriptor from this relay. */
       return;
     }
     long lastRestartedMillis = descriptor.getPublishedMillis()
@@ -276,6 +277,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       detailsStatus = new DetailsStatus();
     } else if (descriptor.getPublishedMillis() <=
         detailsStatus.getDescPublished()) {
+      /* Already parsed more recent server descriptor from this bridge. */
       return;
     }
     long lastRestartedMillis = descriptor.getPublishedMillis()

@@ -393,6 +393,9 @@ public class DocumentStore {
     DetailsDocument detailsDocument = this.retrieveDocumentFile(
         DetailsDocument.class, true, fingerprint);
     if (detailsDocument == null) {
+      /* There is no details document available that we could serve as
+       * basis for generating a summary document on-the-fly.  Nothing to
+       * worry about. */
       return null;
     }
     boolean isRelay = detailsDocument.getHashedFingerprint() == null;
@@ -402,6 +405,10 @@ public class DocumentStore {
     String countryCode = null, aSNumber = null, contact = null;
     for (String orAddressAndPort : detailsDocument.getOrAddresses()) {
       if (!orAddressAndPort.contains(":")) {
+        log.warn("Attempt to create summary document from details "
+            + "document for fingerprint " + fingerprint + " failed "
+            + "because of invalid OR address/port: '" + orAddressAndPort
+            + "'.  Not returning a summary document in this case.");
         return null;
       }
       String orAddress = orAddressAndPort.substring(0,
@@ -431,6 +438,7 @@ public class DocumentStore {
       Class<T> documentType, boolean parse, String fingerprint) {
     File documentFile = this.getDocumentFile(documentType, fingerprint);
     if (documentFile == null || !documentFile.exists()) {
+      /* Document file does not exist.  That's okay. */
       return null;
     } else if (documentFile.isDirectory()) {
       log.error("Could not read file '"
@@ -451,6 +459,7 @@ public class DocumentStore {
       bis.close();
       byte[] allData = baos.toByteArray();
       if (allData.length == 0) {
+        /* Document file is empty. */
         return null;
       }
       documentString = new String(allData, "US-ASCII");
@@ -598,6 +607,9 @@ public class DocumentStore {
     File documentFile = null;
     if (fingerprint == null && !documentType.equals(UpdateStatus.class) &&
         !documentType.equals(UptimeStatus.class)) {
+      log.warn("Attempted to locate a document file of type "
+          + documentType.getName() + " without providing a fingerprint.  "
+          + "Such a file does not exist.");
       return null;
     }
     File directory = null;
@@ -685,6 +697,8 @@ public class DocumentStore {
   private void writeNodeStatuses() {
     File directory = this.statusDir;
     if (directory == null) {
+      log.error("Unable to write node statuses without knowing the "
+          + "'status' directory to write to!");
       return;
     }
     File summaryFile = new File(directory, "summary");
@@ -766,6 +780,8 @@ public class DocumentStore {
 
   private void writeUpdateStatus() {
     if (this.outDir == null) {
+      log.error("Unable to write update status file without knowing the "
+          + "'out' directory to write to!");
       return;
     }
     UpdateStatus updateStatus = new UpdateStatus();

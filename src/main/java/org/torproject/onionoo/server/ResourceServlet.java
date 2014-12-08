@@ -372,6 +372,7 @@ public class ResourceServlet extends HttpServlet {
     Matcher searchQueryStringMatcher = searchQueryStringPattern.matcher(
         queryString);
     if (!searchQueryStringMatcher.matches()) {
+      /* Search query contains illegal character(s). */
       return null;
     }
     String parameter = searchQueryStringMatcher.group(1);
@@ -383,6 +384,7 @@ public class ResourceServlet extends HttpServlet {
     }
     for (String searchParameter : searchParameters) {
       if (!searchParameterPattern.matcher(searchParameter).matches()) {
+        /* Illegal search term. */
         return null;
       }
     }
@@ -393,9 +395,11 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^[0-9a-zA-Z]{1,40}$");
   private String parseFingerprintParameter(String parameter) {
     if (!fingerprintParameterPattern.matcher(parameter).matches()) {
+      /* Fingerprint contains non-hex character(s). */
       return null;
     }
     if (parameter.length() != 40) {
+      /* Only full fingerprints are accepted. */
       return null;
     }
     return parameter;
@@ -405,6 +409,8 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^[0-9a-zA-Z]{2}$");
   private String parseCountryCodeParameter(String parameter) {
     if (!countryCodeParameterPattern.matcher(parameter).matches()) {
+      /* Country code contains illegal characters or is shorter/longer
+       * than 2 characters. */
       return null;
     }
     return parameter;
@@ -414,6 +420,7 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^[asAS]{0,2}[0-9]{1,10}$");
   private String parseASNumberParameter(String parameter) {
     if (!aSNumberParameterPattern.matcher(parameter).matches()) {
+      /* AS number contains illegal character(s). */
       return null;
     }
     return parameter;
@@ -423,6 +430,7 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^[a-zA-Z0-9]{1,20}$");
   private String parseFlagParameter(String parameter) {
     if (!flagPattern.matcher(parameter).matches()) {
+      /* Flag contains illegal character(s). */
       return null;
     }
     return parameter;
@@ -431,6 +439,7 @@ public class ResourceServlet extends HttpServlet {
   private static Pattern daysPattern = Pattern.compile("^[0-9-]{1,10}$");
   private int[] parseDaysParameter(String parameter) {
     if (!daysPattern.matcher(parameter).matches()) {
+      /* Days contain illegal character(s). */
       return null;
     }
     int x = 0, y = Integer.MAX_VALUE;
@@ -448,9 +457,11 @@ public class ResourceServlet extends HttpServlet {
         }
       }
     } catch (NumberFormatException e) {
+      /* Invalid format. */
       return null;
     }
     if (x > y) {
+      /* Second number or days must exceed first number. */
       return null;
     }
     return new int[] { x, y };
@@ -459,6 +470,7 @@ public class ResourceServlet extends HttpServlet {
   private String[] parseContactParameter(String parameter) {
     for (char c : parameter.toCharArray()) {
       if (c < 32 || c >= 127) {
+        /* Only accept printable ASCII. */
         return null;
       }
     }
@@ -469,6 +481,7 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^[0-9a-zA-Z_,]*$");
   private String[] parseFieldsParameter(String parameter) {
     if (!fieldsParameterPattern.matcher(parameter).matches()) {
+      /* Fields contain illegal character(s). */
       return null;
     }
     return parameter.split(",");

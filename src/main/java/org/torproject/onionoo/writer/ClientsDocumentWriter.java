@@ -198,6 +198,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       }
     }
     if (firstNonNullIndex < 0) {
+      /* Not a single non-negative value in the data points. */
       return null;
     }
     long firstDataPointMillis = (((this.now - graphInterval)
@@ -273,6 +274,8 @@ public class ClientsDocumentWriter implements DocumentWriter {
     if (foundTwoAdjacentDataPoints) {
       return graphHistory;
     } else {
+      /* There are no two adjacent values in the data points that are
+       * required to draw a line graph. */
       return null;
     }
   }

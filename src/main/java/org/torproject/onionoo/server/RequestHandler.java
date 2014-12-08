@@ -154,6 +154,7 @@ public class RequestHandler {
 
   private void filterByType() {
     if (this.type == null) {
+      /* Not filtering by type. */
       return;
     } else if (this.type.equals("relay")) {
       this.filteredBridges.clear();
@@ -164,6 +165,7 @@ public class RequestHandler {
 
   private void filterByRunning() {
     if (this.running == null) {
+      /* Not filtering by running or not. */
       return;
     }
     boolean runningRequested = this.running.equals("true");
@@ -191,6 +193,7 @@ public class RequestHandler {
 
   private void filterBySearchTerms() {
     if (this.search == null) {
+      /* Not filtering by search terms. */
       return;
     }
     for (String searchTerm : this.search) {
@@ -276,6 +279,7 @@ public class RequestHandler {
 
   private void filterByLookup() {
     if (this.lookup == null) {
+      /* Not filtering by looking up relay or bridge. */
       return;
     }
     String fingerprint = this.lookup;
@@ -293,6 +297,7 @@ public class RequestHandler {
 
   private void filterByFingerprint() {
     if (this.fingerprint == null) {
+      /* Not filtering by fingerprint. */
       return;
     }
     this.filteredRelays.clear();
@@ -311,6 +316,7 @@ public class RequestHandler {
 
   private void filterByCountryCode() {
     if (this.country == null) {
+      /* Not filtering by country code. */
       return;
     }
     String countryCode = this.country.toLowerCase();
@@ -335,6 +341,7 @@ public class RequestHandler {
 
   private void filterByASNumber() {
     if (this.as == null) {
+      /* Not filtering by AS number. */
       return;
     }
     String aSNumber = this.as.toUpperCase();
@@ -361,6 +368,7 @@ public class RequestHandler {
 
   private void filterByFlag() {
     if (this.flag == null) {
+      /* Not filtering by relay flag. */
       return;
     }
     String flag = this.flag.toLowerCase();
@@ -398,6 +406,7 @@ public class RequestHandler {
 
   private void filterNodesByFirstSeenDays() {
     if (this.firstSeenDays == null) {
+      /* Not filtering by first-seen days. */
       return;
     }
     filterNodesByDays(this.filteredRelays,
@@ -408,6 +417,7 @@ public class RequestHandler {
 
   private void filterNodesByLastSeenDays() {
     if (this.lastSeenDays == null) {
+      /* Not filtering by last-seen days. */
       return;
     }
     filterNodesByDays(this.filteredRelays,
@@ -436,6 +446,7 @@ public class RequestHandler {
 
   private void filterByContact() {
     if (this.contact == null) {
+      /* Not filtering by contact information. */
       return;
     }
     Set<String> removeRelays = new HashSet<String>();
@@ -458,6 +469,7 @@ public class RequestHandler {
 
   private void filterByFamily() {
     if (this.family == null) {
+      /* Not filtering by relay family. */
       return;
     }
     Set<String> removeRelays = new HashSet<String>(
@@ -506,6 +518,7 @@ public class RequestHandler {
 
   private void offset() {
     if (this.offset == null) {
+      /* Not skipping first results. */
       return;
     }
     int offsetValue = Integer.parseInt(this.offset);
@@ -522,6 +535,7 @@ public class RequestHandler {
 
   private void limit() {
     if (this.limit == null) {
+      /* Not limiting number of results. */
       return;
     }
     int limitValue = Integer.parseInt(this.limit);

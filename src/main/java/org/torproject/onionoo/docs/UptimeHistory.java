@@ -1,8 +1,13 @@
 package org.torproject.onionoo.docs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class UptimeHistory
-    implements Comparable<UptimeHistory> {
+
+public class UptimeHistory implements Comparable<UptimeHistory> {
+
+  private final static Logger log = LoggerFactory.getLogger(
+      UptimeHistory.class);
 
   private boolean relay;
   public boolean isRelay() {
@@ -29,23 +34,32 @@ public class UptimeHistory
   public static UptimeHistory fromString(String uptimeHistoryString) {
     String[] parts = uptimeHistoryString.split(" ", 3);
     if (parts.length != 3) {
+      log.warn("Invalid number of space-separated strings in uptime "
+          + "history: '" + uptimeHistoryString + "'.  Skipping");
       return null;
     }
     boolean relay = false;
     if (parts[0].equals("r")) {
       relay = true;
     } else if (!parts[0].equals("b")) {
+      log.warn("Invalid node type in uptime history: '"
+          + uptimeHistoryString + "'.  Supported types are 'r' and 'b'.  "
+          + "Skipping.");
       return null;
     }
     long startMillis = DateTimeHelper.parse(parts[1],
           DateTimeHelper.DATEHOUR_NOSPACE_FORMAT);
     if (DateTimeHelper.NO_TIME_AVAILABLE == startMillis) {
+      log.warn("Invalid start timestamp in uptime history: '"
+          + uptimeHistoryString + "'.  Skipping.");
       return null;
     }
     int uptimeHours = -1;
     try {
       uptimeHours = Integer.parseInt(parts[2]);
     } catch (NumberFormatException e) {
+      log.warn("Invalid number format in uptime history: '"
+          + uptimeHistoryString + "'.  Skipping.");
       return null;
     }
     return new UptimeHistory(relay, startMillis, uptimeHours);
