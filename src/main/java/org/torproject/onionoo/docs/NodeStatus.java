@@ -15,6 +15,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -426,27 +427,18 @@ public class NodeStatus extends Document {
     sb.append("\t" + this.nickname);
     sb.append("\t" + this.fingerprint);
     sb.append("\t" + this.address + ";");
-    int written = 0;
     if (this.orAddressesAndPorts != null) {
-      for (String orAddressAndPort : this.orAddressesAndPorts) {
-        sb.append((written++ > 0 ? "+" : "") + orAddressAndPort);
-      }
+      sb.append(StringUtils.join(this.orAddressesAndPorts, "+"));
     }
     sb.append(";");
     if (this.isRelay) {
-      written = 0;
-      for (String exitAddress : this.exitAddresses) {
-        sb.append((written++ > 0 ? "+" : "") + exitAddress);
-      }
+      sb.append(StringUtils.join(this.exitAddresses, "+"));
     }
     sb.append("\t" + DateTimeHelper.format(this.lastSeenMillis,
         DateTimeHelper.ISO_DATETIME_TAB_FORMAT));
     sb.append("\t" + this.orPort);
     sb.append("\t" + this.dirPort + "\t");
-    written = 0;
-    for (String relayFlag : this.getRelayFlags()) {
-      sb.append((written++ > 0 ? "," : "") + relayFlag);
-    }
+    sb.append(StringUtils.join(this.getRelayFlags(), ","));
     if (this.isRelay) {
       sb.append("\t" + String.valueOf(this.consensusWeight));
       sb.append("\t"
@@ -472,15 +464,7 @@ public class NodeStatus extends Document {
     sb.append("\t" + (this.contact != null ? this.contact : ""));
     sb.append("\t" + (this.recommendedVersion == null ? "null" :
         this.recommendedVersion ? "true" : "false"));
-    if (this.familyFingerprints == null) {
-      sb.append("\tnull");
-    } else {
-      sb.append("\t");
-      written = 0;
-      for (String familyFingerprint : this.familyFingerprints) {
-        sb.append((written++ > 0 ? ";" : "") + familyFingerprint);
-      }
-    }
+    sb.append("\t" + StringUtils.join(this.familyFingerprints, ";"));
     return sb.toString();
   }
 }
