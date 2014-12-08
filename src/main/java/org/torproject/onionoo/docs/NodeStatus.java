@@ -121,8 +121,7 @@ public class NodeStatus extends Document {
     }
     if (this.orAddressesAndPorts != null) {
       for (String orAddressAndPort : this.orAddressesAndPorts) {
-        if (orAddressAndPort.contains(":") &&
-            orAddressAndPort.length() > 0) {
+        if (orAddressAndPort.contains(":")) {
           String orAddress = orAddressAndPort.substring(0,
               orAddressAndPort.lastIndexOf(':'));
           orAddresses.add(orAddress);
