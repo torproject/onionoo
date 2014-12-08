@@ -278,6 +278,10 @@ public class DocumentStore {
     return true;
   }
 
+  private static final long ONE_BYTE = 1L,
+      ONE_KIBIBYTE = 1024L * ONE_BYTE,
+      ONE_MIBIBYTE = 1024L * ONE_KIBIBYTE;
+
   private <T extends Document> boolean storeDocumentFile(T document,
       String fingerprint) {
     File documentFile = this.getDocumentFile(document.getClass(),
@@ -328,6 +332,11 @@ public class DocumentStore {
       return false;
     }
     try {
+      if (documentString.length() > ONE_MIBIBYTE) {
+        log.warn("Attempting to store very large document file: path='"
+            + documentFile.getAbsolutePath() + "', bytes="
+            + documentString.length());
+      }
       documentFile.getParentFile().mkdirs();
       File documentTempFile = new File(
           documentFile.getAbsolutePath() + ".tmp");
@@ -451,6 +460,11 @@ public class DocumentStore {
       log.error("Could not read file '"
           + documentFile.getAbsolutePath() + "'.", e);
       return null;
+    }
+    if (documentString.length() > ONE_MIBIBYTE) {
+      log.warn("Retrieved very large document file: path='"
+          + documentFile.getAbsolutePath() + "', bytes="
+          + documentString.length());
     }
     T result = null;
     if (!parse) {
