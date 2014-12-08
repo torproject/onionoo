@@ -47,8 +47,8 @@ public class WeightsStatusUpdater implements DescriptorListener,
 
   private void processRelayNetworkConsensus(
       RelayNetworkStatusConsensus consensus) {
-    long validAfterMillis = consensus.getValidAfterMillis(),
-        freshUntilMillis = consensus.getFreshUntilMillis();
+    long validAfterMillis = consensus.getValidAfterMillis();
+    long freshUntilMillis = consensus.getFreshUntilMillis();
     SortedMap<String, double[]> pathSelectionWeights =
         this.calculatePathSelectionProbabilities(consensus);
     this.updateWeightsHistory(validAfterMillis, freshUntilMillis,

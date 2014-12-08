@@ -91,8 +91,8 @@ public class BandwidthStatus extends Document {
         * DateTimeHelper.ONE_SECOND;
     for (Map.Entry<Long, Long> e :
         bandwidthHistory.getBandwidthValues().entrySet()) {
-      long endMillis = e.getKey(),
-          startMillis = endMillis - intervalMillis;
+      long endMillis = e.getKey();
+      long startMillis = endMillis - intervalMillis;
       long bandwidthValue = e.getValue();
       /* TODO Should we first check whether an interval is already
        * contained in history? */

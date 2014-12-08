@@ -234,7 +234,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         this.knownNodes.put(fingerprint, nodeStatus);
       }
       String address = entry.getAddress();
-      int orPort = entry.getOrPort(), dirPort = entry.getDirPort();
+      int orPort = entry.getOrPort();
+      int dirPort = entry.getDirPort();
       SortedSet<String> orAddressesAndPorts = new TreeSet<String>(
           entry.getOrAddresses());
       nodeStatus.addLastAddresses(validAfterMillis, address, orPort,
@@ -411,8 +412,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       if (this.knownNodes.containsKey(fingerprint)) {
         updatedNodeStatus = this.knownNodes.get(fingerprint);
         String address = nodeStatus.getAddress();
-        int orPort = nodeStatus.getOrPort(),
-            dirPort = nodeStatus.getDirPort();
+        int orPort = nodeStatus.getOrPort();
+        int dirPort = nodeStatus.getDirPort();
         SortedSet<String> orAddressesAndPorts =
             nodeStatus.getOrAddressesAndPorts();
         updatedNodeStatus.addLastAddresses(
