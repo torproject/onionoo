@@ -275,8 +275,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         DetailsStatus.class, true, fingerprint);
     if (detailsStatus == null) {
       detailsStatus = new DetailsStatus();
-    } else if (descriptor.getPublishedMillis() <=
-        detailsStatus.getDescPublished()) {
+    } else if (detailsStatus.getDescPublished() != null &&
+        detailsStatus.getDescPublished() >=
+        descriptor.getPublishedMillis()) {
       /* Already parsed more recent server descriptor from this bridge. */
       return;
     }
