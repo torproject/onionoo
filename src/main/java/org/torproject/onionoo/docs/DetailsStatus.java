@@ -362,51 +362,51 @@ public class DetailsStatus extends Document {
 
   private String country_name;
   public void setCountryName(String countryName) {
-    this.country_name = countryName;
+    this.country_name = escapeJSON(countryName);
   }
   public String getCountryName() {
-    return this.country_name;
+    return unescapeJSON(this.country_name);
   }
 
   private String region_name;
   public void setRegionName(String regionName) {
-    this.region_name = regionName;
+    this.region_name = escapeJSON(regionName);
   }
   public String getRegionName() {
-    return this.region_name;
+    return unescapeJSON(this.region_name);
   }
 
   private String city_name;
   public void setCityName(String cityName) {
-    this.city_name = cityName;
+    this.city_name = escapeJSON(cityName);
   }
   public String getCityName() {
-    return this.city_name;
+    return unescapeJSON(this.city_name);
   }
 
   private String as_name;
   public void setASName(String aSName) {
-    this.as_name = aSName;
+    this.as_name = escapeJSON(aSName);
   }
   public String getASName() {
-    return this.as_name;
+    return unescapeJSON(this.as_name);
   }
 
   private String as_number;
   public void setASNumber(String aSNumber) {
-    this.as_number = aSNumber;
+    this.as_number = escapeJSON(aSNumber);
   }
   public String getASNumber() {
-    return this.as_number;
+    return unescapeJSON(this.as_number);
   }
 
   /* Reverse DNS lookup result: */
 
   private String host_name;
   public void setHostName(String hostName) {
-    this.host_name = hostName;
+    this.host_name = escapeJSON(hostName);
   }
   public String getHostName() {
-    return this.host_name;
+    return unescapeJSON(this.host_name);
   }
 }
