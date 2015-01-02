@@ -1,6 +1,7 @@
 package org.torproject.onionoo.server;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +17,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
@@ -25,11 +29,20 @@ import org.torproject.onionoo.util.TimeFactory;
 
 public class NodeIndexer implements ServletContextListener, Runnable {
 
+  private static final Logger log = LoggerFactory.getLogger(
+      NodeIndexer.class);
+
   public void contextInitialized(ServletContextEvent contextEvent) {
     ServletContext servletContext = contextEvent.getServletContext();
     File outDir = new File(servletContext.getInitParameter("outDir"));
     DocumentStore documentStore = DocumentStoreFactory.getDocumentStore();
-    documentStore.setOutDir(outDir);
+    try {
+      documentStore.setOutDir(outDir);
+    } catch(FileNotFoundException fnfe) {
+      log.error("\n\n\tOut-dir not found! Expected directory: " + outDir
+          + "\n\tVerify the configuration in ./etc/web.xml.template");
+      System.exit(1);
+    }
     /* The servlet container created us, and we need to avoid that
      * ApplicationFactory creates another instance of us. */
     NodeIndexerFactory.setNodeIndexer(this);

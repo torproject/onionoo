@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +46,11 @@ public class DocumentStore {
   private final File statusDir = new File("status");
 
   private File outDir = new File("out");
-  public void setOutDir(File outDir) {
+  public void setOutDir(File outDir) throws FileNotFoundException {
+    if (!outDir.exists() || !outDir.isDirectory()) {
+      throw new FileNotFoundException("Cannot access directory "
+          + outDir);
+    }
     this.outDir = outDir;
   }
 
