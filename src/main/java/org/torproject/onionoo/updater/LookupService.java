@@ -5,8 +5,13 @@ package org.torproject.onionoo.updater;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -114,9 +119,8 @@ public class LookupService {
     try {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-          new FileInputStream(this.geoLite2CityBlocksIPv4CsvFile),
-          "UTF-8"));
+      BufferedReader br = this.createBufferedReaderFromUtf8File(
+          this.geoLite2CityBlocksIPv4CsvFile);
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.split(",", 9);
@@ -177,7 +181,8 @@ public class LookupService {
       br.close();
     } catch (IOException e) {
       log.error("I/O exception while reading "
-          + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath() + ".");
+          + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
+          + ": " + e);
       return lookupResults;
     }
 
@@ -186,9 +191,8 @@ public class LookupService {
     try {
       Set<Long> blockNumbers = new HashSet<Long>(
           addressNumberBlocks.values());
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-          new FileInputStream(this.geoLite2CityLocationsEnCsvFile),
-          "UTF-8"));
+      BufferedReader br = this.createBufferedReaderFromUtf8File(
+          this.geoLite2CityLocationsEnCsvFile);
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 13);
@@ -217,7 +221,8 @@ public class LookupService {
       br.close();
     } catch (IOException e) {
       log.error("I/O exception while reading "
-          + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath() + ".");
+          + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
+          + ": " + e);
       return lookupResults;
     }
 
@@ -227,8 +232,8 @@ public class LookupService {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-          new FileInputStream(geoIPASNum2CsvFile), "ISO-8859-1"));
+      BufferedReader br = this.createBufferedReaderFromIso88591File(
+          this.geoIPASNum2CsvFile);
       String line;
       long previousStartIpNum = -1L;
       while ((line = br.readLine()) != null) {
@@ -285,7 +290,7 @@ public class LookupService {
       br.close();
     } catch (IOException e) {
       log.error("I/O exception while reading "
-          + geoIPASNum2CsvFile.getAbsolutePath() + ".");
+          + geoIPASNum2CsvFile.getAbsolutePath() + ": " + e);
       return lookupResults;
     }
 
@@ -337,6 +342,27 @@ public class LookupService {
     this.addressesResolved += lookupResults.size();
 
     return lookupResults;
+  }
+
+  private BufferedReader createBufferedReaderFromUtf8File(File utf8File)
+      throws FileNotFoundException, CharacterCodingException {
+    CharsetDecoder dec = StandardCharsets.UTF_8.newDecoder();
+    dec.onMalformedInput(CodingErrorAction.REPORT);
+    dec.onUnmappableCharacter(CodingErrorAction.REPORT);
+    BufferedReader br = new BufferedReader(
+        new InputStreamReader(new FileInputStream(utf8File), dec));
+    return br;
+  }
+
+  private BufferedReader createBufferedReaderFromIso88591File(
+      File iso88591File) throws FileNotFoundException,
+      CharacterCodingException {
+    CharsetDecoder dec = StandardCharsets.ISO_8859_1.newDecoder();
+    dec.onMalformedInput(CodingErrorAction.REPORT);
+    dec.onUnmappableCharacter(CodingErrorAction.REPORT);
+    BufferedReader br = new BufferedReader(
+        new InputStreamReader(new FileInputStream(iso88591File), dec));
+    return br;
   }
 
   private int addressesLookedUp = 0, addressesResolved = 0;
