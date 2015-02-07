@@ -3,13 +3,13 @@
 package org.torproject.onionoo.docs;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -345,10 +345,7 @@ public class DocumentStore {
       documentFile.getParentFile().mkdirs();
       File documentTempFile = new File(
           documentFile.getAbsolutePath() + ".tmp");
-      BufferedWriter bw = new BufferedWriter(new FileWriter(
-          documentTempFile));
-      bw.write(documentString);
-      bw.close();
+      writeToFile(documentTempFile, documentString);
       documentFile.delete();
       documentTempFile.renameTo(documentFile);
       this.storedFiles++;
@@ -740,9 +737,7 @@ public class DocumentStore {
     String documentString = sb.toString();
     try {
       summaryFile.getParentFile().mkdirs();
-      BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));
-      bw.write(documentString);
-      bw.close();
+      writeToFile(summaryFile, documentString);
       this.lastModifiedNodeStatuses = summaryFile.lastModified();
       this.updatedNodeStatuses.clear();
       this.storedFiles++;
@@ -751,6 +746,14 @@ public class DocumentStore {
       log.error("Could not write file '"
           + summaryFile.getAbsolutePath() + "'.", e);
     }
+  }
+
+  private static void writeToFile(File file, String content)
+      throws IOException {
+    BufferedOutputStream bos = new BufferedOutputStream(
+        new FileOutputStream(file));
+    bos.write(content.getBytes("US-ASCII"));
+    bos.close();
   }
 
   private void writeSummaryDocuments() {
@@ -770,9 +773,7 @@ public class DocumentStore {
     File summaryFile = new File(this.outDir, "summary");
     try {
       summaryFile.getParentFile().mkdirs();
-      BufferedWriter bw = new BufferedWriter(new FileWriter(summaryFile));
-      bw.write(documentString);
-      bw.close();
+      writeToFile(summaryFile, documentString);
       this.lastModifiedSummaryDocuments = summaryFile.lastModified();
       this.updatedSummaryDocuments.clear();
       this.storedFiles++;
