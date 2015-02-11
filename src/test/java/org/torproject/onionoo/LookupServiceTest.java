@@ -27,8 +27,8 @@ import org.torproject.onionoo.updater.LookupService;
 
 public class LookupServiceTest {
 
-  private List<String> geoLite2CityBlocksLines,
-      geoLite2CityLocationsLines, geoipASNum2Lines;
+  private List<String> geoLite2CityBlocksIPv4Lines,
+      geoLite2CityLocationsEnLines, geoipASNum2Lines;
 
   private LookupService lookupService;
 
@@ -37,27 +37,28 @@ public class LookupServiceTest {
   private SortedMap<String, LookupResult> lookupResults;
 
   private void populateLines() {
-    this.geoLite2CityBlocksLines = new ArrayList<String>();
-    this.geoLite2CityBlocksLines.add("network_start_ip,"
-        + "network_mask_length,geoname_id,registered_country_geoname_id,"
-        + "represented_country_geoname_id,postal_code,latitude,longitude,"
-        + "is_anonymous_proxy,is_satellite_provider");
-    this.geoLite2CityBlocksLines.add("::ffff:8.8.9.0,120,6252001,6252001,"
-        + ",,38.0000,-97.0000,0,0");
-    this.geoLite2CityBlocksLines.add("::ffff:8.8.8.0,120,5375480,6252001,"
-        + ",94043,37.3860,-122.0838,0,0");
-    this.geoLite2CityBlocksLines.add("::ffff:8.8.7.0,120,6252001,6252001,"
-        + ",,38.0000,-97.0000,0,0");
-    this.geoLite2CityLocationsLines = new ArrayList<String>();
-    this.geoLite2CityLocationsLines.add("geoname_id,continent_code,"
-        + "continent_name,country_iso_code,country_name,"
-        + "subdivision_iso_code,subdivision_name,city_name,metro_code,"
-        + "time_zone");
-    this.geoLite2CityLocationsLines.add("6252001,NA,\"North America\",US,"
-        + "\"United States\",,,,,");
-    this.geoLite2CityLocationsLines.add("5375480,NA,\"North America\",US,"
-        + "\"United States\",CA,California,\"Mountain View\",807,"
-        + "America/Los_Angeles");
+    this.geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    this.geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    this.geoLite2CityBlocksIPv4Lines.add("8.8.0.0/21,6252001,6252001,,0,"
+        + "0,,38.0000,-97.0000");
+    this.geoLite2CityBlocksIPv4Lines.add("8.8.8.0/24,5375480,6252001,,0,"
+        + "0,94035,37.3860,-122.0838");
+    this.geoLite2CityBlocksIPv4Lines.add("8.8.9.0/24,6252001,6252001,,0,"
+        + "0,,38.0000,-97.0000");
+    this.geoLite2CityLocationsEnLines = new ArrayList<String>();
+    this.geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    this.geoLite2CityLocationsEnLines.add("6252001,en,NA,"
+        + "\"North America\",US,\"United States\",,,,,,,");
+    this.geoLite2CityLocationsEnLines.add("5375480,en,NA,"
+        + "\"North America\",US,\"United States\",CA,California,,,"
+        + "\"Mountain View\",807,America/Los_Angeles");
     this.geoipASNum2Lines = new ArrayList<String>();
     this.geoipASNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
         + "Communications\"");
@@ -69,10 +70,10 @@ public class LookupServiceTest {
 
   private void writeCsvFiles() {
     try {
-      this.writeCsvFile(this.geoLite2CityBlocksLines,
-          "GeoLite2-City-Blocks.csv");
-      this.writeCsvFile(this.geoLite2CityLocationsLines,
-          "GeoLite2-City-Locations.csv");
+      this.writeCsvFile(this.geoLite2CityBlocksIPv4Lines,
+          "GeoLite2-City-Blocks-IPv4.csv");
+      this.writeCsvFile(this.geoLite2CityLocationsEnLines,
+          "GeoLite2-City-Locations-en.csv");
       this.writeCsvFile(this.geoipASNum2Lines, "GeoIPASNum2.csv");
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -105,10 +106,10 @@ public class LookupServiceTest {
     this.addressStrings.add(addressString);
     this.populateLines();
     if (geoLite2CityBlocksLines != null) {
-      this.geoLite2CityBlocksLines = geoLite2CityBlocksLines;
+      this.geoLite2CityBlocksIPv4Lines = geoLite2CityBlocksLines;
     }
     if (geoLite2CityLocationsLines != null) {
-      this.geoLite2CityLocationsLines = geoLite2CityLocationsLines;
+      this.geoLite2CityLocationsEnLines = geoLite2CityLocationsLines;
     }
     if (geoipASNum2Lines != null) {
       this.geoipASNum2Lines = geoipASNum2Lines;
@@ -247,96 +248,99 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupNoCorrespondingLocation() {
-    List<String> geoLite2CityLocationsLines = new ArrayList<String>();
-    geoLite2CityLocationsLines.add("geoname_id,continent_code,"
-        + "continent_name,country_iso_code,country_name,"
-        + "subdivision_iso_code,subdivision_name,city_name,metro_code,"
-        + "time_zone");
-    geoLite2CityLocationsLines.add("6252001,NA,\"North America\",US,"
-        + "\"United States\",,,,,");
-    this.assertLookupResult(null, geoLite2CityLocationsLines, null,
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("6252001,en,NA,"
+        + "\"North America\",US,\"United States\",,,,,,,");
+    this.assertLookupResult(null, geoLite2CityLocationsEnLines, null,
         "8.8.8.8", null, null, null, null, 37.3860f, -122.0838f,
         "AS15169", "Google Inc.");
   }
 
   @Test()
   public void testLookupBlocksStartNotANumber() {
-    List<String> geoLite2CityBlocksLines = new ArrayList<String>();
-    geoLite2CityBlocksLines.add("network_start_ip,"
-        + "network_mask_length,geoname_id,registered_country_geoname_id,"
-        + "represented_country_geoname_id,postal_code,latitude,longitude,"
-        + "is_anonymous_proxy,is_satellite_provider");
-    geoLite2CityBlocksLines.add("::ffff:one,120,5375480,6252001,,94043,"
-        + "37.3860,-122.0838,0,0");
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("one/24,5375480,6252001,,0,"
+        + "0,94035,37.3860,-122.0838");
     this.assertLookupResult(
-        geoLite2CityBlocksLines, null, null,
+        geoLite2CityBlocksIPv4Lines, null, null,
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
 
   @Test()
   public void testLookupBlocksLocationX() {
-    List<String> geoLite2CityBlocksLines = new ArrayList<String>();
-    geoLite2CityBlocksLines.add("network_start_ip,"
-        + "network_mask_length,geoname_id,registered_country_geoname_id,"
-        + "represented_country_geoname_id,postal_code,latitude,longitude,"
-        + "is_anonymous_proxy,is_satellite_provider");
-    geoLite2CityBlocksLines.add("::ffff:8.8.8.0,120,X,X,,94043,37.3860,"
-        + "-122.0838,0,0");
-    this.assertLookupResult(geoLite2CityBlocksLines, null, null,
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("8.8.8.0/24,X,X,,0,0,94035,37.3860,"
+        + "-122.0838");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines, null, null,
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
 
   @Test()
   public void testLookupBlocksLocationEmpty() {
-    List<String> geoLite2CityBlocksLines = new ArrayList<String>();
-    geoLite2CityBlocksLines.add("network_start_ip,"
-        + "network_mask_length,geoname_id,registered_country_geoname_id,"
-        + "represented_country_geoname_id,postal_code,latitude,longitude,"
-        + "is_anonymous_proxy,is_satellite_provider");
-    geoLite2CityBlocksLines.add("::ffff:8.8.8.0,120,,,,,,,1,0");
-    this.assertLookupResult(geoLite2CityBlocksLines, null, null,
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("8.8.8.0/24,,,,0,0,,,");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines, null, null,
         "8.8.8.8", null, null, null, null, null, null, "AS15169",
         "Google Inc.");
   }
 
   @Test()
   public void testLookupBlocksTooFewFields() {
-    List<String> geoLite2CityBlocksLines = new ArrayList<String>();
-    geoLite2CityBlocksLines.add("network_start_ip,"
-        + "network_mask_length,geoname_id,registered_country_geoname_id,"
-        + "represented_country_geoname_id,postal_code,latitude,longitude,"
-        + "is_anonymous_proxy,is_satellite_provider");
-    geoLite2CityBlocksLines.add("::ffff:8.8.8.0,120,5375480,6252001,"
-        + ",94043,37.3860,-122.0838,0");
-    this.assertLookupResult(geoLite2CityBlocksLines, null, null,
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("8.8.8.0/24,5375480,6252001,,0,"
+        + "0,94035,37.3860");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines, null, null,
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
 
   @Test()
   public void testLookupLocationLocIdNotANumber() {
-    List<String> geoLite2CityLocationsLines = new ArrayList<String>();
-    geoLite2CityLocationsLines = new ArrayList<String>();
-    geoLite2CityLocationsLines.add("geoname_id,continent_code,"
-        + "continent_name,country_iso_code,country_name,"
-        + "subdivision_iso_code,subdivision_name,city_name,metro_code,"
-        + "time_zone");
-    geoLite2CityLocationsLines.add("threetwoonenineone,NA,"
-        + "\"North America\",US,\"United States\",CA,California,"
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("threetwoonenineone,en,NA,"
+        + "\"North America\",US,\"United States\",CA,California,,,"
         + "\"Mountain View\",807,America/Los_Angeles");
-    this.assertLookupResult(null, geoLite2CityLocationsLines, null,
+    this.assertLookupResult(null, geoLite2CityLocationsEnLines, null,
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
 
   @Test()
   public void testLookupLocationTooFewFields() {
-    List<String> geoLite2CityLocationsLines = new ArrayList<String>();
-    geoLite2CityLocationsLines.add("geoname_id,continent_code,"
-        + "continent_name,country_iso_code,country_name,"
-        + "subdivision_iso_code,subdivision_name,city_name,metro_code,"
-        + "time_zone");
-    geoLite2CityLocationsLines.add("5375480,NA,\"North America\",US,"
-        + "\"United States\",CA,California,\"Mountain View\",807");
-    this.assertLookupResult(null, geoLite2CityLocationsLines, null,
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("threetwoonenineone,en,NA,"
+        + "\"North America\",US,\"United States\",CA,California,,,"
+        + "\"Mountain View\",807");
+    this.assertLookupResult(null, geoLite2CityLocationsEnLines, null,
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
 

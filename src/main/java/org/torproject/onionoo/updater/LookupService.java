@@ -27,8 +27,8 @@ public class LookupService {
       LookupService.class);
 
   private File geoipDir;
-  private File geoLite2CityBlocksCsvFile;
-  private File geoLite2CityLocationsCsvFile;
+  private File geoLite2CityBlocksIPv4CsvFile;
+  private File geoLite2CityLocationsEnCsvFile;
   private File geoIPASNum2CsvFile;
   private boolean hasAllFiles = false;
   public LookupService(File geoipDir) {
@@ -38,16 +38,16 @@ public class LookupService {
 
   /* Make sure we have all required .csv files. */
   private void findRequiredCsvFiles() {
-    this.geoLite2CityBlocksCsvFile = new File(this.geoipDir,
-        "GeoLite2-City-Blocks.csv");
-    if (!this.geoLite2CityBlocksCsvFile.exists()) {
-      log.error("No GeoLite2-City-Blocks.csv file in geoip/.");
+    this.geoLite2CityBlocksIPv4CsvFile = new File(this.geoipDir,
+        "GeoLite2-City-Blocks-IPv4.csv");
+    if (!this.geoLite2CityBlocksIPv4CsvFile.exists()) {
+      log.error("No GeoLite2-City-Blocks-IPv4.csv file in geoip/.");
       return;
     }
-    this.geoLite2CityLocationsCsvFile = new File(this.geoipDir,
-        "GeoLite2-City-Locations.csv");
-    if (!this.geoLite2CityLocationsCsvFile.exists()) {
-      log.error("No GeoLite2-City-Locations.csv file in "
+    this.geoLite2CityLocationsEnCsvFile = new File(this.geoipDir,
+        "GeoLite2-City-Locations-en.csv");
+    if (!this.geoLite2CityLocationsEnCsvFile.exists()) {
+      log.error("No GeoLite2-City-Locations-en.csv file in "
           + "geoip/.");
       return;
     }
@@ -115,59 +115,61 @@ public class LookupService {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
       BufferedReader br = new BufferedReader(new InputStreamReader(
-          new FileInputStream(geoLite2CityBlocksCsvFile), "ISO-8859-1"));
+          new FileInputStream(this.geoLite2CityBlocksIPv4CsvFile),
+          "ISO-8859-1"));
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
-        if (!line.startsWith("::ffff:")) {
-          /* TODO Make this less hacky and IPv6-ready at some point. */
-          continue;
-        }
-        String[] parts = line.replaceAll("\"", "").split(",", 10);
-        if (parts.length != 10) {
+        String[] parts = line.split(",", 9);
+        if (parts.length != 9) {
           log.error("Illegal line '" + line + "' in "
-              + geoLite2CityBlocksCsvFile.getAbsolutePath() + ".");
+              + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
+              + ".");
           br.close();
           return lookupResults;
         }
         try {
-          String startAddressString = parts[0].substring(7); /* ::ffff: */
+          String[] networkAddressAndMask = parts[0].split("/");
+          String startAddressString = networkAddressAndMask[0];
           long startIpNum = this.parseAddressString(startAddressString);
           if (startIpNum < 0L) {
-            log.error("Illegal IP address in '" + line
-                + "' in " + geoLite2CityBlocksCsvFile.getAbsolutePath()
+            log.error("Illegal IP address in '" + line + "' in "
+                + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
                 + ".");
             br.close();
             return lookupResults;
           }
-          int networkMaskLength = Integer.parseInt(parts[1]);
-          if (networkMaskLength < 96 || networkMaskLength > 128) {
-            log.error("Illegal network mask in '" + line
-                + "' in " + geoLite2CityBlocksCsvFile.getAbsolutePath()
+          int networkMaskLength = networkAddressAndMask.length < 2 ? 0
+              : Integer.parseInt(networkAddressAndMask[1]);
+          if (networkMaskLength < 8 || networkMaskLength > 32) {
+            log.error("Missing or illegal network mask in '" + line
+                + "' in "
+                + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
                 + ".");
             br.close();
             return lookupResults;
           }
-          if (parts[2].length() == 0 && parts[3].length() == 0) {
+          if (parts[1].length() == 0 && parts[2].length() == 0) {
             continue;
           }
-          long endIpNum = startIpNum + (1 << (128 - networkMaskLength))
+          long endIpNum = startIpNum + (1 << (32 - networkMaskLength))
               - 1;
           for (long addressNumber : sortedAddressNumbers.
               tailSet(startIpNum).headSet(endIpNum + 1L)) {
-            String blockString = parts[2].length() > 0 ? parts[2] :
-                parts[3];
+            String blockString = parts[1].length() > 0 ? parts[1] :
+                parts[2];
             long blockNumber = Long.parseLong(blockString);
             addressNumberBlocks.put(addressNumber, blockNumber);
-            if (parts[6].length() > 0 && parts[7].length() > 0) {
+            if (parts[7].length() > 0 && parts[8].length() > 0) {
               addressNumberLatLong.put(addressNumber,
-                  new Float[] { Float.parseFloat(parts[6]),
-                  Float.parseFloat(parts[7]) });
+                  new Float[] { Float.parseFloat(parts[7]),
+                  Float.parseFloat(parts[8]) });
             }
           }
         } catch (NumberFormatException e) {
-          log.error("Number format exception while parsing line "
-              + "'" + line + "' in "
-              + geoLite2CityBlocksCsvFile.getAbsolutePath() + ".");
+          log.error("Number format exception while parsing line '" + line
+              + "' in "
+              + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
+              + ".");
           br.close();
           return lookupResults;
         }
@@ -175,7 +177,7 @@ public class LookupService {
       br.close();
     } catch (IOException e) {
       log.error("I/O exception while reading "
-          + geoLite2CityBlocksCsvFile.getAbsolutePath() + ".");
+          + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath() + ".");
       return lookupResults;
     }
 
@@ -185,17 +187,19 @@ public class LookupService {
       Set<Long> blockNumbers = new HashSet<Long>(
           addressNumberBlocks.values());
       BufferedReader br = new BufferedReader(new InputStreamReader(
-          new FileInputStream(geoLite2CityLocationsCsvFile),
+          new FileInputStream(this.geoLite2CityLocationsEnCsvFile),
           "ISO-8859-1"));
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
-        String[] parts = line.replaceAll("\"", "").split(",", 10);
-        if (parts.length != 10) {
+        String[] parts = line.replaceAll("\"", "").split(",", 13);
+        if (parts.length != 13) {
           log.error("Illegal line '" + line + "' in "
-              + geoLite2CityLocationsCsvFile.getAbsolutePath() + ".");
+              + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
+              + ".");
           br.close();
           return lookupResults;
         }
+
         try {
           long locId = Long.parseLong(parts[0]);
           if (blockNumbers.contains(locId)) {
@@ -204,7 +208,8 @@ public class LookupService {
         } catch (NumberFormatException e) {
           log.error("Number format exception while parsing line "
               + "'" + line + "' in "
-              + geoLite2CityLocationsCsvFile.getAbsolutePath() + ".");
+              + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
+              + ".");
           br.close();
           return lookupResults;
         }
@@ -212,7 +217,7 @@ public class LookupService {
       br.close();
     } catch (IOException e) {
       log.error("I/O exception while reading "
-          + geoLite2CityLocationsCsvFile.getAbsolutePath() + ".");
+          + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath() + ".");
       return lookupResults;
     }
 
@@ -301,15 +306,15 @@ public class LookupService {
         if (blockLocations.containsKey(blockNumber)) {
           String[] parts = blockLocations.get(blockNumber).
               replaceAll("\"", "").split(",", -1);
-          lookupResult.setCountryCode(parts[3].toLowerCase());
-          if (parts[4].length() > 0) {
-            lookupResult.setCountryName(parts[4]);
-          }
-          if (parts[6].length() > 0) {
-            lookupResult.setRegionName(parts[6]);
+          lookupResult.setCountryCode(parts[4].toLowerCase());
+          if (parts[5].length() > 0) {
+            lookupResult.setCountryName(parts[5]);
           }
           if (parts[7].length() > 0) {
-            lookupResult.setCityName(parts[7]);
+            lookupResult.setRegionName(parts[7]);
+          }
+          if (parts[10].length() > 0) {
+            lookupResult.setCityName(parts[10]);
           }
         }
       }
