@@ -8,9 +8,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,8 +84,9 @@ public class LookupServiceTest {
   private void writeCsvFile(List<String> lines, String fileName)
       throws IOException {
     if (lines != null && !lines.isEmpty()) {
-      BufferedWriter bw = new BufferedWriter(new FileWriter(
-          new File(this.tempGeoipDir, fileName)));
+      BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
+          new FileOutputStream(new File(this.tempGeoipDir, fileName)),
+          "UTF-8"));
       for (String line : lines) {
         bw.write(line + "\n");
       }
@@ -380,6 +382,53 @@ public class LookupServiceTest {
     geoipASNum2Lines.add("134744064,134744319");
     this.assertLookupResult(null, null, geoipASNum2Lines, "8.8.8.8", null,
         null, null, null, null, null, null, null);
+  }
+
+  @Test()
+  public void testLookupLocationSpecialCharacters() {
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("46.1.133.0/24,307515,298795,,0,0,,"
+        + "39.1458,34.1639");
+    geoLite2CityBlocksIPv4Lines.add("46.196.12.0/24,738927,298795,,0,0,,"
+        + "40.9780,27.5085");
+    geoLite2CityBlocksIPv4Lines.add("78.180.14.0/24,745169,298795,,0,0,,"
+        + "40.0781,29.5133");
+    geoLite2CityBlocksIPv4Lines.add("81.215.1.0/24,749748,298795,,0,0,,"
+        + "40.6000,33.6153");
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("307515,en,AS,Asia,TR,Turkey,40,"
+        + "\"K\u0131r\u015Fehir\",,,\"K\u0131r\u015Fehir\",,"
+        + "Europe/Istanbul");
+    geoLite2CityLocationsEnLines.add("738927,en,AS,Asia,TR,Turkey,59,"
+        + "\"Tekirda\u011F\",,,\"Tekirda\u011F\",,Europe/Istanbul");
+    geoLite2CityLocationsEnLines.add("745169,en,AS,Asia,TR,Turkey,16,"
+        + "Bursa,,,\u0130neg\u00F6l,,Europe/Istanbul");
+    geoLite2CityLocationsEnLines.add("749748,en,AS,Asia,TR,Turkey,18,"
+        + "\"\u00C7ank\u0131r\u0131\",,,\"\u00C7ank\u0131r\u0131\",,"
+        + "Europe/Istanbul");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "46.1.133.0", "tr", "Turkey",
+        "K\u0131r\u015Fehir", "K\u0131r\u015Fehir", 39.1458f, 34.1639f,
+        null, null);
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "46.196.12.0", "tr", "Turkey",
+        "Tekirda\u011F", "Tekirda\u011F", 40.9780f, 27.5085f, null, null);
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "78.180.14.0", "tr", "Turkey",
+        "Bursa", "\u0130neg\u00F6l", 40.0781f, 29.5133f, null, null);
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "81.215.1.0", "tr", "Turkey",
+        "\u00C7ank\u0131r\u0131", "\u00C7ank\u0131r\u0131", 40.6000f,
+        33.6153f, null, null);
   }
 }
 

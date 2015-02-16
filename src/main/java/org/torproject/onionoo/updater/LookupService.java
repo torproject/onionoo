@@ -116,7 +116,7 @@ public class LookupService {
           addressStringNumbers.values());
       BufferedReader br = new BufferedReader(new InputStreamReader(
           new FileInputStream(this.geoLite2CityBlocksIPv4CsvFile),
-          "ISO-8859-1"));
+          "UTF-8"));
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.split(",", 9);
@@ -188,7 +188,7 @@ public class LookupService {
           addressNumberBlocks.values());
       BufferedReader br = new BufferedReader(new InputStreamReader(
           new FileInputStream(this.geoLite2CityLocationsEnCsvFile),
-          "ISO-8859-1"));
+          "UTF-8"));
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 13);
@@ -228,7 +228,7 @@ public class LookupService {
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
       BufferedReader br = new BufferedReader(new InputStreamReader(
-          new FileInputStream(geoIPASNum2CsvFile), "ISO-8859-1"));
+          new FileInputStream(geoIPASNum2CsvFile), "UTF-8"));
       String line;
       long previousStartIpNum = -1L;
       while ((line = br.readLine()) != null) {
