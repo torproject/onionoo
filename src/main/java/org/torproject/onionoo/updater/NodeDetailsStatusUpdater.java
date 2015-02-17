@@ -541,10 +541,11 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         wed = ((double) this.lastBandwidthWeights.get("Wed")) / 10000.0;
       }
     } else {
-      log.error("Could not determine most recent Wxx parameter "
+      log.debug("Not calculating new path selection probabilities, "
+          + "because we could not determine most recent Wxx parameter "
           + "values, probably because we didn't parse a consensus in "
-          + "this execution.  All relays' guard/middle/exit weights are "
-          + "going to be 0.0.");
+          + "this execution.");
+      return;
     }
     SortedMap<String, Double>
         consensusWeights = new TreeMap<String, Double>(),
@@ -709,14 +710,22 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         nodeStatus.setASNumber(lookupResult.getAsNumber());
       }
 
-      detailsStatus.setConsensusWeightFraction(
-          this.consensusWeightFractions.get(fingerprint));
-      detailsStatus.setGuardProbability(
-          this.guardProbabilities.get(fingerprint));
-      detailsStatus.setMiddleProbability(
-          this.middleProbabilities.get(fingerprint));
-      detailsStatus.setExitProbability(
-          this.exitProbabilities.get(fingerprint));
+      if (this.consensusWeightFractions.containsKey(fingerprint)) {
+        detailsStatus.setConsensusWeightFraction(
+            this.consensusWeightFractions.get(fingerprint));
+      }
+      if (this.guardProbabilities.containsKey(fingerprint)) {
+        detailsStatus.setGuardProbability(
+            this.guardProbabilities.get(fingerprint));
+      }
+      if (this.middleProbabilities.containsKey(fingerprint)) {
+        detailsStatus.setMiddleProbability(
+            this.middleProbabilities.get(fingerprint));
+      }
+      if (this.exitProbabilities.containsKey(fingerprint)) {
+        detailsStatus.setExitProbability(
+            this.exitProbabilities.get(fingerprint));
+      }
 
       if (this.rdnsLookupResults.containsKey(fingerprint)) {
         String hostName = this.rdnsLookupResults.get(fingerprint);
