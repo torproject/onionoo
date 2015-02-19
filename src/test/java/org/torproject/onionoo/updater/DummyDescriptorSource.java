@@ -1,4 +1,4 @@
-package org.torproject.onionoo;
+package org.torproject.onionoo.updater;
 
 import java.util.Collection;
 import java.util.HashMap;

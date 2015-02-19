@@ -1,4 +1,4 @@
-package org.torproject.onionoo;
+package org.torproject.onionoo.docs;
 
 import java.util.HashMap;
 import java.util.Map;

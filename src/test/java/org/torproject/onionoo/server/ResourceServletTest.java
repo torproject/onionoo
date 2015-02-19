@@ -1,7 +1,7 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
 
-package org.torproject.onionoo;
+package org.torproject.onionoo.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,12 +23,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.server.HttpServletRequestWrapper;
 import org.torproject.onionoo.server.HttpServletResponseWrapper;
 import org.torproject.onionoo.server.NodeIndexer;
 import org.torproject.onionoo.server.NodeIndexerFactory;
 import org.torproject.onionoo.server.ResourceServlet;
+import org.torproject.onionoo.util.DummyTime;
 import org.torproject.onionoo.util.Time;
 import org.torproject.onionoo.util.TimeFactory;
 

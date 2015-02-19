@@ -1,6 +1,6 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
-package org.torproject.onionoo;
+package org.torproject.onionoo.writer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,12 +12,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.GraphHistory;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.UptimeStatus;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
+import org.torproject.onionoo.updater.DummyDescriptorSource;
+import org.torproject.onionoo.util.DummyTime;
 import org.torproject.onionoo.util.TimeFactory;
-import org.torproject.onionoo.writer.UptimeDocumentWriter;
 
 public class UptimeDocumentWriterTest {
 
