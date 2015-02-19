@@ -385,7 +385,7 @@ public class LookupServiceTest {
   }
 
   @Test()
-  public void testLookupLocationSpecialCharacters() {
+  public void testLookupLocationTurkey() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
@@ -429,6 +429,168 @@ public class LookupServiceTest {
         geoLite2CityLocationsEnLines, null, "81.215.1.0", "tr", "Turkey",
         "\u00C7ank\u0131r\u0131", "\u00C7ank\u0131r\u0131", 40.6000f,
         33.6153f, null, null);
+  }
+
+  @Test()
+  public void testLookupLocationLatvia() {
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("78.28.192.0/24,456202,458258,,0,0,,"
+        + "56.5000,27.3167");
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("456202,en,EU,Europe,LV,Latvia,REZ,"
+        + "Rezekne,,,\"R\u0113zekne\",,Europe/Riga");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "78.28.192.0", "lv", "Latvia",
+        "Rezekne", "R\u0113zekne", 56.5000f, 27.3167f, null, null);
+  }
+
+  @Test()
+  public void testLookupLocationAzerbaijan() {
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("94.20.148.0/24,585170,587116,,0,0,,"
+        + "41.1919,47.1706");
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("585170,en,AS,Asia,AZ,Azerbaijan,"
+        + "SAK,\"Shaki City\",,,\"\u015E\u01DDki\",,Asia/Baku");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "94.20.148.0", "az",
+        "Azerbaijan", "Shaki City", "\u015E\u01DDki", 41.1919f, 47.1706f,
+        null, null);
+  }
+
+  @Test()
+  public void testLookupLocationVietnam() {
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("115.78.92.0/23,1587976,1562822,,0,0,"
+        + ",10.2333,106.3833");
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("1587976,en,AS,Asia,VN,Vietnam,50,"
+        + "\"Tinh Ben Tre\",,,\"B\u1EBFn Tre\",,Asia/Ho_Chi_Minh");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "115.78.92.0", "vn",
+        "Vietnam", "Tinh Ben Tre", "B\u1EBFn Tre", 10.2333f, 106.3833f,
+        null, null);
+  }
+
+  @Test()
+  public void testLookupLocationJapan() {
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("113.154.131.0/24,1848333,1861060,,0,"
+        + "0,1012236,35.8000,139.1833");
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("1848333,en,AS,Asia,JP,Japan,13,"
+        + "\"T\u014Dky\u014D\",,,Yokoo,,Asia/Tokyo");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "113.154.131.0", "jp",
+        "Japan", "T\u014Dky\u014D", "Yokoo", 35.8000f, 139.1833f, null,
+        null);
+  }
+
+  @Test()
+  public void testLookupLocationDenmark() {
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("2.110.246.0/24,2625001,2623032,,0,0,"
+        + "5970,54.8880,10.4112");
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("2625001,en,EU,Europe,DK,Denmark,83,"
+        + "\"South Denmark\",,,\"\u00C6r\u00F8sk\u00F8bing\",,"
+        + "Europe/Copenhagen");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "2.110.246.0", "dk",
+        "Denmark", "South Denmark", "\u00C6r\u00F8sk\u00F8bing", 54.8880f,
+        10.4112f, null, null);
+  }
+
+  @Test()
+  public void testLookupLocationGermany() {
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("37.209.30.128/25,2947444,2921044,,0,"
+        + "0,,48.6833,9.0167");
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("2947444,en,EU,Europe,DE,Germany,BW,"
+        + "\"Baden-W\u00FCrttemberg Region\",,,B\u00F6blingen,,"
+        + "Europe/Berlin");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "37.209.30.128", "de",
+        "Germany", "Baden-W\u00FCrttemberg Region", "B\u00F6blingen",
+        48.6833f, 9.0167f, null, null);
+  }
+
+  @Test()
+  public void testLookupLocationPoland() {
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
+        + "registered_country_geoname_id,represented_country_geoname_id,"
+        + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
+        + "longitude");
+    geoLite2CityBlocksIPv4Lines.add("5.185.94.0/24,3099434,798544,,0,0,,"
+        + "54.3608,18.6583");
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
+        + "continent_code,continent_name,country_iso_code,country_name,"
+        + "subdivision_1_iso_code,subdivision_1_name,"
+        + "subdivision_2_iso_code,subdivision_2_name,city_name,"
+        + "metro_code,time_zone");
+    geoLite2CityLocationsEnLines.add("3099434,en,EU,Europe,PL,Poland,PM,"
+        + "\"Pomeranian Voivodeship\",,,\"Gda\u0144sk\",,Europe/Warsaw");
+    this.assertLookupResult(geoLite2CityBlocksIPv4Lines,
+        geoLite2CityLocationsEnLines, null, "5.185.94.0", "pl", "Poland",
+        "Pomeranian Voivodeship", "Gda\u0144sk", 54.3608f, 18.6583f, null,
+        null);
   }
 }
 
