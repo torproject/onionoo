@@ -107,6 +107,12 @@ public class BandwidthDocumentWriter implements DocumentWriter {
         if (endMillis < intervalStartMillis) {
           continue;
         }
+        if (endMillis - startMillis > dataPointInterval) {
+          /* This history interval is too long for this graph's data point
+           * interval.  Maybe the next graph will contain it, but not this
+           * one. */
+          continue;
+        }
         while ((intervalStartMillis / dataPointInterval) !=
             (endMillis / dataPointInterval)) {
           dataPoints.add(totalMillis * 5L < dataPointInterval
@@ -142,11 +148,13 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       long firstDataPointMillis = (((this.now - graphInterval)
           / dataPointInterval) + firstNonNullIndex) * dataPointInterval
           + dataPointInterval / 2L;
-      if (i > 0 &&
+      if (i > 0 && !graphs.isEmpty() &&
           firstDataPointMillis >= this.now - graphIntervals[i - 1]) {
         /* Skip bandwidth history object, because it doesn't contain
          * anything new that wasn't already contained in the last
-         * bandwidth history object(s). */
+         * bandwidth history object(s).  Unless we did not include any of
+         * the previous bandwidth history objects for other reasons, in
+         * which case we should include this one. */
         continue;
       }
       long lastDataPointMillis = firstDataPointMillis
