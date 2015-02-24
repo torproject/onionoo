@@ -72,21 +72,22 @@ public class LookupServiceTest {
   private void writeCsvFiles() {
     try {
       this.writeCsvFile(this.geoLite2CityBlocksIPv4Lines,
-          "GeoLite2-City-Blocks-IPv4.csv");
+          "GeoLite2-City-Blocks-IPv4.csv", "UTF-8");
       this.writeCsvFile(this.geoLite2CityLocationsEnLines,
-          "GeoLite2-City-Locations-en.csv");
-      this.writeCsvFile(this.geoipASNum2Lines, "GeoIPASNum2.csv");
+          "GeoLite2-City-Locations-en.csv", "UTF-8");
+      this.writeCsvFile(this.geoipASNum2Lines, "GeoIPASNum2.csv",
+          "ISO-8859-1");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void writeCsvFile(List<String> lines, String fileName)
-      throws IOException {
+  private void writeCsvFile(List<String> lines, String fileName,
+      String encoding) throws IOException {
     if (lines != null && !lines.isEmpty()) {
       BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
           new FileOutputStream(new File(this.tempGeoipDir, fileName)),
-          "UTF-8"));
+          encoding));
       for (String line : lines) {
         bw.write(line + "\n");
       }
@@ -591,6 +592,25 @@ public class LookupServiceTest {
         geoLite2CityLocationsEnLines, null, "5.185.94.0", "pl", "Poland",
         "Pomeranian Voivodeship", "Gda\u0144sk", 54.3608f, 18.6583f, null,
         null);
+  }
+
+  @Test()
+  public void testLookupLocationASNameNonAscii() {
+    List<String> geoipASNum2Lines = new ArrayList<String>();
+    geoipASNum2Lines.add("3207917568,3207919615,\"AS52693 Conectel "
+        + "Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME\"");
+    geoipASNum2Lines.add("3211196416,3211198463,\"AS262934 "
+        + "IP\u00B7RED\"");
+    geoipASNum2Lines.add("3227819264,3227819519,\"AS263226 "
+        + "COMPA\u00D1\u00CDA FINANCIERA ARGENTINA S.A.\"");
+    this.assertLookupResult(null, null, geoipASNum2Lines, "191.52.240.0",
+        null, null, null, null, null, null, "AS52693", "Conectel "
+        + "Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME");
+    this.assertLookupResult(null, null, geoipASNum2Lines, "191.102.248.0",
+        null, null, null, null, null, null, "AS262934", "IP\u00B7RED");
+    this.assertLookupResult(null, null, geoipASNum2Lines, "192.100.157.0",
+        null, null, null, null, null, null, "AS263226",
+        "COMPA\u00D1\u00CDA FINANCIERA ARGENTINA S.A.");
   }
 }
 

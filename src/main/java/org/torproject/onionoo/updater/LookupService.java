@@ -228,7 +228,7 @@ public class LookupService {
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
       BufferedReader br = new BufferedReader(new InputStreamReader(
-          new FileInputStream(geoIPASNum2CsvFile), "UTF-8"));
+          new FileInputStream(geoIPASNum2CsvFile), "ISO-8859-1"));
       String line;
       long previousStartIpNum = -1L;
       while ((line = br.readLine()) != null) {
