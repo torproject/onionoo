@@ -316,7 +316,7 @@ public class DocumentStore {
        * this string, it escapes the \ to \\, hence writes \\u00F2.  We
        * need to undo this and change \\u00F2 back to \u00F2. */
       documentString = StringUtils.replace(gson.toJson(document),
-          "\\\\\\\\u", "\\\\u");
+          "\\\\u", "\\u");
       /* Existing details statuses don't contain opening and closing curly
        * brackets, so we should remove them from new details statuses,
        * too. */

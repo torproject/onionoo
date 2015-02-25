@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.torproject.onionoo.docs.BandwidthDocument;
 import org.torproject.onionoo.docs.ClientsDocument;
 import org.torproject.onionoo.docs.DetailsDocument;
@@ -274,7 +275,7 @@ public class ResponseBuilder {
         /* Whenever we provide Gson with a string containing an escaped
          * non-ASCII character like \u00F2, it escapes the \ to \\, which
          * we need to undo before including the string in a response. */
-        return gson.toJson(dd).replaceAll("\\\\\\\\u", "\\\\u");
+        return StringUtils.replace(gson.toJson(dd), "\\\\u", "\\u");
       } else {
         // TODO We should probably log that we didn't find a details
         // document that we expected to exist.

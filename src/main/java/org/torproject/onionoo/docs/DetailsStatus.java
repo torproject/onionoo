@@ -22,7 +22,7 @@ public class DetailsStatus extends Document {
    * '\'. */
   private static String escapeJSON(String s) {
     return StringUtils.replaceEach(StringEscapeUtils.escapeEcmaScript(s),
-        new String[] { "\\\\'" }, new String[] { "'" });
+        new String[] { "\\'" }, new String[] { "'" });
   }
   private static String unescapeJSON(String s) {
     return StringEscapeUtils.unescapeEcmaScript(StringUtils.replaceEach(s,
