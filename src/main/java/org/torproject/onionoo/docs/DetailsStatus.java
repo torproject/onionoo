@@ -8,7 +8,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public class DetailsStatus extends Document {
 
@@ -21,12 +20,10 @@ public class DetailsStatus extends Document {
    * we'll have to do is to change back the '\\' that Gson writes for the
    * '\'. */
   private static String escapeJSON(String s) {
-    return StringUtils.replaceEach(StringEscapeUtils.escapeEcmaScript(s),
-        new String[] { "\\'" }, new String[] { "'" });
+    return StringEscapeUtils.escapeJava(s);
   }
   private static String unescapeJSON(String s) {
-    return StringEscapeUtils.unescapeEcmaScript(StringUtils.replaceEach(s,
-        new String[] { "'" }, new String[] { "\\'" }));
+    return StringEscapeUtils.unescapeJava(s);
   }
 
   /* From most recently published server descriptor: */
