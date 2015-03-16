@@ -360,7 +360,7 @@ public class ResourceServlet extends HttpServlet {
 
   private static Pattern searchQueryStringPattern =
       Pattern.compile("(?:.*[\\?&])*?" // lazily skip other parameters
-          + "search=([0-9a-zA-Z+/\\.: \\$\\[\\]]+)" // capture parameter
+          + "search=([0-9a-zA-Z+/\\.: \\$\\[\\]%]+)" // capture parameter
           + "(?:&.*)*"); // skip remaining parameters
   private static Pattern searchParameterPattern =
       Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Hex fingerprint. */
@@ -376,12 +376,8 @@ public class ResourceServlet extends HttpServlet {
       return null;
     }
     String parameter = searchQueryStringMatcher.group(1);
-    String[] searchParameters;
-    if (parameter.contains(" ")) {
-      searchParameters = parameter.split(" ");
-    } else {
-      searchParameters = new String[] { parameter };
-    }
+    String[] searchParameters =
+        parameter.replaceAll("%20", " ").split(" ");
     for (String searchParameter : searchParameters) {
       if (!searchParameterPattern.matcher(searchParameter).matches()) {
         /* Illegal search term. */

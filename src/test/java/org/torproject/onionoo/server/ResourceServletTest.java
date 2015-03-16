@@ -795,6 +795,12 @@ public class ResourceServletTest {
   }
 
   @Test()
+  public void testSearchTorkaZEscapedSpaceTypeRelay() {
+    this.assertSummaryDocument("/summary?search=TorkaZ%20type:relay", 1,
+        new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test()
   public void testSearchTypeRelayTypeDirectory() {
     this.assertSummaryDocument(
         "/summary?search=type:relay type:directory", 3, null, 0, null);
