@@ -2,6 +2,7 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.docs;
 
+import java.util.NavigableSet;
 import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -24,18 +25,12 @@ public class UptimeStatus extends Document {
 
   private SortedSet<UptimeHistory> relayHistory =
       new TreeSet<UptimeHistory>();
-  public void setRelayHistory(SortedSet<UptimeHistory> relayHistory) {
-    this.relayHistory = relayHistory;
-  }
   public SortedSet<UptimeHistory> getRelayHistory() {
     return this.relayHistory;
   }
 
   private SortedSet<UptimeHistory> bridgeHistory =
       new TreeSet<UptimeHistory>();
-  public void setBridgeHistory(SortedSet<UptimeHistory> bridgeHistory) {
-    this.bridgeHistory = bridgeHistory;
-  }
   public SortedSet<UptimeHistory> getBridgeHistory() {
     return this.bridgeHistory;
   }
@@ -59,30 +54,50 @@ public class UptimeStatus extends Document {
     s.close();
   }
 
-  public void addToHistory(boolean relay, SortedSet<Long> newIntervals) {
-    for (long startMillis : newIntervals) {
-      SortedSet<UptimeHistory> history = relay ? this.relayHistory
-          : this.bridgeHistory;
-      UptimeHistory interval = new UptimeHistory(relay, startMillis, 1);
-      if (!history.headSet(interval).isEmpty()) {
-        UptimeHistory prev = history.headSet(interval).last();
-        if (prev.isRelay() == interval.isRelay() &&
-            prev.getStartMillis() + DateTimeHelper.ONE_HOUR
-            * prev.getUptimeHours() > interval.getStartMillis()) {
-          continue;
-        }
+  public void addToHistory(boolean relay, long startMillis,
+      SortedSet<String> flags) {
+    SortedSet<UptimeHistory> history = relay ? this.relayHistory
+        : this.bridgeHistory;
+    UptimeHistory interval = new UptimeHistory(relay, startMillis, 1,
+        flags);
+    NavigableSet<UptimeHistory> existingIntervals =
+        new TreeSet<UptimeHistory>(history.headSet(new UptimeHistory(
+        relay, startMillis + DateTimeHelper.ONE_HOUR, 0, flags)));
+    for (UptimeHistory prev : existingIntervals.descendingSet()) {
+      if (prev.isRelay() != interval.isRelay() ||
+          prev.getStartMillis() + DateTimeHelper.ONE_HOUR
+          * prev.getUptimeHours() <= interval.getStartMillis()) {
+        break;
       }
-      if (!history.tailSet(interval).isEmpty()) {
-        UptimeHistory next = history.tailSet(interval).first();
-        if (next.isRelay() == interval.isRelay() &&
-            next.getStartMillis() < interval.getStartMillis()
-            + DateTimeHelper.ONE_HOUR) {
-          continue;
-        }
+      if (prev.getFlags() == interval.getFlags() ||
+          (prev.getFlags() != null && interval.getFlags() != null &&
+          prev.getFlags().equals(interval.getFlags()))) {
+        /* The exact same interval is already contained in history. */
+        return;
       }
-      history.add(interval);
-      this.isDirty = true;
+      /* There is an interval that includes the new interval, but it
+       * contains different flags.  Remove the old interval, put in any
+       * parts before or after the new interval, and add the new interval
+       * further down below. */
+      history.remove(prev);
+      int hoursBefore = (int) ((interval.getStartMillis()
+          - prev.getStartMillis()) / DateTimeHelper.ONE_HOUR);
+      if (hoursBefore > 0) {
+        history.add(new UptimeHistory(relay,
+            prev.getStartMillis(), hoursBefore, prev.getFlags()));
+      }
+      int hoursAfter = (int) (prev.getStartMillis()
+          / DateTimeHelper.ONE_HOUR + prev.getUptimeHours() -
+          interval.getStartMillis() / DateTimeHelper.ONE_HOUR - 1);
+      if (hoursAfter > 0) {
+        history.add(new UptimeHistory(relay,
+            interval.getStartMillis() + DateTimeHelper.ONE_HOUR,
+            hoursAfter, prev.getFlags()));
+      }
+      break;
     }
+    history.add(interval);
+    this.isDirty = true;
   }
 
   public void compressHistory() {
@@ -99,7 +114,10 @@ public class UptimeStatus extends Document {
       if (lastInterval != null &&
           lastInterval.getStartMillis() + DateTimeHelper.ONE_HOUR
           * lastInterval.getUptimeHours() == interval.getStartMillis() &&
-          lastInterval.isRelay() == interval.isRelay()) {
+          lastInterval.isRelay() == interval.isRelay() &&
+          (lastInterval.getFlags() == interval.getFlags() ||
+          (lastInterval.getFlags() != null && interval.getFlags() != null
+          && lastInterval.getFlags().equals(interval.getFlags())))) {
         lastInterval.addUptime(interval);
       } else {
         if (lastInterval != null) {

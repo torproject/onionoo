@@ -1,5 +1,8 @@
 package org.torproject.onionoo.docs;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,27 +27,33 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     return this.uptimeHours;
   }
 
+  private SortedSet<String> flags;
+  public SortedSet<String> getFlags() {
+    return this.flags;
+  }
+
   UptimeHistory(boolean relay, long startMillis,
-      int uptimeHours) {
+      int uptimeHours, SortedSet<String> flags) {
     this.relay = relay;
     this.startMillis = startMillis;
     this.uptimeHours = uptimeHours;
+    this.flags = flags;
   }
 
   public static UptimeHistory fromString(String uptimeHistoryString) {
-    String[] parts = uptimeHistoryString.split(" ", 3);
-    if (parts.length != 3) {
+    String[] parts = uptimeHistoryString.split(" ", -1);
+    if (parts.length < 3) {
       log.warn("Invalid number of space-separated strings in uptime "
           + "history: '" + uptimeHistoryString + "'.  Skipping");
       return null;
     }
     boolean relay = false;
-    if (parts[0].equals("r")) {
+    if (parts[0].equalsIgnoreCase("r")) {
       relay = true;
     } else if (!parts[0].equals("b")) {
       log.warn("Invalid node type in uptime history: '"
-          + uptimeHistoryString + "'.  Supported types are 'r' and 'b'.  "
-          + "Skipping.");
+          + uptimeHistoryString + "'.  Supported types are 'r', 'R', and "
+          + "'b'.  Skipping.");
       return null;
     }
     long startMillis = DateTimeHelper.parse(parts[1],
@@ -62,15 +71,27 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
           + uptimeHistoryString + "'.  Skipping.");
       return null;
     }
-    return new UptimeHistory(relay, startMillis, uptimeHours);
+    SortedSet<String> flags = null;
+    if (parts[0].equals("R")) {
+      flags = new TreeSet<String>();
+      for (int i = 3; i < parts.length; i++) {
+        flags.add(parts[i]);
+      }
+    }
+    return new UptimeHistory(relay, startMillis, uptimeHours, flags);
   }
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append(this.relay ? "r" : "b");
+    sb.append(this.relay ? (this.flags == null ? "r" : "R") : "b");
     sb.append(" " + DateTimeHelper.format(this.startMillis,
         DateTimeHelper.DATEHOUR_NOSPACE_FORMAT));
     sb.append(" " + String.format("%d", this.uptimeHours));
+    if (this.flags != null) {
+      for (String flag : this.flags) {
+        sb.append(" " + flag);
+      }
+    }
     return sb.toString();
   }
 

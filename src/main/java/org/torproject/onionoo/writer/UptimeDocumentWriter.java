@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,18 +110,45 @@ public class UptimeDocumentWriter implements DocumentWriter {
         this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
       GraphHistory graphHistory = this.compileUptimeHistory(
-          graphIntervalIndex, relay, history, knownStatuses);
+          graphIntervalIndex, relay, history, knownStatuses, null);
       if (graphHistory != null) {
         uptime.put(graphName, graphHistory);
       }
     }
     uptimeDocument.setUptime(uptime);
+    SortedMap<String, Map<String, GraphHistory>> flags =
+        new TreeMap<String, Map<String, GraphHistory>>();
+    SortedSet<String> allFlags = new TreeSet<String>();
+    for (UptimeHistory hist : history) {
+      if (hist.getFlags() != null) {
+        allFlags.addAll(hist.getFlags());
+      }
+    }
+    for (String flag : allFlags) {
+      Map<String, GraphHistory> graphsForFlags =
+          new LinkedHashMap<String, GraphHistory>();
+      for (int graphIntervalIndex = 0; graphIntervalIndex <
+          this.graphIntervals.length; graphIntervalIndex++) {
+        String graphName = this.graphNames[graphIntervalIndex];
+        GraphHistory graphHistory = this.compileUptimeHistory(
+            graphIntervalIndex, relay, history, knownStatuses, flag);
+        if (graphHistory != null) {
+          graphsForFlags.put(graphName, graphHistory);
+        }
+      }
+      if (!graphsForFlags.isEmpty()) {
+        flags.put(flag, graphsForFlags);
+      }
+    }
+    if (!flags.isEmpty()) {
+      uptimeDocument.setFlags(flags);
+    }
     return uptimeDocument;
   }
 
   private GraphHistory compileUptimeHistory(int graphIntervalIndex,
       boolean relay, SortedSet<UptimeHistory> history,
-      SortedSet<UptimeHistory> knownStatuses) {
+      SortedSet<UptimeHistory> knownStatuses, String flag) {
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
@@ -130,7 +160,9 @@ public class UptimeDocumentWriter implements DocumentWriter {
     int uptimeHours = 0;
     long firstStatusStartMillis = -1L;
     for (UptimeHistory hist : history) {
-      if (hist.isRelay() != relay) {
+      if (hist.isRelay() != relay ||
+          (flag != null && (hist.getFlags() == null ||
+          !hist.getFlags().contains(flag)))) {
         continue;
       }
       if (firstStatusStartMillis < 0L) {
@@ -170,7 +202,9 @@ public class UptimeDocumentWriter implements DocumentWriter {
         / dataPointInterval) * dataPointInterval;
     int statusHours = -1;
     for (UptimeHistory hist : knownStatuses) {
-      if (hist.isRelay() != relay) {
+      if (hist.isRelay() != relay ||
+          (flag != null && (hist.getFlags() == null ||
+          !hist.getFlags().contains(flag)))) {
         continue;
       }
       long histEndMillis = hist.getStartMillis() + DateTimeHelper.ONE_HOUR

@@ -52,6 +52,7 @@ public class UptimeStatusUpdaterTest {
     statusEntry.addFlag("Running");
     DummyConsensus consensus = new DummyConsensus();
     consensus.setValidAfterMillis(VALID_AFTER_SAMPLE);
+    consensus.addKnownFlag("Running");
     consensus.addStatusEntry(statusEntry);
     this.descriptorSource.addDescriptor(DescriptorType.RELAY_CONSENSUSES,
         consensus);
@@ -83,7 +84,7 @@ public class UptimeStatusUpdaterTest {
   private static final String ALL_RELAYS_AND_BRIDGES_FINGERPRINT = null;
 
   private static final String ALL_RELAYS_AND_BRIDGES_UPTIME_SAMPLE =
-      "r 2013-07-22-17 5811\n" /* ends 2014-03-21 20:00:00 */
+      "R 2013-07-22-17 5811 Running\n" /* ends 2014-03-21 20:00:00 */
       + "b 2013-07-22-17 5811\n"; /* ends 2014-03-21 20:00:00 */
 
   private void addAllRelaysAndBridgesUptimeSample() {
@@ -105,7 +106,7 @@ public class UptimeStatusUpdaterTest {
         2, this.documentStore.getPerformedStoreOperations());
     UptimeStatus status = this.documentStore.getDocument(
         UptimeStatus.class, ALL_RELAYS_AND_BRIDGES_FINGERPRINT);
-    assertEquals("Relay history must contain one entry", 1,
+    assertEquals("Relay history must contain one entry.", 1,
         status.getRelayHistory().size());
     UptimeHistory history = status.getRelayHistory().first();
     assertEquals("History not for relay.", true, history.isRelay());

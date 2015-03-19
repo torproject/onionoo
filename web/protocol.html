@@ -174,6 +174,8 @@ field from details documents and optional "advertised_bandwidth" and
 <li><strong>2.2</strong>: Removed optional "pool_assignment" field and
 added "transports" field to bridge details documents on December 8,
 2014.</li>
+<li><strong>2.3</strong>: Added optional "flags" field to uptime
+documents on March 22, 2015.</li>
 </ul>
 
 </div> <!-- box -->
@@ -2203,6 +2205,23 @@ period and higher data resolution.
 The unit is fractional uptime from 0 to 1.
 Contained graph history objects may contain null values if less than 20%
 of network statuses have been processed for a given time period.
+</p>
+</li>
+
+<li>
+<b><font color="blue">flags</font></b>
+<code class="typeof">object</code>
+<span class="required-false">optional</span>
+<p>
+Object containing fractional times of this relay having relay flags
+assigned.
+Keys are flag names like <strong>"Running"</strong> or
+<strong>"Exit"</strong>, values are objects similar to the
+<strong>uptime</strong> field above, again with keys like
+<strong>"1_week"</strong> etc.
+If a relay never had a given relay flag assigned, no object is included
+for that flag.
+<font color="blue">Added on March 22, 2015.</font>
 </p>
 </li>
 

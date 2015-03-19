@@ -1,8 +1,8 @@
 <project default="dist" name="onionoo" basedir=".">
 
-  <property name="onionoo.protocol.version" value="2.2"/>
+  <property name="onionoo.protocol.version" value="2.3"/>
   <property name="release.version"
-            value="${onionoo.protocol.version}.1"/>
+            value="${onionoo.protocol.version}.0"/>
   <property name="javasources" value="src/main/java"/>
   <property name="tests" value="src/test/java"/>
   <property name="classes" value="classes"/>

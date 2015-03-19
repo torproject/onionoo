@@ -2,6 +2,8 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.updater;
 
+import java.util.BitSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -48,41 +50,70 @@ public class UptimeStatusUpdater implements DescriptorListener,
     }
   }
 
-  private SortedSet<Long> newRelayStatuses = new TreeSet<Long>(),
-      newBridgeStatuses = new TreeSet<Long>();
+  private static class Flags {
+
+    private static Map<String, Integer> flagIndexes =
+        new HashMap<String, Integer>();
+
+    private static Map<Integer, String> flagStrings =
+        new HashMap<Integer, String>();
+
+    private BitSet flags;
+
+    private Flags(SortedSet<String> flags) {
+      this.flags = new BitSet(flagIndexes.size());
+      for (String flag : flags) {
+        if (!flagIndexes.containsKey(flag)) {
+          flagStrings.put(flagIndexes.size(), flag);
+          flagIndexes.put(flag, flagIndexes.size());
+        }
+        this.flags.set(flagIndexes.get(flag));
+      }
+    }
+
+    public SortedSet<String> getFlags() {
+      SortedSet<String> result = new TreeSet<String>();
+      if (this.flags != null) {
+        for (int i = this.flags.nextSetBit(0); i >= 0;
+            i = this.flags.nextSetBit(i + 1)) {
+          result.add(flagStrings.get(i));
+        }
+      }
+      return result;
+    }
+  }
+
+  private SortedMap<Long, Flags>
+      newRelayStatuses = new TreeMap<Long, Flags>();
+  private SortedMap<String, SortedMap<Long, Flags>>
+      newRunningRelays = new TreeMap<String, SortedMap<Long, Flags>>();
+  private SortedSet<Long> newBridgeStatuses = new TreeSet<Long>();
   private SortedMap<String, SortedSet<Long>>
-      newRunningRelays = new TreeMap<String, SortedSet<Long>>(),
       newRunningBridges = new TreeMap<String, SortedSet<Long>>();
 
   private void processRelayNetworkStatusConsensus(
       RelayNetworkStatusConsensus consensus) {
-    SortedSet<String> fingerprints = new TreeSet<String>();
+    long dateHourMillis = (consensus.getValidAfterMillis()
+        / DateTimeHelper.ONE_HOUR) * DateTimeHelper.ONE_HOUR;
     for (NetworkStatusEntry entry :
         consensus.getStatusEntries().values()) {
-      if (entry.getFlags().contains("Running")) {
-        fingerprints.add(entry.getFingerprint());
+      String fingerprint = entry.getFingerprint();
+      if (!this.newRunningRelays.containsKey(fingerprint)) {
+        this.newRunningRelays.put(fingerprint,
+            new TreeMap<Long, Flags>());
       }
+      this.newRunningRelays.get(fingerprint).put(dateHourMillis,
+          new Flags(entry.getFlags()));
     }
-    if (!fingerprints.isEmpty()) {
-      long dateHourMillis = (consensus.getValidAfterMillis()
-          / DateTimeHelper.ONE_HOUR) * DateTimeHelper.ONE_HOUR;
-      for (String fingerprint : fingerprints) {
-        if (!this.newRunningRelays.containsKey(fingerprint)) {
-          this.newRunningRelays.put(fingerprint, new TreeSet<Long>());
-        }
-        this.newRunningRelays.get(fingerprint).add(dateHourMillis);
-      }
-      this.newRelayStatuses.add(dateHourMillis);
-    }
+    this.newRelayStatuses.put(dateHourMillis,
+        new Flags(consensus.getKnownFlags()));
   }
 
   private void processBridgeNetworkStatus(BridgeNetworkStatus status) {
     SortedSet<String> fingerprints = new TreeSet<String>();
     for (NetworkStatusEntry entry :
         status.getStatusEntries().values()) {
-      if (entry.getFlags().contains("Running")) {
-        fingerprints.add(entry.getFingerprint());
-      }
+      fingerprints.add(entry.getFingerprint());
     }
     if (!fingerprints.isEmpty()) {
       long dateHourMillis = (status.getPublishedMillis()
@@ -98,20 +129,30 @@ public class UptimeStatusUpdater implements DescriptorListener,
   }
 
   public void updateStatuses() {
-    for (Map.Entry<String, SortedSet<Long>> e :
+    for (Map.Entry<String, SortedMap<Long, Flags>> e :
         this.newRunningRelays.entrySet()) {
       this.updateStatus(true, e.getKey(), e.getValue());
     }
     this.updateStatus(true, null, this.newRelayStatuses);
     for (Map.Entry<String, SortedSet<Long>> e :
         this.newRunningBridges.entrySet()) {
-      this.updateStatus(false, e.getKey(), e.getValue());
+      SortedMap<Long, Flags> dateHourMillisNoFlags =
+          new TreeMap<Long, Flags>();
+      for (long dateHourMillis : e.getValue()) {
+        dateHourMillisNoFlags.put(dateHourMillis, null);
+      }
+      this.updateStatus(false, e.getKey(), dateHourMillisNoFlags);
     }
-    this.updateStatus(false, null, this.newBridgeStatuses);
+    SortedMap<Long, Flags> dateHourMillisNoFlags =
+        new TreeMap<Long, Flags>();
+    for (long dateHourMillis : this.newBridgeStatuses) {
+      dateHourMillisNoFlags.put(dateHourMillis, null);
+    }
+    this.updateStatus(false, null, dateHourMillisNoFlags);
   }
 
   private void updateStatus(boolean relay, String fingerprint,
-      SortedSet<Long> newUptimeHours) {
+      SortedMap<Long, Flags> dateHourMillisFlags) {
     UptimeStatus uptimeStatus = (fingerprint == null) ?
         this.documentStore.retrieve(UptimeStatus.class, true) :
         this.documentStore.retrieve(UptimeStatus.class, true,
@@ -119,7 +160,10 @@ public class UptimeStatusUpdater implements DescriptorListener,
     if (uptimeStatus == null) {
       uptimeStatus = new UptimeStatus();
     }
-    uptimeStatus.addToHistory(relay, newUptimeHours);
+    for (Map.Entry<Long, Flags> e : dateHourMillisFlags.entrySet()) {
+      uptimeStatus.addToHistory(relay, e.getKey(),
+          e.getValue() == null ? null : e.getValue().getFlags());
+    }
     if (uptimeStatus.isDirty()) {
       uptimeStatus.compressHistory();
       if (fingerprint == null) {

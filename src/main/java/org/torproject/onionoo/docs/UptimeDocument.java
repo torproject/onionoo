@@ -3,6 +3,7 @@
 package org.torproject.onionoo.docs;
 
 import java.util.Map;
+import java.util.SortedMap;
 
 public class UptimeDocument extends Document {
 
@@ -18,6 +19,15 @@ public class UptimeDocument extends Document {
   }
   public Map<String, GraphHistory> getUptime() {
     return this.uptime;
+  }
+
+  private SortedMap<String, Map<String, GraphHistory>> flags;
+  public void setFlags(
+      SortedMap<String, Map<String, GraphHistory>> flags) {
+    this.flags = flags;
+  }
+  public SortedMap<String, Map<String, GraphHistory>> getFlags() {
+    return this.flags;
   }
 }
 

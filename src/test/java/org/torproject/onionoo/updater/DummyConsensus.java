@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.torproject.descriptor.DirSourceEntry;
 import org.torproject.descriptor.DirectorySignature;
@@ -70,8 +71,12 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
     return null;
   }
 
+  private SortedSet<String> knownFlags = new TreeSet<String>();
+  public void addKnownFlag(String flag) {
+    this.knownFlags.add(flag);
+  }
   public SortedSet<String> getKnownFlags() {
-    return null;
+    return this.knownFlags;
   }
 
   public SortedMap<String, Integer> getConsensusParams() {
