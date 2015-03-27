@@ -13,12 +13,11 @@ echo "Installing required packages."
 apt-get install -y openjdk-7-jdk
 apt-get install -y libcommons-codec-java libcommons-compress-java \
 libcommons-lang3-java libgoogle-gson-java junit4 libservlet3.0-java \
-ant tomcat6 libslf4j-java liblogback-java unzip
+ant libslf4j-java liblogback-java unzip libjetty8-java
 
 echo "Setting up paths and creating symbolic links."
 mkdir -p /srv/onionoo.torproject.org/onionoo/
 cd /srv/onionoo.torproject.org/onionoo/
-ln -s /vagrant/bin
 ln -s /vagrant/build.xml
 ln -s /vagrant/deps
 ln -s /vagrant/etc
