@@ -205,6 +205,16 @@ public class NodeStatus extends Document {
   public void setRelayFlags(SortedSet<String> relayFlags) {
     BitSet newRelayFlags = new BitSet(relayFlagIndexes.size());
     for (String relayFlag : relayFlags) {
+      if (relayFlag.length() == 0) {
+        /* Workaround to handle cases when nodes have no relay flags at
+         * all.  The problem is that we cannot distinguish an empty relay
+         * flags set from a set with a single flag being the empty string.
+         * But given that the empty string is not a valid flag, we can
+         * just skip flags being the empty string and return an empty
+         * set below.  Without this workaround, we'd return a set with one
+         * flag in it: "". */
+        continue;
+      }
       if (!relayFlagIndexes.containsKey(relayFlag)) {
         relayFlagStrings.put(relayFlagIndexes.size(), relayFlag);
         relayFlagIndexes.put(relayFlag, relayFlagIndexes.size());
