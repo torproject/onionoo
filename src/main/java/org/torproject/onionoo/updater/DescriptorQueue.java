@@ -24,8 +24,6 @@ class DescriptorQueue {
   private final static Logger log = LoggerFactory.getLogger(
       DescriptorQueue.class);
 
-  private File inDir;
-
   private File statusDir;
 
   private DescriptorReader descriptorReader;
@@ -56,14 +54,21 @@ class DescriptorQueue {
     return this.returnedBytes;
   }
 
-  public DescriptorQueue(File inDir, File statusDir) {
-    this.inDir = inDir;
+  public DescriptorQueue(File inDir, DescriptorType descriptorType,
+      File statusDir) {
+    File directory = inDir;
+    if (descriptorType != null) {
+      directory = this.getDirectoryForDescriptorType(inDir,
+          descriptorType);
+    }
     this.statusDir = statusDir;
     this.descriptorReader =
         DescriptorSourceFactory.createDescriptorReader();
+    this.addDirectory(directory);
   }
 
-  public void addDirectory(DescriptorType descriptorType) {
+  public File getDirectoryForDescriptorType(File inDir,
+      DescriptorType descriptorType) {
     String directoryName = null;
     switch (descriptorType) {
     case RELAY_CONSENSUSES:
@@ -93,9 +98,16 @@ class DescriptorQueue {
     default:
       log.error("Unknown descriptor type.  Not adding directory "
           + "to descriptor reader.");
+      return null;
+    }
+    File directory = new File(inDir, directoryName);
+    return directory;
+  }
+
+  private void addDirectory(File directory) {
+    if (directory == null) {
       return;
     }
-    File directory = new File(this.inDir, directoryName);
     if (directory.exists() && directory.isDirectory()) {
       this.descriptorReader.addDirectory(directory);
       this.descriptorReader.setMaxDescriptorFilesInQueue(1);
@@ -107,6 +119,9 @@ class DescriptorQueue {
   }
 
   public void readHistoryFile(DescriptorHistory descriptorHistory) {
+    if (this.statusDir == null) {
+      return;
+    }
     String historyFileName = null;
     switch (descriptorHistory) {
     case RELAY_EXTRAINFO_HISTORY:
@@ -168,8 +183,6 @@ class DescriptorQueue {
 
   public void writeHistoryFile() {
     if (this.historyFile == null) {
-      log.error("Unable to write history file, possibly because of an "
-          + "unknown descriptor type.  Skipping.");
       return;
     }
     SortedMap<String, Long> excludedAndParsedFiles =
