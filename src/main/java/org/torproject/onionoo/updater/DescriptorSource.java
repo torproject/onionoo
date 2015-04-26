@@ -68,9 +68,6 @@ public class DescriptorSource {
       downloadedFiles = 0, deletedLocalFiles = 0;
 
   private void downloadDescriptors(DescriptorType descriptorType) {
-    if (!this.descriptorListeners.containsKey(descriptorType)) {
-      return;
-    }
     DescriptorDownloader descriptorDownloader =
         new DescriptorDownloader(descriptorType);
     this.localFilesBefore += descriptorDownloader.statLocalFiles();
