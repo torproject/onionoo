@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,12 +44,8 @@ public class DocumentStore {
 
   private final File statusDir = new File("status");
 
-  private File outDir = new File("out");
-  public void setOutDir(File outDir) throws FileNotFoundException {
-    if (!outDir.exists() || !outDir.isDirectory()) {
-      throw new FileNotFoundException("Cannot access directory "
-          + outDir);
-    }
+  private File outDir = null;
+  public void setOutDir(File outDir) {
     this.outDir = outDir;
   }
 
@@ -156,9 +151,8 @@ public class DocumentStore {
   private void cacheSummaryDocuments() {
     SortedMap<String, SummaryDocument> parsedSummaryDocuments =
         new TreeMap<String, SummaryDocument>();
-    File directory = this.outDir;
-    if (directory != null) {
-      File summaryFile = new File(directory, "summary");
+    if (this.outDir != null) {
+      File summaryFile = new File(this.outDir, "summary");
       if (summaryFile.exists()) {
         String line = null;
         try {
@@ -757,6 +751,10 @@ public class DocumentStore {
   }
 
   private void writeSummaryDocuments() {
+    if (this.outDir == null) {
+      /* Can't write out/summary without knowing the path of out/. */
+      return;
+    }
     StringBuilder sb = new StringBuilder();
     Gson gson = new Gson();
     for (SummaryDocument summaryDocument :
@@ -786,8 +784,7 @@ public class DocumentStore {
 
   private void writeUpdateStatus() {
     if (this.outDir == null) {
-      log.error("Unable to write update status file without knowing the "
-          + "'out' directory to write to!");
+      /* Can't write out/update without knowing the path of out/. */
       return;
     }
     UpdateStatus updateStatus = new UpdateStatus();

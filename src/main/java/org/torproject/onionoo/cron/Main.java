@@ -2,6 +2,7 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.cron;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -141,6 +142,8 @@ public class Main implements Runnable {
 
   private DocumentStore ds;
 
+  private File outDir = new File("out");
+
   private StatusUpdateRunner sur;
 
   private DocumentWriterRunner dwr;
@@ -160,6 +163,7 @@ public class Main implements Runnable {
       this.log.info("Initialized status update runner");
     }
     if (!this.downloadOnly && !this.updateOnly) {
+      this.ds.setOutDir(outDir);
       this.dwr = new DocumentWriterRunner();
       this.log.info("Initialized document writer runner");
     }
