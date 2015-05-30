@@ -17,7 +17,7 @@
   <property name="webxml" value="${config}/web.xml"/>
   <property name="warfile"
             value="${dist}/onionoo-${release.version}.war"/>
-  <property name="jarfile"
+  <property name="onionoo.jarfile"
             value="${dist}/onionoo-${release.version}.jar"/>
   <property name="source-and-target-java-version" value="1.7" />
 
@@ -161,7 +161,7 @@
   </target>
 
   <target name="jar" depends="compile">
-    <jar destfile="${jarfile}"
+    <jar destfile="${onionoo.jarfile}"
          basedir="${classes}">
       <zipgroupfileset dir="/usr/share/java">
         <include name="commons-codec-1.6.jar"/>
