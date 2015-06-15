@@ -1185,22 +1185,6 @@ found.
 </li>
 
 <li>
-<b><font color="red">advertised_bandwidth_fraction</font></b>
-<code class="typeof">number</code>
-<span class="required-false">optional</span>
-<p>
-Relative advertised bandwidth of this relay compared to the total
-advertised bandwidth in the network.
-If there were no bandwidth authorities, this fraction would be a very
-rough approximation of the probability of this relay to be selected by
-clients.
-Omitted if the relay is not running, or router descriptor containing this
-information cannot be found.
-<font color="red">This field was removed on November 17, 2014.</font>
-</p>
-</li>
-
-<li>
 <b>consensus_weight_fraction</b>
 <code class="typeof">number</code>
 <span class="required-false">optional</span>
@@ -1392,24 +1376,11 @@ information cannot be found.
 </li>
 
 <li>
-<b><font color="red">pool_assignment</font></b>
-<code class="typeof">string</code>
-<span class="required-false">optional</span>
-<p>
-Information of the pool that BridgeDB
-assigned this bridge to, including further assignment information if
-available.
-<font color="red">Removed on December 2, 2014.</font>
-</p>
-</li>
-
-<li>
-<b><font color="blue">transports</font></b>
+<b>transports</b>
 <code class="typeof">array of strings</code>
 <span class="required-false">optional</span>
 <p>
 Array of (pluggable) transport names supported by this bridge.
-<font color="blue">Added on December 2, 2014.</font>
 </p>
 </li>
 
@@ -1787,20 +1758,6 @@ hexadecimal characters.
 </li>
 
 <li>
-<b><font color="red">advertised_bandwidth_fraction</font></b>
-<code class="typeof">object</code>
-<span class="required-false">optional</span>
-<p>
-Object containing graph history objects with relative advertised bandwidth
-of this relay compared to the total advertised bandwidth in the network.
-If there were no bandwidth authorities, this fraction would be a very
-rough approximation of the probability of this relay to be selected by
-clients.
-<font color="red">This field was removed on November 16, 2014.</font>
-</p>
-</li>
-
-<li>
 <b>consensus_weight_fraction</b>
 <code class="typeof">object</code>
 <span class="required-false">optional</span>
@@ -1871,18 +1828,6 @@ Path selection depends on more factors, so that this probability can only
 be an approximation.
 The specification of this history object is similar to that in the
 <strong>consensus_weight_fraction</strong> field above.
-</p>
-</li>
-
-<li>
-<b><font color="red">advertised_bandwidth</font></b>
-<code class="typeof">object</code>
-<span class="required-false">optional</span>
-<p>
-History object containing the absolute advertised bandwidth of this relay.
-The specification of this history object is similar to that in the
-<strong>consensus_weight_fraction</strong> field above.
-<font color="red">This field was removed on November 16, 2014.</font>
 </p>
 </li>
 
@@ -2212,7 +2157,7 @@ of network statuses have been processed for a given time period.
 </li>
 
 <li>
-<b><font color="blue">flags</font></b>
+<b>flags</b>
 <code class="typeof">object</code>
 <span class="required-false">optional</span>
 <p>
@@ -2224,7 +2169,6 @@ Keys are flag names like <strong>"Running"</strong> or
 <strong>"1_week"</strong> etc.
 If a relay never had a given relay flag assigned, no object is included
 for that flag.
-<font color="blue">Added on March 22, 2015.</font>
 </p>
 </li>
 
