@@ -1174,8 +1174,11 @@ the relay did not report which version it runs.
 <code class="typeof">array of strings</code>
 <span class="required-false">optional</span>
 <p>
-Array of fingerprints or nicknames of relays in the
-same family as this relay.
+Array of fingerprints or nicknames of relays that this relay considers to
+be part of its family.
+There are no cross-checks whether the listed relays exist or consider this
+relay part of their family, so that the effective family of this relay may
+be smaller.
 Omitted if empty or if descriptor containing this information cannot be
 found.
 </p>
