@@ -9,13 +9,13 @@
   <property name="filestatistics-logname" value="${logfile-base}statistics" />
 
   <!-- date pattern -->
-  <property name="utc-date-pattern" value="%date{yyyy-MM-dd HH:mm:ss, UTC}" />
+  <property name="utc-date-pattern" value="%date{ISO8601, UTC}" />
 
   <!-- appender section -->
   <appender name="FILEALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${fileall-logname}.log</file>
     <encoder>
-      <pattern>${utc-date-pattern} %level [runtime: %r] %logger{20}:%line %msg%n</pattern>
+      <pattern>${utc-date-pattern} %level %logger{20}:%line %msg%n</pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <!-- rollover daily -->
@@ -32,7 +32,7 @@
   <appender name="FILEERR" class="ch.qos.logback.core.FileAppender">
     <file>${fileerr-logname}.log</file>
     <encoder>
-      <pattern>${utc-date-pattern} %level %logger{30}(%line): %msg%n</pattern>
+      <pattern>${utc-date-pattern} %level %logger{20}:%line %msg%n</pattern>
     </encoder>
 
     <!-- ERROR or worse -->
@@ -44,7 +44,7 @@
   <appender name="FILESTATISTICS" class="ch.qos.logback.core.FileAppender">
     <file>${filestatistics-logname}.log</file>
     <encoder>
-      <pattern>${utc-date-pattern} [runtime: %r] %msg%n</pattern>
+      <pattern>${utc-date-pattern} %msg%n</pattern>
     </encoder>
 
     <!-- only INFO level -->
