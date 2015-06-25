@@ -89,9 +89,6 @@ class DescriptorQueue {
     case BRIDGE_EXTRA_INFOS:
       directoryName = "bridge-descriptors/extra-infos";
       break;
-    case BRIDGE_POOL_ASSIGNMENTS:
-      directoryName = "bridge-pool-assignments";
-      break;
     case EXIT_LISTS:
       directoryName = "exit-lists";
       break;
@@ -132,9 +129,6 @@ class DescriptorQueue {
       break;
     case EXIT_LIST_HISTORY:
       historyFileName = "exit-list-history";
-      break;
-    case BRIDGE_POOLASSIGN_HISTORY:
-      historyFileName = "bridge-poolassign-history";
       break;
     case RELAY_CONSENSUS_HISTORY:
       historyFileName = "relay-consensus-history";

@@ -64,7 +64,6 @@ public class DummyDescriptorSource extends DescriptorSource {
       case BRIDGE_STATUSES:
       case BRIDGE_SERVER_DESCRIPTORS:
       case BRIDGE_EXTRA_INFOS:
-      case BRIDGE_POOL_ASSIGNMENTS:
       default:
         relay = false;
         break;

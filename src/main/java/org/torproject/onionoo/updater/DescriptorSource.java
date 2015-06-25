@@ -101,10 +101,6 @@ public class DescriptorSource {
     log.debug("Reading recent " + DescriptorType.BRIDGE_EXTRA_INFOS + " ...");
     this.readDescriptors(DescriptorType.BRIDGE_EXTRA_INFOS,
         DescriptorHistory.BRIDGE_EXTRAINFO_HISTORY, false);
-    log.debug("Reading recent " + DescriptorType.BRIDGE_POOL_ASSIGNMENTS
-        + " ...");
-    this.readDescriptors(DescriptorType.BRIDGE_POOL_ASSIGNMENTS,
-        DescriptorHistory.BRIDGE_POOLASSIGN_HISTORY, false);
     log.debug("Reading recent " + DescriptorType.BRIDGE_STATUSES + " ...");
     this.readDescriptors(DescriptorType.BRIDGE_STATUSES,
         DescriptorHistory.BRIDGE_STATUS_HISTORY, false);
@@ -146,9 +142,6 @@ public class DescriptorSource {
       break;
     case BRIDGE_EXTRA_INFOS:
       log.info("Read recent bridge extra-info descriptors");
-      break;
-    case BRIDGE_POOL_ASSIGNMENTS:
-      log.info("Read recent bridge-pool assignments");
       break;
     }
   }

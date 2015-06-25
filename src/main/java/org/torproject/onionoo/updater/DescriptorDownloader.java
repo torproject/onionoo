@@ -52,9 +52,6 @@ class DescriptorDownloader {
     case BRIDGE_EXTRA_INFOS:
       this.directory = "bridge-descriptors/extra-infos/";
       break;
-    case BRIDGE_POOL_ASSIGNMENTS:
-      this.directory = "bridge-pool-assignments/";
-      break;
     default:
       log.error("Unknown descriptor type.");
       return;
