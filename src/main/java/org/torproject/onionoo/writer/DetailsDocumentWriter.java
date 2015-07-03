@@ -112,6 +112,14 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setContact(detailsStatus.getContact());
     detailsDocument.setPlatform(detailsStatus.getPlatform());
     detailsDocument.setFamily(detailsStatus.getFamily());
+    if (detailsStatus.getEffectiveFamily() != null &&
+        !detailsStatus.getEffectiveFamily().isEmpty()) {
+      SortedSet<String> effectiveFamily = new TreeSet<String>();
+      for (String familyMember : detailsStatus.getEffectiveFamily()) {
+        effectiveFamily.add("$" + familyMember);
+      }
+      detailsDocument.setEffectiveFamily(effectiveFamily);
+    }
     detailsDocument.setExitPolicyV6Summary(
         detailsStatus.getExitPolicyV6Summary());
     detailsDocument.setHibernating(detailsStatus.getHibernating());

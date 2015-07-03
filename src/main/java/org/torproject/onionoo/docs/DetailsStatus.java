@@ -110,6 +110,14 @@ public class DetailsStatus extends Document {
     return this.family;
   }
 
+  private SortedSet<String> effective_family;
+  public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
+    this.effective_family = effectiveFamily;
+  }
+  public SortedSet<String> getEffectiveFamily() {
+    return this.effective_family;
+  }
+
   private Map<String, List<String>> exit_policy_v6_summary;
   public void setExitPolicyV6Summary(
       Map<String, List<String>> exitPolicyV6Summary) {

@@ -185,6 +185,9 @@ public class SummaryDocument extends Document {
     return this.c;
   }
 
+  /* This attribute can go away once all Onionoo services had their hourly
+   * updater write effective families to summary documents at least once.
+   * Remove this code after September 8, 2015. */
   private String[] ff;
   public void setFamilyFingerprints(
       SortedSet<String> familyFingerprints) {
@@ -194,11 +197,22 @@ public class SummaryDocument extends Document {
     return this.stringArrayToSortedSet(this.ff);
   }
 
+  private String[] ef;
+  public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
+    this.ef = this.collectionToStringArray(effectiveFamily);
+  }
+  public SortedSet<String> getEffectiveFamily() {
+    return this.stringArrayToSortedSet(this.ef);
+  }
+
+  /* The familyFingerprints parameter can go away after September 8, 2015.
+   * See above. */
   public SummaryDocument(boolean isRelay, String nickname,
       String fingerprint, List<String> addresses, long lastSeenMillis,
       boolean running, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, long firstSeenMillis, String aSNumber,
-      String contact, SortedSet<String> familyFingerprints) {
+      String contact, SortedSet<String> familyFingerprints,
+      SortedSet<String> effectiveFamily) {
     this.setRelay(isRelay);
     this.setNickname(nickname);
     this.setFingerprint(fingerprint);
@@ -212,6 +226,7 @@ public class SummaryDocument extends Document {
     this.setASNumber(aSNumber);
     this.setContact(contact);
     this.setFamilyFingerprints(familyFingerprints);
+    this.setEffectiveFamily(effectiveFamily);
   }
 }
 

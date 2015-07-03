@@ -289,6 +289,14 @@ public class DetailsDocument extends Document {
     return this.family;
   }
 
+  private SortedSet<String> effective_family;
+  public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
+    this.effective_family = effectiveFamily;
+  }
+  public SortedSet<String> getEffectiveFamily() {
+    return this.effective_family;
+  }
+
   private Float consensus_weight_fraction;
   public void setConsensusWeightFraction(Float consensusWeightFraction) {
     if (consensusWeightFraction == null ||

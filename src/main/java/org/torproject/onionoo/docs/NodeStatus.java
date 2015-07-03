@@ -301,6 +301,16 @@ public class NodeStatus extends Document {
     return this.lastRdnsLookup;
   }
 
+  /* Computed effective family */
+
+  private String[] effectiveFamily;
+  public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
+    this.effectiveFamily = collectionToStringArray(effectiveFamily);
+  }
+  public SortedSet<String> getEffectiveFamily() {
+    return stringArrayToSortedSet(this.effectiveFamily);
+  }
+
   /* Constructor and (de-)serialization methods: */
 
   public NodeStatus(String fingerprint) {
@@ -402,8 +412,17 @@ public class NodeStatus extends Document {
         nodeStatus.setRecommendedVersion(parts[21].equals("true"));
       }
       if (!parts[22].equals("null")) {
-        nodeStatus.setFamilyFingerprints(new TreeSet<String>(
-            Arrays.asList(parts[22].split(";"))));
+        SortedSet<String> familyFingerprints = new TreeSet<String>();
+        for (String familyMember : parts[22].split("[;:]")) {
+          if (familyMember.length() > 0) {
+            familyFingerprints.add(familyMember);
+          }
+        }
+        nodeStatus.setFamilyFingerprints(familyFingerprints);
+        if (parts[22].contains(":")) {
+          nodeStatus.setEffectiveFamily(new TreeSet<String>(
+              Arrays.asList(parts[22].split(":", 2)[1].split(";"))));
+        }
       }
       return nodeStatus;
     } catch (NumberFormatException e) {
@@ -464,7 +483,16 @@ public class NodeStatus extends Document {
     sb.append("\t" + (this.contact != null ? this.contact : ""));
     sb.append("\t" + (this.recommendedVersion == null ? "null" :
         this.recommendedVersion ? "true" : "false"));
-    sb.append("\t" + StringUtils.join(this.familyFingerprints, ";"));
+    if (this.effectiveFamily != null && this.effectiveFamily.length > 0) {
+      SortedSet<String> mutual = this.getEffectiveFamily();
+      SortedSet<String> notMutual = new TreeSet<String>(
+          this.getFamilyFingerprints());
+      notMutual.removeAll(mutual);
+      sb.append("\t" + StringUtils.join(notMutual, ";") + ":"
+          + StringUtils.join(mutual, ";"));
+    } else {
+      sb.append("\t" + StringUtils.join(this.familyFingerprints, ";"));
+    }
     return sb.toString();
   }
 }

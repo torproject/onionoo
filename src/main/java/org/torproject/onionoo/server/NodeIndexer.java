@@ -1,7 +1,6 @@
 package org.torproject.onionoo.server;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ import javax.servlet.ServletContextListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
@@ -160,6 +158,11 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
     Time time = TimeFactory.getTime();
     List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
+    /* This variable can go away once all Onionoo services had their
+     * hourly updater write effective families to summary documents at
+     * least once.  Remove this code after September 8, 2015. */
+    SortedMap<String, Set<String>> computedEffectiveFamilies =
+        new TreeMap<String, Set<String>>();
     for (SummaryDocument entry : currentRelays) {
       String fingerprint = entry.getFingerprint().toUpperCase();
       String hashedFingerprint = entry.getHashedFingerprint().
@@ -196,8 +199,16 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByFlag.get(flagLowerCase).add(fingerprint);
         newRelaysByFlag.get(flagLowerCase).add(hashedFingerprint);
       }
-      if (entry.getFamilyFingerprints() != null) {
-        newRelaysByFamily.put(fingerprint, entry.getFamilyFingerprints());
+      /* This condition can go away once all Onionoo services had their
+       * hourly updater write effective families to summary documents at
+       * least once.  Remove this code after September 8, 2015. */
+      if (entry.getFamilyFingerprints() != null &&
+          !entry.getFamilyFingerprints().isEmpty()) {
+        computedEffectiveFamilies.put(fingerprint,
+            entry.getFamilyFingerprints());
+      }
+      if (entry.getEffectiveFamily() != null) {
+        newRelaysByFamily.put(fingerprint, entry.getEffectiveFamily());
       }
       int daysSinceFirstSeen = (int) ((time.currentTimeMillis()
           - entry.getFirstSeenMillis()) / ONE_DAY);
@@ -229,18 +240,21 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     for (String relay : orderRelaysByConsensusWeight) {
       newRelaysByConsensusWeight.add(relay.split(" ")[1]);
     }
+    /* This loop can go away once all Onionoo services had their hourly
+     * updater write effective families to summary documents at least
+     * once.  Remove this code after September 8, 2015. */
     for (Map.Entry<String, Set<String>> e :
-        newRelaysByFamily.entrySet()) {
+        computedEffectiveFamilies.entrySet()) {
       String fingerprint = e.getKey();
       Set<String> inMutualFamilyRelation = new HashSet<String>();
       for (String otherFingerprint : e.getValue()) {
-        if (newRelaysByFamily.containsKey(otherFingerprint) &&
-            newRelaysByFamily.get(otherFingerprint).contains(
+        if (computedEffectiveFamilies.containsKey(otherFingerprint) &&
+            computedEffectiveFamilies.get(otherFingerprint).contains(
                 fingerprint)) {
           inMutualFamilyRelation.add(otherFingerprint);
         }
       }
-      e.getValue().retainAll(inMutualFamilyRelation);
+      newRelaysByFamily.put(fingerprint, inMutualFamilyRelation);
     }
     for (SummaryDocument entry : currentBridges) {
       String hashedFingerprint = entry.getFingerprint().toUpperCase();

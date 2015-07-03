@@ -56,14 +56,14 @@ import org.torproject.onionoo.util.TimeFactory;
  *      are not loaded from disk before the parse step in order to save
  *      memory for parsed descriptors.
  *   3. Perform reverse DNS lookups, Look up relay IP addresses in a
- *      GeoIP database, and calculate path selection probabilities.
- *      Update node statuses accordingly.
+ *      GeoIP database, calculate path selection probabilities, and
+ *      compute effective families, and update node statuses accordingly.
  *   4. Retrieve details statuses corresponding to nodes that have been
  *      changed since the start of the update process, possibly update the
  *      node statuses with contents from newly parsed descriptors, update
- *      details statuses with results from lookup operations and new path
- *      selection probabilities, and store details statuses and node
- *      statuses back to disk.
+ *      details statuses with results from lookup operations, new path
+ *      selection probabilities, and effective families, and store details
+ *      statuses and node statuses back to disk.
  */
 public class NodeDetailsStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -140,6 +140,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
+  private Map<String, SortedSet<String>> familyFingerprints =
+      new HashMap<String, SortedSet<String>>();
+
   private void processRelayServerDescriptor(
       ServerDescriptor descriptor) {
     String fingerprint = descriptor.getFingerprint();
@@ -170,6 +173,16 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     detailsStatus.setContact(descriptor.getContact());
     detailsStatus.setPlatform(descriptor.getPlatform());
     detailsStatus.setFamily(descriptor.getFamilyEntries());
+    if (descriptor.getFamilyEntries() != null) {
+      SortedSet<String> noPrefixUpperCase = new TreeSet<String>();
+      for (String familyMember : descriptor.getFamilyEntries()) {
+        if (familyMember.startsWith("$") && familyMember.length() >= 41) {
+          noPrefixUpperCase.add(
+              familyMember.substring(1, 41).toUpperCase());
+        }
+      }
+      this.familyFingerprints.put(fingerprint, noPrefixUpperCase);
+    }
     if (descriptor.getIpv6DefaultPolicy() != null &&
         (descriptor.getIpv6DefaultPolicy().equals("accept") ||
         descriptor.getIpv6DefaultPolicy().equals("reject")) &&
@@ -354,6 +367,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     log.info("Looked up cities and ASes");
     this.calculatePathSelectionProbabilities();
     log.info("Calculated path selection probabilities");
+    this.computeEffectiveFamilies();
+    log.info("Computed effective families");
     this.finishReverseDomainNameLookups();
     log.info("Finished reverse domain name lookups");
     this.updateNodeDetailsStatuses();
@@ -449,6 +464,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         }
         updatedNodeStatus.setLastRdnsLookup(
             nodeStatus.getLastRdnsLookup());
+        updatedNodeStatus.setFamilyFingerprints(
+            nodeStatus.getFamilyFingerprints());
+        updatedNodeStatus.setEffectiveFamily(
+            nodeStatus.getEffectiveFamily());
       } else {
         updatedNodeStatus = nodeStatus;
         this.knownNodes.put(fingerprint, nodeStatus);
@@ -471,6 +490,19 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         }
       }
     }
+    /* Update family fingerprints in known nodes with any fingerprints we
+     * learned when parsing server descriptors in this run.  These are
+     * guaranteed to come from more recent server descriptors, so it's
+     * safe to override whatever is in node statuses. */
+    for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
+      String fingerprint = e.getKey();
+      if (this.familyFingerprints.containsKey(fingerprint)) {
+        NodeStatus nodeStatus = e.getValue();
+        nodeStatus.setFamilyFingerprints(
+            this.familyFingerprints.get(fingerprint));
+      }
+    }
+    this.familyFingerprints.clear();
   }
 
   /* Step 3: perform lookups and calculate path selection
@@ -617,6 +649,52 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
+  private void computeEffectiveFamilies() {
+    SortedMap<String, SortedSet<String>> declaredFamilies =
+        new TreeMap<String, SortedSet<String>>();
+    for (String fingerprint : this.currentRelays) {
+      NodeStatus nodeStatus = this.knownNodes.get(fingerprint);
+      if (nodeStatus != null &&
+          nodeStatus.getFamilyFingerprints() != null &&
+          !nodeStatus.getFamilyFingerprints().isEmpty()) {
+        declaredFamilies.put(fingerprint,
+            nodeStatus.getFamilyFingerprints());
+      }
+    }
+    SortedMap<String, SortedSet<String>> effectiveFamilies =
+        new TreeMap<String, SortedSet<String>>();
+    for (Map.Entry<String, SortedSet<String>> e :
+        declaredFamilies.entrySet()) {
+      String fingerprint = e.getKey();
+      SortedSet<String> declaredFamily = e.getValue();
+      SortedSet<String> effectiveFamily = new TreeSet<String>();
+      for (String declaredFamilyMember : declaredFamily) {
+        if (declaredFamilies.containsKey(declaredFamilyMember) &&
+            declaredFamilies.get(declaredFamilyMember).contains(
+            fingerprint)) {
+          effectiveFamily.add(declaredFamilyMember);
+        }
+      }
+      if (!effectiveFamily.isEmpty()) {
+        effectiveFamilies.put(fingerprint, effectiveFamily);
+      }
+    }
+    for (String fingerprint : this.currentRelays) {
+      NodeStatus nodeStatus = this.knownNodes.get(fingerprint);
+      if (nodeStatus == null) {
+        continue;
+      }
+      if (effectiveFamilies.containsKey(fingerprint)) {
+        nodeStatus.setEffectiveFamily(effectiveFamilies.get(fingerprint));
+        this.updatedNodes.add(fingerprint);
+      } else if (nodeStatus.getEffectiveFamily() != null ||
+          !nodeStatus.getEffectiveFamily().isEmpty()) {
+        nodeStatus.setEffectiveFamily(null);
+        this.updatedNodes.add(fingerprint);
+      }
+    }
+  }
+
   private long startedRdnsLookups = -1L;
 
   private SortedMap<String, String> rdnsLookupResults =
@@ -681,19 +759,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           nodeStatus.getOrAddresses());
       nodeStatus.setExitAddresses(exitAddressesWithoutOrAddresses);
 
-      if (detailsStatus.getFamily() != null &&
-          !detailsStatus.getFamily().isEmpty()) {
-        SortedSet<String> familyFingerprints = new TreeSet<String>();
-        for (String familyMember : detailsStatus.getFamily()) {
-          if (familyMember.startsWith("$") &&
-              familyMember.length() == 41) {
-            familyFingerprints.add(familyMember.substring(1));
-          }
-        }
-        if (!familyFingerprints.isEmpty()) {
-          nodeStatus.setFamilyFingerprints(familyFingerprints);
-        }
-      }
+      detailsStatus.setEffectiveFamily(nodeStatus.getEffectiveFamily());
 
       if (this.geoIpLookupResults.containsKey(fingerprint)) {
         LookupResult lookupResult = this.geoIpLookupResults.get(

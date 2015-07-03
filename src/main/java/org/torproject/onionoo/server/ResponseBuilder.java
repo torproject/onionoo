@@ -70,7 +70,7 @@ public class ResponseBuilder {
     return this.charsWritten;
   }
 
-  private static final String PROTOCOL_VERSION = "2.3";
+  private static final String PROTOCOL_VERSION = "2.4";
 
   private static final String NEXT_MAJOR_VERSION_SCHEDULED = null;
 
@@ -267,6 +267,8 @@ public class ResponseBuilder {
             dd.setHibernating(detailsDocument.getHibernating());
           } else if (field.equals("transports")) {
             dd.setTransports(detailsDocument.getTransports());
+          } else if (field.equals("effective_family")) {
+            dd.setEffectiveFamily(detailsDocument.getEffectiveFamily());
           }
         }
         /* Don't escape HTML characters, like < and >, contained in

@@ -422,7 +422,7 @@ public class DocumentStore {
     SummaryDocument summaryDocument = new SummaryDocument(isRelay,
         nickname, fingerprint, addresses, lastSeenMillis, running,
         relayFlags, consensusWeight, countryCode, firstSeenMillis,
-        aSNumber, contact, family);
+        aSNumber, contact, family, family);
     return summaryDocument;
   }
 
