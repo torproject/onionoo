@@ -172,7 +172,9 @@ public class DescriptorSource {
     }
     log.info("Reading archived descriptors...");
     this.archiveDescriptorQueue = new DescriptorQueue(this.inArchiveDir,
-        null, null);
+        null, this.statusDir);
+    this.archiveDescriptorQueue.readHistoryFile(
+        DescriptorHistory.ARCHIVED_HISTORY);
     Descriptor descriptor;
     while ((descriptor = this.archiveDescriptorQueue.nextDescriptor())
         != null) {
@@ -217,6 +219,7 @@ public class DescriptorSource {
         descriptorListener.processDescriptor(descriptor, relay);
       }
     }
+    this.archiveDescriptorQueue.writeHistoryFile();
     log.info("Read archived descriptors");
   }
 

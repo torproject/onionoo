@@ -1,3 +1,9 @@
+# Changes in version ???
+
+ * Medium changes
+   - Add a parse history for imported descriptor archives.
+
+
 # Changes in version 4.0-1.2.0 - 2017-02-28
 
  * Medium changes

@@ -149,6 +149,9 @@ class DescriptorQueue {
       case BRIDGE_SERVER_HISTORY:
         historyFileName = "bridge-server-history";
         break;
+      case ARCHIVED_HISTORY:
+        historyFileName = "archived-history";
+        break;
       default:
         log.error("Unknown descriptor history.  Not excluding "
             + "files.");
