@@ -345,13 +345,12 @@ public class ResourceServlet extends HttpServlet {
     response.setCharacterEncoding("utf-8");
     response.setHeader("Cache-Control", "public, max-age="
         + (cacheMaxAgeMillis / 1000L));
-    PrintWriter pw = response.getWriter();
-    rb.buildResponse(pw);
+    try (PrintWriter pw = response.getWriter()) {
+      rb.buildResponse(pw);
+    }
     int relayDocumentsWritten = rh.getOrderedRelays().size();
     int bridgeDocumentsWritten = rh.getOrderedBridges().size();
     int charsWritten = rb.getCharsWritten();
-    pw.flush();
-    pw.close();
     long writtenResponseMillis = time.currentTimeMillis();
     PerformanceMetrics.logStatistics(receivedRequestMillis, resourceType,
         parameterMap.keySet(), parsedRequestMillis, relayDocumentsWritten,

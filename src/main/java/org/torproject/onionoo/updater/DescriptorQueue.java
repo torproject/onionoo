@@ -97,8 +97,7 @@ class DescriptorQueue {
           + "to descriptor reader.");
       return null;
     }
-    File directory = new File(inDir, directoryName);
-    return directory;
+    return new File(inDir, directoryName);
   }
 
   private void addDirectory(File directory) {
@@ -150,9 +149,8 @@ class DescriptorQueue {
     this.historyFile = new File(this.statusDir, historyFileName);
     if (this.historyFile.exists() && this.historyFile.isFile()) {
       SortedMap<String, Long> excludedFiles = new TreeMap<String, Long>();
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(
-            this.historyFile));
+      try (BufferedReader br = new BufferedReader(new FileReader(
+          this.historyFile))) {
         String line;
         while ((line = br.readLine()) != null) {
           try {
@@ -163,7 +161,6 @@ class DescriptorQueue {
                 + "history.  Skipping line.");
           }
         }
-        br.close();
       } catch (IOException e) {
         log.error("Could not read history file '"
             + this.historyFile.getAbsolutePath() + "'.  Not excluding "
@@ -185,22 +182,19 @@ class DescriptorQueue {
         this.descriptorReader.getExcludedFiles());
     excludedAndParsedFiles.putAll(this.descriptorReader.getParsedFiles());
     this.historySizeAfter = excludedAndParsedFiles.size();
-    try {
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(
+        this.historyFile))) {
       this.historyFile.getParentFile().mkdirs();
-      BufferedWriter bw = new BufferedWriter(new FileWriter(
-          this.historyFile));
       for (Map.Entry<String, Long> e : excludedAndParsedFiles.entrySet()) {
         String absolutePath = e.getKey();
         long lastModifiedMillis = e.getValue();
         bw.write(String.valueOf(lastModifiedMillis) + " " + absolutePath
             + "\n");
       }
-      bw.close();
     } catch (IOException e) {
       log.error("Could not write history file '"
           + this.historyFile.getAbsolutePath() + "'.  Not excluding "
           + "descriptors in next execution.");
-      return;
     }
   }
 

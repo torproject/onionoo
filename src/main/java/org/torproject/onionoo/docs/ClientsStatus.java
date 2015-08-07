@@ -33,18 +33,18 @@ public class ClientsStatus extends Document {
   }
 
   public void setFromDocumentString(String documentString) {
-    Scanner s = new Scanner(documentString);
-    while (s.hasNextLine()) {
-      String line = s.nextLine();
-      ClientsHistory parsedLine = ClientsHistory.fromString(line);
-      if (parsedLine != null) {
-        this.history.add(parsedLine);
-      } else {
-        log.error("Could not parse clients history line '"
-            + line + "'.  Skipping.");
+    try (Scanner s = new Scanner(documentString)) {
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        ClientsHistory parsedLine = ClientsHistory.fromString(line);
+        if (parsedLine != null) {
+          this.history.add(parsedLine);
+        } else {
+          log.error("Could not parse clients history line '"
+              + line + "'.  Skipping.");
+        }
       }
     }
-    s.close();
   }
 
   public void addToHistory(SortedSet<ClientsHistory> newIntervals) {

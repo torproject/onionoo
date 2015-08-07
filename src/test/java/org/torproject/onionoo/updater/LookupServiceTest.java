@@ -85,13 +85,15 @@ public class LookupServiceTest {
   private void writeCsvFile(List<String> lines, String fileName,
       String encoding) throws IOException {
     if (lines != null && !lines.isEmpty()) {
-      BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
+      try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
           new FileOutputStream(new File(this.tempGeoipDir, fileName)),
-          encoding));
-      for (String line : lines) {
-        bw.write(line + "\n");
+          encoding))) {
+
+        for (String line : lines) {
+          bw.write(line);
+          bw.newLine();
+        }
       }
-      bw.close();
     }
   }
 

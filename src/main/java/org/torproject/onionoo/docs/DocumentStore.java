@@ -110,9 +110,8 @@ public class DocumentStore {
     if (directory != null) {
       File summaryFile = new File(directory, "summary");
       if (summaryFile.exists()) {
-        try {
-          BufferedReader br = new BufferedReader(new FileReader(
-              summaryFile));
+        try (BufferedReader br = new BufferedReader(new FileReader(
+            summaryFile))) {
           String line;
           while ((line = br.readLine()) != null) {
             if (line.length() == 0) {
@@ -123,7 +122,6 @@ public class DocumentStore {
               parsedNodeStatuses.put(node.getFingerprint(), node);
             }
           }
-          br.close();
           this.lastModifiedNodeStatuses = summaryFile.lastModified();
           this.listedFiles += parsedNodeStatuses.size();
           this.listOperations++;
@@ -155,10 +153,9 @@ public class DocumentStore {
       File summaryFile = new File(this.outDir, "summary");
       if (summaryFile.exists()) {
         String line = null;
-        try {
+        try (BufferedReader br = new BufferedReader(new FileReader(
+            summaryFile))) {
           Gson gson = new Gson();
-          BufferedReader br = new BufferedReader(new FileReader(
-              summaryFile));
           while ((line = br.readLine()) != null) {
             if (line.length() == 0) {
               continue;
@@ -170,7 +167,6 @@ public class DocumentStore {
                   summaryDocument);
             }
           }
-          br.close();
           this.lastModifiedSummaryDocuments = summaryFile.lastModified();
           this.listedFiles += parsedSummaryDocuments.size();
           this.listOperations++;
@@ -443,16 +439,14 @@ public class DocumentStore {
       return null;
     }
     String documentString = null;
-    try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      BufferedInputStream bis = new BufferedInputStream(
-          new FileInputStream(documentFile));
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(
+        new FileInputStream(documentFile))) {
       int len;
       byte[] data = new byte[1024];
       while ((len = bis.read(data, 0, 1024)) >= 0) {
         baos.write(data, 0, len);
       }
-      bis.close();
       byte[] allData = baos.toByteArray();
       if (allData.length == 0) {
         /* Document file is empty. */
@@ -744,10 +738,10 @@ public class DocumentStore {
 
   private static void writeToFile(File file, String content)
       throws IOException {
-    BufferedOutputStream bos = new BufferedOutputStream(
-        new FileOutputStream(file));
-    bos.write(content.getBytes("US-ASCII"));
-    bos.close();
+    try (BufferedOutputStream bos = new BufferedOutputStream(
+        new FileOutputStream(file))) {
+      bos.write(content.getBytes("US-ASCII"));
+    }
   }
 
   private void writeSummaryDocuments() {

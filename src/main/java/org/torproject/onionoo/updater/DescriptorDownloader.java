@@ -86,26 +86,26 @@ class DescriptorDownloader {
             + huc.getResponseMessage() + ".  Skipping.");
         return 0;
       }
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-          huc.getInputStream()));
-      String line;
-      while ((line = br.readLine()) != null) {
-        if (!line.trim().startsWith("<tr>") ||
-            !line.contains("<a href=\"")) {
-          continue;
+      try (BufferedReader br = new BufferedReader(new InputStreamReader(
+          huc.getInputStream()))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+          if (!line.trim().startsWith("<tr>") ||
+              !line.contains("<a href=\"")) {
+            continue;
+          }
+          String linePart = line.substring(
+              line.indexOf("<a href=\"") + "<a href=\"".length());
+          if (!linePart.contains("\"")) {
+            continue;
+          }
+          linePart = linePart.substring(0, linePart.indexOf("\""));
+          if (linePart.endsWith("/")) {
+            continue;
+          }
+          this.remoteFiles.add(linePart);
         }
-        String linePart = line.substring(
-            line.indexOf("<a href=\"") + "<a href=\"".length());
-        if (!linePart.contains("\"")) {
-          continue;
-        }
-        linePart = linePart.substring(0, linePart.indexOf("\""));
-        if (linePart.endsWith("/")) {
-          continue;
-        }
-        this.remoteFiles.add(linePart);
       }
-      br.close();
     } catch (IOException e) {
       log.error("Could not fetch or parse " + directoryUrl
         + ".  Skipping. Reason: " + e.getMessage());
@@ -145,16 +145,15 @@ class DescriptorDownloader {
         } else {
           is = huc.getInputStream();
         }
-        BufferedInputStream bis = new BufferedInputStream(is);
-        BufferedOutputStream bos = new BufferedOutputStream(
-            new FileOutputStream(localTempFile));
-        int len;
-        byte[] data = new byte[1024];
-        while ((len = bis.read(data, 0, 1024)) >= 0) {
-          bos.write(data, 0, len);
+        try (BufferedInputStream bis = new BufferedInputStream(is);
+            BufferedOutputStream bos = new BufferedOutputStream(
+            new FileOutputStream(localTempFile))) {
+          int len;
+          byte[] data = new byte[1024];
+          while ((len = bis.read(data, 0, 1024)) >= 0) {
+            bos.write(data, 0, len);
+          }
         }
-        bis.close();
-        bos.close();
         localTempFile.renameTo(localFile);
         if (lastModified >= 0) {
           localFile.setLastModified(lastModified);

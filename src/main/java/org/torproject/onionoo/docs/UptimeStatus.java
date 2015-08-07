@@ -36,22 +36,22 @@ public class UptimeStatus extends Document {
   }
 
   public void setFromDocumentString(String documentString) {
-    Scanner s = new Scanner(documentString);
-    while (s.hasNextLine()) {
-      String line = s.nextLine();
-      UptimeHistory parsedLine = UptimeHistory.fromString(line);
-      if (parsedLine != null) {
-        if (parsedLine.isRelay()) {
-          this.relayHistory.add(parsedLine);
+    try (Scanner s = new Scanner(documentString)) {
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        UptimeHistory parsedLine = UptimeHistory.fromString(line);
+        if (parsedLine != null) {
+          if (parsedLine.isRelay()) {
+            this.relayHistory.add(parsedLine);
+          } else {
+            this.bridgeHistory.add(parsedLine);
+          }
         } else {
-          this.bridgeHistory.add(parsedLine);
+          log.error("Could not parse uptime history line '"
+              + line + "'.  Skipping.");
         }
-      } else {
-        log.error("Could not parse uptime history line '"
-            + line + "'.  Skipping.");
       }
     }
-    s.close();
   }
 
   public void addToHistory(boolean relay, long startMillis,

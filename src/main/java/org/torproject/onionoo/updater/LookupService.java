@@ -116,11 +116,10 @@ public class LookupService {
     Map<Long, Long> addressNumberBlocks = new HashMap<Long, Long>();
     Map<Long, Float[]> addressNumberLatLong =
         new HashMap<Long, Float[]>();
-    try {
+    try (BufferedReader br = this.createBufferedReaderFromUtf8File(
+        this.geoLite2CityBlocksIPv4CsvFile)) {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
-      BufferedReader br = this.createBufferedReaderFromUtf8File(
-          this.geoLite2CityBlocksIPv4CsvFile);
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.split(",", 9);
@@ -128,7 +127,6 @@ public class LookupService {
           log.error("Illegal line '" + line + "' in "
               + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
               + ".");
-          br.close();
           return lookupResults;
         }
         try {
@@ -139,7 +137,6 @@ public class LookupService {
             log.error("Illegal IP address in '" + line + "' in "
                 + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
                 + ".");
-            br.close();
             return lookupResults;
           }
           int networkMaskLength = networkAddressAndMask.length < 2 ? 0
@@ -149,7 +146,6 @@ public class LookupService {
                 + "' in "
                 + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
                 + ".");
-            br.close();
             return lookupResults;
           }
           if (parts[1].length() == 0 && parts[2].length() == 0) {
@@ -174,11 +170,9 @@ public class LookupService {
               + "' in "
               + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
               + ".");
-          br.close();
           return lookupResults;
         }
       }
-      br.close();
     } catch (IOException e) {
       log.error("I/O exception while reading "
           + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
@@ -188,11 +182,10 @@ public class LookupService {
 
     /* Obtain a map from relevant blocks to location lines. */
     Map<Long, String> blockLocations = new HashMap<Long, String>();
-    try {
+    try (BufferedReader br = this.createBufferedReaderFromUtf8File(
+        this.geoLite2CityLocationsEnCsvFile)) {
       Set<Long> blockNumbers = new HashSet<Long>(
           addressNumberBlocks.values());
-      BufferedReader br = this.createBufferedReaderFromUtf8File(
-          this.geoLite2CityLocationsEnCsvFile);
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 13);
@@ -200,7 +193,6 @@ public class LookupService {
           log.error("Illegal line '" + line + "' in "
               + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
               + ".");
-          br.close();
           return lookupResults;
         }
 
@@ -214,11 +206,9 @@ public class LookupService {
               + "'" + line + "' in "
               + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
               + ".");
-          br.close();
           return lookupResults;
         }
       }
-      br.close();
     } catch (IOException e) {
       log.error("I/O exception while reading "
           + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
@@ -228,12 +218,11 @@ public class LookupService {
 
     /* Obtain a map from IP address numbers to ASN. */
     Map<Long, String> addressNumberASN = new HashMap<Long, String>();
-    try {
+    try (BufferedReader br = this.createBufferedReaderFromIso88591File(
+        this.geoIPASNum2CsvFile)) {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
-      BufferedReader br = this.createBufferedReaderFromIso88591File(
-          this.geoIPASNum2CsvFile);
       String line;
       long previousStartIpNum = -1L;
       while ((line = br.readLine()) != null) {
@@ -241,7 +230,6 @@ public class LookupService {
         if (parts.length != 3) {
           log.error("Illegal line '" + line + "' in "
               + geoIPASNum2CsvFile.getAbsolutePath() + ".");
-          br.close();
           return lookupResults;
         }
         try {
@@ -249,7 +237,6 @@ public class LookupService {
           if (startIpNum <= previousStartIpNum) {
             log.error("Line '" + line + "' not sorted in "
                 + geoIPASNum2CsvFile.getAbsolutePath() + ".");
-            br.close();
             return lookupResults;
           }
           previousStartIpNum = startIpNum;
@@ -283,11 +270,9 @@ public class LookupService {
           log.error("Number format exception while parsing line "
               + "'" + line + "' in "
               + geoIPASNum2CsvFile.getAbsolutePath() + ".");
-          br.close();
           return lookupResults;
         }
       }
-      br.close();
     } catch (IOException e) {
       log.error("I/O exception while reading "
           + geoIPASNum2CsvFile.getAbsolutePath() + ": " + e);
@@ -346,23 +331,23 @@ public class LookupService {
 
   private BufferedReader createBufferedReaderFromUtf8File(File utf8File)
       throws FileNotFoundException, CharacterCodingException {
-    CharsetDecoder dec = StandardCharsets.UTF_8.newDecoder();
-    dec.onMalformedInput(CodingErrorAction.REPORT);
-    dec.onUnmappableCharacter(CodingErrorAction.REPORT);
-    BufferedReader br = new BufferedReader(
-        new InputStreamReader(new FileInputStream(utf8File), dec));
-    return br;
+    return this.createBufferedReaderFromFile(utf8File,
+        StandardCharsets.UTF_8.newDecoder());
   }
 
   private BufferedReader createBufferedReaderFromIso88591File(
       File iso88591File) throws FileNotFoundException,
       CharacterCodingException {
-    CharsetDecoder dec = StandardCharsets.ISO_8859_1.newDecoder();
+    return this.createBufferedReaderFromFile(iso88591File,
+        StandardCharsets.ISO_8859_1.newDecoder());
+  }
+
+  private BufferedReader createBufferedReaderFromFile(File file,
+      CharsetDecoder dec) throws FileNotFoundException {
     dec.onMalformedInput(CodingErrorAction.REPORT);
     dec.onUnmappableCharacter(CodingErrorAction.REPORT);
-    BufferedReader br = new BufferedReader(
-        new InputStreamReader(new FileInputStream(iso88591File), dec));
-    return br;
+    return new BufferedReader(new InputStreamReader(
+        new FileInputStream(file), dec));
   }
 
   private int addressesLookedUp = 0, addressesResolved = 0;

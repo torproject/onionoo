@@ -44,37 +44,37 @@ public class BandwidthStatus extends Document {
   }
 
   public void setFromDocumentString(String documentString) {
-    Scanner s = new Scanner(documentString);
-    while (s.hasNextLine()) {
-      String line = s.nextLine();
-      String[] parts = line.split(" ");
-      if (parts.length != 6) {
-        log.error("Illegal line '" + line + "' in bandwidth "
-            + "history.  Skipping this line.");
-        continue;
-      }
-      SortedMap<Long, long[]> history = parts[0].equals("r")
-          ? readHistory : writeHistory;
-      long startMillis = DateTimeHelper.parse(parts[1] + " " + parts[2]);
-      long endMillis = DateTimeHelper.parse(parts[3] + " " + parts[4]);
-      if (startMillis < 0L || endMillis < 0L) {
-        log.error("Could not parse timestamp while reading "
-            + "bandwidth history.  Skipping.");
-        break;
-      }
-      long bandwidth = Long.parseLong(parts[5]);
-      long previousEndMillis = history.headMap(startMillis).isEmpty()
-          ? startMillis
-          : history.get(history.headMap(startMillis).lastKey())[1];
-      long nextStartMillis = history.tailMap(startMillis).isEmpty()
-          ? endMillis : history.tailMap(startMillis).firstKey();
-      if (previousEndMillis <= startMillis &&
-          nextStartMillis >= endMillis) {
-        history.put(startMillis, new long[] { startMillis, endMillis,
-            bandwidth });
+    try (Scanner s = new Scanner(documentString)) {
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        String[] parts = line.split(" ");
+        if (parts.length != 6) {
+          log.error("Illegal line '" + line + "' in bandwidth "
+              + "history.  Skipping this line.");
+          continue;
+        }
+        SortedMap<Long, long[]> history = parts[0].equals("r")
+            ? readHistory : writeHistory;
+        long startMillis = DateTimeHelper.parse(parts[1] + " " + parts[2]);
+        long endMillis = DateTimeHelper.parse(parts[3] + " " + parts[4]);
+        if (startMillis < 0L || endMillis < 0L) {
+          log.error("Could not parse timestamp while reading "
+              + "bandwidth history.  Skipping.");
+          break;
+        }
+        long bandwidth = Long.parseLong(parts[5]);
+        long previousEndMillis = history.headMap(startMillis).isEmpty()
+            ? startMillis
+            : history.get(history.headMap(startMillis).lastKey())[1];
+        long nextStartMillis = history.tailMap(startMillis).isEmpty()
+            ? endMillis : history.tailMap(startMillis).firstKey();
+        if (previousEndMillis <= startMillis &&
+            nextStartMillis >= endMillis) {
+          history.put(startMillis, new long[] { startMillis, endMillis,
+              bandwidth });
+        }
       }
     }
-    s.close();
   }
 
   public void addToWriteHistory(BandwidthHistory bandwidthHistory) {

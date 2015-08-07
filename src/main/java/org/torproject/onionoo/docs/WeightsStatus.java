@@ -37,46 +37,47 @@ public class WeightsStatus extends Document {
   }
 
   public void setFromDocumentString(String documentString) {
-    Scanner s = new Scanner(documentString);
-    while (s.hasNextLine()) {
-      String line = s.nextLine();
-      String[] parts = line.split(" ");
-      if (parts.length == 2) {
-        /* Skip lines containing descriptor digest and advertised
-         * bandwidth. */
-        continue;
-      }
-      if (parts.length != 9 && parts.length != 11) {
-        log.error("Illegal line '" + line + "' in weights "
+    try (Scanner s = new Scanner(documentString)) {
+      while (s.hasNextLine()) {
+        String line = s.nextLine();
+        String[] parts = line.split(" ");
+        if (parts.length == 2) {
+          /* Skip lines containing descriptor digest and advertised
+           * bandwidth. */
+          continue;
+        }
+        if (parts.length != 9 && parts.length != 11) {
+          log.error("Illegal line '" + line + "' in weights "
               + "status file.  Skipping this line.");
-        continue;
+          continue;
+        }
+        if (parts[4].equals("NaN")) {
+          /* Remove corrupt lines written on 2013-07-07 and the days
+           * after. */
+          continue;
+        }
+        long validAfterMillis = DateTimeHelper.parse(parts[0] + " "
+            + parts[1]);
+        long freshUntilMillis = DateTimeHelper.parse(parts[2] + " "
+            + parts[3]);
+        if (validAfterMillis < 0L || freshUntilMillis < 0L) {
+          log.error("Could not parse timestamp while reading "
+              + "weights status file.  Skipping.");
+          break;
+        }
+        long[] interval = new long[] { validAfterMillis,
+            freshUntilMillis };
+        double[] weights = new double[] { -1.0,
+            Double.parseDouble(parts[5]),
+            Double.parseDouble(parts[6]),
+            Double.parseDouble(parts[7]),
+            Double.parseDouble(parts[8]), -1.0, -1.0 };
+        if (parts.length == 11) {
+          weights[6] = Double.parseDouble(parts[10]);
+        }
+        this.history.put(interval, weights);
       }
-      if (parts[4].equals("NaN")) {
-        /* Remove corrupt lines written on 2013-07-07 and the days
-         * after. */
-        continue;
-      }
-      long validAfterMillis = DateTimeHelper.parse(parts[0] + " "
-          + parts[1]);
-      long freshUntilMillis = DateTimeHelper.parse(parts[2] + " "
-          + parts[3]);
-      if (validAfterMillis < 0L || freshUntilMillis < 0L) {
-        log.error("Could not parse timestamp while reading "
-            + "weights status file.  Skipping.");
-        break;
-      }
-      long[] interval = new long[] { validAfterMillis, freshUntilMillis };
-      double[] weights = new double[] { -1.0,
-          Double.parseDouble(parts[5]),
-          Double.parseDouble(parts[6]),
-          Double.parseDouble(parts[7]),
-          Double.parseDouble(parts[8]), -1.0, -1.0 };
-      if (parts.length == 11) {
-        weights[6] = Double.parseDouble(parts[10]);
-      }
-      this.history.put(interval, weights);
     }
-    s.close();
   }
 
   public void addToHistory(long validAfterMillis, long freshUntilMillis,
