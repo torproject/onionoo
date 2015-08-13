@@ -131,6 +131,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
       detailsDocument.setExitAddresses(new ArrayList<String>(
           exitAddressesWithoutOrAddresses));
     }
+    detailsDocument.setMeasured(detailsStatus.getMeasured());
     this.documentStore.store(detailsDocument, fingerprint);
   }
 

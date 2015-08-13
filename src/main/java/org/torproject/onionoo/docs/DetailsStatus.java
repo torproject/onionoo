@@ -295,6 +295,14 @@ public class DetailsStatus extends Document {
     return this.recommended_version;
   }
 
+  private Boolean measured;
+  public void setMeasured(Boolean measured) {
+    this.measured = measured;
+  }
+  public Boolean getMeasured() {
+    return this.measured;
+  }
+
   /* From exit lists: */
 
   private Map<String, Long> exit_addresses;

@@ -224,6 +224,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
+  private Map<String, Long>
+      lastSeenUnmeasured = new HashMap<String, Long>(),
+      lastSeenMeasured = new HashMap<String, Long>();
+
   private void processRelayNetworkStatusConsensus(
       RelayNetworkStatusConsensus consensus) {
     long validAfterMillis = consensus.getValidAfterMillis();
@@ -273,6 +277,17 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         nodeStatus.setRecommendedVersion((recommendedVersions == null ||
             entry.getVersion() == null) ? null :
             recommendedVersions.contains(entry.getVersion()));
+      }
+      if (entry.getUnmeasured()) {
+        if (!this.lastSeenUnmeasured.containsKey(fingerprint) ||
+            this.lastSeenUnmeasured.get(fingerprint) < validAfterMillis) {
+          this.lastSeenUnmeasured.put(fingerprint, validAfterMillis);
+        }
+      } else if (consensus.getConsensusMethod() >= 17) {
+        if (!this.lastSeenMeasured.containsKey(fingerprint) ||
+            this.lastSeenMeasured.get(fingerprint) < validAfterMillis) {
+          this.lastSeenMeasured.put(fingerprint, validAfterMillis);
+        }
       }
     }
     this.relayConsensusesProcessed++;
@@ -797,6 +812,21 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         String hostName = this.rdnsLookupResults.get(fingerprint);
         detailsStatus.setHostName(hostName);
         nodeStatus.setLastRdnsLookup(this.startedRdnsLookups);
+      }
+
+      if (detailsStatus.getLastSeenMillis() <
+          nodeStatus.getLastSeenMillis()) {
+        if (this.lastSeenMeasured.containsKey(fingerprint)) {
+          if (this.lastSeenUnmeasured.containsKey(fingerprint) &&
+              this.lastSeenUnmeasured.get(fingerprint) >
+              this.lastSeenMeasured.get(fingerprint)) {
+            detailsStatus.setMeasured(false);
+          } else {
+            detailsStatus.setMeasured(true);
+          }
+        } else if (this.lastSeenUnmeasured.containsKey(fingerprint)) {
+          detailsStatus.setMeasured(false);
+        }
       }
 
       detailsStatus.setRelay(nodeStatus.isRelay());

@@ -362,5 +362,13 @@ public class DetailsDocument extends Document {
   public List<String> getTransports() {
     return this.transports;
   }
+
+  private Boolean measured;
+  public void setMeasured(Boolean measured) {
+    this.measured = measured;
+  }
+  public Boolean getMeasured() {
+    return this.measured;
+  }
 }
 
