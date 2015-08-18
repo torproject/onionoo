@@ -46,13 +46,12 @@ public class NodeStatus extends Document {
     return this.contact;
   }
 
-  private String[] familyFingerprints;
-  public void setFamilyFingerprints(
-      SortedSet<String> familyFingerprints) {
-    this.familyFingerprints = collectionToStringArray(familyFingerprints);
+  private String[] declaredFamily;
+  public void setDeclaredFamily(SortedSet<String> declaredFamily) {
+    this.declaredFamily = collectionToStringArray(declaredFamily);
   }
-  public SortedSet<String> getFamilyFingerprints() {
-    return stringArrayToSortedSet(this.familyFingerprints);
+  public SortedSet<String> getDeclaredFamily() {
+    return stringArrayToSortedSet(this.declaredFamily);
   }
 
   private static String[] collectionToStringArray(
@@ -301,7 +300,8 @@ public class NodeStatus extends Document {
     return this.lastRdnsLookup;
   }
 
-  /* Computed effective family */
+  /* Computed effective and extended family and derived subsets alleged
+   * and indirect family */
 
   private String[] effectiveFamily;
   public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
@@ -309,6 +309,28 @@ public class NodeStatus extends Document {
   }
   public SortedSet<String> getEffectiveFamily() {
     return stringArrayToSortedSet(this.effectiveFamily);
+  }
+
+  private String[] extendedFamily;
+  public void setExtendedFamily(SortedSet<String> extendedFamily) {
+    this.extendedFamily = collectionToStringArray(extendedFamily);
+  }
+  public SortedSet<String> getExtendedFamily() {
+    return stringArrayToSortedSet(this.extendedFamily);
+  }
+
+  public SortedSet<String> getAllegedFamily() {
+    SortedSet<String> allegedFamily = new TreeSet<String>(
+        stringArrayToSortedSet(this.declaredFamily));
+    allegedFamily.removeAll(stringArrayToSortedSet(this.effectiveFamily));
+    return allegedFamily;
+  }
+
+  public SortedSet<String> getIndirectFamily() {
+    SortedSet<String> indirectFamily = new TreeSet<String>(
+        stringArrayToSortedSet(this.extendedFamily));
+    indirectFamily.removeAll(stringArrayToSortedSet(this.effectiveFamily));
+    return indirectFamily;
   }
 
   /* Constructor and (de-)serialization methods: */
@@ -412,17 +434,33 @@ public class NodeStatus extends Document {
         nodeStatus.setRecommendedVersion(parts[21].equals("true"));
       }
       if (!parts[22].equals("null")) {
-        SortedSet<String> familyFingerprints = new TreeSet<String>();
-        for (String familyMember : parts[22].split("[;:]")) {
-          if (familyMember.length() > 0) {
-            familyFingerprints.add(familyMember);
-          }
+        /* The relay's family is encoded in three ':'-separated groups:
+         *  0. declared, not-mutually agreed family members,
+         *  1. effective, mutually agreed family members, and
+         *  2. indirect members that can be reached via others only.
+         * Each group contains zero or more ';'-separated fingerprints. */
+        String[] groups = parts[22].split(":", -1);
+        SortedSet<String> allegedFamily = new TreeSet<String>(),
+            effectiveFamily = new TreeSet<String>(),
+            indirectFamily = new TreeSet<String>();
+        if (groups[0].length() > 0) {
+          allegedFamily.addAll(Arrays.asList(groups[0].split(";")));
         }
-        nodeStatus.setFamilyFingerprints(familyFingerprints);
-        if (parts[22].contains(":")) {
-          nodeStatus.setEffectiveFamily(new TreeSet<String>(
-              Arrays.asList(parts[22].split(":", 2)[1].split(";"))));
+        if (groups.length > 1 && groups[1].length() > 0) {
+          effectiveFamily.addAll(Arrays.asList(groups[1].split(";")));
         }
+        if (groups.length > 2 && groups[2].length() > 0) {
+          indirectFamily.addAll(Arrays.asList(groups[2].split(";")));
+        }
+        SortedSet<String> declaredFamily = new TreeSet<String>();
+        declaredFamily.addAll(allegedFamily);
+        declaredFamily.addAll(effectiveFamily);
+        nodeStatus.setDeclaredFamily(declaredFamily);
+        nodeStatus.setEffectiveFamily(effectiveFamily);
+        SortedSet<String> extendedFamily = new TreeSet<String>();
+        extendedFamily.addAll(effectiveFamily);
+        extendedFamily.addAll(indirectFamily);
+        nodeStatus.setExtendedFamily(extendedFamily);
       }
       return nodeStatus;
     } catch (NumberFormatException e) {
@@ -483,16 +521,9 @@ public class NodeStatus extends Document {
     sb.append("\t" + (this.contact != null ? this.contact : ""));
     sb.append("\t" + (this.recommendedVersion == null ? "null" :
         this.recommendedVersion ? "true" : "false"));
-    if (this.effectiveFamily != null && this.effectiveFamily.length > 0) {
-      SortedSet<String> mutual = this.getEffectiveFamily();
-      SortedSet<String> notMutual = new TreeSet<String>(
-          this.getFamilyFingerprints());
-      notMutual.removeAll(mutual);
-      sb.append("\t" + StringUtils.join(notMutual, ";") + ":"
-          + StringUtils.join(mutual, ";"));
-    } else {
-      sb.append("\t" + StringUtils.join(this.familyFingerprints, ";"));
-    }
+    sb.append("\t" + StringUtils.join(this.getAllegedFamily(), ";") + ":"
+        + StringUtils.join(this.getEffectiveFamily(), ";") + ":"
+        + StringUtils.join(this.getIndirectFamily(), ";"));
     return sb.toString();
   }
 }

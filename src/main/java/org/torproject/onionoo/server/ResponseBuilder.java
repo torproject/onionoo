@@ -70,7 +70,7 @@ public class ResponseBuilder {
     return this.charsWritten;
   }
 
-  private static final String PROTOCOL_VERSION = "2.5";
+  private static final String PROTOCOL_VERSION = "2.6";
 
   private static final String NEXT_MAJOR_VERSION_SCHEDULED = null;
 
@@ -271,6 +271,10 @@ public class ResponseBuilder {
             dd.setEffectiveFamily(detailsDocument.getEffectiveFamily());
           } else if (field.equals("measured")) {
             dd.setMeasured(detailsDocument.getMeasured());
+          } else if (field.equals("alleged_family")) {
+            dd.setAllegedFamily(detailsDocument.getAllegedFamily());
+          } else if (field.equals("indirect_family")) {
+            dd.setIndirectFamily(detailsDocument.getIndirectFamily());
           }
         }
         /* Don't escape HTML characters, like < and >, contained in

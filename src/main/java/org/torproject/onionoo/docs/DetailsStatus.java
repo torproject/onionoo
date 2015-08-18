@@ -110,12 +110,28 @@ public class DetailsStatus extends Document {
     return this.family;
   }
 
+  private SortedSet<String> alleged_family;
+  public void setAllegedFamily(SortedSet<String> allegedFamily) {
+    this.alleged_family = allegedFamily;
+  }
+  public SortedSet<String> getAllegedFamily() {
+    return this.alleged_family;
+  }
+
   private SortedSet<String> effective_family;
   public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
     this.effective_family = effectiveFamily;
   }
   public SortedSet<String> getEffectiveFamily() {
     return this.effective_family;
+  }
+
+  private SortedSet<String> indirect_family;
+  public void setIndirectFamily(SortedSet<String> indirectFamily) {
+    this.indirect_family = indirectFamily;
+  }
+  public SortedSet<String> getIndirectFamily() {
+    return this.indirect_family;
   }
 
   private Map<String, List<String>> exit_policy_v6_summary;

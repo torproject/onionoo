@@ -112,6 +112,18 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setContact(detailsStatus.getContact());
     detailsDocument.setPlatform(detailsStatus.getPlatform());
     detailsDocument.setFamily(detailsStatus.getFamily());
+    if (detailsStatus.getAllegedFamily() != null &&
+        !detailsStatus.getAllegedFamily().isEmpty()) {
+      SortedSet<String> allegedFamily = new TreeSet<String>();
+      for (String familyMember : detailsStatus.getAllegedFamily()) {
+        if (familyMember.length() >= 40) {
+          allegedFamily.add("$" + familyMember);
+        } else {
+          allegedFamily.add(familyMember);
+        }
+      }
+      detailsDocument.setAllegedFamily(allegedFamily);
+    }
     if (detailsStatus.getEffectiveFamily() != null &&
         !detailsStatus.getEffectiveFamily().isEmpty()) {
       SortedSet<String> effectiveFamily = new TreeSet<String>();
@@ -119,6 +131,14 @@ public class DetailsDocumentWriter implements DocumentWriter {
         effectiveFamily.add("$" + familyMember);
       }
       detailsDocument.setEffectiveFamily(effectiveFamily);
+    }
+    if (detailsStatus.getIndirectFamily() != null &&
+        !detailsStatus.getIndirectFamily().isEmpty()) {
+      SortedSet<String> indirectFamily = new TreeSet<String>();
+      for (String familyMember : detailsStatus.getIndirectFamily()) {
+        indirectFamily.add("$" + familyMember);
+      }
+      detailsDocument.setIndirectFamily(indirectFamily);
     }
     detailsDocument.setExitPolicyV6Summary(
         detailsStatus.getExitPolicyV6Summary());

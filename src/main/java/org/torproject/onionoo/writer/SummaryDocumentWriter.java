@@ -84,13 +84,12 @@ public class SummaryDocumentWriter implements DocumentWriter {
       long firstSeenMillis = nodeStatus.getFirstSeenMillis();
       String aSNumber = nodeStatus.getASNumber();
       String contact = nodeStatus.getContact();
-      SortedSet<String> familyFingerprints =
-          nodeStatus.getFamilyFingerprints();
+      SortedSet<String> declaredFamily = nodeStatus.getDeclaredFamily();
       SortedSet<String> effectiveFamily = nodeStatus.getEffectiveFamily();
       SummaryDocument summaryDocument = new SummaryDocument(isRelay,
           nickname, fingerprint, addresses, lastSeenMillis, running,
           relayFlags, consensusWeight, countryCode, firstSeenMillis,
-          aSNumber, contact, familyFingerprints, effectiveFamily);
+          aSNumber, contact, declaredFamily, effectiveFamily);
       if (this.documentStore.store(summaryDocument, fingerprint)) {
         this.writtenDocuments++;
       };
