@@ -70,9 +70,9 @@ public class ResponseBuilder {
     return this.charsWritten;
   }
 
-  private static final String PROTOCOL_VERSION = "2.6";
+  private static final String PROTOCOL_VERSION = "3.0";
 
-  private static final String NEXT_MAJOR_VERSION_SCHEDULED = "2015-11-15";
+  private static final String NEXT_MAJOR_VERSION_SCHEDULED = null;
 
   private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
     String nextMajorVersionScheduledLine =

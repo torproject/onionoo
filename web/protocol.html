@@ -183,9 +183,8 @@ documents on August 13, 2015.</li>
 <li><strong>2.6</strong>: Added optional "alleged_family" and
 "indirect_family" fields and deprecated optional "family" field in details
 documents on August 25, 2015.</li>
-<li><strong>3.0</strong> (scheduled, but not deployed yet!): Extend search
-parameter to match any 4 hex characters of a space-separated fingerprint,
-to be deployed by November 15, 2015.</li>
+<li><strong>3.0</strong>: Extended search parameter to match any 4 hex
+characters of a space-separated fingerprint on November 15, 2015.</li>
 </ul>
 
 </div> <!-- box -->
@@ -289,13 +288,13 @@ Parameter values are case-insensitive.
 <li>
 <b>search</b>
 <p>
-Return only (1) relays with the parameter value
-matching (part of a) nickname, (possibly $-prefixed) beginning of a
-hex-encoded fingerprint, beginning of a base64-encoded fingerprint
-without trailing equal signs, or beginning of an IP address, (2) bridges
-with (part of a) nickname or (possibly $-prefixed) beginning of a hashed
-hex-encoded fingerprint, and (3) relays and/or bridges matching a given
-qualified search term.
+Return only (1) relays with the parameter value matching (part of a)
+nickname, (possibly $-prefixed) beginning of a hex-encoded fingerprint,
+any 4 hex characters of a space-separated fingerprint, beginning of a
+base64-encoded fingerprint without trailing equal signs, or beginning of
+an IP address, (2) bridges with (part of a) nickname or (possibly
+$-prefixed) beginning of a hashed hex-encoded fingerprint, and (3) relays
+and/or bridges matching a given qualified search term.
 Searches by relay IP address include all known addresses used for onion
 routing and for exiting to the Internet.
 Searches for beginnings of IP addresses are performed on textual

@@ -3,6 +3,7 @@
 package org.torproject.onionoo.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -209,6 +210,8 @@ public class RequestHandler {
       SummaryDocument entry = e.getValue();
       String base64Fingerprint = entry.isRelay() ?
           entry.getBase64Fingerprint() : null;
+      String[] fingerprintSortedHexBlocks =
+          entry.getFingerprintSortedHexBlocks();
       boolean lineMatches = false;
       String nickname = entry.getNickname() != null ?
           entry.getNickname().toLowerCase() : "unnamed";
@@ -228,6 +231,13 @@ public class RequestHandler {
       } else if (base64Fingerprint != null &&
           base64Fingerprint.startsWith(searchTerm)) {
         /* Base64-encoded fingerprint matches. */
+        lineMatches = true;
+      } else if (searchTerm.length() == 4 &&
+          fingerprintSortedHexBlocks != null &&
+          Arrays.binarySearch(fingerprintSortedHexBlocks,
+              searchTerm.toUpperCase()) >= 0) {
+        /* 4-hex-character block of space-separated fingerprint
+         * matches. */
         lineMatches = true;
       } else {
         List<String> addresses = entry.getAddresses();

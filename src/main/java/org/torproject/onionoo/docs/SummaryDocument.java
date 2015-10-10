@@ -68,6 +68,22 @@ public class SummaryDocument extends Document {
     return this.base64Fingerprint;
   }
 
+  private transient String[] fingerprintSortedHexBlocks = null;
+  public String[] getFingerprintSortedHexBlocks() {
+    if (this.fingerprintSortedHexBlocks == null && this.f != null) {
+      String fingerprint = this.f.toUpperCase();
+      String[] fingerprintSortedHexBlocks =
+          new String[fingerprint.length() / 4];
+      for (int i = 0; i < fingerprint.length(); i += 4) {
+        fingerprintSortedHexBlocks[i / 4] = fingerprint.substring(
+            i, Math.min(i + 4, fingerprint.length()));
+      }
+      Arrays.sort(fingerprintSortedHexBlocks);
+      this.fingerprintSortedHexBlocks = fingerprintSortedHexBlocks;
+    }
+    return this.fingerprintSortedHexBlocks;
+  }
+
   private String n;
   public void setNickname(String nickname) {
     if (nickname == null || nickname.equals("Unnamed")) {

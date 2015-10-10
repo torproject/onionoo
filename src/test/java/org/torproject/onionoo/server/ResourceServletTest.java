@@ -611,6 +611,26 @@ public class ResourceServletTest {
   }
 
   @Test()
+  public void testSearchSpaceSeparatedFingerprintFourty() {
+    this.assertSummaryDocument(
+        "/summary?search=000C 5F55 BD48 14B9 17CC 474B D537 F1A3 B33C "
+        + "CE2A", 1, new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchSpaceSeparatedFingerprintLastEight() {
+    this.assertSummaryDocument(
+        "/summary?search=F1A3 B33C", 1, new String[] { "TorkaZ" }, 0,
+        null);
+  }
+
+  @Test()
+  public void testSearchSpaceSeparatedFingerprintLastThree() {
+    this.assertSummaryDocument(
+        "/summary?search=33C", 0, null, 0, null);
+  }
+
+  @Test()
   public void testSearchIp() {
     this.assertSummaryDocument(
         "/summary?search=62.216.201.221", 1, new String[] { "TorkaZ" }, 0,

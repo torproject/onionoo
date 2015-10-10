@@ -1,6 +1,6 @@
 <project default="dist" name="onionoo" basedir=".">
 
-  <property name="onionoo.protocol.version" value="2.6"/>
+  <property name="onionoo.protocol.version" value="3.0"/>
   <property name="release.version"
             value="${onionoo.protocol.version}.0"/>
   <property name="javasources" value="src/main/java"/>
