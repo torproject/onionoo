@@ -72,7 +72,7 @@ public class ResponseBuilder {
 
   private static final String PROTOCOL_VERSION = "2.6";
 
-  private static final String NEXT_MAJOR_VERSION_SCHEDULED = null;
+  private static final String NEXT_MAJOR_VERSION_SCHEDULED = "2015-11-15";
 
   private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
     String nextMajorVersionScheduledLine =
