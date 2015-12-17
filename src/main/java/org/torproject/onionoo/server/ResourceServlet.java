@@ -479,7 +479,7 @@ public class ResourceServlet extends HttpServlet {
       /* Fields contain illegal character(s). */
       return null;
     }
-    return parameter.split(",");
+    return parameter.toLowerCase().split(",");
   }
 }
 
