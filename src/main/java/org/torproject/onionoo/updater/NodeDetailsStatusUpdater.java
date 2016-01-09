@@ -172,7 +172,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     detailsStatus.setExitPolicy(descriptor.getExitPolicyLines());
     detailsStatus.setContact(descriptor.getContact());
     detailsStatus.setPlatform(descriptor.getPlatform());
-    detailsStatus.setFamily(descriptor.getFamilyEntries());
     if (descriptor.getFamilyEntries() != null) {
       SortedSet<String> declaredFamily = new TreeSet<String>();
       for (String familyMember : descriptor.getFamilyEntries()) {

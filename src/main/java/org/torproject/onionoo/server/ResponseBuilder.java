@@ -70,7 +70,7 @@ public class ResponseBuilder {
     return this.charsWritten;
   }
 
-  private static final String PROTOCOL_VERSION = "3.0";
+  private static final String PROTOCOL_VERSION = "3.1";
 
   private static final String NEXT_MAJOR_VERSION_SCHEDULED = null;
 
@@ -248,8 +248,6 @@ public class ResponseBuilder {
             dd.setContact(detailsDocument.getContact());
           } else if (field.equals("platform")) {
             dd.setPlatform(detailsDocument.getPlatform());
-          } else if (field.equals("family")) {
-            dd.setFamily(detailsDocument.getFamily());
           } else if (field.equals("consensus_weight_fraction")) {
             dd.setConsensusWeightFraction(
                 detailsDocument.getConsensusWeightFraction());

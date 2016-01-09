@@ -281,14 +281,6 @@ public class DetailsDocument extends Document {
     return unescapeJSON(this.platform);
   }
 
-  private List<String> family;
-  public void setFamily(List<String> family) {
-    this.family = family;
-  }
-  public List<String> getFamily() {
-    return this.family;
-  }
-
   private SortedSet<String> alleged_family;
   public void setAllegedFamily(SortedSet<String> allegedFamily) {
     this.alleged_family = allegedFamily;

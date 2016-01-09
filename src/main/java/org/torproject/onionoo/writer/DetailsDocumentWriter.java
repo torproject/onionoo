@@ -111,7 +111,6 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setExitPolicy(detailsStatus.getExitPolicy());
     detailsDocument.setContact(detailsStatus.getContact());
     detailsDocument.setPlatform(detailsStatus.getPlatform());
-    detailsDocument.setFamily(detailsStatus.getFamily());
     if (detailsStatus.getAllegedFamily() != null &&
         !detailsStatus.getAllegedFamily().isEmpty()) {
       SortedSet<String> allegedFamily = new TreeSet<String>();

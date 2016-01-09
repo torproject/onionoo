@@ -185,6 +185,8 @@ documents on August 13, 2015.</li>
 documents on August 25, 2015.</li>
 <li><strong>3.0</strong>: Extended search parameter to match any 4 hex
 characters of a space-separated fingerprint on November 15, 2015.</li>
+<li><strong>3.1</strong>: Removed optional "family" field on January 18,
+2016.</li>
 </ul>
 
 </div> <!-- box -->
@@ -1179,7 +1181,7 @@ the relay did not report which version it runs.
 </li>
 
 <li>
-<b>family</b>
+<b><font color="red">family</font></b>
 <code class="typeof">array of strings</code>
 <span class="required-false">optional</span>
 <p>
@@ -1190,7 +1192,8 @@ relay part of their family, so that the effective family of this relay may
 be smaller.
 Omitted if empty or if descriptor containing this information cannot be
 found.
-<font color="blue">Deprecated on August 25, 2015.</font>
+<font color="red">Deprecated on August 25, 2015, removed on January 18,
+2016.</font>
 </p>
 </li>
 
