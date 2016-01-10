@@ -57,8 +57,7 @@ public class ResourceServlet extends HttpServlet {
     this.doGet(requestWrapper, responseWrapper);
   }
 
-  private static final long INDEX_MAX_AGE = 6L * 60L * 60L * 1000L,
-      CACHE_MIN_TIME = 5L * 60L * 1000L,
+  private static final long CACHE_MIN_TIME = 5L * 60L * 1000L,
       CACHE_MAX_TIME = 45L * 60L * 1000L,
       CACHE_INTERVAL = 5L * 60L * 1000L;
 
@@ -84,10 +83,6 @@ public class ResourceServlet extends HttpServlet {
         NodeIndexerFactory.getNodeIndexer().getLastIndexed(
         INDEX_WAITING_TIME);
     long indexAgeMillis = nowMillis - indexWrittenMillis;
-    if (indexAgeMillis > INDEX_MAX_AGE) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return;
-    }
     long cacheMaxAgeMillis = Math.max(CACHE_MIN_TIME,
         ((CACHE_MAX_TIME - indexAgeMillis)
         / CACHE_INTERVAL) * CACHE_INTERVAL);
