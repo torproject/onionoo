@@ -446,6 +446,12 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       if (this.knownNodes.containsKey(fingerprint)) {
         updatedNodeStatus = this.knownNodes.get(fingerprint);
         String address = nodeStatus.getAddress();
+        if (address.equals(updatedNodeStatus.getAddress())) {
+          /* Only remember the last lookup time if the address has not
+           * changed.  Otherwise we'll want to do a fresh lookup. */
+          updatedNodeStatus.setLastRdnsLookup(
+              nodeStatus.getLastRdnsLookup());
+        }
         int orPort = nodeStatus.getOrPort();
         int dirPort = nodeStatus.getDirPort();
         SortedSet<String> orAddressesAndPorts =
@@ -478,8 +484,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           updatedNodeStatus.setFirstSeenMillis(
               nodeStatus.getFirstSeenMillis());
         }
-        updatedNodeStatus.setLastRdnsLookup(
-            nodeStatus.getLastRdnsLookup());
         updatedNodeStatus.setDeclaredFamily(
             nodeStatus.getDeclaredFamily());
         updatedNodeStatus.setEffectiveFamily(
