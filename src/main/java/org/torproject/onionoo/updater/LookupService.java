@@ -296,7 +296,9 @@ public class LookupService {
         if (blockLocations.containsKey(blockNumber)) {
           String[] parts = blockLocations.get(blockNumber).
               replaceAll("\"", "").split(",", -1);
-          lookupResult.setCountryCode(parts[4].toLowerCase());
+          if (parts[4].length() > 0) {
+            lookupResult.setCountryCode(parts[4].toLowerCase());
+          }
           if (parts[5].length() > 0) {
             lookupResult.setCountryName(parts[5]);
           }
