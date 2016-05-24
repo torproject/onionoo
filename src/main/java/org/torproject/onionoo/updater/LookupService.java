@@ -122,8 +122,8 @@ public class LookupService {
           addressStringNumbers.values());
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
-        String[] parts = line.split(",", 9);
-        if (parts.length != 9) {
+        String[] parts = line.split(",", -1);
+        if (parts.length < 9) {
           log.error("Illegal line '" + line + "' in "
               + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
               + ".");
@@ -169,7 +169,7 @@ public class LookupService {
           log.error("Number format exception while parsing line '" + line
               + "' in "
               + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
-              + ".");
+              + ".", e);
           return lookupResults;
         }
       }
