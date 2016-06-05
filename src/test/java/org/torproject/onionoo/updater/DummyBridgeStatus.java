@@ -39,5 +39,50 @@ public class DummyBridgeStatus implements BridgeNetworkStatus {
   public SortedMap<String, NetworkStatusEntry> getStatusEntries() {
     return this.statusEntries;
   }
+
+  @Override
+  public int getEnoughMtbfInfo() {
+    return 0;
+  }
+
+  @Override
+  public long getFastBandwidth() {
+    return 0;
+  }
+
+  @Override
+  public long getGuardBandwidthExcludingExits() {
+    return 0;
+  }
+
+  @Override
+  public long getGuardBandwidthIncludingExits() {
+    return 0;
+  }
+
+  @Override
+  public long getGuardTk() {
+    return 0;
+  }
+
+  @Override
+  public double getGuardWfu() {
+    return 0;
+  }
+
+  @Override
+  public int getIgnoringAdvertisedBws() {
+    return 0;
+  }
+
+  @Override
+  public long getStableMtbf() {
+    return 0;
+  }
+
+  @Override
+  public long getStableUptime() {
+    return 0;
+  }
 }
 

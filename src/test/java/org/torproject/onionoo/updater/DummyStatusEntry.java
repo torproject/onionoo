@@ -88,5 +88,10 @@ public class DummyStatusEntry implements NetworkStatusEntry {
   public String getPortList() {
     return null;
   }
+
+  @Override
+  public String getMasterKeyEd25519() {
+    return null;
+  }
 }
 
