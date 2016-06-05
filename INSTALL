@@ -29,6 +29,12 @@ uses Debian stable provided libraries; see vagrant/bootstrap.sh for Debian
 package names.  If you download .jar files elsewhere, please edit the
 corresponding paths in build.xml.
 
+DescripTor is provided by The Tor Project and can be found here:
+    https://dist.torproject.org/descriptor/
+Download the tar.gz file with the version number listed in build.xml.
+The README inside the tar.gz file has all the information about DescripTor
+and explains how to verify the downloaded files.
+
 Attempt to compile the Java sources to make sure that everything works
 correctly:
 

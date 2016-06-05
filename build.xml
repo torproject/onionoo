@@ -3,10 +3,12 @@
   <property name="onionoo.protocol.version" value="3.1"/>
   <property name="release.version"
             value="${onionoo.protocol.version}.0"/>
+  <property name="descriptorversion" value="1.2.0"/>
   <property name="javasources" value="src/main/java"/>
   <property name="tests" value="src/test/java"/>
   <property name="classes" value="classes"/>
   <property name="dist" value="dist"/>
+  <property name="libs" value="lib"/>
   <property name="config" value="etc"/>
   <property name="webxmlfile" value="${config}/web.xml"/>
   <property name="contextxmltemplate"
@@ -21,19 +23,19 @@
             value="${dist}/onionoo-${release.version}.jar"/>
   <property name="source-and-target-java-version" value="1.7" />
 
-  <path id="classpath">
-    <pathelement path="${classes}"/>
-    <fileset dir="/usr/share/java">
-      <include name="commons-codec-1.6.jar"/>
-      <include name="commons-compress-1.4.1.jar"/>
-      <include name="commons-lang3-3.1.jar"/>
-      <include name="gson-2.1.jar"/>
-      <include name="junit4-4.10.jar"/>
-      <include name="hamcrest-all-1.3.jar"/>
+  <patternset id="runtime" >
+    <include name="descriptor-${descriptorversion}.jar"/>
+    <include name="commons-codec-1.6.jar"/>
+    <include name="commons-compress-1.4.1.jar"/>
+    <include name="commons-lang3-3.1.jar"/>
+    <include name="gson-2.1.jar"/>
+    <include name="logback-classic-1.0.4.jar"/>
+    <include name="logback-core-1.0.4.jar"/>
+    <include name="slf4j-api-1.6.5.jar"/>
+  </patternset>
+
+  <patternset id="web" >
       <include name="servlet-api-3.0.jar"/>
-      <include name="logback-classic-1.0.4.jar"/>
-      <include name="logback-core-1.0.4.jar"/>
-      <include name="slf4j-api-1.6.5.jar"/>
       <include name="jetty8-server-8.1.3.v20120416.jar"/>
       <include name="jetty8-servlets-8.1.3.v20120416.jar"/>
       <include name="jetty8-servlet-8.1.3.v20120416.jar"/>
@@ -44,12 +46,30 @@
       <include name="jetty8-webapp-8.1.3.v20120416.jar"/>
       <include name="jetty8-continuation-8.1.3.v20120416.jar"/>
       <include name="jetty8-security-8.1.3.v20120416.jar"/>
-    </fileset>
-    <fileset dir="lib">
-      <include name="descriptor-1.2.0.jar"/>
+  </patternset>
+
+  <patternset id="test" >
+    <include name="junit4-4.10.jar"/>
+    <include name="hamcrest-core-1.3.jar"/>
+  </patternset>
+
+  <path id="classpath">
+    <pathelement path="${classes}"/>
+    <fileset dir="${libs}">
+      <patternset refid="runtime" />
+      <patternset refid="web" />
     </fileset>
     <fileset dir="${config}">
       <include name="logback.xml,jetty.xml"/>
+    </fileset>
+  </path>
+
+  <path id="testclasspath">
+    <path refid="classpath" />
+    <fileset dir="${libs}">
+      <patternset refid="runtime" />
+      <patternset refid="test" />
+      <patternset refid="web" />
     </fileset>
   </path>
 
@@ -92,10 +112,10 @@
            optimize="false"
            failonerror="true"
            includeantruntime="false">
-      <classpath refid="classpath"/>
+      <classpath refid="testclasspath" />
     </javac>
     <junit fork="true" haltonfailure="true" printsummary="off">
-      <classpath refid="classpath"/>
+      <classpath refid="testclasspath" />
       <formatter type="plain" usefile="false"/>
       <batchtest>
         <fileset dir="${classes}"
@@ -109,29 +129,19 @@
     <war destfile="${warfile}"
          webxml="${webxmlfile}">
       <fileset dir="web"/>
-      <zipgroupfileset dir="lib">
-        <include name="descriptor-1.2.0.jar"/>
-      </zipgroupfileset>
-      <zipgroupfileset dir="/usr/share/java">
-        <include name="commons-codec-1.6.jar"/>
-        <include name="commons-compress-1.4.1.jar"/>
-        <include name="commons-lang3-3.1.jar"/>
-        <include name="gson-2.1.jar"/>
-        <include name="servlet-api-3.0.jar"/>
-        <include name="jetty8-server-8.1.3.v20120416.jar"/>
-        <include name="jetty8-servlet-8.1.3.v20120416.jar"/>
-        <include name="jetty8-servlets-8.1.3.v20120416.jar"/>
-        <include name="jetty8-util-8.1.3.v20120416.jar"/>
-        <include name="jetty8-http-8.1.3.v20120416.jar"/>
-        <include name="jetty8-io-8.1.3.v20120416.jar"/>
-        <include name="jetty8-xml-8.1.3.v20120416.jar"/>
-        <include name="jetty8-webapp-8.1.3.v20120416.jar"/>
-        <include name="jetty8-continuation-8.1.3.v20120416.jar"/>
-        <include name="jetty8-security-8.1.3.v20120416.jar"/>
-        <include name="logback-classic-1.0.4.jar"/>
-        <include name="logback-core-1.0.4.jar"/>
-        <include name="slf4j-api-1.6.5.jar"/>
-      </zipgroupfileset>
+      <restrict>
+        <not>
+          <name name="META-INF/*" />
+        </not>
+        <archives>
+          <zips>
+            <fileset dir="${libs}">
+              <patternset refid="runtime" />
+              <patternset refid="web" />
+            </fileset>
+          </zips>
+        </archives>
+      </restrict>
       <fileset dir="${classes}"
                includes="**/*"
                excludes="**/Test*.class"/>
@@ -160,18 +170,18 @@
   <target name="jar" depends="compile">
     <jar destfile="${onionoo.jarfile}"
          basedir="${classes}">
-      <zipgroupfileset dir="/usr/share/java">
-        <include name="commons-codec-1.6.jar"/>
-        <include name="commons-compress-1.4.1.jar"/>
-        <include name="commons-lang3-3.1.jar"/>
-        <include name="gson-2.1.jar"/>
-        <include name="logback-classic-1.0.4.jar"/>
-        <include name="logback-core-1.0.4.jar"/>
-        <include name="slf4j-api-1.6.5.jar"/>
-      </zipgroupfileset>
-      <zipgroupfileset dir="lib">
-        <include name="descriptor-1.2.0.jar"/>
-      </zipgroupfileset>
+      <restrict>
+        <not>
+          <name name="META-INF/*" />
+        </not>
+        <archives>
+          <zips>
+            <fileset dir="${libs}">
+              <patternset refid="runtime" />
+            </fileset>
+          </zips>
+        </archives>
+      </restrict>
       <fileset dir="${classes}"
                excludes="org/torproject/onionoo/server/" />
       <fileset dir="${config}" includes="logback.xml" />
