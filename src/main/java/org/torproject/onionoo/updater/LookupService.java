@@ -252,8 +252,7 @@ public class LookupService {
           long endIpNum = Long.parseLong(parts[1]);
           while (firstAddressNumber <= endIpNum &&
               firstAddressNumber != -1L) {
-            if (parts[2].startsWith("AS") &&
-                parts[2].split(" ", 2).length == 2) {
+            if (parts[2].startsWith("AS")) {
               addressNumberASN.put(firstAddressNumber, parts[2]);
             }
             sortedAddressNumbers.remove(firstAddressNumber);
@@ -319,7 +318,7 @@ public class LookupService {
         String[] parts = addressNumberASN.get(addressNumber).split(" ",
             2);
         lookupResult.setAsNumber(parts[0]);
-        lookupResult.setAsName(parts[1]);
+        lookupResult.setAsName(parts.length == 2 ? parts[1] : "");
       }
       lookupResults.put(addressString, lookupResult);
     }

@@ -416,6 +416,17 @@ public class LookupServiceTest {
   }
 
   @Test()
+  public void testLookupGeoipASNum2NoASName() {
+    List<String> geoipASNum2Lines = new ArrayList<String>();
+    geoipASNum2Lines.add("134743296,134744063,AS3356");
+    geoipASNum2Lines.add("134744064,134744319,AS15169");
+    geoipASNum2Lines.add("134744320,134750463,AS3356");
+    this.assertLookupResult(null, null, geoipASNum2Lines, "8.8.8.8", "us",
+        "United States", "California", "Mountain View", 37.3860f,
+        -122.0838f, "AS15169", "");
+  }
+
+  @Test()
   public void testLookupLocationTurkey() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
