@@ -6,7 +6,9 @@
   <property name="descriptorversion" value="1.2.0"/>
   <property name="javasources" value="src/main/java"/>
   <property name="tests" value="src/test/java"/>
+  <property name="generated" value="generated/"/>
   <property name="classes" value="classes"/>
+  <property name="testresources" value="src/test/resources/"/>
   <property name="dist" value="dist"/>
   <property name="libs" value="lib"/>
   <property name="config" value="etc"/>
@@ -73,11 +75,18 @@
     </fileset>
   </path>
 
+  <path id="checkstyle.classpath" >
+    <fileset dir="${libs}">
+      <include name="checkstyle-6.17-all.jar" />
+    </fileset>
+  </path>
+
   <target name="init">
     <copy file="${contextxmltemplate}" tofile="${contextxml}"/>
     <copy file="${webxmltemplate}" tofile="${webxml}"/>
     <mkdir dir="${classes}"/>
     <mkdir dir="${dist}"/>
+    <mkdir dir="${generated}"/>
   </target>
 
   <target name="clean" >
@@ -122,6 +131,22 @@
                  includes="**/*Test.class"/>
       </batchtest>
     </junit>
+  </target>
+
+  <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties">
+    <classpath refid="checkstyle.classpath" />
+  </taskdef>
+  <target name="checks" depends="compile">
+    <checkstyle config="${testresources}/metrics_checks.xml">
+      <fileset dir="${javasources}"
+               includes="**/*.java" />
+      <classpath>
+        <path refid="classpath" />
+        <path refid="checkstyle.classpath" />
+      </classpath>
+      <formatter type="plain"
+                 toFile="${generated}/checkstyle_report.txt"/>
+    </checkstyle>
   </target>
 
   <target name="war"
