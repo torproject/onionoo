@@ -1,5 +1,6 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.util;
 
 public class FormattingUtils {
@@ -7,8 +8,9 @@ public class FormattingUtils {
   private FormattingUtils() {
   }
 
-  private static final long ONE_SECOND = 1000L,
-      ONE_MINUTE = 60L * ONE_SECOND;
+  private static final long ONE_SECOND = 1000L;
+
+  private static final long ONE_MINUTE = 60L * ONE_SECOND;
 
   public static String formatMillis(long millis) {
     return String.format("%02d:%02d.%03d minutes", millis / ONE_MINUTE,
@@ -29,3 +31,4 @@ public class FormattingUtils {
     return String.format("%,d", decimalNumber);
   }
 }
+

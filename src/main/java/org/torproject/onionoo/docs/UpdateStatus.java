@@ -1,5 +1,6 @@
 /* Copyright 2013, 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
 
 import org.slf4j.Logger;
@@ -10,9 +11,11 @@ public class UpdateStatus extends Document {
   private static Logger log = LoggerFactory.getLogger(UpdateStatus.class);
 
   private long updatedMillis;
+
   public void setUpdatedMillis(long updatedMillis) {
     this.updatedMillis = updatedMillis;
   }
+
   public long getUpdatedMillis() {
     return this.updatedMillis;
   }

@@ -1,5 +1,6 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
 
 import java.net.InetAddress;
@@ -8,9 +9,17 @@ import java.net.UnknownHostException;
 class RdnsLookupRequest extends Thread {
 
   private final ReverseDomainNameResolver reverseDomainNameResolver;
+
   private RdnsLookupWorker parent;
-  private String address, hostName;
-  private long lookupStartedMillis = -1L, lookupCompletedMillis = -1L;
+
+  private String address;
+
+  private String hostName;
+
+  private long lookupStartedMillis = -1L;
+
+  private long lookupCompletedMillis = -1L;
+
   public RdnsLookupRequest(
       ReverseDomainNameResolver reverseDomainNameResolver,
       RdnsLookupWorker parent, String address) {
@@ -18,6 +27,7 @@ class RdnsLookupRequest extends Thread {
     this.parent = parent;
     this.address = address;
   }
+
   public void run() {
     this.lookupStartedMillis =
         this.reverseDomainNameResolver.time.currentTimeMillis();
@@ -33,9 +43,11 @@ class RdnsLookupRequest extends Thread {
         this.reverseDomainNameResolver.time.currentTimeMillis();
     this.parent.interrupt();
   }
+
   public synchronized String getHostName() {
     return hostName;
   }
+
   public synchronized long getLookupMillis() {
     return this.lookupCompletedMillis - this.lookupStartedMillis;
   }

@@ -1,45 +1,52 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ClientsHistory implements Comparable<ClientsHistory> {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       ClientsHistory.class);
 
   private long startMillis;
+
   public long getStartMillis() {
     return this.startMillis;
   }
 
   private long endMillis;
+
   public long getEndMillis() {
     return this.endMillis;
   }
 
   private double totalResponses;
+
   public double getTotalResponses() {
     return this.totalResponses;
   }
 
   private SortedMap<String, Double> responsesByCountry;
+
   public SortedMap<String, Double> getResponsesByCountry() {
     return this.responsesByCountry;
   }
 
   private SortedMap<String, Double> responsesByTransport;
+
   public SortedMap<String, Double> getResponsesByTransport() {
     return this.responsesByTransport;
   }
 
   private SortedMap<String, Double> responsesByVersion;
+
   public SortedMap<String, Double> getResponsesByVersion() {
     return this.responsesByVersion;
   }
@@ -92,8 +99,8 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
         parseResponses(parts[6]);
     SortedMap<String, Double> responsesByVersion =
         parseResponses(parts[7]);
-    if (responsesByCountry == null || responsesByTransport == null ||
-        responsesByVersion == null) {
+    if (responsesByCountry == null || responsesByTransport == null
+        || responsesByVersion == null) {
       log.warn("Invalid format of responses by country, transport, or "
           + "version in clients history: '" + responseHistoryString
           + "'.  Skipping.");
@@ -177,16 +184,17 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
   }
 
   public int compareTo(ClientsHistory other) {
-    return this.startMillis < other.startMillis ? -1 :
-        this.startMillis > other.startMillis ? 1 : 0;
+    return this.startMillis < other.startMillis ? -1
+        : this.startMillis > other.startMillis ? 1 : 0;
   }
 
   public boolean equals(Object other) {
-    return other instanceof ClientsHistory &&
-        this.startMillis == ((ClientsHistory) other).startMillis;
+    return other instanceof ClientsHistory
+        && this.startMillis == ((ClientsHistory) other).startMillis;
   }
 
   public int hashCode() {
     return (int) this.startMillis;
   }
 }
+

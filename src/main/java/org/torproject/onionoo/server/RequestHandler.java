@@ -1,6 +1,11 @@
 /* Copyright 2011--2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.server;
+
+import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.SummaryDocument;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,10 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-
-import org.torproject.onionoo.docs.DocumentStore;
-import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.docs.SummaryDocument;
 
 public class RequestHandler {
 
@@ -28,74 +29,88 @@ public class RequestHandler {
   }
 
   private String resourceType;
+
   public void setResourceType(String resourceType) {
     this.resourceType = resourceType;
   }
 
   private String type;
+
   public void setType(String type) {
     this.type = type;
   }
 
   private String running;
+
   public void setRunning(String running) {
     this.running = running;
   }
 
   private String[] search;
+
   public void setSearch(String[] search) {
     this.search = new String[search.length];
     System.arraycopy(search, 0, this.search, 0, search.length);
   }
 
   private String lookup;
+
   public void setLookup(String lookup) {
     this.lookup = lookup;
   }
 
   private String fingerprint;
+
   public void setFingerprint(String fingerprint) {
     this.fingerprint = fingerprint;
   }
 
   private String country;
+
   public void setCountry(String country) {
     this.country = country;
   }
 
   private String as;
+
   public void setAs(String as) {
     this.as = as;
   }
 
   private String flag;
+
   public void setFlag(String flag) {
     this.flag = flag;
   }
 
   private String[] contact;
+
   public void setContact(String[] contact) {
     this.contact = new String[contact.length];
     System.arraycopy(contact, 0, this.contact, 0, contact.length);
   }
 
   private String[] order;
+
   public void setOrder(String[] order) {
     this.order = new String[order.length];
     System.arraycopy(order, 0, this.order, 0, order.length);
   }
 
   private String offset;
+
   public void setOffset(String offset) {
     this.offset = offset;
   }
 
   private String limit;
+
   public void setLimit(String limit) {
     this.limit = limit;
   }
 
   private int[] firstSeenDays;
+
   public void setFirstSeenDays(int[] firstSeenDays) {
     this.firstSeenDays = new int[firstSeenDays.length];
     System.arraycopy(firstSeenDays, 0, this.firstSeenDays, 0,
@@ -103,6 +118,7 @@ public class RequestHandler {
   }
 
   private int[] lastSeenDays;
+
   public void setLastSeenDays(int[] lastSeenDays) {
     this.lastSeenDays = new int[lastSeenDays.length];
     System.arraycopy(lastSeenDays, 0, this.lastSeenDays, 0,
@@ -110,6 +126,7 @@ public class RequestHandler {
   }
 
   private String family;
+
   public void setFamily(String family) {
     this.family = family;
   }
@@ -143,7 +160,6 @@ public class RequestHandler {
     this.limit();
   }
 
-
   private void filterByResourceType() {
     if (this.resourceType.equals("clients")) {
       this.filteredRelays.clear();
@@ -171,8 +187,8 @@ public class RequestHandler {
     }
     boolean runningRequested = this.running.equals("true");
     Set<String> removeRelays = new HashSet<String>();
-    for (Map.Entry<String, SummaryDocument> e :
-        filteredRelays.entrySet()) {
+    for (Map.Entry<String, SummaryDocument> e
+        : filteredRelays.entrySet()) {
       if (e.getValue().isRunning() != runningRequested) {
         removeRelays.add(e.getKey());
       }
@@ -181,8 +197,8 @@ public class RequestHandler {
       this.filteredRelays.remove(fingerprint);
     }
     Set<String> removeBridges = new HashSet<String>();
-    for (Map.Entry<String, SummaryDocument> e :
-        filteredBridges.entrySet()) {
+    for (Map.Entry<String, SummaryDocument> e
+        : filteredBridges.entrySet()) {
       if (e.getValue().isRunning() != runningRequested) {
         removeBridges.add(e.getKey());
       }
@@ -204,17 +220,17 @@ public class RequestHandler {
 
   private void filterBySearchTerm(String searchTerm) {
     Set<String> removeRelays = new HashSet<String>();
-    for (Map.Entry<String, SummaryDocument> e :
-        filteredRelays.entrySet()) {
+    for (Map.Entry<String, SummaryDocument> e
+        : filteredRelays.entrySet()) {
       String fingerprint = e.getKey();
       SummaryDocument entry = e.getValue();
-      String base64Fingerprint = entry.isRelay() ?
-          entry.getBase64Fingerprint() : null;
+      String base64Fingerprint = entry.isRelay()
+          ? entry.getBase64Fingerprint() : null;
       String[] fingerprintSortedHexBlocks =
           entry.getFingerprintSortedHexBlocks();
       boolean lineMatches = false;
-      String nickname = entry.getNickname() != null ?
-          entry.getNickname().toLowerCase() : "unnamed";
+      String nickname = entry.getNickname() != null
+          ? entry.getNickname().toLowerCase() : "unnamed";
       if (searchTerm.startsWith("$")) {
         /* Search is for $-prefixed fingerprint. */
         if (fingerprint.startsWith(
@@ -228,14 +244,14 @@ public class RequestHandler {
       } else if (fingerprint.startsWith(searchTerm.toUpperCase())) {
         /* Non-$-prefixed fingerprint matches. */
         lineMatches = true;
-      } else if (base64Fingerprint != null &&
-          base64Fingerprint.startsWith(searchTerm)) {
+      } else if (base64Fingerprint != null
+          && base64Fingerprint.startsWith(searchTerm)) {
         /* Base64-encoded fingerprint matches. */
         lineMatches = true;
-      } else if (searchTerm.length() == 4 &&
-          fingerprintSortedHexBlocks != null &&
-          Arrays.binarySearch(fingerprintSortedHexBlocks,
-              searchTerm.toUpperCase()) >= 0) {
+      } else if (searchTerm.length() == 4
+          && fingerprintSortedHexBlocks != null
+          && Arrays.binarySearch(fingerprintSortedHexBlocks,
+          searchTerm.toUpperCase()) >= 0) {
         /* 4-hex-character block of space-separated fingerprint
          * matches. */
         lineMatches = true;
@@ -262,8 +278,8 @@ public class RequestHandler {
       String hashedFingerprint = e.getKey();
       SummaryDocument entry = e.getValue();
       boolean lineMatches = false;
-      String nickname = entry.getNickname() != null ?
-          entry.getNickname().toLowerCase() : "unnamed";
+      String nickname = entry.getNickname() != null
+          ? entry.getNickname().toLowerCase() : "unnamed";
       if (searchTerm.startsWith("$")) {
         /* Search is for $-prefixed hashed fingerprint. */
         if (hashedFingerprint.startsWith(
@@ -464,8 +480,8 @@ public class RequestHandler {
         this.nodeIndex.getRelaysByContact().entrySet()) {
       String contact = e.getKey();
       for (String contactPart : this.contact) {
-        if (contact == null ||
-            !contact.contains(contactPart.toLowerCase())) {
+        if (contact == null
+            || !contact.contains(contactPart.toLowerCase())) {
           removeRelays.addAll(e.getValue());
           break;
         }
@@ -486,8 +502,8 @@ public class RequestHandler {
         this.filteredRelays.keySet());
     removeRelays.remove(this.family);
     if (this.nodeIndex.getRelaysByFamily().containsKey(this.family)) {
-      removeRelays.removeAll(this.nodeIndex.getRelaysByFamily().
-          get(this.family));
+      removeRelays.removeAll(this.nodeIndex.getRelaysByFamily()
+          .get(this.family));
     }
     for (String fingerprint : removeRelays) {
       this.filteredRelays.remove(fingerprint);
@@ -503,8 +519,8 @@ public class RequestHandler {
         Collections.reverse(orderBy);
       }
       for (String relay : orderBy) {
-        if (this.filteredRelays.containsKey(relay) &&
-            !this.orderedRelays.contains(filteredRelays.get(relay))) {
+        if (this.filteredRelays.containsKey(relay)
+            && !this.orderedRelays.contains(filteredRelays.get(relay))) {
           this.orderedRelays.add(this.filteredRelays.remove(relay));
         }
       }
@@ -532,9 +548,9 @@ public class RequestHandler {
       return;
     }
     int offsetValue = Integer.parseInt(this.offset);
-    while (offsetValue-- > 0 &&
-        (!this.orderedRelays.isEmpty() ||
-        !this.orderedBridges.isEmpty())) {
+    while (offsetValue-- > 0
+        && (!this.orderedRelays.isEmpty()
+        || !this.orderedBridges.isEmpty())) {
       if (!this.orderedRelays.isEmpty()) {
         this.orderedRelays.remove(0);
       } else {
@@ -549,25 +565,27 @@ public class RequestHandler {
       return;
     }
     int limitValue = Integer.parseInt(this.limit);
-    while (!this.orderedRelays.isEmpty() &&
-        limitValue < this.orderedRelays.size()) {
+    while (!this.orderedRelays.isEmpty()
+        && limitValue < this.orderedRelays.size()) {
       this.orderedRelays.remove(this.orderedRelays.size() - 1);
     }
     limitValue -= this.orderedRelays.size();
-    while (!this.orderedBridges.isEmpty() &&
-        limitValue < this.orderedBridges.size()) {
+    while (!this.orderedBridges.isEmpty()
+        && limitValue < this.orderedBridges.size()) {
       this.orderedBridges.remove(this.orderedBridges.size() - 1);
     }
   }
 
   private List<SummaryDocument> orderedRelays =
       new ArrayList<SummaryDocument>();
+
   public List<SummaryDocument> getOrderedRelays() {
     return this.orderedRelays;
   }
 
   private List<SummaryDocument> orderedBridges =
       new ArrayList<SummaryDocument>();
+
   public List<SummaryDocument> getOrderedBridges() {
     return this.orderedBridges;
   }
@@ -580,3 +598,4 @@ public class RequestHandler {
     return this.nodeIndex.getBridgesPublishedString();
   }
 }
+

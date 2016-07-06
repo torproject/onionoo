@@ -1,13 +1,8 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.writer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
@@ -15,9 +10,16 @@ import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.SummaryDocument;
 import org.torproject.onionoo.util.FormattingUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+
 public class SummaryDocumentWriter implements DocumentWriter {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       SummaryDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -26,11 +28,13 @@ public class SummaryDocumentWriter implements DocumentWriter {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
   }
 
-  private int writtenDocuments = 0, deletedDocuments = 0;
+  private int writtenDocuments = 0;
+
+  private int deletedDocuments = 0;
 
   public void writeDocuments() {
-    long relaysLastValidAfterMillis = -1L,
-        bridgesLastPublishedMillis = -1L;
+    long relaysLastValidAfterMillis = -1L;
+    long bridgesLastPublishedMillis = -1L;
     for (String fingerprint : this.documentStore.list(NodeStatus.class)) {
       NodeStatus nodeStatus = this.documentStore.retrieve(
           NodeStatus.class, true, fingerprint);
@@ -76,9 +80,9 @@ public class SummaryDocumentWriter implements DocumentWriter {
       }
       long lastSeenMillis = nodeStatus.getLastSeenMillis();
       SortedSet<String> relayFlags = nodeStatus.getRelayFlags();
-      boolean running = relayFlags.contains("Running") && (isRelay ?
-          lastSeenMillis == relaysLastValidAfterMillis :
-          lastSeenMillis == bridgesLastPublishedMillis);
+      boolean running = relayFlags.contains("Running") && (isRelay
+          ? lastSeenMillis == relaysLastValidAfterMillis
+          : lastSeenMillis == bridgesLastPublishedMillis);
       long consensusWeight = nodeStatus.getConsensusWeight();
       String countryCode = nodeStatus.getCountryCode();
       long firstSeenMillis = nodeStatus.getFirstSeenMillis();
@@ -92,7 +96,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
           aSNumber, contact, declaredFamily, effectiveFamily);
       if (this.documentStore.store(summaryDocument, fingerprint)) {
         this.writtenDocuments++;
-      };
+      }
     }
     log.info("Wrote summary document files");
   }
@@ -106,3 +110,4 @@ public class SummaryDocumentWriter implements DocumentWriter {
     return sb.toString();
   }
 }
+

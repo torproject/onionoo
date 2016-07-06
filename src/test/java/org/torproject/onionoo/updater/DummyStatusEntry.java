@@ -2,12 +2,12 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.updater;
 
+import org.torproject.descriptor.NetworkStatusEntry;
+
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import org.torproject.descriptor.NetworkStatusEntry;
 
 public class DummyStatusEntry implements NetworkStatusEntry {
 

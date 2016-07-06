@@ -1,14 +1,16 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
+
+import org.torproject.onionoo.util.TimeFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.torproject.onionoo.util.TimeFactory;
 
 public class ClientsStatus extends Document {
 
@@ -16,18 +18,22 @@ public class ClientsStatus extends Document {
       ClientsStatus.class);
 
   private transient boolean isDirty = false;
+
   public boolean isDirty() {
     return this.isDirty;
   }
+
   public void clearDirty() {
     this.isDirty = false;
   }
 
   private SortedSet<ClientsHistory> history =
       new TreeSet<ClientsHistory>();
+
   public void setHistory(SortedSet<ClientsHistory> history) {
     this.history = history;
   }
+
   public SortedSet<ClientsHistory> getHistory() {
     return this.history;
   }
@@ -49,12 +55,12 @@ public class ClientsStatus extends Document {
 
   public void addToHistory(SortedSet<ClientsHistory> newIntervals) {
     for (ClientsHistory interval : newIntervals) {
-      if ((this.history.headSet(interval).isEmpty() ||
-          this.history.headSet(interval).last().getEndMillis() <=
-          interval.getStartMillis()) &&
-          (this.history.tailSet(interval).isEmpty() ||
-          this.history.tailSet(interval).first().getStartMillis() >=
-          interval.getEndMillis())) {
+      if ((this.history.headSet(interval).isEmpty()
+          || this.history.headSet(interval).last().getEndMillis()
+          <= interval.getStartMillis())
+          && (this.history.tailSet(interval).isEmpty()
+          || this.history.tailSet(interval).first().getStartMillis()
+          >= interval.getEndMillis())) {
         this.history.add(interval);
         this.isDirty = true;
       }
@@ -70,11 +76,11 @@ public class ClientsStatus extends Document {
     long now = TimeFactory.getTime().currentTimeMillis();
     for (ClientsHistory responses : uncompressedHistory) {
       long intervalLengthMillis;
-      if (now - responses.getEndMillis() <=
-          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+      if (now - responses.getEndMillis()
+          <= DateTimeHelper.ROUGHLY_THREE_MONTHS) {
         intervalLengthMillis = DateTimeHelper.ONE_DAY;
-      } else if (now - responses.getEndMillis() <=
-          DateTimeHelper.ROUGHLY_ONE_YEAR) {
+      } else if (now - responses.getEndMillis()
+          <= DateTimeHelper.ROUGHLY_ONE_YEAR) {
         intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {
         intervalLengthMillis = DateTimeHelper.TEN_DAYS;
@@ -82,11 +88,11 @@ public class ClientsStatus extends Document {
       String monthString = DateTimeHelper.format(
           responses.getStartMillis(),
           DateTimeHelper.ISO_YEARMONTH_FORMAT);
-      if (lastResponses != null &&
-          lastResponses.getEndMillis() == responses.getStartMillis() &&
-          ((lastResponses.getEndMillis() - 1L) / intervalLengthMillis) ==
-          ((responses.getEndMillis() - 1L) / intervalLengthMillis) &&
-          lastMonthString.equals(monthString)) {
+      if (lastResponses != null
+          && lastResponses.getEndMillis() == responses.getStartMillis()
+          && ((lastResponses.getEndMillis() - 1L) / intervalLengthMillis)
+          == ((responses.getEndMillis() - 1L) / intervalLengthMillis)
+          && lastMonthString.equals(monthString)) {
         lastResponses.addResponses(responses);
       } else {
         if (lastResponses != null) {

@@ -6,6 +6,11 @@ package org.torproject.onionoo.updater;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,13 +23,6 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.torproject.onionoo.updater.LookupResult;
-import org.torproject.onionoo.updater.LookupService;
 
 public class LookupServiceTest {
 

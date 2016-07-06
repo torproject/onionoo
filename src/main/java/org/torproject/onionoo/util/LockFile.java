@@ -1,18 +1,19 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.util;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class LockFile {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       LockFile.class);
 
   private final File lockFile = new File("lock");
@@ -22,7 +23,7 @@ public class LockFile {
    * milliseconds and return whether this operation was successful.
    *
    * @return <code>true</code> if the lock file did not exist and writing
-   * that file now succeeded, <code>false</code> otherwise.
+   *     that file now succeeded, <code>false</code> otherwise.
    */
   public boolean acquireLock() {
     Time time = TimeFactory.getTime();
@@ -54,7 +55,7 @@ public class LockFile {
    * whether the file was successfully deleted.
    *
    * @return <code>true</code> if the lock file does not exist anymore
-   * when returning, <code>false</code> otherwise.
+   *     when returning, <code>false</code> otherwise.
    */
   public boolean releaseLock() {
     if (this.lockFile.exists()) {

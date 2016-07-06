@@ -1,5 +1,6 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
 
 class RdnsLookupWorker extends Thread {
@@ -11,8 +12,8 @@ class RdnsLookupWorker extends Thread {
   }
 
   public void run() {
-    while (this.reverseDomainNameResolver.time.currentTimeMillis() -
-        ReverseDomainNameResolver.RDNS_LOOKUP_MAX_DURATION_MILLIS
+    while (this.reverseDomainNameResolver.time.currentTimeMillis()
+        - ReverseDomainNameResolver.RDNS_LOOKUP_MAX_DURATION_MILLIS
         <= this.reverseDomainNameResolver.startedRdnsLookups) {
       String rdnsLookupJob = null;
       synchronized (this.reverseDomainNameResolver.rdnsLookupJobs) {

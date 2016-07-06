@@ -2,12 +2,12 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.updater;
 
+import org.torproject.descriptor.BridgeNetworkStatus;
+import org.torproject.descriptor.NetworkStatusEntry;
+
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import org.torproject.descriptor.BridgeNetworkStatus;
-import org.torproject.descriptor.NetworkStatusEntry;
 
 public class DummyBridgeStatus implements BridgeNetworkStatus {
 

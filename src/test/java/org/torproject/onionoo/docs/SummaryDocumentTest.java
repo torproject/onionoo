@@ -4,10 +4,10 @@ package org.torproject.onionoo.docs;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.TreeSet;
-
-import org.junit.Test;
 
 public class SummaryDocumentTest {
 

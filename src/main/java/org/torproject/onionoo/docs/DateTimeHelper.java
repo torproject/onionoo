@@ -1,6 +1,10 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -9,38 +13,53 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class DateTimeHelper {
 
-  public final static long NO_TIME_AVAILABLE = -1L;
+  public static final long NO_TIME_AVAILABLE = -1L;
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       DateTimeHelper.class);
 
   private DateTimeHelper() {
   }
 
-  public static final long ONE_SECOND = 1000L,
-      TEN_SECONDS = 10L * ONE_SECOND,
-      ONE_MINUTE = 60L * ONE_SECOND,
-      FIVE_MINUTES = 5L * ONE_MINUTE,
-      FIFTEEN_MINUTES = 15L * ONE_MINUTE,
-      FOURTY_FIVE_MINUTES = 45L * ONE_MINUTE,
-      ONE_HOUR = 60L * ONE_MINUTE,
-      FOUR_HOURS = 4L * ONE_HOUR,
-      SIX_HOURS = 6L * ONE_HOUR,
-      TWELVE_HOURS = 12L * ONE_HOUR,
-      ONE_DAY = 24L * ONE_HOUR,
-      TWO_DAYS = 2L * ONE_DAY,
-      THREE_DAYS = 3L * ONE_DAY,
-      ONE_WEEK = 7L * ONE_DAY,
-      TEN_DAYS = 10L * ONE_DAY,
-      ROUGHLY_ONE_MONTH = 31L * ONE_DAY,
-      ROUGHLY_THREE_MONTHS = 92L * ONE_DAY,
-      ROUGHLY_ONE_YEAR = 366L * ONE_DAY,
-      ROUGHLY_FIVE_YEARS = 5L * ROUGHLY_ONE_YEAR;
+  public static final long ONE_SECOND = 1000L;
+
+  public static final long TEN_SECONDS = 10L * ONE_SECOND;
+
+  public static final long ONE_MINUTE = 60L * ONE_SECOND;
+
+  public static final long FIVE_MINUTES = 5L * ONE_MINUTE;
+
+  public static final long FIFTEEN_MINUTES = 15L * ONE_MINUTE;
+
+  public static final long FOURTY_FIVE_MINUTES = 45L * ONE_MINUTE;
+
+  public static final long ONE_HOUR = 60L * ONE_MINUTE;
+
+  public static final long FOUR_HOURS = 4L * ONE_HOUR;
+
+  public static final long SIX_HOURS = 6L * ONE_HOUR;
+
+  public static final long TWELVE_HOURS = 12L * ONE_HOUR;
+
+  public static final long ONE_DAY = 24L * ONE_HOUR;
+
+  public static final long TWO_DAYS = 2L * ONE_DAY;
+
+  public static final long THREE_DAYS = 3L * ONE_DAY;
+
+  public static final long ONE_WEEK = 7L * ONE_DAY;
+
+  public static final long TEN_DAYS = 10L * ONE_DAY;
+
+  public static final long ROUGHLY_ONE_MONTH = 31L * ONE_DAY;
+
+  public static final long ROUGHLY_THREE_MONTHS = 92L * ONE_DAY;
+
+  public static final long ROUGHLY_ONE_YEAR = 366L * ONE_DAY;
+
+  public static final long ROUGHLY_FIVE_YEARS = 5L * ROUGHLY_ONE_YEAR;
 
   public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
@@ -52,16 +71,20 @@ public class DateTimeHelper {
   public static final String DATEHOUR_NOSPACE_FORMAT = "yyyy-MM-dd-HH";
 
   private static ThreadLocal<Map<String, DateFormat>> dateFormats =
-      new ThreadLocal<Map<String, DateFormat>> () {
+      new ThreadLocal<Map<String, DateFormat>>() {
+
     public Map<String, DateFormat> get() {
       return super.get();
     }
+
     protected Map<String, DateFormat> initialValue() {
       return new HashMap<String, DateFormat>();
     }
+
     public void remove() {
       super.remove();
     }
+
     public void set(Map<String, DateFormat> value) {
       super.set(value);
     }

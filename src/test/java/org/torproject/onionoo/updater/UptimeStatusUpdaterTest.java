@@ -4,13 +4,14 @@ package org.torproject.onionoo.updater;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.UptimeHistory;
 import org.torproject.onionoo.docs.UptimeStatus;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class UptimeStatusUpdaterTest {
 

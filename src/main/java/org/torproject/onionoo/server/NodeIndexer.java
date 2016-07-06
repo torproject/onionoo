@@ -1,5 +1,15 @@
 package org.torproject.onionoo.server;
 
+import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.SummaryDocument;
+import org.torproject.onionoo.docs.UpdateStatus;
+import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,15 +25,6 @@ import java.util.TreeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.torproject.onionoo.docs.DocumentStore;
-import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.docs.SummaryDocument;
-import org.torproject.onionoo.docs.UpdateStatus;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
 
 public class NodeIndexer implements ServletContextListener, Runnable {
 
@@ -57,8 +58,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
   private Thread nodeIndexerThread = null;
 
   public synchronized long getLastIndexed(long timeoutMillis) {
-    if (this.lastIndexed == -1L && this.nodeIndexerThread != null &&
-        timeoutMillis > 0L) {
+    if (this.lastIndexed == -1L && this.nodeIndexerThread != null
+        && timeoutMillis > 0L) {
       try {
         this.wait(timeoutMillis);
       } catch (InterruptedException e) {
@@ -68,8 +69,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
   }
 
   public synchronized NodeIndex getLatestNodeIndex(long timeoutMillis) {
-    if (this.latestNodeIndex == null && this.nodeIndexerThread != null &&
-        timeoutMillis > 0L) {
+    if (this.latestNodeIndex == null && this.nodeIndexerThread != null
+        && timeoutMillis > 0L) {
       try {
         this.wait(timeoutMillis);
       } catch (InterruptedException e) {
@@ -86,8 +87,9 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
   }
 
-  private static final long ONE_MINUTE = 60L * 1000L,
-      ONE_DAY = 24L * 60L * ONE_MINUTE;
+  private static final long ONE_MINUTE = 60L * 1000L;
+
+  private static final long ONE_DAY = 24L * 60L * ONE_MINUTE;
 
   public void run() {
     while (this.nodeIndexerThread != null) {
@@ -121,28 +123,36 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
     documentStore.invalidateDocumentCache();
     List<String> newRelaysByConsensusWeight = new ArrayList<String>();
-    Map<String, SummaryDocument>
-        newRelayFingerprintSummaryLines =
-        new HashMap<String, SummaryDocument>(),
-        newBridgeFingerprintSummaryLines =
+    Map<String, SummaryDocument> newRelayFingerprintSummaryLines =
         new HashMap<String, SummaryDocument>();
-    Map<String, Set<String>>
-        newRelaysByCountryCode = new HashMap<String, Set<String>>(),
-        newRelaysByASNumber = new HashMap<String, Set<String>>(),
-        newRelaysByFlag = new HashMap<String, Set<String>>(),
-        newBridgesByFlag = new HashMap<String, Set<String>>(),
-        newRelaysByContact = new HashMap<String, Set<String>>(),
-        newRelaysByFamily = new HashMap<String, Set<String>>();
-    SortedMap<Integer, Set<String>>
-        newRelaysByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
-        newBridgesByFirstSeenDays = new TreeMap<Integer, Set<String>>(),
-        newRelaysByLastSeenDays = new TreeMap<Integer, Set<String>>(),
-        newBridgesByLastSeenDays = new TreeMap<Integer, Set<String>>();
-    Set<SummaryDocument> currentRelays = new HashSet<SummaryDocument>(),
-        currentBridges = new HashSet<SummaryDocument>();
+    Map<String, SummaryDocument> newBridgeFingerprintSummaryLines =
+        new HashMap<String, SummaryDocument>();
+    Map<String, Set<String>> newRelaysByCountryCode =
+        new HashMap<String, Set<String>>();
+    Map<String, Set<String>> newRelaysByASNumber =
+        new HashMap<String, Set<String>>();
+    Map<String, Set<String>> newRelaysByFlag =
+        new HashMap<String, Set<String>>();
+    Map<String, Set<String>> newBridgesByFlag =
+        new HashMap<String, Set<String>>();
+    Map<String, Set<String>> newRelaysByContact =
+        new HashMap<String, Set<String>>();
+    Map<String, Set<String>> newRelaysByFamily =
+        new HashMap<String, Set<String>>();
+    SortedMap<Integer, Set<String>> newRelaysByFirstSeenDays =
+        new TreeMap<Integer, Set<String>>();
+    SortedMap<Integer, Set<String>> newBridgesByFirstSeenDays =
+        new TreeMap<Integer, Set<String>>();
+    SortedMap<Integer, Set<String>> newRelaysByLastSeenDays =
+        new TreeMap<Integer, Set<String>>();
+    SortedMap<Integer, Set<String>> newBridgesByLastSeenDays =
+        new TreeMap<Integer, Set<String>>();
+    Set<SummaryDocument> currentRelays = new HashSet<SummaryDocument>();
+    Set<SummaryDocument> currentBridges = new HashSet<SummaryDocument>();
     SortedSet<String> fingerprints = documentStore.list(
         SummaryDocument.class);
-    long relaysLastValidAfterMillis = 0L, bridgesLastPublishedMillis = 0L;
+    long relaysLastValidAfterMillis = 0L;
+    long bridgesLastPublishedMillis = 0L;
     for (String fingerprint : fingerprints) {
       SummaryDocument node = documentStore.retrieve(SummaryDocument.class,
           true, fingerprint);
@@ -165,8 +175,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         new TreeMap<String, Set<String>>();
     for (SummaryDocument entry : currentRelays) {
       String fingerprint = entry.getFingerprint().toUpperCase();
-      String hashedFingerprint = entry.getHashedFingerprint().
-          toUpperCase();
+      String hashedFingerprint = entry.getHashedFingerprint()
+          .toUpperCase();
       newRelayFingerprintSummaryLines.put(fingerprint, entry);
       newRelayFingerprintSummaryLines.put(hashedFingerprint, entry);
       long consensusWeight = entry.getConsensusWeight();
@@ -202,8 +212,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       /* This condition can go away once all Onionoo services had their
        * hourly updater write effective families to summary documents at
        * least once.  Remove this code after September 8, 2015. */
-      if (entry.getFamilyFingerprints() != null &&
-          !entry.getFamilyFingerprints().isEmpty()) {
+      if (entry.getFamilyFingerprints() != null
+          && !entry.getFamilyFingerprints().isEmpty()) {
         computedEffectiveFamilies.put(fingerprint,
             entry.getFamilyFingerprints());
       }
@@ -248,9 +258,9 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       String fingerprint = e.getKey();
       Set<String> inMutualFamilyRelation = new HashSet<String>();
       for (String otherFingerprint : e.getValue()) {
-        if (computedEffectiveFamilies.containsKey(otherFingerprint) &&
-            computedEffectiveFamilies.get(otherFingerprint).contains(
-                fingerprint)) {
+        if (computedEffectiveFamilies.containsKey(otherFingerprint)
+            && computedEffectiveFamilies.get(otherFingerprint).contains(
+            fingerprint)) {
           inMutualFamilyRelation.add(otherFingerprint);
         }
       }
@@ -258,8 +268,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
     for (SummaryDocument entry : currentBridges) {
       String hashedFingerprint = entry.getFingerprint().toUpperCase();
-      String hashedHashedFingerprint = entry.getHashedFingerprint().
-          toUpperCase();
+      String hashedHashedFingerprint = entry.getHashedFingerprint()
+          .toUpperCase();
       newBridgeFingerprintSummaryLines.put(hashedFingerprint, entry);
       newBridgeFingerprintSummaryLines.put(hashedHashedFingerprint,
           entry);

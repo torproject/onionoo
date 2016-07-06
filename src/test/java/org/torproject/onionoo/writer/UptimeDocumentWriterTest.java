@@ -5,11 +5,6 @@ package org.torproject.onionoo.writer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.DummyDocumentStore;
@@ -20,6 +15,12 @@ import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.DummyDescriptorSource;
 import org.torproject.onionoo.util.DummyTime;
 import org.torproject.onionoo.util.TimeFactory;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class UptimeDocumentWriterTest {
 

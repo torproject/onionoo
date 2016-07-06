@@ -1,14 +1,7 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
-package org.torproject.onionoo.updater;
 
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+package org.torproject.onionoo.updater;
 
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.Descriptor;
@@ -19,6 +12,14 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UptimeStatus;
 import org.torproject.onionoo.util.FormattingUtils;
+
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class UptimeStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -85,9 +86,12 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private SortedMap<Long, Flags>
       newRelayStatuses = new TreeMap<Long, Flags>();
+
   private SortedMap<String, SortedMap<Long, Flags>>
       newRunningRelays = new TreeMap<String, SortedMap<Long, Flags>>();
+
   private SortedSet<Long> newBridgeStatuses = new TreeSet<Long>();
+
   private SortedMap<String, SortedSet<Long>>
       newRunningBridges = new TreeMap<String, SortedSet<Long>>();
 
@@ -153,10 +157,10 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private void updateStatus(boolean relay, String fingerprint,
       SortedMap<Long, Flags> dateHourMillisFlags) {
-    UptimeStatus uptimeStatus = (fingerprint == null) ?
-        this.documentStore.retrieve(UptimeStatus.class, true) :
-        this.documentStore.retrieve(UptimeStatus.class, true,
-            fingerprint);
+    UptimeStatus uptimeStatus = (fingerprint == null)
+        ? this.documentStore.retrieve(UptimeStatus.class, true)
+        : this.documentStore.retrieve(UptimeStatus.class, true,
+        fingerprint);
     if (uptimeStatus == null) {
       uptimeStatus = new UptimeStatus();
     }

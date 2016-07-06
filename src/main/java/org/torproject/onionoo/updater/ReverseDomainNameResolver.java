@@ -1,6 +1,11 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
+
+import org.torproject.onionoo.util.FormattingUtils;
+import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,10 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.torproject.onionoo.util.FormattingUtils;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
 
 public class ReverseDomainNameResolver {
 
@@ -23,9 +24,12 @@ public class ReverseDomainNameResolver {
   }
 
   static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS = 10L * 1000L;
+
   static final long RDNS_LOOKUP_MAX_DURATION_MILLIS = 5L * 60L * 1000L;
+
   private static final long RDNS_LOOKUP_MAX_AGE_MILLIS =
       12L * 60L * 60L * 1000L;
+
   private static final int RDNS_LOOKUP_WORKERS_NUM = 5;
 
   private Map<String, Long> addressLastLookupTimes;

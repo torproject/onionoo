@@ -1,36 +1,41 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.NavigableSet;
 import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class UptimeStatus extends Document {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       UptimeStatus.class);
 
   private transient boolean isDirty = false;
+
   public boolean isDirty() {
     return this.isDirty;
   }
+
   public void clearDirty() {
     this.isDirty = false;
   }
 
   private SortedSet<UptimeHistory> relayHistory =
       new TreeSet<UptimeHistory>();
+
   public SortedSet<UptimeHistory> getRelayHistory() {
     return this.relayHistory;
   }
 
   private SortedSet<UptimeHistory> bridgeHistory =
       new TreeSet<UptimeHistory>();
+
   public SortedSet<UptimeHistory> getBridgeHistory() {
     return this.bridgeHistory;
   }
@@ -64,14 +69,14 @@ public class UptimeStatus extends Document {
         new TreeSet<UptimeHistory>(history.headSet(new UptimeHistory(
         relay, startMillis + DateTimeHelper.ONE_HOUR, 0, flags)));
     for (UptimeHistory prev : existingIntervals.descendingSet()) {
-      if (prev.isRelay() != interval.isRelay() ||
-          prev.getStartMillis() + DateTimeHelper.ONE_HOUR
+      if (prev.isRelay() != interval.isRelay()
+          || prev.getStartMillis() + DateTimeHelper.ONE_HOUR
           * prev.getUptimeHours() <= interval.getStartMillis()) {
         break;
       }
-      if (prev.getFlags() == interval.getFlags() ||
-          (prev.getFlags() != null && interval.getFlags() != null &&
-          prev.getFlags().equals(interval.getFlags()))) {
+      if (prev.getFlags() == interval.getFlags()
+          || (prev.getFlags() != null && interval.getFlags() != null
+          && prev.getFlags().equals(interval.getFlags()))) {
         /* The exact same interval is already contained in history. */
         return;
       }
@@ -87,8 +92,8 @@ public class UptimeStatus extends Document {
             prev.getStartMillis(), hoursBefore, prev.getFlags()));
       }
       int hoursAfter = (int) (prev.getStartMillis()
-          / DateTimeHelper.ONE_HOUR + prev.getUptimeHours() -
-          interval.getStartMillis() / DateTimeHelper.ONE_HOUR - 1);
+          / DateTimeHelper.ONE_HOUR + prev.getUptimeHours()
+          - interval.getStartMillis() / DateTimeHelper.ONE_HOUR - 1);
       if (hoursAfter > 0) {
         history.add(new UptimeHistory(relay,
             interval.getStartMillis() + DateTimeHelper.ONE_HOUR,
@@ -111,12 +116,13 @@ public class UptimeStatus extends Document {
     history.clear();
     UptimeHistory lastInterval = null;
     for (UptimeHistory interval : uncompressedHistory) {
-      if (lastInterval != null &&
-          lastInterval.getStartMillis() + DateTimeHelper.ONE_HOUR
-          * lastInterval.getUptimeHours() == interval.getStartMillis() &&
-          lastInterval.isRelay() == interval.isRelay() &&
-          (lastInterval.getFlags() == interval.getFlags() ||
-          (lastInterval.getFlags() != null && interval.getFlags() != null
+      if (lastInterval != null
+          && lastInterval.getStartMillis() + DateTimeHelper.ONE_HOUR
+          * lastInterval.getUptimeHours() == interval.getStartMillis()
+          && lastInterval.isRelay() == interval.isRelay()
+          && (lastInterval.getFlags() == interval.getFlags()
+          || (lastInterval.getFlags() != null
+          && interval.getFlags() != null
           && lastInterval.getFlags().equals(interval.getFlags())))) {
         lastInterval.addUptime(interval);
       } else {

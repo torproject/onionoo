@@ -1,37 +1,44 @@
 package org.torproject.onionoo.docs;
 
+import org.torproject.onionoo.util.TimeFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.torproject.onionoo.util.TimeFactory;
-
 public class WeightsStatus extends Document {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       WeightsStatus.class);
 
   private transient boolean isDirty = false;
+
   public boolean isDirty() {
     return this.isDirty;
   }
+
   public void clearDirty() {
     this.isDirty = false;
   }
 
   private SortedMap<long[], double[]> history =
-      new TreeMap<long[], double[]>(new Comparator<long[]>() {
-    public int compare(long[] a, long[] b) {
-      return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
-    }
-  });
+      new TreeMap<long[], double[]>(
+      new Comparator<long[]>() {
+        public int compare(long[] a, long[] b) {
+          return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
+        }
+      }
+  );
+
   public void setHistory(SortedMap<long[], double[]> history) {
     this.history = history;
   }
+
   public SortedMap<long[], double[]> getHistory() {
     return this.history;
   }
@@ -83,12 +90,12 @@ public class WeightsStatus extends Document {
   public void addToHistory(long validAfterMillis, long freshUntilMillis,
       double[] weights) {
     long[] interval = new long[] { validAfterMillis, freshUntilMillis };
-    if ((this.history.headMap(interval).isEmpty() ||
-        this.history.headMap(interval).lastKey()[1] <=
-        validAfterMillis) &&
-        (this.history.tailMap(interval).isEmpty() ||
-        this.history.tailMap(interval).firstKey()[0] >=
-        freshUntilMillis)) {
+    if ((this.history.headMap(interval).isEmpty()
+        || this.history.headMap(interval).lastKey()[1]
+        <= validAfterMillis)
+        && (this.history.tailMap(interval).isEmpty()
+        || this.history.tailMap(interval).firstKey()[0]
+        >= freshUntilMillis)) {
       this.history.put(interval, weights);
       this.isDirty = true;
     }
@@ -98,25 +105,27 @@ public class WeightsStatus extends Document {
     SortedMap<long[], double[]> uncompressedHistory =
         new TreeMap<long[], double[]>(this.history);
     history.clear();
-    long lastStartMillis = 0L, lastEndMillis = 0L;
+    long lastStartMillis = 0L;
+    long lastEndMillis = 0L;
     double[] lastWeights = null;
     String lastMonthString = "1970-01";
     int lastMissingValues = -1;
     long now = TimeFactory.getTime().currentTimeMillis();
     for (Map.Entry<long[], double[]> e : uncompressedHistory.entrySet()) {
-      long startMillis = e.getKey()[0], endMillis = e.getKey()[1];
+      long startMillis = e.getKey()[0];
+      long endMillis = e.getKey()[1];
       double[] weights = e.getValue();
       long intervalLengthMillis;
       if (now - endMillis <= DateTimeHelper.ONE_WEEK) {
         intervalLengthMillis = DateTimeHelper.ONE_HOUR;
-      } else if (now - endMillis <=
-          DateTimeHelper.ROUGHLY_ONE_MONTH) {
+      } else if (now - endMillis
+          <= DateTimeHelper.ROUGHLY_ONE_MONTH) {
         intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
-      } else if (now - endMillis <=
-          DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+      } else if (now - endMillis
+          <= DateTimeHelper.ROUGHLY_THREE_MONTHS) {
         intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
-      } else if (now - endMillis <=
-          DateTimeHelper.ROUGHLY_ONE_YEAR) {
+      } else if (now - endMillis
+          <= DateTimeHelper.ROUGHLY_ONE_YEAR) {
         intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {
         intervalLengthMillis = DateTimeHelper.TEN_DAYS;
@@ -129,11 +138,11 @@ public class WeightsStatus extends Document {
           missingValues += 1 << i;
         }
       }
-      if (lastEndMillis == startMillis &&
-          ((lastEndMillis - 1L) / intervalLengthMillis) ==
-          ((endMillis - 1L) / intervalLengthMillis) &&
-          lastMonthString.equals(monthString) &&
-          lastMissingValues == missingValues) {
+      if (lastEndMillis == startMillis
+          && ((lastEndMillis - 1L) / intervalLengthMillis)
+          == ((endMillis - 1L) / intervalLengthMillis)
+          && lastMonthString.equals(monthString)
+          && lastMissingValues == missingValues) {
         double lastIntervalInHours = (double) ((lastEndMillis
             - lastStartMillis) / DateTimeHelper.ONE_HOUR);
         double currentIntervalInHours = (double) ((endMillis

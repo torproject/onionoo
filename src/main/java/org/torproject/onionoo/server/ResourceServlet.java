@@ -1,6 +1,10 @@
 /* Copyright 2011, 2012 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.server;
+
+import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,9 +24,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
-
 public class ResourceServlet extends HttpServlet {
 
   private static final long serialVersionUID = 7236658979947465319L;
@@ -32,9 +33,8 @@ public class ResourceServlet extends HttpServlet {
   /* Called by servlet container, not by test class. */
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    this.maintenanceMode =
-        config.getInitParameter("maintenance") != null &&
-        config.getInitParameter("maintenance").equals("1");
+    this.maintenanceMode = config.getInitParameter("maintenance") != null
+        && config.getInitParameter("maintenance").equals("1");
   }
 
   private static final long INDEX_WAITING_TIME = 10L * 1000L;
@@ -57,9 +57,11 @@ public class ResourceServlet extends HttpServlet {
     this.doGet(requestWrapper, responseWrapper);
   }
 
-  private static final long CACHE_MIN_TIME = 5L * 60L * 1000L,
-      CACHE_MAX_TIME = 45L * 60L * 1000L,
-      CACHE_INTERVAL = 5L * 60L * 1000L;
+  private static final long CACHE_MIN_TIME = 5L * 60L * 1000L;
+
+  private static final long CACHE_MAX_TIME = 45L * 60L * 1000L;
+
+  private static final long CACHE_INTERVAL = 5L * 60L * 1000L;
 
   private static Set<String> knownParameters = new HashSet<String>(
       Arrays.asList(("type,running,search,lookup,fingerprint,country,as,"
@@ -87,8 +89,8 @@ public class ResourceServlet extends HttpServlet {
         ((CACHE_MAX_TIME - indexAgeMillis)
         / CACHE_INTERVAL) * CACHE_INTERVAL);
 
-    NodeIndex nodeIndex = NodeIndexerFactory.getNodeIndexer().
-        getLatestNodeIndex(INDEX_WAITING_TIME);
+    NodeIndex nodeIndex = NodeIndexerFactory.getNodeIndexer()
+        .getLatestNodeIndex(INDEX_WAITING_TIME);
     if (nodeIndex == null) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
@@ -153,8 +155,8 @@ public class ResourceServlet extends HttpServlet {
         if (searchTerm.contains(":") && !searchTerm.startsWith("[")) {
           String[] parts = searchTerm.split(":", 2);
           String parameterKey = parts[0];
-          if (!knownParameters.contains(parameterKey) ||
-              illegalSearchQualifiers.contains(parameterKey)) {
+          if (!knownParameters.contains(parameterKey)
+              || illegalSearchQualifiers.contains(parameterKey)) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
           }
@@ -356,12 +358,14 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("(?:.*[\\?&])*?" // lazily skip other parameters
           + "search=([0-9a-zA-Z+/\\.: \\$\\[\\]%]+)" // capture parameter
           + "(?:&.*)*"); // skip remaining parameters
+
   private static Pattern searchParameterPattern =
       Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Hex fingerprint. */
       + "^[0-9a-zA-Z+/]{1,27}$|" /* Base64 fingerprint. */
       + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
       + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$|" /* IPv6 address. */
       + "^[a-zA-Z_]+:[0-9a-zA-Z_,-]+$" /* Qualified search term. */);
+
   protected static String[] parseSearchParameters(String queryString) {
     Matcher searchQueryStringMatcher = searchQueryStringPattern.matcher(
         queryString);
@@ -383,6 +387,7 @@ public class ResourceServlet extends HttpServlet {
 
   private static Pattern fingerprintParameterPattern =
       Pattern.compile("^[0-9a-zA-Z]{1,40}$");
+
   private String parseFingerprintParameter(String parameter) {
     if (!fingerprintParameterPattern.matcher(parameter).matches()) {
       /* Fingerprint contains non-hex character(s). */
@@ -397,6 +402,7 @@ public class ResourceServlet extends HttpServlet {
 
   private static Pattern countryCodeParameterPattern =
       Pattern.compile("^[0-9a-zA-Z]{2}$");
+
   private String parseCountryCodeParameter(String parameter) {
     if (!countryCodeParameterPattern.matcher(parameter).matches()) {
       /* Country code contains illegal characters or is shorter/longer
@@ -408,6 +414,7 @@ public class ResourceServlet extends HttpServlet {
 
   private static Pattern aSNumberParameterPattern =
       Pattern.compile("^[asAS]{0,2}[0-9]{1,10}$");
+
   private String parseASNumberParameter(String parameter) {
     if (!aSNumberParameterPattern.matcher(parameter).matches()) {
       /* AS number contains illegal character(s). */
@@ -418,6 +425,7 @@ public class ResourceServlet extends HttpServlet {
 
   private static Pattern flagPattern =
       Pattern.compile("^[a-zA-Z0-9]{1,20}$");
+
   private String parseFlagParameter(String parameter) {
     if (!flagPattern.matcher(parameter).matches()) {
       /* Flag contains illegal character(s). */
@@ -427,12 +435,14 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern daysPattern = Pattern.compile("^[0-9-]{1,10}$");
+
   private int[] parseDaysParameter(String parameter) {
     if (!daysPattern.matcher(parameter).matches()) {
       /* Days contain illegal character(s). */
       return null;
     }
-    int x = 0, y = Integer.MAX_VALUE;
+    int x = 0;
+    int y = Integer.MAX_VALUE;
     try {
       if (!parameter.contains("-")) {
         x = Integer.parseInt(parameter);
@@ -469,6 +479,7 @@ public class ResourceServlet extends HttpServlet {
 
   private static Pattern fieldsParameterPattern =
       Pattern.compile("^[0-9a-zA-Z_,]*$");
+
   private String[] parseFieldsParameter(String parameter) {
     if (!fieldsParameterPattern.matcher(parameter).matches()) {
       /* Fields contain illegal character(s). */

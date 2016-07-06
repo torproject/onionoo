@@ -1,33 +1,36 @@
 package org.torproject.onionoo.docs;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class UptimeHistory implements Comparable<UptimeHistory> {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       UptimeHistory.class);
 
   private boolean relay;
+
   public boolean isRelay() {
     return this.relay;
   }
 
   private long startMillis;
+
   public long getStartMillis() {
     return this.startMillis;
   }
 
   private int uptimeHours;
+
   public int getUptimeHours() {
     return this.uptimeHours;
   }
 
   private SortedSet<String> flags;
+
   public SortedSet<String> getFlags() {
     return this.flags;
   }
@@ -108,17 +111,18 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     } else if (!this.relay && other.relay) {
       return 1;
     }
-    return this.startMillis < other.startMillis ? -1 :
-        this.startMillis > other.startMillis ? 1 : 0;
+    return this.startMillis < other.startMillis ? -1
+        : this.startMillis > other.startMillis ? 1 : 0;
   }
 
   public boolean equals(Object other) {
-    return other instanceof UptimeHistory &&
-        this.relay == ((UptimeHistory) other).relay &&
-        this.startMillis == ((UptimeHistory) other).startMillis;
+    return other instanceof UptimeHistory
+        && this.relay == ((UptimeHistory) other).relay
+        && this.startMillis == ((UptimeHistory) other).startMillis;
   }
 
   public int hashCode() {
     return (int) this.startMillis + (this.relay ? 1 : 0);
   }
 }
+

@@ -1,6 +1,19 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
+
+import org.torproject.onionoo.util.FormattingUtils;
+import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -21,17 +34,6 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.torproject.onionoo.util.FormattingUtils;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
-
 // TODO For later migration from disk to database, do the following:
 // - read from database and then from disk if not found
 // - write only to database, delete from disk once in database
@@ -45,6 +47,7 @@ public class DocumentStore {
   private final File statusDir = new File("status");
 
   private File outDir = null;
+
   public void setOutDir(File outDir) {
     this.outDir = outDir;
   }
@@ -55,25 +58,38 @@ public class DocumentStore {
     this.time = TimeFactory.getTime();
   }
 
-  private long listOperations = 0L, listedFiles = 0L, storedFiles = 0L,
-      storedBytes = 0L, retrievedFiles = 0L, retrievedBytes = 0L,
-      removedFiles = 0L;
+  private long listOperations = 0L;
+
+  private long listedFiles = 0L;
+
+  private long storedFiles = 0L;
+
+  private long storedBytes = 0L;
+
+  private long retrievedFiles = 0L;
+
+  private long retrievedBytes = 0L;
+
+  private long removedFiles = 0L;
 
   /* Node statuses and summary documents are cached in memory, as opposed
    * to all other document types.  These caches are initialized when first
    * accessing or modifying a NodeStatus or SummaryDocument document,
    * respectively. */
   private SortedMap<String, NodeStatus> cachedNodeStatuses;
+
   private SortedMap<String, SummaryDocument> cachedSummaryDocuments;
 
   /* Last-modified timestamp of cached network statuses and summary
    * documents when reading them from disk. */
   private long lastModifiedNodeStatuses = 0L;
+
   private long lastModifiedSummaryDocuments = 0L;
 
   /* Fingerprints of updated node statuses and summary documents that are
    * not yet written to disk. */
   private SortedSet<String> updatedNodeStatuses;
+
   private SortedSet<String> updatedSummaryDocuments;
 
   public <T extends Document> SortedSet<String> list(
@@ -226,8 +242,9 @@ public class DocumentStore {
         File file = files.pop();
         if (file.isDirectory()) {
           files.addAll(Arrays.asList(file.listFiles()));
-        } else if (file.getName().length() == 40 &&
-            (updatedAfter == 0L || file.lastModified() > updatedAfter)) {
+        } else if (file.getName().length() == 40
+            && (updatedAfter == 0L
+            || file.lastModified() > updatedAfter)) {
           fingerprints.add(file.getName());
         }
       }
@@ -273,9 +290,11 @@ public class DocumentStore {
     return true;
   }
 
-  private static final long ONE_BYTE = 1L,
-      ONE_KIBIBYTE = 1024L * ONE_BYTE,
-      ONE_MIBIBYTE = 1024L * ONE_KIBIBYTE;
+  private static final long ONE_BYTE = 1L;
+
+  private static final long ONE_KIBIBYTE = 1024L * ONE_BYTE;
+
+  private static final long ONE_MIBIBYTE = 1024L * ONE_KIBIBYTE;
 
   private <T extends Document> boolean storeDocumentFile(T document,
       String fingerprint) {
@@ -287,14 +306,14 @@ public class DocumentStore {
     String documentString;
     if (document.getDocumentString() != null) {
       documentString = document.getDocumentString();
-    } else if (document instanceof BandwidthDocument ||
-          document instanceof WeightsDocument ||
-          document instanceof ClientsDocument ||
-          document instanceof UptimeDocument) {
+    } else if (document instanceof BandwidthDocument
+        || document instanceof WeightsDocument
+        || document instanceof ClientsDocument
+        || document instanceof UptimeDocument) {
       Gson gson = new Gson();
       documentString = gson.toJson(document);
-    } else if (document instanceof DetailsStatus ||
-        document instanceof DetailsDocument) {
+    } else if (document instanceof DetailsStatus
+        || document instanceof DetailsDocument) {
       /* Don't escape HTML characters, like < and >, contained in
        * strings. */
       Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -310,16 +329,16 @@ public class DocumentStore {
       /* Existing details statuses don't contain opening and closing curly
        * brackets, so we should remove them from new details statuses,
        * too. */
-       if (document instanceof DetailsStatus) {
-         documentString = documentString.substring(
-             documentString.indexOf("{") + 1,
-             documentString.lastIndexOf("}"));
-       }
-    } else if (document instanceof BandwidthStatus ||
-        document instanceof WeightsStatus ||
-        document instanceof ClientsStatus ||
-        document instanceof UptimeStatus ||
-        document instanceof UpdateStatus) {
+      if (document instanceof DetailsStatus) {
+        documentString = documentString.substring(
+            documentString.indexOf("{") + 1,
+            documentString.lastIndexOf("}"));
+      }
+    } else if (document instanceof BandwidthStatus
+        || document instanceof WeightsStatus
+        || document instanceof ClientsStatus
+        || document instanceof UptimeStatus
+        || document instanceof UpdateStatus) {
       documentString = document.toDocumentString();
     } else {
       log.error("Serializing is not supported for type "
@@ -394,7 +413,9 @@ public class DocumentStore {
     boolean running = false;
     String nickname = detailsDocument.getNickname();
     List<String> addresses = new ArrayList<String>();
-    String countryCode = null, aSNumber = null, contact = null;
+    String countryCode = null;
+    String aSNumber = null;
+    String contact = null;
     for (String orAddressAndPort : detailsDocument.getOrAddresses()) {
       if (!orAddressAndPort.contains(":")) {
         log.warn("Attempt to create summary document from details "
@@ -416,9 +437,11 @@ public class DocumentStore {
         }
       }
     }
-    SortedSet<String> relayFlags = new TreeSet<String>(), family = null;
-    long lastSeenMillis = -1L, consensusWeight = -1L,
-        firstSeenMillis = -1L;
+    SortedSet<String> relayFlags = new TreeSet<String>();
+    SortedSet<String> family = null;
+    long lastSeenMillis = -1L;
+    long consensusWeight = -1L;
+    long firstSeenMillis = -1L;
     SummaryDocument summaryDocument = new SummaryDocument(isRelay,
         nickname, fingerprint, addresses, lastSeenMillis, running,
         relayFlags, consensusWeight, countryCode, firstSeenMillis,
@@ -469,18 +492,18 @@ public class DocumentStore {
     if (!parse) {
       return this.retrieveUnparsedDocumentFile(documentType,
           documentString);
-    } else if (documentType.equals(DetailsDocument.class) ||
-        documentType.equals(BandwidthDocument.class) ||
-        documentType.equals(WeightsDocument.class) ||
-        documentType.equals(ClientsDocument.class) ||
-        documentType.equals(UptimeDocument.class)) {
+    } else if (documentType.equals(DetailsDocument.class)
+        || documentType.equals(BandwidthDocument.class)
+        || documentType.equals(WeightsDocument.class)
+        || documentType.equals(ClientsDocument.class)
+        || documentType.equals(UptimeDocument.class)) {
       return this.retrieveParsedDocumentFile(documentType,
           documentString);
-    } else if (documentType.equals(BandwidthStatus.class) ||
-        documentType.equals(WeightsStatus.class) ||
-        documentType.equals(ClientsStatus.class) ||
-        documentType.equals(UptimeStatus.class) ||
-        documentType.equals(UpdateStatus.class)) {
+    } else if (documentType.equals(BandwidthStatus.class)
+        || documentType.equals(WeightsStatus.class)
+        || documentType.equals(ClientsStatus.class)
+        || documentType.equals(UptimeStatus.class)
+        || documentType.equals(UpdateStatus.class)) {
       return this.retrieveParsedStatusFile(documentType, documentString);
     } else if (documentType.equals(DetailsStatus.class)) {
       return this.retrieveParsedDocumentFile(documentType, "{"
@@ -595,8 +618,8 @@ public class DocumentStore {
   private <T extends Document> File getDocumentFile(Class<T> documentType,
       String fingerprint) {
     File documentFile = null;
-    if (fingerprint == null && !documentType.equals(UpdateStatus.class) &&
-        !documentType.equals(UptimeStatus.class)) {
+    if (fingerprint == null && !documentType.equals(UpdateStatus.class)
+        && !documentType.equals(UptimeStatus.class)) {
       log.warn("Attempted to locate a document file of type "
           + documentType.getName() + " without providing a fingerprint.  "
           + "Such a file does not exist.");
@@ -663,8 +686,8 @@ public class DocumentStore {
      * containing current time.  It's important to write the update file
      * now, not earlier, because the front-end should not read new node
      * statuses until all details, bandwidths, and weights are ready. */
-    if (this.cachedNodeStatuses != null ||
-        this.cachedSummaryDocuments != null) {
+    if (this.cachedNodeStatuses != null
+        || this.cachedSummaryDocuments != null) {
       if (this.cachedNodeStatuses != null) {
         this.writeNodeStatuses();
       }
@@ -692,9 +715,10 @@ public class DocumentStore {
       return;
     }
     File summaryFile = new File(directory, "summary");
-    SortedMap<String, NodeStatus>
-        cachedRelays = new TreeMap<String, NodeStatus>(),
-        cachedBridges = new TreeMap<String, NodeStatus>();
+    SortedMap<String, NodeStatus> cachedRelays =
+        new TreeMap<String, NodeStatus>();
+    SortedMap<String, NodeStatus> cachedBridges =
+        new TreeMap<String, NodeStatus>();
     for (Map.Entry<String, NodeStatus> e :
         this.cachedNodeStatuses.entrySet()) {
       if (e.getValue().isRelay()) {

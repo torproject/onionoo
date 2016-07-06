@@ -1,11 +1,12 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
-package org.torproject.onionoo.updater;
 
-import java.io.File;
+package org.torproject.onionoo.updater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class StatusUpdateRunner {
 
@@ -48,9 +49,10 @@ public class StatusUpdateRunner {
             su.getClass().getSimpleName() + "\n" + statsString);
       }
     }
-    LoggerFactory.getLogger("statistics").info("GeoIP lookup service\n" +
-        this.ls.getStatsString());
+    LoggerFactory.getLogger("statistics").info("GeoIP lookup service\n"
+        + this.ls.getStatsString());
     LoggerFactory.getLogger("statistics").info("Reverse domain name "
         + "resolver\n" + this.rdnr.getStatsString());
   }
 }
+

@@ -1,13 +1,7 @@
 /* Copyright 2012--2014 The Tor Project
  * See LICENSE for licensing information */
-package org.torproject.onionoo.updater;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+package org.torproject.onionoo.updater;
 
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
@@ -15,6 +9,13 @@ import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.WeightsStatus;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class WeightsStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -80,8 +81,14 @@ public class WeightsStatusUpdater implements DescriptorListener,
   private SortedMap<String, double[]> calculatePathSelectionProbabilities(
       RelayNetworkStatusConsensus consensus) {
     boolean containsBandwidthWeights = false;
-    double wgg = 1.0, wgd = 1.0, wmg = 1.0, wmm = 1.0, wme = 1.0,
-        wmd = 1.0, wee = 1.0, wed = 1.0;
+    double wgg = 1.0;
+    double wgd = 1.0;
+    double wmg = 1.0;
+    double wmm = 1.0;
+    double wme = 1.0;
+    double wmd = 1.0;
+    double wee = 1.0;
+    double wed = 1.0;
     SortedMap<String, Integer> bandwidthWeights =
         consensus.getBandwidthWeights();
     if (bandwidthWeights != null) {
@@ -100,11 +107,14 @@ public class WeightsStatusUpdater implements DescriptorListener,
         containsBandwidthWeights = true;
       }
     }
-    SortedMap<String, Double>
-        consensusWeights = new TreeMap<String, Double>(),
-        guardWeights = new TreeMap<String, Double>(),
-        middleWeights = new TreeMap<String, Double>(),
-        exitWeights = new TreeMap<String, Double>();
+    SortedMap<String, Double> consensusWeights =
+        new TreeMap<String, Double>();
+    SortedMap<String, Double> guardWeights =
+        new TreeMap<String, Double>();
+    SortedMap<String, Double> middleWeights =
+        new TreeMap<String, Double>();
+    SortedMap<String, Double> exitWeights =
+        new TreeMap<String, Double>();
     double totalConsensusWeight = 0.0;
     double totalGuardWeight = 0.0;
     double totalMiddleWeight = 0.0;
@@ -123,8 +133,8 @@ public class WeightsStatusUpdater implements DescriptorListener,
           double guardWeight = (double) relay.getBandwidth();
           double middleWeight = (double) relay.getBandwidth();
           double exitWeight = (double) relay.getBandwidth();
-          boolean isExit = relay.getFlags().contains("Exit") &&
-              !relay.getFlags().contains("BadExit");
+          boolean isExit = relay.getFlags().contains("Exit")
+              && !relay.getFlags().contains("BadExit");
           boolean isGuard = relay.getFlags().contains("Guard");
           if (isGuard && isExit) {
             guardWeight *= wgd;
@@ -157,26 +167,26 @@ public class WeightsStatusUpdater implements DescriptorListener,
     for (String fingerprint : consensusWeights.keySet()) {
       double[] probabilities = new double[] { -1.0, -1.0, -1.0, -1.0,
           -1.0, -1.0, -1.0 };
-      if (consensusWeights.containsKey(fingerprint) &&
-          totalConsensusWeight > 0.0) {
-        probabilities[1] = consensusWeights.get(fingerprint) /
-            totalConsensusWeight;
+      if (consensusWeights.containsKey(fingerprint)
+          && totalConsensusWeight > 0.0) {
+        probabilities[1] = consensusWeights.get(fingerprint)
+            / totalConsensusWeight;
         probabilities[6] = consensusWeights.get(fingerprint);
       }
-      if (guardWeights.containsKey(fingerprint) &&
-          totalGuardWeight > 0.0) {
-        probabilities[2] = guardWeights.get(fingerprint) /
-            totalGuardWeight;
+      if (guardWeights.containsKey(fingerprint)
+          && totalGuardWeight > 0.0) {
+        probabilities[2] = guardWeights.get(fingerprint)
+            / totalGuardWeight;
       }
-      if (middleWeights.containsKey(fingerprint) &&
-          totalMiddleWeight > 0.0) {
-        probabilities[3] = middleWeights.get(fingerprint) /
-            totalMiddleWeight;
+      if (middleWeights.containsKey(fingerprint)
+          && totalMiddleWeight > 0.0) {
+        probabilities[3] = middleWeights.get(fingerprint)
+            / totalMiddleWeight;
       }
-      if (exitWeights.containsKey(fingerprint) &&
-          totalExitWeight > 0.0) {
-        probabilities[4] = exitWeights.get(fingerprint) /
-            totalExitWeight;
+      if (exitWeights.containsKey(fingerprint)
+          && totalExitWeight > 0.0) {
+        probabilities[4] = exitWeights.get(fingerprint)
+            / totalExitWeight;
       }
       pathSelectionProbabilities.put(fingerprint, probabilities);
     }

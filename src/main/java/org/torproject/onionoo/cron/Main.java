@@ -1,15 +1,8 @@
 /* Copyright 2011--2015 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.cron;
 
-import java.io.File;
-import java.util.Calendar;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.updater.DescriptorSource;
@@ -17,6 +10,15 @@ import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.StatusUpdateRunner;
 import org.torproject.onionoo.util.LockFile;
 import org.torproject.onionoo.writer.DocumentWriterRunner;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Calendar;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /* Update search data and status data files. */
 public class Main implements Runnable {
@@ -32,8 +34,15 @@ public class Main implements Runnable {
     main.runOrScheduleExecutions();
   }
 
-  boolean defaultMode = false, singleRun = false, downloadOnly = false,
-      updateOnly = false, writeOnly = false;
+  boolean defaultMode = false;
+
+  boolean singleRun = false;
+
+  boolean downloadOnly = false;
+
+  boolean updateOnly = false;
+
+  boolean writeOnly = false;
 
   /* TODO Parsing command-line arguments is only a workaround until we're
    * more certain what kind of options we want to support.  We should then
@@ -44,23 +53,23 @@ public class Main implements Runnable {
       this.defaultMode = true;
     } else if (args.length == 1) {
       switch (args[0]) {
-      case "--help":
-        this.printUsageAndExit(0);
-        break;
-      case "--single-run":
-        this.singleRun = true;
-        break;
-      case "--download-only":
-        this.downloadOnly = true;
-        break;
-      case "--update-only":
-        this.updateOnly = true;
-        break;
-      case "--write-only":
-        this.writeOnly = true;
-        break;
-      default:
-        validArgs = false;
+        case "--help":
+          this.printUsageAndExit(0);
+          break;
+        case "--single-run":
+          this.singleRun = true;
+          break;
+        case "--download-only":
+          this.downloadOnly = true;
+          break;
+        case "--update-only":
+          this.updateOnly = true;
+          break;
+        case "--write-only":
+          this.writeOnly = true;
+          break;
+        default:
+          validArgs = false;
       }
     } else if (args.length > 1) {
       validArgs = false;

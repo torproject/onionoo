@@ -6,14 +6,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.junit.Before;
-import org.junit.Test;
 import org.torproject.descriptor.BandwidthHistory;
 import org.torproject.onionoo.util.DummyTime;
 import org.torproject.onionoo.util.TimeFactory;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class BandwidthStatusTest {
 

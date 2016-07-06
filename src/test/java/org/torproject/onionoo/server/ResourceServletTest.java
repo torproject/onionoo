@@ -7,6 +7,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import org.torproject.onionoo.docs.DateTimeHelper;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.DummyDocumentStore;
+import org.torproject.onionoo.docs.UpdateStatus;
+import org.torproject.onionoo.util.DummyTime;
+import org.torproject.onionoo.util.Time;
+import org.torproject.onionoo.util.TimeFactory;
+
+import com.google.gson.Gson;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -18,23 +31,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.torproject.onionoo.docs.DateTimeHelper;
-import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.docs.DummyDocumentStore;
-import org.torproject.onionoo.docs.UpdateStatus;
-import org.torproject.onionoo.server.HttpServletRequestWrapper;
-import org.torproject.onionoo.server.HttpServletResponseWrapper;
-import org.torproject.onionoo.server.NodeIndexer;
-import org.torproject.onionoo.server.NodeIndexerFactory;
-import org.torproject.onionoo.server.ResourceServlet;
-import org.torproject.onionoo.util.DummyTime;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
-
-import com.google.gson.Gson;
 
 /* TODO This test class could (should?) be split into ResponseBuilderTest
  * which tests ResponseBuilder and a much shorter ResourceServletTest

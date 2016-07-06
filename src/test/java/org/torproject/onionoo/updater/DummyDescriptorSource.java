@@ -1,15 +1,12 @@
 package org.torproject.onionoo.updater;
 
+import org.torproject.descriptor.Descriptor;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.torproject.descriptor.Descriptor;
-import org.torproject.onionoo.updater.DescriptorListener;
-import org.torproject.onionoo.updater.DescriptorSource;
-import org.torproject.onionoo.updater.DescriptorType;
 
 public class DummyDescriptorSource extends DescriptorSource {
 

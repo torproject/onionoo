@@ -1,5 +1,8 @@
 package org.torproject.onionoo.updater;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -13,9 +16,6 @@ import java.net.URL;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class DescriptorDownloader {
 
@@ -31,30 +31,30 @@ class DescriptorDownloader {
 
   public DescriptorDownloader(DescriptorType descriptorType) {
     switch (descriptorType) {
-    case RELAY_CONSENSUSES:
-      this.directory = "relay-descriptors/consensuses/";
-      break;
-    case RELAY_SERVER_DESCRIPTORS:
-      this.directory = "relay-descriptors/server-descriptors/";
-      break;
-    case RELAY_EXTRA_INFOS:
-      this.directory = "relay-descriptors/extra-infos/";
-      break;
-    case EXIT_LISTS:
-      this.directory = "exit-lists/";
-      break;
-    case BRIDGE_STATUSES:
-      this.directory = "bridge-descriptors/statuses/";
-      break;
-    case BRIDGE_SERVER_DESCRIPTORS:
-      this.directory = "bridge-descriptors/server-descriptors/";
-      break;
-    case BRIDGE_EXTRA_INFOS:
-      this.directory = "bridge-descriptors/extra-infos/";
-      break;
-    default:
-      log.error("Unknown descriptor type.");
-      return;
+      case RELAY_CONSENSUSES:
+        this.directory = "relay-descriptors/consensuses/";
+        break;
+      case RELAY_SERVER_DESCRIPTORS:
+        this.directory = "relay-descriptors/server-descriptors/";
+        break;
+      case RELAY_EXTRA_INFOS:
+        this.directory = "relay-descriptors/extra-infos/";
+        break;
+      case EXIT_LISTS:
+        this.directory = "exit-lists/";
+        break;
+      case BRIDGE_STATUSES:
+        this.directory = "bridge-descriptors/statuses/";
+        break;
+      case BRIDGE_SERVER_DESCRIPTORS:
+        this.directory = "bridge-descriptors/server-descriptors/";
+        break;
+      case BRIDGE_EXTRA_INFOS:
+        this.directory = "bridge-descriptors/extra-infos/";
+        break;
+      default:
+        log.error("Unknown descriptor type.");
+        return;
     }
   }
 
@@ -90,8 +90,8 @@ class DescriptorDownloader {
           huc.getInputStream()))) {
         String line;
         while ((line = br.readLine()) != null) {
-          if (!line.trim().startsWith("<tr>") ||
-              !line.contains("<a href=\"")) {
+          if (!line.trim().startsWith("<tr>")
+              || !line.contains("<a href=\"")) {
             continue;
           }
           String linePart = line.substring(
@@ -108,7 +108,7 @@ class DescriptorDownloader {
       }
     } catch (IOException e) {
       log.error("Could not fetch or parse " + directoryUrl
-        + ".  Skipping. Reason: " + e.getMessage());
+          + ".  Skipping. Reason: " + e.getMessage());
     }
     return this.remoteFiles.size();
   }
@@ -139,8 +139,8 @@ class DescriptorDownloader {
         }
         long lastModified = huc.getHeaderFieldDate("Last-Modified", -1L);
         InputStream is;
-        if (huc.getContentEncoding() != null &&
-            huc.getContentEncoding().equalsIgnoreCase("gzip")) {
+        if (huc.getContentEncoding() != null
+            && huc.getContentEncoding().equalsIgnoreCase("gzip")) {
           is = new GZIPInputStream(huc.getInputStream());
         } else {
           is = huc.getInputStream();
@@ -178,3 +178,4 @@ class DescriptorDownloader {
     return deletedFiles;
   }
 }
+

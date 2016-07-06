@@ -1,12 +1,8 @@
 /* Copyright 2011--2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.server;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 import org.torproject.onionoo.docs.BandwidthDocument;
 import org.torproject.onionoo.docs.ClientsDocument;
 import org.torproject.onionoo.docs.DetailsDocument;
@@ -19,6 +15,12 @@ import org.torproject.onionoo.docs.WeightsDocument;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ResponseBuilder {
 
   private DocumentStore documentStore;
@@ -28,33 +30,39 @@ public class ResponseBuilder {
   }
 
   private String resourceType;
+
   public void setResourceType(String resourceType) {
     this.resourceType = resourceType;
   }
 
   private String relaysPublishedString;
+
   public void setRelaysPublishedString(String relaysPublishedString) {
     this.relaysPublishedString = relaysPublishedString;
   }
 
   private String bridgesPublishedString;
+
   public void setBridgesPublishedString(String bridgesPublishedString) {
     this.bridgesPublishedString = bridgesPublishedString;
   }
 
   private List<SummaryDocument> orderedRelays =
       new ArrayList<SummaryDocument>();
+
   public void setOrderedRelays(List<SummaryDocument> orderedRelays) {
     this.orderedRelays = orderedRelays;
   }
 
   private List<SummaryDocument> orderedBridges =
       new ArrayList<SummaryDocument>();
+
   public void setOrderedBridges(List<SummaryDocument> orderedBridges) {
     this.orderedBridges = orderedBridges;
   }
 
   private String[] fields;
+
   public void setFields(String[] fields) {
     this.fields = new String[fields.length];
     System.arraycopy(fields, 0, this.fields, 0, fields.length);
@@ -66,6 +74,7 @@ public class ResponseBuilder {
   }
 
   private int charsWritten = 0;
+
   public int getCharsWritten() {
     return this.charsWritten;
   }
@@ -144,8 +153,8 @@ public class ResponseBuilder {
   }
 
   private String writeRelaySummaryLine(SummaryDocument entry) {
-    String nickname = !entry.getNickname().equals("Unnamed") ?
-        entry.getNickname() : null;
+    String nickname = !entry.getNickname().equals("Unnamed")
+        ? entry.getNickname() : null;
     String fingerprint = entry.getFingerprint();
     String running = entry.isRunning() ? "true" : "false";
     List<String> addresses = entry.getAddresses();
@@ -161,8 +170,8 @@ public class ResponseBuilder {
   }
 
   private String writeBridgeSummaryLine(SummaryDocument entry) {
-    String nickname = !entry.getNickname().equals("Unnamed") ?
-        entry.getNickname() : null;
+    String nickname = !entry.getNickname().equals("Unnamed")
+        ? entry.getNickname() : null;
     String hashedFingerprint = entry.getFingerprint();
     String running = entry.isRunning() ? "true" : "false";
     return String.format("{%s\"h\":\"%s\",\"r\":%s}",
@@ -304,8 +313,8 @@ public class ResponseBuilder {
     String fingerprint = entry.getFingerprint();
     BandwidthDocument bandwidthDocument = this.documentStore.retrieve(
         BandwidthDocument.class, false, fingerprint);
-    if (bandwidthDocument != null &&
-        bandwidthDocument.getDocumentString() != null) {
+    if (bandwidthDocument != null
+        && bandwidthDocument.getDocumentString() != null) {
       return bandwidthDocument.getDocumentString();
     } else {
       return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
@@ -316,8 +325,8 @@ public class ResponseBuilder {
     String fingerprint = entry.getFingerprint();
     WeightsDocument weightsDocument = this.documentStore.retrieve(
         WeightsDocument.class, false, fingerprint);
-    if (weightsDocument != null &&
-        weightsDocument.getDocumentString() != null) {
+    if (weightsDocument != null
+        && weightsDocument.getDocumentString() != null) {
       return weightsDocument.getDocumentString();
     } else {
       return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
@@ -328,8 +337,8 @@ public class ResponseBuilder {
     String fingerprint = entry.getFingerprint();
     ClientsDocument clientsDocument = this.documentStore.retrieve(
         ClientsDocument.class, false, fingerprint);
-    if (clientsDocument != null &&
-        clientsDocument.getDocumentString() != null) {
+    if (clientsDocument != null
+        && clientsDocument.getDocumentString() != null) {
       return clientsDocument.getDocumentString();
     } else {
       return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
@@ -340,11 +349,12 @@ public class ResponseBuilder {
     String fingerprint = entry.getFingerprint();
     UptimeDocument uptimeDocument = this.documentStore.retrieve(
         UptimeDocument.class, false, fingerprint);
-    if (uptimeDocument != null &&
-        uptimeDocument.getDocumentString() != null) {
+    if (uptimeDocument != null
+        && uptimeDocument.getDocumentString() != null) {
       return uptimeDocument.getDocumentString();
     } else {
       return "{\"fingerprint\":\"" + fingerprint.toUpperCase() + "\"}";
     }
   }
 }
+

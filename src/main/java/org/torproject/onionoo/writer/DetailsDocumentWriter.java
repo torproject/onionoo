@@ -1,5 +1,14 @@
 package org.torproject.onionoo.writer;
 
+import org.torproject.onionoo.docs.DetailsDocument;
+import org.torproject.onionoo.docs.DetailsStatus;
+import org.torproject.onionoo.docs.DocumentStore;
+import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.UpdateStatus;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,17 +17,9 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.torproject.onionoo.docs.DetailsDocument;
-import org.torproject.onionoo.docs.DetailsStatus;
-import org.torproject.onionoo.docs.DocumentStore;
-import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.docs.UpdateStatus;
-
 public class DetailsDocumentWriter implements DocumentWriter {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       DetailsDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -30,8 +31,8 @@ public class DetailsDocumentWriter implements DocumentWriter {
   public void writeDocuments() {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
-    long updatedMillis = updateStatus != null ?
-        updateStatus.getUpdatedMillis() : 0L;
+    long updatedMillis = updateStatus != null
+        ? updateStatus.getUpdatedMillis() : 0L;
     SortedSet<String> updatedDetailsStatuses = this.documentStore.list(
         DetailsStatus.class, updatedMillis);
     for (String fingerprint : updatedDetailsStatuses) {
@@ -73,8 +74,8 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setHostName(detailsStatus.getHostName());
     String defaultPolicy = detailsStatus.getDefaultPolicy();
     String portList = detailsStatus.getPortList();
-    if (defaultPolicy != null && (defaultPolicy.equals("accept") ||
-        defaultPolicy.equals("reject")) && portList != null) {
+    if (defaultPolicy != null && (defaultPolicy.equals("accept")
+        || defaultPolicy.equals("reject")) && portList != null) {
       Map<String, List<String>> exitPolicySummary =
           new HashMap<String, List<String>>();
       List<String> portsOrPortRanges = Arrays.asList(portList.split(","));
@@ -111,8 +112,8 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setExitPolicy(detailsStatus.getExitPolicy());
     detailsDocument.setContact(detailsStatus.getContact());
     detailsDocument.setPlatform(detailsStatus.getPlatform());
-    if (detailsStatus.getAllegedFamily() != null &&
-        !detailsStatus.getAllegedFamily().isEmpty()) {
+    if (detailsStatus.getAllegedFamily() != null
+        && !detailsStatus.getAllegedFamily().isEmpty()) {
       SortedSet<String> allegedFamily = new TreeSet<String>();
       for (String familyMember : detailsStatus.getAllegedFamily()) {
         if (familyMember.length() >= 40) {
@@ -123,16 +124,16 @@ public class DetailsDocumentWriter implements DocumentWriter {
       }
       detailsDocument.setAllegedFamily(allegedFamily);
     }
-    if (detailsStatus.getEffectiveFamily() != null &&
-        !detailsStatus.getEffectiveFamily().isEmpty()) {
+    if (detailsStatus.getEffectiveFamily() != null
+        && !detailsStatus.getEffectiveFamily().isEmpty()) {
       SortedSet<String> effectiveFamily = new TreeSet<String>();
       for (String familyMember : detailsStatus.getEffectiveFamily()) {
         effectiveFamily.add("$" + familyMember);
       }
       detailsDocument.setEffectiveFamily(effectiveFamily);
     }
-    if (detailsStatus.getIndirectFamily() != null &&
-        !detailsStatus.getIndirectFamily().isEmpty()) {
+    if (detailsStatus.getIndirectFamily() != null
+        && !detailsStatus.getIndirectFamily().isEmpty()) {
       SortedSet<String> indirectFamily = new TreeSet<String>();
       for (String familyMember : detailsStatus.getIndirectFamily()) {
         indirectFamily.add("$" + familyMember);
@@ -187,3 +188,4 @@ public class DetailsDocumentWriter implements DocumentWriter {
     return null;
   }
 }
+

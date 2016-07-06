@@ -1,5 +1,6 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.writer;
 
 import org.slf4j.Logger;
@@ -7,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 public class DocumentWriterRunner {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       DocumentWriterRunner.class);
 
   private DocumentWriter[] documentWriters;
@@ -34,9 +35,10 @@ public class DocumentWriterRunner {
     for (DocumentWriter dw : this.documentWriters) {
       String statsString = dw.getStatsString();
       if (statsString != null) {
-        log.info(dw.getClass().getSimpleName() + "\n" +
-            statsString);
+        log.info(dw.getClass().getSimpleName() + "\n"
+            + statsString);
       }
     }
   }
 }
+

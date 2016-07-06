@@ -2,16 +2,16 @@
  * See LICENSE for licensing information */
 package org.torproject.onionoo.updater;
 
+import org.torproject.descriptor.DirSourceEntry;
+import org.torproject.descriptor.DirectorySignature;
+import org.torproject.descriptor.NetworkStatusEntry;
+import org.torproject.descriptor.RelayNetworkStatusConsensus;
+
 import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import org.torproject.descriptor.DirSourceEntry;
-import org.torproject.descriptor.DirectorySignature;
-import org.torproject.descriptor.NetworkStatusEntry;
-import org.torproject.descriptor.RelayNetworkStatusConsensus;
 
 public class DummyConsensus implements RelayNetworkStatusConsensus {
 

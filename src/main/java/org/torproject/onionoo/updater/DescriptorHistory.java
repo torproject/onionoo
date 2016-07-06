@@ -9,3 +9,4 @@ enum DescriptorHistory {
   BRIDGE_SERVER_HISTORY,
   BRIDGE_EXTRAINFO_HISTORY,
 }
+

@@ -1,13 +1,16 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
 
 public abstract class Document {
 
   private transient String documentString;
+
   public void setDocumentString(String documentString) {
     this.documentString = documentString;
   }
+
   public String getDocumentString() {
     return this.documentString;
   }

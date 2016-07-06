@@ -1,6 +1,12 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
+
+import org.torproject.onionoo.util.FormattingUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,20 +28,21 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.torproject.onionoo.util.FormattingUtils;
-
 public class LookupService {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       LookupService.class);
 
   private File geoipDir;
+
   private File geoLite2CityBlocksIPv4CsvFile;
+
   private File geoLite2CityLocationsEnCsvFile;
+
   private File geoIPASNum2CsvFile;
+
   private boolean hasAllFiles = false;
+
   public LookupService(File geoipDir) {
     this.geoipDir = geoipDir;
     this.findRequiredCsvFiles();
@@ -65,6 +72,7 @@ public class LookupService {
   }
 
   private Pattern ipv4Pattern = Pattern.compile("^[0-9\\.]{7,15}$");
+
   private long parseAddressString(String addressString) {
     long addressNumber = -1L;
     if (ipv4Pattern.matcher(addressString).matches()) {
@@ -153,10 +161,10 @@ public class LookupService {
           }
           long endIpNum = startIpNum + (1 << (32 - networkMaskLength))
               - 1;
-          for (long addressNumber : sortedAddressNumbers.
-              tailSet(startIpNum).headSet(endIpNum + 1L)) {
-            String blockString = parts[1].length() > 0 ? parts[1] :
-                parts[2];
+          for (long addressNumber : sortedAddressNumbers
+              .tailSet(startIpNum).headSet(endIpNum + 1L)) {
+            String blockString = parts[1].length() > 0 ? parts[1]
+                : parts[2];
             long blockNumber = Long.parseLong(blockString);
             addressNumberBlocks.put(addressNumber, blockNumber);
             if (parts[7].length() > 0 && parts[8].length() > 0) {
@@ -240,8 +248,8 @@ public class LookupService {
             return lookupResults;
           }
           previousStartIpNum = startIpNum;
-          while (firstAddressNumber < startIpNum &&
-              firstAddressNumber != -1L) {
+          while (firstAddressNumber < startIpNum
+              && firstAddressNumber != -1L) {
             sortedAddressNumbers.remove(firstAddressNumber);
             if (sortedAddressNumbers.isEmpty()) {
               firstAddressNumber = -1L;
@@ -250,8 +258,8 @@ public class LookupService {
             }
           }
           long endIpNum = Long.parseLong(parts[1]);
-          while (firstAddressNumber <= endIpNum &&
-              firstAddressNumber != -1L) {
+          while (firstAddressNumber <= endIpNum
+              && firstAddressNumber != -1L) {
             if (parts[2].startsWith("AS")) {
               addressNumberASN.put(firstAddressNumber, parts[2]);
             }
@@ -284,17 +292,17 @@ public class LookupService {
         continue;
       }
       long addressNumber = addressStringNumbers.get(addressString);
-      if (!addressNumberBlocks.containsKey(addressNumber) &&
-          !addressNumberLatLong.containsKey(addressNumber) &&
-          !addressNumberASN.containsKey(addressNumber)) {
+      if (!addressNumberBlocks.containsKey(addressNumber)
+          && !addressNumberLatLong.containsKey(addressNumber)
+          && !addressNumberASN.containsKey(addressNumber)) {
         continue;
       }
       LookupResult lookupResult = new LookupResult();
       if (addressNumberBlocks.containsKey(addressNumber)) {
         long blockNumber = addressNumberBlocks.get(addressNumber);
         if (blockLocations.containsKey(blockNumber)) {
-          String[] parts = blockLocations.get(blockNumber).
-              replaceAll("\"", "").split(",", -1);
+          String[] parts = blockLocations.get(blockNumber)
+              .replaceAll("\"", "").split(",", -1);
           if (parts[4].length() > 0) {
             lookupResult.setCountryCode(parts[4].toLowerCase());
           }
@@ -351,7 +359,9 @@ public class LookupService {
         new FileInputStream(file), dec));
   }
 
-  private int addressesLookedUp = 0, addressesResolved = 0;
+  private int addressesLookedUp = 0;
+
+  private int addressesResolved = 0;
 
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
@@ -362,3 +372,4 @@ public class LookupService {
     return sb.toString();
   }
 }
+

@@ -1,6 +1,11 @@
 /* Copyright 2011, 2012 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -15,18 +20,15 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class NodeStatus extends Document {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       NodeStatus.class);
 
   /* From most recently published server descriptor: */
 
   private String contact;
+
   public void setContact(String contact) {
     if (contact == null) {
       this.contact = null;
@@ -42,14 +44,17 @@ public class NodeStatus extends Document {
       this.contact = sb.toString();
     }
   }
+
   public String getContact() {
     return this.contact;
   }
 
   private String[] declaredFamily;
+
   public void setDeclaredFamily(SortedSet<String> declaredFamily) {
     this.declaredFamily = collectionToStringArray(declaredFamily);
   }
+
   public SortedSet<String> getDeclaredFamily() {
     return stringArrayToSortedSet(this.declaredFamily);
   }
@@ -66,6 +71,7 @@ public class NodeStatus extends Document {
     }
     return stringArray;
   }
+
   private SortedSet<String> stringArrayToSortedSet(String[] stringArray) {
     SortedSet<String> sortedSet = new TreeSet<String>();
     if (stringArray != null) {
@@ -77,43 +83,53 @@ public class NodeStatus extends Document {
   /* From network status entries: */
 
   private boolean isRelay;
+
   public void setRelay(boolean isRelay) {
     this.isRelay = isRelay;
   }
+
   public boolean isRelay() {
     return this.isRelay;
   }
 
   private final String fingerprint;
+
   public String getFingerprint() {
     return this.fingerprint;
   }
 
   private String nickname;
+
   public void setNickname(String nickname) {
     this.nickname = nickname;
   }
+
   public String getNickname() {
     return this.nickname;
   }
 
   private String address;
+
   public void setAddress(String address) {
     this.address = address;
   }
+
   public String getAddress() {
     return this.address;
   }
 
   private SortedSet<String> orAddressesAndPorts;
+
   public void setOrAddressesAndPorts(
       SortedSet<String> orAddressesAndPorts) {
     this.orAddressesAndPorts = orAddressesAndPorts;
   }
+
   public SortedSet<String> getOrAddressesAndPorts() {
-    return this.orAddressesAndPorts == null ? new TreeSet<String>() :
-        this.orAddressesAndPorts;
+    return this.orAddressesAndPorts == null ? new TreeSet<String>()
+        : this.orAddressesAndPorts;
   }
+
   public SortedSet<String> getOrAddresses() {
     SortedSet<String> orAddresses = new TreeSet<String>();
     if (this.address != null) {
@@ -132,43 +148,53 @@ public class NodeStatus extends Document {
   }
 
   private long firstSeenMillis;
+
   public void setFirstSeenMillis(long firstSeenMillis) {
     this.firstSeenMillis = firstSeenMillis;
   }
+
   public long getFirstSeenMillis() {
     return this.firstSeenMillis;
   }
 
   private long lastSeenMillis;
+
   public void setLastSeenMillis(long lastSeenMillis) {
     this.lastSeenMillis = lastSeenMillis;
   }
+
   public long getLastSeenMillis() {
     return this.lastSeenMillis;
   }
 
   private int orPort;
+
   public void setOrPort(int orPort) {
     this.orPort = orPort;
   }
+
   public int getOrPort() {
     return this.orPort;
   }
 
   private int dirPort;
+
   public void setDirPort(int dirPort) {
     this.dirPort = dirPort;
   }
+
   public int getDirPort() {
     return this.dirPort;
   }
 
   private static Map<String, Integer> relayFlagIndexes =
       new HashMap<String, Integer>();
+
   private static Map<Integer, String> relayFlagStrings =
       new HashMap<Integer, String>();
 
   private BitSet relayFlags;
+
   public void setRelayFlags(SortedSet<String> relayFlags) {
     BitSet newRelayFlags = new BitSet(relayFlagIndexes.size());
     for (String relayFlag : relayFlags) {
@@ -180,6 +206,7 @@ public class NodeStatus extends Document {
     }
     this.relayFlags = newRelayFlags;
   }
+
   public SortedSet<String> getRelayFlags() {
     SortedSet<String> result = new TreeSet<String>();
     if (this.relayFlags != null) {
@@ -192,34 +219,42 @@ public class NodeStatus extends Document {
   }
 
   private long consensusWeight;
+
   public void setConsensusWeight(long consensusWeight) {
     this.consensusWeight = consensusWeight;
   }
+
   public long getConsensusWeight() {
     return this.consensusWeight;
   }
 
   private String defaultPolicy;
+
   public void setDefaultPolicy(String defaultPolicy) {
     this.defaultPolicy = defaultPolicy;
   }
+
   public String getDefaultPolicy() {
     return this.defaultPolicy;
   }
 
   private String portList;
+
   public void setPortList(String portList) {
     this.portList = portList;
   }
+
   public String getPortList() {
     return this.portList;
   }
 
   private SortedMap<Long, Set<String>> lastAddresses =
       new TreeMap<Long, Set<String>>(Collections.reverseOrder());
+
   public SortedMap<Long, Set<String>> getLastAddresses() {
     return new TreeMap<Long, Set<String>>(this.lastAddresses);
   }
+
   public void addLastAddresses(long lastSeenMillis, String address,
       int orPort, int dirPort, SortedSet<String> orAddressesAndPorts) {
     Set<String> addressesAndPorts = new HashSet<String>();
@@ -234,6 +269,7 @@ public class NodeStatus extends Document {
       this.lastAddresses.put(lastSeenMillis, addressesAndPorts);
     }
   }
+
   public long getLastChangedOrAddressOrPort() {
     long lastChangedAddressesMillis = -1L;
     if (this.lastAddresses != null) {
@@ -255,9 +291,11 @@ public class NodeStatus extends Document {
   }
 
   private Boolean recommendedVersion;
+
   public void setRecommendedVersion(Boolean recommendedVersion) {
     this.recommendedVersion = recommendedVersion;
   }
+
   public Boolean getRecommendedVersion() {
     return this.recommendedVersion;
   }
@@ -265,9 +303,11 @@ public class NodeStatus extends Document {
   /* From exit lists: */
 
   private SortedSet<String> exitAddresses;
+
   public void setExitAddresses(SortedSet<String> exitAddresses) {
     this.exitAddresses = exitAddresses;
   }
+
   public SortedSet<String> getExitAddresses() {
     return new TreeSet<String>(this.exitAddresses);
   }
@@ -275,17 +315,21 @@ public class NodeStatus extends Document {
   /* GeoIP lookup results: */
 
   private String countryCode;
+
   public void setCountryCode(String countryCode) {
     this.countryCode = countryCode;
   }
+
   public String getCountryCode() {
     return this.countryCode;
   }
 
   private String aSNumber;
+
   public void setASNumber(String aSNumber) {
     this.aSNumber = aSNumber;
   }
+
   public String getASNumber() {
     return this.aSNumber;
   }
@@ -293,9 +337,11 @@ public class NodeStatus extends Document {
   /* Reverse DNS lookup result */
 
   private long lastRdnsLookup = -1L;
+
   public void setLastRdnsLookup(long lastRdnsLookup) {
     this.lastRdnsLookup = lastRdnsLookup;
   }
+
   public long getLastRdnsLookup() {
     return this.lastRdnsLookup;
   }
@@ -304,17 +350,21 @@ public class NodeStatus extends Document {
    * and indirect family */
 
   private String[] effectiveFamily;
+
   public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
     this.effectiveFamily = collectionToStringArray(effectiveFamily);
   }
+
   public SortedSet<String> getEffectiveFamily() {
     return stringArrayToSortedSet(this.effectiveFamily);
   }
 
   private String[] extendedFamily;
+
   public void setExtendedFamily(SortedSet<String> extendedFamily) {
     this.extendedFamily = collectionToStringArray(extendedFamily);
   }
+
   public SortedSet<String> getExtendedFamily() {
     return stringArrayToSortedSet(this.extendedFamily);
   }
@@ -353,7 +403,8 @@ public class NodeStatus extends Document {
       nodeStatus.setNickname(parts[1]);
       SortedSet<String> orAddressesAndPorts = new TreeSet<String>();
       SortedSet<String> exitAddresses = new TreeSet<String>();
-      String addresses = parts[3], address = null;
+      String addresses = parts[3];
+      String address = null;
       if (addresses.contains(";")) {
         String[] addressParts = addresses.split(";", -1);
         if (addressParts.length != 3) {
@@ -384,8 +435,8 @@ public class NodeStatus extends Document {
         return null;
       }
       nodeStatus.setLastSeenMillis(lastSeenMillis);
-      int orPort = Integer.parseInt(parts[6]),
-          dirPort = Integer.parseInt(parts[7]);
+      int orPort = Integer.parseInt(parts[6]);
+      int dirPort = Integer.parseInt(parts[7]);
       nodeStatus.setOrPort(orPort);
       nodeStatus.setDirPort(dirPort);
       nodeStatus.setRelayFlags(new TreeSet<String>(
@@ -440,9 +491,9 @@ public class NodeStatus extends Document {
          *  2. indirect members that can be reached via others only.
          * Each group contains zero or more ';'-separated fingerprints. */
         String[] groups = parts[22].split(":", -1);
-        SortedSet<String> allegedFamily = new TreeSet<String>(),
-            effectiveFamily = new TreeSet<String>(),
-            indirectFamily = new TreeSet<String>();
+        SortedSet<String> allegedFamily = new TreeSet<String>();
+        SortedSet<String> effectiveFamily = new TreeSet<String>();
+        SortedSet<String> indirectFamily = new TreeSet<String>();
         if (groups[0].length() > 0) {
           allegedFamily.addAll(Arrays.asList(groups[0].split(";")));
         }

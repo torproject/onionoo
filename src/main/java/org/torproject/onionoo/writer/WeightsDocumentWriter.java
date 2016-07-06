@@ -1,16 +1,8 @@
 /* Copyright 2012--2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.writer;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
@@ -20,9 +12,19 @@ import org.torproject.onionoo.docs.WeightsDocument;
 import org.torproject.onionoo.docs.WeightsStatus;
 import org.torproject.onionoo.util.TimeFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+
 public class WeightsDocumentWriter implements DocumentWriter {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       WeightsDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -37,8 +39,8 @@ public class WeightsDocumentWriter implements DocumentWriter {
   public void writeDocuments() {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
-    long updatedMillis = updateStatus != null ?
-        updateStatus.getUpdatedMillis() : 0L;
+    long updatedMillis = updateStatus != null
+        ? updateStatus.getUpdatedMillis() : 0L;
     SortedSet<String> updateWeightsDocuments = this.documentStore.list(
         WeightsStatus.class, updatedMillis);
     for (String fingerprint : updateWeightsDocuments) {
@@ -97,8 +99,8 @@ public class WeightsDocumentWriter implements DocumentWriter {
       SortedMap<long[], double[]> history, int graphTypeIndex) {
     Map<String, GraphHistory> graphs =
         new LinkedHashMap<String, GraphHistory>();
-    for (int graphIntervalIndex = 0; graphIntervalIndex <
-        this.graphIntervals.length; graphIntervalIndex++) {
+    for (int graphIntervalIndex = 0; graphIntervalIndex
+        < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
       GraphHistory graphHistory = this.compileWeightsHistory(
           graphTypeIndex, graphIntervalIndex, history);
@@ -120,13 +122,14 @@ public class WeightsDocumentWriter implements DocumentWriter {
     long totalMillis = 0L;
     double totalWeightTimesMillis = 0.0;
     for (Map.Entry<long[], double[]> e : history.entrySet()) {
-      long startMillis = e.getKey()[0], endMillis = e.getKey()[1];
+      long startMillis = e.getKey()[0];
+      long endMillis = e.getKey()[1];
       double weight = e.getValue()[graphTypeIndex];
       if (endMillis < intervalStartMillis) {
         continue;
       }
-      while ((intervalStartMillis / dataPointInterval) !=
-          (endMillis / dataPointInterval)) {
+      while ((intervalStartMillis / dataPointInterval)
+          != (endMillis / dataPointInterval)) {
         dataPoints.add(totalMillis * 5L < dataPointInterval
             ? -1.0 : totalWeightTimesMillis / (double) totalMillis);
         totalWeightTimesMillis = 0.0;
@@ -142,7 +145,8 @@ public class WeightsDocumentWriter implements DocumentWriter {
     dataPoints.add(totalMillis * 5L < dataPointInterval
         ? -1.0 : totalWeightTimesMillis / (double) totalMillis);
     double maxValue = 0.0;
-    int firstNonNullIndex = -1, lastNonNullIndex = -1;
+    int firstNonNullIndex = -1;
+    int lastNonNullIndex = -1;
     for (int dataPointIndex = 0; dataPointIndex < dataPoints.size();
         dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
@@ -163,8 +167,8 @@ public class WeightsDocumentWriter implements DocumentWriter {
     long firstDataPointMillis = (((this.now - graphInterval)
         / dataPointInterval) + firstNonNullIndex) * dataPointInterval
         + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis >=
-        this.now - graphIntervals[graphIntervalIndex - 1]) {
+    if (graphIntervalIndex > 0 && firstDataPointMillis
+        >= this.now - graphIntervals[graphIntervalIndex - 1]) {
       /* Skip weights history object, because it doesn't contain
        * anything new that wasn't already contained in the last
        * weights history object(s). */
@@ -184,8 +188,8 @@ public class WeightsDocumentWriter implements DocumentWriter {
     int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
     List<Integer> values = new ArrayList<Integer>();
-    for (int dataPointIndex = firstNonNullIndex; dataPointIndex <=
-        lastNonNullIndex; dataPointIndex++) {
+    for (int dataPointIndex = firstNonNullIndex; dataPointIndex
+        <= lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
       if (dataPoint >= 0.0) {
         if (dataPointIndex - previousNonNullIndex == 1) {
@@ -211,3 +215,4 @@ public class WeightsDocumentWriter implements DocumentWriter {
     return null;
   }
 }
+

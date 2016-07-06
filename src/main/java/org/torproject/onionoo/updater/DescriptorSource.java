@@ -1,6 +1,13 @@
 /* Copyright 2013, 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
+
+import org.torproject.descriptor.Descriptor;
+import org.torproject.onionoo.util.FormattingUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,18 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.torproject.descriptor.Descriptor;
-import org.torproject.onionoo.util.FormattingUtils;
-
 public class DescriptorSource {
 
   private static final Logger log = LoggerFactory.getLogger(
       DescriptorSource.class);
 
-  private final File inRecentDir = new File("in/recent"),
-      inArchiveDir = new File("in/archive");
+  private final File inRecentDir = new File("in/recent");
+
+  private final File inArchiveDir = new File("in/archive");
 
   private final File statusDir = new File("status");
 
@@ -66,8 +69,13 @@ public class DescriptorSource {
     }
   }
 
-  private int localFilesBefore = 0, foundRemoteFiles = 0,
-      downloadedFiles = 0, deletedLocalFiles = 0;
+  private int localFilesBefore = 0;
+
+  private int foundRemoteFiles = 0;
+
+  private int downloadedFiles = 0;
+
+  private int deletedLocalFiles = 0;
 
   private void downloadDescriptors(DescriptorType descriptorType) {
     DescriptorDownloader descriptorDownloader =
@@ -122,27 +130,27 @@ public class DescriptorSource {
       }
     }
     switch (descriptorType) {
-    case RELAY_CONSENSUSES:
-      log.info("Read recent relay network consensuses");
-      break;
-    case RELAY_SERVER_DESCRIPTORS:
-      log.info("Read recent relay server descriptors");
-      break;
-    case RELAY_EXTRA_INFOS:
-      log.info("Read recent relay extra-info descriptors");
-      break;
-    case EXIT_LISTS:
-      log.info("Read recent exit lists");
-      break;
-    case BRIDGE_STATUSES:
-      log.info("Read recent bridge network statuses");
-      break;
-    case BRIDGE_SERVER_DESCRIPTORS:
-      log.info("Read recent bridge server descriptors");
-      break;
-    case BRIDGE_EXTRA_INFOS:
-      log.info("Read recent bridge extra-info descriptors");
-      break;
+      case RELAY_CONSENSUSES:
+        log.info("Read recent relay network consensuses");
+        break;
+      case RELAY_SERVER_DESCRIPTORS:
+        log.info("Read recent relay server descriptors");
+        break;
+      case RELAY_EXTRA_INFOS:
+        log.info("Read recent relay extra-info descriptors");
+        break;
+      case EXIT_LISTS:
+        log.info("Read recent exit lists");
+        break;
+      case BRIDGE_STATUSES:
+        log.info("Read recent bridge network statuses");
+        break;
+      case BRIDGE_SERVER_DESCRIPTORS:
+        log.info("Read recent bridge server descriptors");
+        break;
+      case BRIDGE_EXTRA_INFOS:
+        log.info("Read recent bridge extra-info descriptors");
+        break;
     }
   }
 
@@ -219,8 +227,10 @@ public class DescriptorSource {
         + "files deleted locally\n");
     sb.append("    " + this.descriptorQueues.size() + " descriptor "
         + "queues created for recent descriptors\n");
-    int historySizeBefore = 0, historySizeAfter = 0;
-    long descriptors = 0L, bytes = 0L;
+    int historySizeBefore = 0;
+    int historySizeAfter = 0;
+    long descriptors = 0L;
+    long bytes = 0L;
     for (DescriptorQueue descriptorQueue : this.descriptorQueues) {
       historySizeBefore += descriptorQueue.getHistorySizeBefore();
       historySizeAfter += descriptorQueue.getHistorySizeAfter();
@@ -239,8 +249,8 @@ public class DescriptorSource {
         + "execution\n");
     if (this.archiveDescriptorQueue != null) {
       sb.append("    " + FormattingUtils.formatDecimalNumber(
-          this.archiveDescriptorQueue.getReturnedDescriptors()) +
-          " archived descriptors provided\n");
+          this.archiveDescriptorQueue.getReturnedDescriptors())
+          + " archived descriptors provided\n");
       sb.append("    " + FormattingUtils.formatBytes(
           this.archiveDescriptorQueue.getReturnedBytes()) + " of "
           + "archived descriptors provided\n");

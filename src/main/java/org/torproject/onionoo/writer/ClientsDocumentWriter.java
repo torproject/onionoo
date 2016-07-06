@@ -1,17 +1,8 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.writer;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.ClientsDocument;
 import org.torproject.onionoo.docs.ClientsGraphHistory;
 import org.torproject.onionoo.docs.ClientsHistory;
@@ -22,6 +13,17 @@ import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.TimeFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
 
 /*
  * Clients status file produced as intermediate output:
@@ -48,7 +50,7 @@ import org.torproject.onionoo.util.TimeFactory;
  */
 public class ClientsDocumentWriter implements DocumentWriter {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       ClientsDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -65,8 +67,8 @@ public class ClientsDocumentWriter implements DocumentWriter {
   public void writeDocuments() {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
-    long updatedMillis = updateStatus != null ?
-        updateStatus.getUpdatedMillis() : 0L;
+    long updatedMillis = updateStatus != null
+        ? updateStatus.getUpdatedMillis() : 0L;
     SortedSet<String> updateDocuments = this.documentStore.list(
         ClientsStatus.class, updatedMillis);
     for (String hashedFingerprint : updateDocuments) {
@@ -111,8 +113,8 @@ public class ClientsDocumentWriter implements DocumentWriter {
     clientsDocument.setFingerprint(hashedFingerprint);
     Map<String, ClientsGraphHistory> averageClients =
         new LinkedHashMap<String, ClientsGraphHistory>();
-    for (int graphIntervalIndex = 0; graphIntervalIndex <
-        this.graphIntervals.length; graphIntervalIndex++) {
+    for (int graphIntervalIndex = 0; graphIntervalIndex
+        < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
       ClientsGraphHistory graphHistory = this.compileClientsHistory(
           graphIntervalIndex, history);
@@ -133,17 +135,20 @@ public class ClientsDocumentWriter implements DocumentWriter {
     long intervalStartMillis = ((this.now - graphInterval)
         / dataPointInterval) * dataPointInterval;
     long millis = 0L;
-    double responses = 0.0, totalResponses = 0.0;
-    SortedMap<String, Double>
-        totalResponsesByCountry = new TreeMap<String, Double>(),
-        totalResponsesByTransport = new TreeMap<String, Double>(),
-        totalResponsesByVersion = new TreeMap<String, Double>();
+    double responses = 0.0;
+    double totalResponses = 0.0;
+    SortedMap<String, Double> totalResponsesByCountry =
+        new TreeMap<String, Double>();
+    SortedMap<String, Double> totalResponsesByTransport =
+        new TreeMap<String, Double>();
+    SortedMap<String, Double> totalResponsesByVersion =
+        new TreeMap<String, Double>();
     for (ClientsHistory hist : history) {
       if (hist.getEndMillis() < intervalStartMillis) {
         continue;
       }
-      while ((intervalStartMillis / dataPointInterval) !=
-          (hist.getEndMillis() / dataPointInterval)) {
+      while ((intervalStartMillis / dataPointInterval)
+          != (hist.getEndMillis() / dataPointInterval)) {
         dataPoints.add(millis * 2L < dataPointInterval
             ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)
             / (((double) millis) * 10.0));
@@ -183,7 +188,8 @@ public class ClientsDocumentWriter implements DocumentWriter {
         ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)
         / (((double) millis) * 10.0));
     double maxValue = 0.0;
-    int firstNonNullIndex = -1, lastNonNullIndex = -1;
+    int firstNonNullIndex = -1;
+    int lastNonNullIndex = -1;
     for (int dataPointIndex = 0; dataPointIndex < dataPoints.size();
         dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
@@ -204,8 +210,8 @@ public class ClientsDocumentWriter implements DocumentWriter {
     long firstDataPointMillis = (((this.now - graphInterval)
         / dataPointInterval) + firstNonNullIndex) * dataPointInterval
         + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis >=
-        this.now - graphIntervals[graphIntervalIndex - 1]) {
+    if (graphIntervalIndex > 0 && firstDataPointMillis
+        >= this.now - graphIntervals[graphIntervalIndex - 1]) {
       /* Skip clients history object, because it doesn't contain
        * anything new that wasn't already contained in the last
        * clients history object(s). */
@@ -225,8 +231,8 @@ public class ClientsDocumentWriter implements DocumentWriter {
     int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
     List<Integer> values = new ArrayList<Integer>();
-    for (int dataPointIndex = firstNonNullIndex; dataPointIndex <=
-        lastNonNullIndex; dataPointIndex++) {
+    for (int dataPointIndex = firstNonNullIndex; dataPointIndex
+        <= lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
       if (dataPoint >= 0.0) {
         if (dataPointIndex - previousNonNullIndex == 1) {
@@ -287,3 +293,4 @@ public class ClientsDocumentWriter implements DocumentWriter {
     return sb.toString();
   }
 }
+

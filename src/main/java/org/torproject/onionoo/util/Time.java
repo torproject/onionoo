@@ -1,5 +1,6 @@
 /* Copyright 2013 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.util;
 
 /*
@@ -7,6 +8,7 @@ package org.torproject.onionoo.util;
  * custom time source for testing.
  */
 public class Time {
+
   public long currentTimeMillis() {
     return System.currentTimeMillis();
   }

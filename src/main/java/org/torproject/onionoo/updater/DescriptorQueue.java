@@ -1,5 +1,13 @@
 package org.torproject.onionoo.updater;
 
+import org.torproject.descriptor.Descriptor;
+import org.torproject.descriptor.DescriptorFile;
+import org.torproject.descriptor.DescriptorReader;
+import org.torproject.descriptor.DescriptorSourceFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,16 +20,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.torproject.descriptor.Descriptor;
-import org.torproject.descriptor.DescriptorFile;
-import org.torproject.descriptor.DescriptorReader;
-import org.torproject.descriptor.DescriptorSourceFactory;
-
 class DescriptorQueue {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       DescriptorQueue.class);
 
   private File statusDir;
@@ -35,21 +36,25 @@ class DescriptorQueue {
   private List<Descriptor> descriptors;
 
   private int historySizeBefore;
+
   public int getHistorySizeBefore() {
     return this.historySizeBefore;
   }
 
   private int historySizeAfter;
+
   public int getHistorySizeAfter() {
     return this.historySizeAfter;
   }
 
   private long returnedDescriptors = 0L;
+
   public long getReturnedDescriptors() {
     return this.returnedDescriptors;
   }
 
   private long returnedBytes = 0L;
+
   public long getReturnedBytes() {
     return this.returnedBytes;
   }
@@ -71,31 +76,31 @@ class DescriptorQueue {
       DescriptorType descriptorType) {
     String directoryName = null;
     switch (descriptorType) {
-    case RELAY_CONSENSUSES:
-      directoryName = "relay-descriptors/consensuses";
-      break;
-    case RELAY_SERVER_DESCRIPTORS:
-      directoryName = "relay-descriptors/server-descriptors";
-      break;
-    case RELAY_EXTRA_INFOS:
-      directoryName = "relay-descriptors/extra-infos";
-      break;
-    case BRIDGE_STATUSES:
-      directoryName = "bridge-descriptors/statuses";
-      break;
-    case BRIDGE_SERVER_DESCRIPTORS:
-      directoryName = "bridge-descriptors/server-descriptors";
-      break;
-    case BRIDGE_EXTRA_INFOS:
-      directoryName = "bridge-descriptors/extra-infos";
-      break;
-    case EXIT_LISTS:
-      directoryName = "exit-lists";
-      break;
-    default:
-      log.error("Unknown descriptor type.  Not adding directory "
-          + "to descriptor reader.");
-      return null;
+      case RELAY_CONSENSUSES:
+        directoryName = "relay-descriptors/consensuses";
+        break;
+      case RELAY_SERVER_DESCRIPTORS:
+        directoryName = "relay-descriptors/server-descriptors";
+        break;
+      case RELAY_EXTRA_INFOS:
+        directoryName = "relay-descriptors/extra-infos";
+        break;
+      case BRIDGE_STATUSES:
+        directoryName = "bridge-descriptors/statuses";
+        break;
+      case BRIDGE_SERVER_DESCRIPTORS:
+        directoryName = "bridge-descriptors/server-descriptors";
+        break;
+      case BRIDGE_EXTRA_INFOS:
+        directoryName = "bridge-descriptors/extra-infos";
+        break;
+      case EXIT_LISTS:
+        directoryName = "exit-lists";
+        break;
+      default:
+        log.error("Unknown descriptor type.  Not adding directory "
+            + "to descriptor reader.");
+        return null;
     }
     return new File(inDir, directoryName);
   }
@@ -120,31 +125,31 @@ class DescriptorQueue {
     }
     String historyFileName = null;
     switch (descriptorHistory) {
-    case RELAY_EXTRAINFO_HISTORY:
-      historyFileName = "relay-extrainfo-history";
-      break;
-    case BRIDGE_EXTRAINFO_HISTORY:
-      historyFileName = "bridge-extrainfo-history";
-      break;
-    case EXIT_LIST_HISTORY:
-      historyFileName = "exit-list-history";
-      break;
-    case RELAY_CONSENSUS_HISTORY:
-      historyFileName = "relay-consensus-history";
-      break;
-    case BRIDGE_STATUS_HISTORY:
-      historyFileName = "bridge-status-history";
-      break;
-    case RELAY_SERVER_HISTORY:
-      historyFileName = "relay-server-history";
-      break;
-    case BRIDGE_SERVER_HISTORY:
-      historyFileName = "bridge-server-history";
-      break;
-    default:
-      log.error("Unknown descriptor history.  Not excluding "
-          + "files.");
-      return;
+      case RELAY_EXTRAINFO_HISTORY:
+        historyFileName = "relay-extrainfo-history";
+        break;
+      case BRIDGE_EXTRAINFO_HISTORY:
+        historyFileName = "bridge-extrainfo-history";
+        break;
+      case EXIT_LIST_HISTORY:
+        historyFileName = "exit-list-history";
+        break;
+      case RELAY_CONSENSUS_HISTORY:
+        historyFileName = "relay-consensus-history";
+        break;
+      case BRIDGE_STATUS_HISTORY:
+        historyFileName = "bridge-status-history";
+        break;
+      case RELAY_SERVER_HISTORY:
+        historyFileName = "relay-server-history";
+        break;
+      case BRIDGE_SERVER_HISTORY:
+        historyFileName = "bridge-server-history";
+        break;
+      default:
+        log.error("Unknown descriptor history.  Not excluding "
+            + "files.");
+        return;
     }
     this.historyFile = new File(this.statusDir, historyFileName);
     if (this.historyFile.exists() && this.historyFile.isFile()) {
@@ -209,8 +214,8 @@ class DescriptorQueue {
         log.error("Could not parse " + descriptorFile.getFileName(), 
             descriptorFile.getException());
       }
-      if (descriptorFile.getDescriptors() != null &&
-          !descriptorFile.getDescriptors().isEmpty()) {
+      if (descriptorFile.getDescriptors() != null
+          && !descriptorFile.getDescriptors().isEmpty()) {
         this.descriptors = descriptorFile.getDescriptors();
       }
     }
@@ -225,3 +230,4 @@ class DescriptorQueue {
     return nextDescriptor;
   }
 }
+

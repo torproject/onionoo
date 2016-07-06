@@ -1,12 +1,7 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
-package org.torproject.onionoo.updater;
 
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+package org.torproject.onionoo.updater;
 
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExtraInfoDescriptor;
@@ -16,6 +11,12 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.util.FormattingUtils;
+
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /*
  * Example extra-info descriptor used as input:
@@ -70,9 +71,9 @@ public class ClientsStatusUpdater implements DescriptorListener,
         descriptor.getDirreqStatsIntervalLength()
         * DateTimeHelper.ONE_SECOND;
     SortedMap<String, Integer> responses = descriptor.getDirreqV3Resp();
-    if (dirreqStatsEndMillis < 0L ||
-        dirreqStatsIntervalLengthMillis != DateTimeHelper.ONE_DAY ||
-        responses == null || !responses.containsKey("ok")) {
+    if (dirreqStatsEndMillis < 0L
+        || dirreqStatsIntervalLengthMillis != DateTimeHelper.ONE_DAY
+        || responses == null || !responses.containsKey("ok")) {
       /* No directory request responses in the descriptor that we would
        * include in a clients document. */
       return;

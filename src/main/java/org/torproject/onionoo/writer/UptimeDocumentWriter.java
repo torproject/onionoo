@@ -1,18 +1,8 @@
 /* Copyright 2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.writer;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
@@ -24,9 +14,21 @@ import org.torproject.onionoo.docs.UptimeStatus;
 import org.torproject.onionoo.util.FormattingUtils;
 import org.torproject.onionoo.util.TimeFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 public class UptimeDocumentWriter implements DocumentWriter {
 
-  private final static Logger log = LoggerFactory.getLogger(
+  private static final Logger log = LoggerFactory.getLogger(
       UptimeDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -47,8 +49,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
     }
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
-    long updatedMillis = updateStatus != null ?
-        updateStatus.getUpdatedMillis() : 0L;
+    long updatedMillis = updateStatus != null
+        ? updateStatus.getUpdatedMillis() : 0L;
     SortedSet<String> updatedUptimeStatuses = this.documentStore.list(
         UptimeStatus.class, updatedMillis);
     for (String fingerprint : updatedUptimeStatuses) {
@@ -106,8 +108,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
     uptimeDocument.setFingerprint(fingerprint);
     Map<String, GraphHistory> uptime =
         new LinkedHashMap<String, GraphHistory>();
-    for (int graphIntervalIndex = 0; graphIntervalIndex <
-        this.graphIntervals.length; graphIntervalIndex++) {
+    for (int graphIntervalIndex = 0; graphIntervalIndex
+        < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
       GraphHistory graphHistory = this.compileUptimeHistory(
           graphIntervalIndex, relay, history, knownStatuses, null);
@@ -127,8 +129,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
     for (String flag : allFlags) {
       Map<String, GraphHistory> graphsForFlags =
           new LinkedHashMap<String, GraphHistory>();
-      for (int graphIntervalIndex = 0; graphIntervalIndex <
-          this.graphIntervals.length; graphIntervalIndex++) {
+      for (int graphIntervalIndex = 0; graphIntervalIndex
+          < this.graphIntervals.length; graphIntervalIndex++) {
         String graphName = this.graphNames[graphIntervalIndex];
         GraphHistory graphHistory = this.compileUptimeHistory(
             graphIntervalIndex, relay, history, knownStatuses, flag);
@@ -160,9 +162,9 @@ public class UptimeDocumentWriter implements DocumentWriter {
     int uptimeHours = 0;
     long firstStatusStartMillis = -1L;
     for (UptimeHistory hist : history) {
-      if (hist.isRelay() != relay ||
-          (flag != null && (hist.getFlags() == null ||
-          !hist.getFlags().contains(flag)))) {
+      if (hist.isRelay() != relay
+          || (flag != null && (hist.getFlags() == null
+          || !hist.getFlags().contains(flag)))) {
         continue;
       }
       if (firstStatusStartMillis < 0L) {
@@ -202,9 +204,9 @@ public class UptimeDocumentWriter implements DocumentWriter {
         / dataPointInterval) * dataPointInterval;
     int statusHours = -1;
     for (UptimeHistory hist : knownStatuses) {
-      if (hist.isRelay() != relay ||
-          (flag != null && (hist.getFlags() == null ||
-          !hist.getFlags().contains(flag)))) {
+      if (hist.isRelay() != relay
+          || (flag != null && (hist.getFlags() == null
+          || !hist.getFlags().contains(flag)))) {
         continue;
       }
       long histEndMillis = hist.getStartMillis() + DateTimeHelper.ONE_HOUR
@@ -248,15 +250,16 @@ public class UptimeDocumentWriter implements DocumentWriter {
         dataPointIndex++) {
       if (dataPointIndex >= uptimeDataPoints.size()) {
         dataPoints.add(0.0);
-      } else if (uptimeDataPoints.get(dataPointIndex) >= 0 &&
-          statusDataPoints.get(dataPointIndex) > 0) {
+      } else if (uptimeDataPoints.get(dataPointIndex) >= 0
+          && statusDataPoints.get(dataPointIndex) > 0) {
         dataPoints.add(((double) uptimeDataPoints.get(dataPointIndex))
             / ((double) statusDataPoints.get(dataPointIndex)));
       } else {
         dataPoints.add(-1.0);
       }
     }
-    int firstNonNullIndex = -1, lastNonNullIndex = -1;
+    int firstNonNullIndex = -1;
+    int lastNonNullIndex = -1;
     for (int dataPointIndex = 0; dataPointIndex < dataPoints.size();
         dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
@@ -274,8 +277,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
     long firstDataPointMillis = (((this.now - graphInterval)
         / dataPointInterval) + firstNonNullIndex)
         * dataPointInterval + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis >=
-        this.now - graphIntervals[graphIntervalIndex - 1]) {
+    if (graphIntervalIndex > 0 && firstDataPointMillis
+        >= this.now - graphIntervals[graphIntervalIndex - 1]) {
       /* Skip uptime history object, because it doesn't contain
        * anything new that wasn't already contained in the last
        * uptime history object(s). */
@@ -294,8 +297,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
     int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
     List<Integer> values = new ArrayList<Integer>();
-    for (int dataPointIndex = firstNonNullIndex; dataPointIndex <=
-        lastNonNullIndex; dataPointIndex++) {
+    for (int dataPointIndex = firstNonNullIndex; dataPointIndex
+        <= lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
       if (dataPoint >= 0.0) {
         if (dataPointIndex - previousNonNullIndex == 1) {

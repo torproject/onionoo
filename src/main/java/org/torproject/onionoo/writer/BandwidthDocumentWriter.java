@@ -1,16 +1,8 @@
 /* Copyright 2011--2014 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.writer;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.torproject.onionoo.docs.BandwidthDocument;
 import org.torproject.onionoo.docs.BandwidthStatus;
 import org.torproject.onionoo.docs.DateTimeHelper;
@@ -19,6 +11,16 @@ import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.TimeFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
 
 public class BandwidthDocumentWriter implements DocumentWriter {
 
@@ -37,8 +39,8 @@ public class BandwidthDocumentWriter implements DocumentWriter {
   public void writeDocuments() {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
-    long updatedMillis = updateStatus != null ?
-        updateStatus.getUpdatedMillis() : 0L;
+    long updatedMillis = updateStatus != null
+        ? updateStatus.getUpdatedMillis() : 0L;
     SortedSet<String> updateBandwidthDocuments = this.documentStore.list(
         BandwidthStatus.class, updatedMillis);
     for (String fingerprint : updateBandwidthDocuments) {
@@ -101,9 +103,12 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       List<Long> dataPoints = new ArrayList<Long>();
       long intervalStartMillis = ((this.now - graphInterval)
           / dataPointInterval) * dataPointInterval;
-      long totalMillis = 0L, totalBandwidth = 0L;
+      long totalMillis = 0L;
+      long totalBandwidth = 0L;
       for (long[] v : history.values()) {
-        long startMillis = v[0], endMillis = v[1], bandwidth = v[2];
+        long startMillis = v[0];
+        long endMillis = v[1];
+        long bandwidth = v[2];
         if (endMillis < intervalStartMillis) {
           continue;
         }
@@ -113,8 +118,8 @@ public class BandwidthDocumentWriter implements DocumentWriter {
            * one. */
           continue;
         }
-        while ((intervalStartMillis / dataPointInterval) !=
-            (endMillis / dataPointInterval)) {
+        while ((intervalStartMillis / dataPointInterval)
+            != (endMillis / dataPointInterval)) {
           dataPoints.add(totalMillis * 5L < dataPointInterval
               ? -1L : (totalBandwidth * DateTimeHelper.ONE_SECOND)
               / totalMillis);
@@ -129,7 +134,8 @@ public class BandwidthDocumentWriter implements DocumentWriter {
           ? -1L : (totalBandwidth * DateTimeHelper.ONE_SECOND)
           / totalMillis);
       long maxValue = 1L;
-      int firstNonNullIndex = -1, lastNonNullIndex = -1;
+      int firstNonNullIndex = -1;
+      int lastNonNullIndex = -1;
       for (int j = 0; j < dataPoints.size(); j++) {
         long dataPoint = dataPoints.get(j);
         if (dataPoint >= 0L) {
@@ -148,8 +154,8 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       long firstDataPointMillis = (((this.now - graphInterval)
           / dataPointInterval) + firstNonNullIndex) * dataPointInterval
           + dataPointInterval / 2L;
-      if (i > 0 && !graphs.isEmpty() &&
-          firstDataPointMillis >= this.now - graphIntervals[i - 1]) {
+      if (i > 0 && !graphs.isEmpty()
+          && firstDataPointMillis >= this.now - graphIntervals[i - 1]) {
         /* Skip bandwidth history object, because it doesn't contain
          * anything new that wasn't already contained in the last
          * bandwidth history object(s).  Unless we did not include any of
@@ -179,8 +185,8 @@ public class BandwidthDocumentWriter implements DocumentWriter {
           }
           previousNonNullIndex = j;
         }
-        values.add(dataPoint < 0L ? null :
-          (int) ((dataPoint * 999L) / maxValue));
+        values.add(dataPoint < 0L ? null
+            : (int) ((dataPoint * 999L) / maxValue));
       }
       graphHistory.setValues(values);
       if (foundTwoAdjacentDataPoints) {
@@ -195,3 +201,4 @@ public class BandwidthDocumentWriter implements DocumentWriter {
     return null;
   }
 }
+
