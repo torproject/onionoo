@@ -6,7 +6,6 @@ package org.torproject.onionoo.updater;
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExitList;
-import org.torproject.descriptor.ExitListEntry;
 import org.torproject.descriptor.ExtraInfoDescriptor;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
@@ -209,22 +208,26 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       new HashMap<String, Map<String, Long>>();
 
   private void processExitList(ExitList exitList) {
-    for (ExitListEntry exitListEntry : exitList.getExitListEntries()) {
+    for (ExitList.Entry exitListEntry : exitList.getEntries()) {
       String fingerprint = exitListEntry.getFingerprint();
-      long scanMillis = exitListEntry.getScanMillis();
-      if (scanMillis < this.now - DateTimeHelper.ONE_DAY) {
-        continue;
-      }
-      if (!this.exitListEntries.containsKey(fingerprint)) {
-        this.exitListEntries.put(fingerprint,
-            new HashMap<String, Long>());
-      }
-      String exitAddress = exitListEntry.getExitAddress();
-      if (!this.exitListEntries.get(fingerprint).containsKey(exitAddress)
-          || this.exitListEntries.get(fingerprint).get(exitAddress)
-          < scanMillis) {
-        this.exitListEntries.get(fingerprint).put(exitAddress,
-            scanMillis);
+      for (Map.Entry<String, Long> exitAddressScanMillis
+          : exitListEntry.getExitAddresses().entrySet()) {
+        long scanMillis = exitAddressScanMillis.getValue();
+        if (scanMillis < this.now - DateTimeHelper.ONE_DAY) {
+          continue;
+        }
+        if (!this.exitListEntries.containsKey(fingerprint)) {
+          this.exitListEntries.put(fingerprint,
+              new HashMap<String, Long>());
+        }
+        String exitAddress = exitAddressScanMillis.getKey();
+        if (!this.exitListEntries.get(fingerprint).containsKey(
+            exitAddress)
+            || this.exitListEntries.get(fingerprint).get(exitAddress)
+            < scanMillis) {
+          this.exitListEntries.get(fingerprint).put(exitAddress,
+              scanMillis);
+        }
       }
     }
   }
