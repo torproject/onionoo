@@ -1,3 +1,6 @@
+/* Copyright 2016 The Tor Project
+ * See LICENSE for licensing information */
+
 package org.torproject.onionoo.writer;
 
 import org.torproject.onionoo.docs.DetailsDocument;
