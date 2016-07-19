@@ -44,6 +44,7 @@ public class SummaryDocument extends Document {
     this.f = fingerprint;
     this.hashedFingerprint = null;
     this.base64Fingerprint = null;
+    this.fingerprintSortedHexBlocks = null;
   }
 
   public String getFingerprint() {
