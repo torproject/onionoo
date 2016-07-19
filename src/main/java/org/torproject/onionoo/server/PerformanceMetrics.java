@@ -30,6 +30,7 @@ class Counter {
     this.value++;
   }
 
+  @Override
   public String toString() {
     return String.valueOf(this.value);
   }
@@ -52,6 +53,7 @@ class MostFrequentString {
     }
   }
 
+  @Override
   public String toString() {
     SortedMap<Integer, SortedSet<String>> sortedFrequencies =
         new TreeMap<Integer, SortedSet<String>>(
@@ -98,6 +100,7 @@ class IntegerDistribution {
     logValues[64 - Long.numberOfLeadingZeros(value)]++;
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     int totalValues = 0;
@@ -172,6 +175,9 @@ public class PerformanceMetrics {
   private static IntegerDistribution buildResponseMillis =
       new IntegerDistribution();
 
+  /** Collects aggregate statistics on a given request for periodic
+   * request statistics, and logs requests taking longer than expected to
+   * process. */
   public static void logStatistics(long receivedRequestMillis,
       String resourceType, Collection<String> parameterKeys,
       long parsedRequestMillis, int relayDocumentsWritten,

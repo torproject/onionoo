@@ -109,6 +109,9 @@ public class DateTimeHelper {
     return format(millis, ISO_DATETIME_FORMAT);
   }
 
+  /** Parses the given string using the given format and return the time
+   * in milliseconds since the epoch or {@link #NO_TIME_AVAILABLE} if the
+   * string cannot be parsed. */
   public static long parse(String string, String format) {
     if (null == string) {
       log.warn("Date String was null.");
@@ -122,6 +125,9 @@ public class DateTimeHelper {
     }
   }
 
+  /** Parses the given string using {@link #ISO_DATETIME_FORMAT} as format
+   * and return the time in milliseconds since the epoch or
+   * {@link #NO_TIME_AVAILABLE} if the string cannot be parsed. */
   public static long parse(String string) {
     return parse(string, ISO_DATETIME_FORMAT);
   }

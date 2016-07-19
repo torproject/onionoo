@@ -29,6 +29,9 @@ public class NodeStatus extends Document {
 
   private String contact;
 
+  /** Sets the contact to a lower-cased variant of the given string with
+   * all non-printable characters outside of ASCII code 32 (space) to 126
+   * (dash) replaced with spaces. */
   public void setContact(String contact) {
     if (contact == null) {
       this.contact = null;
@@ -130,6 +133,9 @@ public class NodeStatus extends Document {
         : this.orAddressesAndPorts;
   }
 
+  /** Returns all addresses used for the onion-routing protocol which
+   * includes the primary address and all additionally configured
+   * onion-routing addresses. */
   public SortedSet<String> getOrAddresses() {
     SortedSet<String> orAddresses = new TreeSet<String>();
     if (this.address != null) {
@@ -195,6 +201,7 @@ public class NodeStatus extends Document {
 
   private BitSet relayFlags;
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public void setRelayFlags(SortedSet<String> relayFlags) {
     BitSet newRelayFlags = new BitSet(relayFlagIndexes.size());
     for (String relayFlag : relayFlags) {
@@ -207,6 +214,7 @@ public class NodeStatus extends Document {
     this.relayFlags = newRelayFlags;
   }
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public SortedSet<String> getRelayFlags() {
     SortedSet<String> result = new TreeSet<String>();
     if (this.relayFlags != null) {
@@ -255,6 +263,9 @@ public class NodeStatus extends Document {
     return new TreeMap<Long, Set<String>>(this.lastAddresses);
   }
 
+  /** Adds addresses and ports together with the time in milliseconds
+   * since the epoch when they were last seen to the history of last seen
+   * addresses and ports. */
   public void addLastAddresses(long lastSeenMillis, String address,
       int orPort, int dirPort, SortedSet<String> orAddressesAndPorts) {
     Set<String> addressesAndPorts = new HashSet<String>();
@@ -270,6 +281,8 @@ public class NodeStatus extends Document {
     }
   }
 
+  /** Returns the time in milliseconds since the epoch when addresses or
+   * ports were last changed. */
   public long getLastChangedOrAddressOrPort() {
     long lastChangedAddressesMillis = -1L;
     if (this.lastAddresses != null) {
@@ -369,6 +382,9 @@ public class NodeStatus extends Document {
     return stringArrayToSortedSet(this.extendedFamily);
   }
 
+  /** Returns the alleged family consisting of all relays in this relay's
+   * declared family that are not in a mutual family relationship with
+   * this relay. */
   public SortedSet<String> getAllegedFamily() {
     SortedSet<String> allegedFamily = new TreeSet<String>(
         stringArrayToSortedSet(this.declaredFamily));
@@ -376,6 +392,9 @@ public class NodeStatus extends Document {
     return allegedFamily;
   }
 
+  /** Returns the indirect family consisting of all relays that can be
+   * reached via mutual family relationships except for those that can be
+   * reached directly via such a relationship. */
   public SortedSet<String> getIndirectFamily() {
     SortedSet<String> indirectFamily = new TreeSet<String>(
         stringArrayToSortedSet(this.extendedFamily));
@@ -385,10 +404,13 @@ public class NodeStatus extends Document {
 
   /* Constructor and (de-)serialization methods: */
 
+  /** Instantiates a new node status object from the given fingerprint. */
   public NodeStatus(String fingerprint) {
     this.fingerprint = fingerprint;
   }
 
+  /** Instantiates a new node status object from the given string that may
+   * have been produced by {@link #toString()}. */
   public static NodeStatus fromString(String documentString) {
     try {
       String[] parts = documentString.trim().split("\t");
@@ -529,6 +551,7 @@ public class NodeStatus extends Document {
     }
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(this.isRelay ? "r" : "b");

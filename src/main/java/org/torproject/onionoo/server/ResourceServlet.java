@@ -31,6 +31,7 @@ public class ResourceServlet extends HttpServlet {
   private boolean maintenanceMode = false;
 
   /* Called by servlet container, not by test class. */
+  @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
     this.maintenanceMode = config.getInitParameter("maintenance") != null
@@ -39,6 +40,7 @@ public class ResourceServlet extends HttpServlet {
 
   private static final long INDEX_WAITING_TIME = 10L * 1000L;
 
+  @Override
   public long getLastModified(HttpServletRequest request) {
     if (this.maintenanceMode) {
       return super.getLastModified(request);
@@ -48,6 +50,7 @@ public class ResourceServlet extends HttpServlet {
     }
   }
 
+  @Override
   public void doGet(HttpServletRequest request,
       HttpServletResponse response) throws IOException, ServletException {
     HttpServletRequestWrapper requestWrapper =
@@ -72,6 +75,9 @@ public class ResourceServlet extends HttpServlet {
       new HashSet<String>(Arrays.asList(("search,fingerprint,order,limit,"
           + "offset,fields").split(",")));
 
+  /** Handles the HTTP GET request in the wrapped <code>request</code> by
+   * writing an HTTP GET response to the likewise <code>response</code>,
+   * both of which are wrapped to facilitate testing. */
   public void doGet(HttpServletRequestWrapper request,
       HttpServletResponseWrapper response) throws IOException {
 

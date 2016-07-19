@@ -28,6 +28,8 @@ public class Main implements Runnable {
 
   private Logger log = LoggerFactory.getLogger(Main.class);
 
+  /** Executes a single update run or partial update run, or initiates
+   * hourly executions, depending on the given command-line arguments. */
   public static void main(String[] args) {
     Main main = new Main();
     main.parseArgsOrExit(args);
@@ -121,6 +123,7 @@ public class Main implements Runnable {
         TimeUnit.MINUTES);
   }
 
+  @Override
   public void run() {
     this.acquireLockOrExit();
     this.initialize();

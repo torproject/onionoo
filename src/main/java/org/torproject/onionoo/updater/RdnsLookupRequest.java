@@ -28,6 +28,7 @@ class RdnsLookupRequest extends Thread {
     this.address = address;
   }
 
+  @Override
   public void run() {
     this.lookupStartedMillis =
         this.reverseDomainNameResolver.time.currentTimeMillis();

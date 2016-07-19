@@ -97,6 +97,8 @@ public class DocumentStore {
     return this.list(documentType, 0L);
   }
 
+  /** Returns all fingerprints of documents of the given type that have
+   * been updated after the given time in milliseconds since the epoch. */
   public <T extends Document> SortedSet<String> list(
       Class<T> documentType, long updatedAfter) {
     if (documentType.equals(NodeStatus.class)) {
@@ -258,6 +260,8 @@ public class DocumentStore {
     return this.store(document, null);
   }
 
+  /** Stores the given document using the given fingerprint as
+   * identifier. */
   public <T extends Document> boolean store(T document,
       String fingerprint) {
     if (document instanceof NodeStatus) {
@@ -372,6 +376,8 @@ public class DocumentStore {
     return this.retrieve(documentType, parse, null);
   }
 
+  /** Retrieves the document with given type and identified by the given
+   * fingerprint, and either parses it or returns it unparsed. */
   public <T extends Document> T retrieve(Class<T> documentType,
       boolean parse, String fingerprint) {
     if (documentType.equals(NodeStatus.class)) {
@@ -576,6 +582,8 @@ public class DocumentStore {
     return this.remove(documentType, null);
   }
 
+  /** Removes the document with given type and identified by the given
+   * fingerprint. */
   public <T extends Document> boolean remove(Class<T> documentType,
       String fingerprint) {
     if (documentType.equals(NodeStatus.class)) {
@@ -681,6 +689,8 @@ public class DocumentStore {
     return documentFile;
   }
 
+  /** Writes cached node statuses, cached summary documents, and then the
+   * update file to disk. */
   public void flushDocumentCache() {
     /* Write cached node statuses to disk, and write update file
      * containing current time.  It's important to write the update file
@@ -698,6 +708,8 @@ public class DocumentStore {
     }
   }
 
+  /** Invalidates the document cache, so that it will be freshly populated
+   * during the next execution. */
   public void invalidateDocumentCache() {
     this.cachedNodeStatuses = null;
     this.cachedSummaryDocuments = null;
@@ -810,6 +822,7 @@ public class DocumentStore {
     this.store(updateStatus);
   }
 
+  /** Returns a string with statistics on document storage operations. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + FormattingUtils.formatDecimalNumber(listOperations)

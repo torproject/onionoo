@@ -20,6 +20,7 @@ public class UpdateStatus extends Document {
     return this.updatedMillis;
   }
 
+  @Override
   public void setFromDocumentString(String documentString) {
     try {
       this.updatedMillis = Long.parseLong(documentString.trim());
@@ -30,6 +31,7 @@ public class UpdateStatus extends Document {
     }
   }
 
+  @Override
   public String toDocumentString() {
     return String.valueOf(this.updatedMillis);
   }

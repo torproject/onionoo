@@ -34,6 +34,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
   private static final Logger log = LoggerFactory.getLogger(
       NodeIndexer.class);
 
+  @Override
   public void contextInitialized(ServletContextEvent contextEvent) {
     ServletContext servletContext = contextEvent.getServletContext();
     File outDir = new File(servletContext.getInitParameter("outDir"));
@@ -50,6 +51,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     this.startIndexing();
   }
 
+  @Override
   public void contextDestroyed(ServletContextEvent contextEvent) {
     this.stopIndexing();
   }
@@ -60,6 +62,9 @@ public class NodeIndexer implements ServletContextListener, Runnable {
 
   private Thread nodeIndexerThread = null;
 
+  /** Returns the creation time of the last known node index in
+   * milliseconds since the epoch, or <code>-1</code> if no node index
+   * could be retrieved within <code>timeoutMillis</code> milliseconds. */
   public synchronized long getLastIndexed(long timeoutMillis) {
     if (this.lastIndexed == -1L && this.nodeIndexerThread != null
         && timeoutMillis > 0L) {
@@ -71,6 +76,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     return this.lastIndexed;
   }
 
+  /** Returns the last known node index, or null if no node index could be
+   * retrieved within <code>timeoutMillis</code> milliseconds. */
   public synchronized NodeIndex getLatestNodeIndex(long timeoutMillis) {
     if (this.latestNodeIndex == null && this.nodeIndexerThread != null
         && timeoutMillis > 0L) {
@@ -82,6 +89,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     return this.latestNodeIndex;
   }
 
+  /** Start reading the node index into memory periodically in a
+   * background thread. */
   public synchronized void startIndexing() {
     if (this.nodeIndexerThread == null) {
       this.nodeIndexerThread = new Thread(this);
@@ -94,6 +103,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
 
   private static final long ONE_DAY = 24L * 60L * ONE_MINUTE;
 
+  @Override
   public void run() {
     while (this.nodeIndexerThread != null) {
       this.indexNodeStatuses();
@@ -104,6 +114,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
   }
 
+  /** Stop the background process that is periodically reading the node
+   * index. */
   public synchronized void stopIndexing() {
     Thread indexerThread = this.nodeIndexerThread;
     this.nodeIndexerThread = null;

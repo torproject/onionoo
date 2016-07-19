@@ -40,6 +40,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
     this.now = TimeFactory.getTime().currentTimeMillis();
   }
 
+  @Override
   public void writeDocuments() {
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true);
@@ -318,6 +319,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
     }
   }
 
+  @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + FormattingUtils.formatDecimalNumber(

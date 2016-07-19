@@ -24,6 +24,9 @@ public class WeightsStatusUpdater implements DescriptorListener,
 
   private DocumentStore documentStore;
 
+  /** Initializes a new status updater, obtains references to all relevant
+   * singleton instances, and registers as listener at the (singleton)
+   * descriptor source. */
   public WeightsStatusUpdater() {
     this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
@@ -35,6 +38,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
         DescriptorType.RELAY_CONSENSUSES);
   }
 
+  @Override
   public void processDescriptor(Descriptor descriptor, boolean relay) {
     if (descriptor instanceof RelayNetworkStatusConsensus) {
       this.processRelayNetworkConsensus(
@@ -42,6 +46,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
     }
   }
 
+  @Override
   public void updateStatuses() {
     /* Nothing to do. */
   }
@@ -193,6 +198,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
     return pathSelectionProbabilities;
   }
 
+  @Override
   public String getStatsString() {
     /* TODO Add statistics string. */
     return null;

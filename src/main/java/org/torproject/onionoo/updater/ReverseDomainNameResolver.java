@@ -48,6 +48,8 @@ public class ReverseDomainNameResolver {
     this.addressLastLookupTimes = addressLastLookupTimes;
   }
 
+  /** Starts reverse domain name lookups in one or more background
+   * threads and returns immediately. */
   public void startReverseDomainNameLookups() {
     this.startedRdnsLookups = this.time.currentTimeMillis();
     this.rdnsLookupJobs = new HashSet<String>();
@@ -69,6 +71,8 @@ public class ReverseDomainNameResolver {
     }
   }
 
+  /** Joins all background threads performing reverse domain name lookups
+   * and returns as soon as they have all finished. */
   public void finishReverseDomainNameLookups() {
     for (RdnsLookupWorker rdnsLookupWorker : this.rdnsLookupWorkers) {
       try {
@@ -80,16 +84,21 @@ public class ReverseDomainNameResolver {
     }
   }
 
+  /** Returns reverse domain name lookup results. */
   public Map<String, String> getLookupResults() {
     synchronized (this.rdnsLookupResults) {
       return new HashMap<String, String>(this.rdnsLookupResults);
     }
   }
 
+  /** Returns the time in milliseconds since the epoch when reverse domain
+   * lookups have been started. */
   public long getLookupStartMillis() {
     return this.startedRdnsLookups;
   }
 
+  /** Returns a string with the number of performed reverse domain name
+   * lookups and some simple statistics on lookup time. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + FormattingUtils.formatDecimalNumber(

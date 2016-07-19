@@ -14,6 +14,7 @@ public class ServerMain {
   private static final Logger log = LoggerFactory.getLogger(
       ServerMain.class);
 
+  /** Starts the web server listening for incoming client connections. */
   public static void main(String[] args) {
     try {
       Resource onionooXml = Resource.newSystemResource("jetty.xml");

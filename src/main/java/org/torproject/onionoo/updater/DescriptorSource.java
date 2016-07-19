@@ -32,6 +32,7 @@ public class DescriptorSource {
 
   private DescriptorQueue archiveDescriptorQueue;
 
+  /** Instantiates a new descriptor source. */
   public DescriptorSource() {
     this.descriptorQueues = new ArrayList<DescriptorQueue>();
     this.descriptorListeners =
@@ -53,6 +54,7 @@ public class DescriptorSource {
   private Map<DescriptorType, Set<DescriptorListener>>
       descriptorListeners;
 
+  /** Registers a descriptor listener for a given descriptor type. */
   public void registerDescriptorListener(DescriptorListener listener,
       DescriptorType descriptorType) {
     if (!this.descriptorListeners.containsKey(descriptorType)) {
@@ -62,6 +64,7 @@ public class DescriptorSource {
     this.descriptorListeners.get(descriptorType).add(listener);
   }
 
+  /** Downloads descriptors from CollecTor. */
   public void downloadDescriptors() {
     for (DescriptorType descriptorType : DescriptorType.values()) {
       log.info("Loading: " + descriptorType);
@@ -87,6 +90,8 @@ public class DescriptorSource {
     this.deletedLocalFiles += descriptorDownloader.deleteOldLocalFiles();
   }
 
+  /** Reads archived and recent descriptors from disk and feeds them into
+   * any registered listeners. */
   public void readDescriptors() {
     this.readArchivedDescriptors();
     log.debug("Reading recent " + DescriptorType.RELAY_SERVER_DESCRIPTORS
@@ -154,6 +159,8 @@ public class DescriptorSource {
     }
   }
 
+  /** Reads archived descriptors from disk and feeds them into any
+   * registered listeners. */
   public void readArchivedDescriptors() {
     if (!this.inArchiveDir.exists()) {
       return;
@@ -208,6 +215,7 @@ public class DescriptorSource {
     log.info("Read archived descriptors");
   }
 
+  /** Writes parse histories for recent descriptors to disk. */
   public void writeHistoryFiles() {
     log.debug("Writing parse histories for recent descriptors...");
     for (DescriptorQueue descriptorQueue : this.descriptorQueues) {
@@ -215,6 +223,8 @@ public class DescriptorSource {
     }
   }
 
+  /** Returns a string with statistics on the number of processed
+   * descriptors during the current execution. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + this.localFilesBefore + " recent descriptor files "

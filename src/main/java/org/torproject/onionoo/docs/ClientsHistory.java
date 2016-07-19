@@ -51,6 +51,9 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
     return this.responsesByVersion;
   }
 
+  /** Instantiates a new clients history object with given interval start
+   * and end, total responses, and responses by country, transport, and
+   * version. */
   public ClientsHistory(long startMillis, long endMillis,
       double totalResponses,
       SortedMap<String, Double> responsesByCountry,
@@ -64,6 +67,8 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
     this.responsesByVersion = responsesByVersion;
   }
 
+  /** Instantiates a new clients history object from the given string that
+   * may have been produced by {@link #toString()}. */
   public static ClientsHistory fromString(
       String responseHistoryString) {
     String[] parts = responseHistoryString.split(" ", 8);
@@ -133,6 +138,7 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
     return responses;
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(DateTimeHelper.format(startMillis));
@@ -154,6 +160,9 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
     }
   }
 
+  /** Adds responses from another clients history object to this one by
+   * summing up response numbers and extending interval start and/or
+   * end. */
   public void addResponses(ClientsHistory other) {
     this.totalResponses += other.totalResponses;
     this.addResponsesByCategory(this.responsesByCountry,
@@ -183,16 +192,19 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
     }
   }
 
+  @Override
   public int compareTo(ClientsHistory other) {
     return this.startMillis < other.startMillis ? -1
         : this.startMillis > other.startMillis ? 1 : 0;
   }
 
+  @Override
   public boolean equals(Object other) {
     return other instanceof ClientsHistory
         && this.startMillis == ((ClientsHistory) other).startMillis;
   }
 
+  @Override
   public int hashCode() {
     return (int) this.startMillis;
   }

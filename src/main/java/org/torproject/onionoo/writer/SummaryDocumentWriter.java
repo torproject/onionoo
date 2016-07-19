@@ -32,6 +32,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
 
   private int deletedDocuments = 0;
 
+  @Override
   public void writeDocuments() {
     long relaysLastValidAfterMillis = -1L;
     long bridgesLastPublishedMillis = -1L;
@@ -101,6 +102,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
     log.info("Wrote summary document files");
   }
 
+  @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + FormattingUtils.formatDecimalNumber(

@@ -28,6 +28,9 @@ public class UptimeStatusUpdater implements DescriptorListener,
 
   private DocumentStore documentStore;
 
+  /** Initializes a new status updater, obtains references to all relevant
+   * singleton instances, and registers as listener at the (singleton)
+   * descriptor source. */
   public UptimeStatusUpdater() {
     this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
@@ -41,6 +44,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
         DescriptorType.BRIDGE_STATUSES);
   }
 
+  @Override
   public void processDescriptor(Descriptor descriptor, boolean relay) {
     if (descriptor instanceof RelayNetworkStatusConsensus) {
       this.processRelayNetworkStatusConsensus(
@@ -132,6 +136,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
     }
   }
 
+  @Override
   public void updateStatuses() {
     for (Map.Entry<String, SortedMap<Long, Flags>> e :
         this.newRunningRelays.entrySet()) {
@@ -179,6 +184,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
     }
   }
 
+  @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + FormattingUtils.formatDecimalNumber(

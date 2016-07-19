@@ -19,6 +19,8 @@ public class StatusUpdateRunner {
 
   private StatusUpdater[] statusUpdaters;
 
+  /** Instantiates a new status update runner with newly created instances
+   * of all known status updater implementations. */
   public StatusUpdateRunner() {
     this.ls = new LookupService(new File("geoip"));
     this.rdnr = new ReverseDomainNameResolver();
@@ -32,6 +34,7 @@ public class StatusUpdateRunner {
         usu };
   }
 
+  /** Lets each configured status updater update its status files. */
   public void updateStatuses() {
     for (StatusUpdater su : this.statusUpdaters) {
       log.debug("Begin update of " + su.getClass().getSimpleName());
@@ -41,6 +44,7 @@ public class StatusUpdateRunner {
     }
   }
 
+  /** Logs statistics of all configured status updaters. */
   public void logStatistics() {
     for (StatusUpdater su : this.statusUpdaters) {
       String statsString = su.getStatsString();

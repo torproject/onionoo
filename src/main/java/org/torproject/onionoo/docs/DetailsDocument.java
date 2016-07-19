@@ -377,6 +377,8 @@ public class DetailsDocument extends Document {
 
   private Float consensus_weight_fraction;
 
+  /** Sets the consensus weight fraction to the given value, but only if
+   * that value is neither null nor negative. */
   public void setConsensusWeightFraction(Float consensusWeightFraction) {
     if (consensusWeightFraction == null
         || consensusWeightFraction >= 0.0) {
@@ -390,6 +392,8 @@ public class DetailsDocument extends Document {
 
   private Float guard_probability;
 
+  /** Sets the guard probability to the given value, but only if that
+   * value is neither null nor negative. */
   public void setGuardProbability(Float guardProbability) {
     if (guardProbability == null || guardProbability >= 0.0) {
       this.guard_probability = guardProbability;
@@ -402,6 +406,8 @@ public class DetailsDocument extends Document {
 
   private Float middle_probability;
 
+  /** Sets the middle probability to the given value, but only if that
+   * value is neither null nor negative. */
   public void setMiddleProbability(Float middleProbability) {
     if (middleProbability == null || middleProbability >= 0.0) {
       this.middle_probability = middleProbability;
@@ -414,6 +420,8 @@ public class DetailsDocument extends Document {
 
   private Float exit_probability;
 
+  /** Sets the exit probability to the given value, but only if that
+   * value is neither null nor negative. */
   public void setExitProbability(Float exitProbability) {
     if (exitProbability == null || exitProbability >= 0.0) {
       this.exit_probability = exitProbability;

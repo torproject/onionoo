@@ -111,6 +111,7 @@ public class RequestHandler {
 
   private int[] firstSeenDays;
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public void setFirstSeenDays(int[] firstSeenDays) {
     this.firstSeenDays = new int[firstSeenDays.length];
     System.arraycopy(firstSeenDays, 0, this.firstSeenDays, 0,
@@ -119,6 +120,7 @@ public class RequestHandler {
 
   private int[] lastSeenDays;
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public void setLastSeenDays(int[] lastSeenDays) {
     this.lastSeenDays = new int[lastSeenDays.length];
     System.arraycopy(lastSeenDays, 0, this.lastSeenDays, 0,
@@ -137,6 +139,8 @@ public class RequestHandler {
   private Map<String, SummaryDocument> filteredBridges =
       new HashMap<String, SummaryDocument>();
 
+  /** Handles this request by filtering by all given parameters and then
+   * possibly ordering, offsetting, and limiting results. */
   public void handleRequest() {
     this.filteredRelays.putAll(
         this.nodeIndex.getRelayFingerprintSummaryLines());

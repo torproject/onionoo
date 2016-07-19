@@ -13,6 +13,8 @@ public class DocumentWriterRunner {
 
   private DocumentWriter[] documentWriters;
 
+  /** Instantiates a new document writer runner with newly created
+   * instances of all known document writer implementations. */
   public DocumentWriterRunner() {
     SummaryDocumentWriter sdw = new SummaryDocumentWriter();
     DetailsDocumentWriter ddw = new DetailsDocumentWriter();
@@ -24,6 +26,7 @@ public class DocumentWriterRunner {
         udw };
   }
 
+  /** Lets each configured document writer write its documents. */
   public void writeDocuments() {
     for (DocumentWriter dw : this.documentWriters) {
       log.debug("Writing " + dw.getClass().getSimpleName());
@@ -31,6 +34,7 @@ public class DocumentWriterRunner {
     }
   }
 
+  /** Logs statistics of all configured document writers. */
   public void logStatistics() {
     for (DocumentWriter dw : this.documentWriters) {
       String statsString = dw.getStatsString();

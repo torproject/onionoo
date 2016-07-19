@@ -36,6 +36,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
     this.now = TimeFactory.getTime().currentTimeMillis();
   }
 
+  @Override
   public void writeDocuments() {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
@@ -196,6 +197,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
     return graphs;
   }
 
+  @Override
   public String getStatsString() {
     /* TODO Add statistics string. */
     return null;

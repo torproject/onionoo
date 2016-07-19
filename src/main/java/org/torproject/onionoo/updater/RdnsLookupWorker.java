@@ -11,6 +11,7 @@ class RdnsLookupWorker extends Thread {
     this.reverseDomainNameResolver = reverseDomainNameResolver;
   }
 
+  @Override
   public void run() {
     while (this.reverseDomainNameResolver.time.currentTimeMillis()
         - ReverseDomainNameResolver.RDNS_LOOKUP_MAX_DURATION_MILLIS

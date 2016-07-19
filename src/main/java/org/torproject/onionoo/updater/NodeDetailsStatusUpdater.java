@@ -95,6 +95,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   private int bridgeStatusesProcessed = 0;
 
+  /** Initializes a new status updater, obtains references to all relevant
+   * singleton instances, and registers as listener at the (singleton)
+   * descriptor source. */
   public NodeDetailsStatusUpdater(
       ReverseDomainNameResolver reverseDomainNameResolver,
       LookupService lookupService) {
@@ -125,6 +128,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   private SortedSet<String> updatedNodes = new TreeSet<String>();
 
+  @Override
   public void processDescriptor(Descriptor descriptor, boolean relay) {
     if (descriptor instanceof ServerDescriptor && relay) {
       this.processRelayServerDescriptor((ServerDescriptor) descriptor);
@@ -385,6 +389,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.bridgeStatusesProcessed++;
   }
 
+  @Override
   public void updateStatuses() {
     this.readNodeStatuses();
     log.info("Read node statuses");
@@ -927,6 +932,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
+  @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + FormattingUtils.formatDecimalNumber(

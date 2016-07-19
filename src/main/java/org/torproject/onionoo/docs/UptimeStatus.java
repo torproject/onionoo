@@ -40,6 +40,7 @@ public class UptimeStatus extends Document {
     return this.bridgeHistory;
   }
 
+  @Override
   public void setFromDocumentString(String documentString) {
     try (Scanner s = new Scanner(documentString)) {
       while (s.hasNextLine()) {
@@ -59,6 +60,8 @@ public class UptimeStatus extends Document {
     }
   }
 
+  /** Adds all given uptime history objects that don't overlap with
+   * existing uptime history objects. */
   public void addToHistory(boolean relay, long startMillis,
       SortedSet<String> flags) {
     SortedSet<UptimeHistory> history = relay ? this.relayHistory
@@ -105,6 +108,8 @@ public class UptimeStatus extends Document {
     this.isDirty = true;
   }
 
+  /** Compresses the history of uptime objects by merging adjacent
+   * intervals. */
   public void compressHistory() {
     this.compressHistory(this.relayHistory);
     this.compressHistory(this.bridgeHistory);
@@ -137,6 +142,7 @@ public class UptimeStatus extends Document {
     }
   }
 
+  @Override
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
     for (UptimeHistory interval : this.relayHistory) {

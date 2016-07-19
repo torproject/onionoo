@@ -97,6 +97,9 @@ public class LookupService {
     return addressNumber;
   }
 
+  /** Looks up address strings in the configured
+   * <code>GeoLite2-City-*.csv</code> and <code>GeoIPASNum2.csv</code>
+   * files and returns all lookup results. */
   public SortedMap<String, LookupResult> lookup(
       SortedSet<String> addressStrings) {
 
@@ -363,6 +366,8 @@ public class LookupService {
 
   private int addressesResolved = 0;
 
+  /** Returns a string with the number of addresses looked up and
+   * resolved. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + FormattingUtils.formatDecimalNumber(

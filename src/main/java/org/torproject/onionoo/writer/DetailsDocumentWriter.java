@@ -31,6 +31,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
   }
 
+  @Override
   public void writeDocuments() {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
@@ -186,6 +187,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     this.documentStore.store(detailsDocument, fingerprint);
   }
 
+  @Override
   public String getStatsString() {
     /* TODO Add statistics string. */
     return null;

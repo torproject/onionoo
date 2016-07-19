@@ -38,6 +38,8 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     return this.flags;
   }
 
+  /** Instantiates a new uptime history object for a relay or bridge with
+   * the given interval start, uptime hours, and relay flags. */
   UptimeHistory(boolean relay, long startMillis,
       int uptimeHours, SortedSet<String> flags) {
     this.relay = relay;
@@ -46,6 +48,8 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     this.flags = flags;
   }
 
+  /** Instantiates a new uptime history object from the given string that
+   * may have been produced by {@link #toString()}. */
   public static UptimeHistory fromString(String uptimeHistoryString) {
     String[] parts = uptimeHistoryString.split(" ", -1);
     if (parts.length < 3) {
@@ -87,6 +91,7 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     return new UptimeHistory(relay, startMillis, uptimeHours, flags);
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(this.relay ? (this.flags == null ? "r" : "R") : "b");
@@ -101,6 +106,10 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     return sb.toString();
   }
 
+  /** Adds uptime hours from another uptime history object, which is
+   * assumed to either start right after this one or which ends right
+   * before it, and sets the interval start to the earlier interval
+   * start. */
   public void addUptime(UptimeHistory other) {
     this.uptimeHours += other.uptimeHours;
     if (this.startMillis > other.startMillis) {
@@ -108,6 +117,7 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     }
   }
 
+  @Override
   public int compareTo(UptimeHistory other) {
     if (this.relay && !other.relay) {
       return -1;
@@ -118,12 +128,14 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
         : this.startMillis > other.startMillis ? 1 : 0;
   }
 
+  @Override
   public boolean equals(Object other) {
     return other instanceof UptimeHistory
         && this.relay == ((UptimeHistory) other).relay
         && this.startMillis == ((UptimeHistory) other).startMillis;
   }
 
+  @Override
   public int hashCode() {
     return (int) this.startMillis + (this.relay ? 1 : 0);
   }

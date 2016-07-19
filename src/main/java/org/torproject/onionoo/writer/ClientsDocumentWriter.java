@@ -64,6 +64,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
 
   private int writtenDocuments = 0;
 
+  @Override
   public void writeDocuments() {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
@@ -286,6 +287,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
     }
   }
 
+  @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
     sb.append("    " + FormattingUtils.formatDecimalNumber(

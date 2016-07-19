@@ -10,6 +10,7 @@
   <property name="classes" value="classes"/>
   <property name="testresources" value="src/test/resources/"/>
   <property name="dist" value="dist"/>
+  <property name="docs" value="${generated}/javadoc/"/>
   <property name="libs" value="lib"/>
   <property name="config" value="etc"/>
   <property name="webxmlfile" value="${config}/web.xml"/>
@@ -85,6 +86,7 @@
     <copy file="${contextxmltemplate}" tofile="${contextxml}"/>
     <copy file="${webxmltemplate}" tofile="${webxml}"/>
     <mkdir dir="${classes}"/>
+    <mkdir dir="${docs}"/>
     <mkdir dir="${dist}"/>
     <mkdir dir="${generated}"/>
   </target>
@@ -109,6 +111,17 @@
            includeantruntime="false">
       <classpath refid="classpath"/>
     </javac>
+  </target>
+
+  <target name="docs" depends="init">
+    <javadoc destdir="${docs}"
+             footer="&amp;copy; 2016 The Tor Project"
+             doctitle="Onionoo Documentation"
+             use="true"
+             windowtitle="Onionoo Documentation">
+      <classpath refid="classpath"/>
+      <fileset dir="${javasources}/" includes="**/*.java" />
+    </javadoc>
   </target>
 
   <target name="test" depends="compile">

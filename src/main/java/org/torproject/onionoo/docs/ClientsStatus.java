@@ -38,6 +38,7 @@ public class ClientsStatus extends Document {
     return this.history;
   }
 
+  @Override
   public void setFromDocumentString(String documentString) {
     try (Scanner s = new Scanner(documentString)) {
       while (s.hasNextLine()) {
@@ -53,6 +54,8 @@ public class ClientsStatus extends Document {
     }
   }
 
+  /** Adds all given clients history objects that don't overlap with
+   * existing clients history objects. */
   public void addToHistory(SortedSet<ClientsHistory> newIntervals) {
     for (ClientsHistory interval : newIntervals) {
       if ((this.history.headSet(interval).isEmpty()
@@ -67,6 +70,8 @@ public class ClientsStatus extends Document {
     }
   }
 
+  /** Compresses the history of clients objects by merging adjacent
+   * intervals, depending on how far back in the past they lie. */
   public void compressHistory() {
     SortedSet<ClientsHistory> uncompressedHistory =
         new TreeSet<ClientsHistory>(this.history);
@@ -107,6 +112,7 @@ public class ClientsStatus extends Document {
     }
   }
 
+  @Override
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
     for (ClientsHistory interval : this.history) {

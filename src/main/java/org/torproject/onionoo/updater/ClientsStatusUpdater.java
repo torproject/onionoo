@@ -43,6 +43,9 @@ public class ClientsStatusUpdater implements DescriptorListener,
 
   private DocumentStore documentStore;
 
+  /** Initializes a new status updater, obtains references to all relevant
+   * singleton instances, and registers as listener at the (singleton)
+   * descriptor source. */
   public ClientsStatusUpdater() {
     this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
@@ -54,6 +57,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
         DescriptorType.BRIDGE_EXTRA_INFOS);
   }
 
+  @Override
   public void processDescriptor(Descriptor descriptor, boolean relay) {
     if (descriptor instanceof ExtraInfoDescriptor && !relay) {
       this.processBridgeExtraInfoDescriptor(
@@ -143,6 +147,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
     return weightedResponses;
   }
 
+  @Override
   public void updateStatuses() {
     for (Map.Entry<String, SortedSet<ClientsHistory>> e :
         this.newResponses.entrySet()) {
@@ -161,6 +166,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
     }
   }
 
+  @Override
   public String getStatsString() {
     int newIntervals = 0;
     for (SortedSet<ClientsHistory> hist : this.newResponses.values()) {

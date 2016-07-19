@@ -51,6 +51,7 @@ public class BandwidthStatus extends Document {
     return this.readHistory;
   }
 
+  @Override
   public void setFromDocumentString(String documentString) {
     try (Scanner s = new Scanner(documentString)) {
       while (s.hasNextLine()) {
@@ -170,6 +171,7 @@ public class BandwidthStatus extends Document {
     }
   }
 
+  @Override
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
     for (long[] v : writeHistory.values()) {

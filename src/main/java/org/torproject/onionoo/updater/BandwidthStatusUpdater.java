@@ -16,6 +16,9 @@ public class BandwidthStatusUpdater implements DescriptorListener,
 
   private DocumentStore documentStore;
 
+  /** Initializes a new status updater, obtains references to all relevant
+   * singleton instances, and registers as listener at the (singleton)
+   * descriptor source. */
   public BandwidthStatusUpdater() {
     this.descriptorSource = DescriptorSourceFactory.getDescriptorSource();
     this.documentStore = DocumentStoreFactory.getDocumentStore();
@@ -29,12 +32,14 @@ public class BandwidthStatusUpdater implements DescriptorListener,
         DescriptorType.BRIDGE_EXTRA_INFOS);
   }
 
+  @Override
   public void processDescriptor(Descriptor descriptor, boolean relay) {
     if (descriptor instanceof ExtraInfoDescriptor) {
       this.parseDescriptor((ExtraInfoDescriptor) descriptor);
     }
   }
 
+  @Override
   public void updateStatuses() {
     /* Status files are already updated while processing descriptors. */
   }
@@ -59,6 +64,7 @@ public class BandwidthStatusUpdater implements DescriptorListener,
     }
   }
 
+  @Override
   public String getStatsString() {
     /* TODO Add statistics string. */
     return null;

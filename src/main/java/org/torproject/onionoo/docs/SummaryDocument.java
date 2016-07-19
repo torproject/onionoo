@@ -30,6 +30,9 @@ public class SummaryDocument extends Document {
 
   private String f;
 
+  /** Sets the fingerprint to the given 40 hex characters and clears
+   * SHA1-hashed and base64 fingerprints, so that they are re-computed at
+   * next request. */
   public void setFingerprint(String fingerprint) {
     if (fingerprint != null) {
       Pattern fingerprintPattern = Pattern.compile("^[0-9a-fA-F]{40}$");
@@ -49,6 +52,8 @@ public class SummaryDocument extends Document {
 
   private transient String hashedFingerprint = null;
 
+  /** Returns the SHA1-hashed fingerprint, or <code>null</code> if no
+   * fingerprint is set. */
   public String getHashedFingerprint() {
     if (this.hashedFingerprint == null && this.f != null) {
       try {
@@ -63,6 +68,8 @@ public class SummaryDocument extends Document {
 
   private transient String base64Fingerprint = null;
 
+  /** Returns the base64-encoded fingerprint, or <code>null</code> if no
+   * fingerprint is set. */
   public String getBase64Fingerprint() {
     if (this.base64Fingerprint == null && this.f != null) {
       try {
@@ -77,6 +84,9 @@ public class SummaryDocument extends Document {
 
   private transient String[] fingerprintSortedHexBlocks = null;
 
+  /** Returns a sorted array containing blocks of 4 upper-case hex
+   * characters from the fingerprint, or <code>null</code> if no
+   * fingerprint is set. */
   public String[] getFingerprintSortedHexBlocks() {
     if (this.fingerprintSortedHexBlocks == null && this.f != null) {
       String fingerprint = this.f.toUpperCase();
@@ -94,6 +104,7 @@ public class SummaryDocument extends Document {
 
   private String n;
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public void setNickname(String nickname) {
     if (nickname == null || nickname.equals("Unnamed")) {
       this.n = null;
@@ -219,6 +230,7 @@ public class SummaryDocument extends Document {
 
   private String c;
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public void setContact(String contact) {
     if (contact != null && contact.length() == 0) {
       this.c = null;
@@ -257,6 +269,7 @@ public class SummaryDocument extends Document {
 
   /* The familyFingerprints parameter can go away after September 8, 2015.
    * See above. */
+  /** Instantiates a summary document with all given properties. */
   public SummaryDocument(boolean isRelay, String nickname,
       String fingerprint, List<String> addresses, long lastSeenMillis,
       boolean running, SortedSet<String> relayFlags, long consensusWeight,

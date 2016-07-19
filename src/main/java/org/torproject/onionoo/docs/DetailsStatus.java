@@ -250,6 +250,9 @@ public class DetailsStatus extends Document {
         this.or_addresses_and_ports;
   }
 
+  /** Returns all addresses used for the onion-routing protocol which
+   * includes the primary address and all additionally configured
+   * onion-routing addresses. */
   public SortedSet<String> getOrAddresses() {
     SortedSet<String> orAddresses = new TreeSet<String>();
     if (this.address != null) {

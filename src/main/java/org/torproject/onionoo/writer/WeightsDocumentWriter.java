@@ -36,6 +36,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
     this.now = TimeFactory.getTime().currentTimeMillis();
   }
 
+  @Override
   public void writeDocuments() {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
@@ -210,6 +211,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
     }
   }
 
+  @Override
   public String getStatsString() {
     /* TODO Add statistics string. */
     return null;
