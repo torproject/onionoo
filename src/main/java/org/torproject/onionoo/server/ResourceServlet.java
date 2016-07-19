@@ -78,6 +78,7 @@ public class ResourceServlet extends HttpServlet {
   /** Handles the HTTP GET request in the wrapped <code>request</code> by
    * writing an HTTP GET response to the likewise <code>response</code>,
    * both of which are wrapped to facilitate testing. */
+  @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
   public void doGet(HttpServletRequestWrapper request,
       HttpServletResponseWrapper response) throws IOException {
 
@@ -85,15 +86,6 @@ public class ResourceServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
       return;
     }
-
-    long nowMillis = TimeFactory.getTime().currentTimeMillis();
-    long indexWrittenMillis =
-        NodeIndexerFactory.getNodeIndexer().getLastIndexed(
-        INDEX_WAITING_TIME);
-    long indexAgeMillis = nowMillis - indexWrittenMillis;
-    long cacheMaxAgeMillis = Math.max(CACHE_MIN_TIME,
-        ((CACHE_MAX_TIME - indexAgeMillis)
-        / CACHE_INTERVAL) * CACHE_INTERVAL);
 
     NodeIndex nodeIndex = NodeIndexerFactory.getNodeIndexer()
         .getLatestNodeIndex(INDEX_WAITING_TIME);
@@ -230,13 +222,13 @@ public class ResourceServlet extends HttpServlet {
       rh.setCountry(countryCodeParameter);
     }
     if (parameterMap.containsKey("as")) {
-      String aSNumberParameter = this.parseASNumberParameter(
+      String asNumberParameter = this.parseAsNumberParameter(
           parameterMap.get("as"));
-      if (aSNumberParameter == null) {
+      if (asNumberParameter == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rh.setAs(aSNumberParameter);
+      rh.setAs(asNumberParameter);
     }
     if (parameterMap.containsKey("flag")) {
       String flagParameter = this.parseFlagParameter(
@@ -343,6 +335,14 @@ public class ResourceServlet extends HttpServlet {
       rb.setFields(fields);
     }
 
+    long indexWrittenMillis =
+        NodeIndexerFactory.getNodeIndexer().getLastIndexed(
+        INDEX_WAITING_TIME);
+    long indexAgeMillis = receivedRequestMillis - indexWrittenMillis;
+    long cacheMaxAgeMillis = Math.max(CACHE_MIN_TIME,
+        ((CACHE_MAX_TIME - indexAgeMillis)
+        / CACHE_INTERVAL) * CACHE_INTERVAL);
+
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setContentType("application/json");
     response.setCharacterEncoding("utf-8");
@@ -418,11 +418,11 @@ public class ResourceServlet extends HttpServlet {
     return parameter;
   }
 
-  private static Pattern aSNumberParameterPattern =
+  private static Pattern asNumberParameterPattern =
       Pattern.compile("^[asAS]{0,2}[0-9]{1,10}$");
 
-  private String parseASNumberParameter(String parameter) {
-    if (!aSNumberParameterPattern.matcher(parameter).matches()) {
+  private String parseAsNumberParameter(String parameter) {
+    if (!asNumberParameterPattern.matcher(parameter).matches()) {
       /* AS number contains illegal character(s). */
       return null;
     }
@@ -447,30 +447,30 @@ public class ResourceServlet extends HttpServlet {
       /* Days contain illegal character(s). */
       return null;
     }
-    int x = 0;
-    int y = Integer.MAX_VALUE;
+    int fromDays = 0;
+    int toDays = Integer.MAX_VALUE;
     try {
       if (!parameter.contains("-")) {
-        x = Integer.parseInt(parameter);
-        y = x;
+        fromDays = Integer.parseInt(parameter);
+        toDays = fromDays;
       } else {
         String[] parts = parameter.split("-", 2);
         if (parts[0].length() > 0) {
-          x = Integer.parseInt(parts[0]);
+          fromDays = Integer.parseInt(parts[0]);
         }
         if (parts.length > 1 && parts[1].length() > 0) {
-          y = Integer.parseInt(parts[1]);
+          toDays = Integer.parseInt(parts[1]);
         }
       }
     } catch (NumberFormatException e) {
       /* Invalid format. */
       return null;
     }
-    if (x > y) {
+    if (fromDays > toDays) {
       /* Second number or days must exceed first number. */
       return null;
     }
-    return new int[] { x, y };
+    return new int[] { fromDays, toDays };
   }
 
   private String[] parseContactParameter(String parameter) {

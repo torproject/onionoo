@@ -39,7 +39,7 @@ public class LookupService {
 
   private File geoLite2CityLocationsEnCsvFile;
 
-  private File geoIPASNum2CsvFile;
+  private File geoIpAsNum2CsvFile;
 
   private boolean hasAllFiles = false;
 
@@ -63,8 +63,8 @@ public class LookupService {
           + "geoip/.");
       return;
     }
-    this.geoIPASNum2CsvFile = new File(this.geoipDir, "GeoIPASNum2.csv");
-    if (!this.geoIPASNum2CsvFile.exists()) {
+    this.geoIpAsNum2CsvFile = new File(this.geoipDir, "GeoIPASNum2.csv");
+    if (!this.geoIpAsNum2CsvFile.exists()) {
       log.error("No GeoIPASNum2.csv file in geoip/.");
       return;
     }
@@ -85,6 +85,7 @@ public class LookupService {
           try {
             octetValue = Integer.parseInt(parts[i]);
           } catch (NumberFormatException e) {
+            /* Handled below, because octetValue will still be -1. */
           }
           if (octetValue < 0 || octetValue > 255) {
             addressNumber = -1L;
@@ -228,9 +229,9 @@ public class LookupService {
     }
 
     /* Obtain a map from IP address numbers to ASN. */
-    Map<Long, String> addressNumberASN = new HashMap<Long, String>();
+    Map<Long, String> addressNumberAsn = new HashMap<Long, String>();
     try (BufferedReader br = this.createBufferedReaderFromIso88591File(
-        this.geoIPASNum2CsvFile)) {
+        this.geoIpAsNum2CsvFile)) {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
@@ -240,14 +241,14 @@ public class LookupService {
         String[] parts = line.replaceAll("\"", "").split(",", 3);
         if (parts.length != 3) {
           log.error("Illegal line '" + line + "' in "
-              + geoIPASNum2CsvFile.getAbsolutePath() + ".");
+              + geoIpAsNum2CsvFile.getAbsolutePath() + ".");
           return lookupResults;
         }
         try {
           long startIpNum = Long.parseLong(parts[0]);
           if (startIpNum <= previousStartIpNum) {
             log.error("Line '" + line + "' not sorted in "
-                + geoIPASNum2CsvFile.getAbsolutePath() + ".");
+                + geoIpAsNum2CsvFile.getAbsolutePath() + ".");
             return lookupResults;
           }
           previousStartIpNum = startIpNum;
@@ -264,7 +265,7 @@ public class LookupService {
           while (firstAddressNumber <= endIpNum
               && firstAddressNumber != -1L) {
             if (parts[2].startsWith("AS")) {
-              addressNumberASN.put(firstAddressNumber, parts[2]);
+              addressNumberAsn.put(firstAddressNumber, parts[2]);
             }
             sortedAddressNumbers.remove(firstAddressNumber);
             if (sortedAddressNumbers.isEmpty()) {
@@ -279,13 +280,13 @@ public class LookupService {
         } catch (NumberFormatException e) {
           log.error("Number format exception while parsing line "
               + "'" + line + "' in "
-              + geoIPASNum2CsvFile.getAbsolutePath() + ".");
+              + geoIpAsNum2CsvFile.getAbsolutePath() + ".");
           return lookupResults;
         }
       }
     } catch (IOException e) {
       log.error("I/O exception while reading "
-          + geoIPASNum2CsvFile.getAbsolutePath() + ": " + e);
+          + geoIpAsNum2CsvFile.getAbsolutePath() + ": " + e);
       return lookupResults;
     }
 
@@ -297,7 +298,7 @@ public class LookupService {
       long addressNumber = addressStringNumbers.get(addressString);
       if (!addressNumberBlocks.containsKey(addressNumber)
           && !addressNumberLatLong.containsKey(addressNumber)
-          && !addressNumberASN.containsKey(addressNumber)) {
+          && !addressNumberAsn.containsKey(addressNumber)) {
         continue;
       }
       LookupResult lookupResult = new LookupResult();
@@ -325,8 +326,8 @@ public class LookupService {
         lookupResult.setLatitude(latLong[0]);
         lookupResult.setLongitude(latLong[1]);
       }
-      if (addressNumberASN.containsKey(addressNumber)) {
-        String[] parts = addressNumberASN.get(addressNumber).split(" ",
+      if (addressNumberAsn.containsKey(addressNumber)) {
+        String[] parts = addressNumberAsn.get(addressNumber).split(" ",
             2);
         lookupResult.setAsNumber(parts[0]);
         lookupResult.setAsName(parts.length == 2 ? parts[1] : "");

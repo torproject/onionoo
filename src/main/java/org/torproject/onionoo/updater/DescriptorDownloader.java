@@ -79,8 +79,8 @@ class DescriptorDownloader {
     String directoryUrl = this.protocolHostNameResourcePrefix
         + this.directory;
     try {
-      URL u = new URL(directoryUrl);
-      HttpURLConnection huc = (HttpURLConnection) u.openConnection();
+      URL url = new URL(directoryUrl);
+      HttpURLConnection huc = (HttpURLConnection) url.openConnection();
       huc.setRequestMethod("GET");
       huc.connect();
       if (huc.getResponseCode() != 200) {
@@ -129,8 +129,8 @@ class DescriptorDownloader {
       File localFile = new File(this.inDir, this.directory + remoteFile);
       try {
         localFile.getParentFile().mkdirs();
-        URL u = new URL(fileUrl);
-        HttpURLConnection huc = (HttpURLConnection) u.openConnection();
+        URL url = new URL(fileUrl);
+        HttpURLConnection huc = (HttpURLConnection) url.openConnection();
         huc.setRequestMethod("GET");
         huc.addRequestProperty("Accept-Encoding", "gzip");
         huc.connect();
@@ -140,7 +140,6 @@ class DescriptorDownloader {
               + huc.getResponseMessage() + ".  Skipping.");
           continue;
         }
-        long lastModified = huc.getHeaderFieldDate("Last-Modified", -1L);
         InputStream is;
         if (huc.getContentEncoding() != null
             && huc.getContentEncoding().equalsIgnoreCase("gzip")) {
@@ -158,6 +157,7 @@ class DescriptorDownloader {
           }
         }
         localTempFile.renameTo(localFile);
+        long lastModified = huc.getHeaderFieldDate("Last-Modified", -1L);
         if (lastModified >= 0) {
           localFile.setLastModified(lastModified);
         }

@@ -5,6 +5,7 @@ package org.torproject.onionoo.docs;
 
 import java.util.Map;
 
+@SuppressWarnings("checkstyle:membername")
 public class WeightsDocument extends Document {
 
   @SuppressWarnings("unused")

@@ -107,12 +107,11 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       long totalMillis = 0L;
       long totalBandwidth = 0L;
       for (long[] v : history.values()) {
-        long startMillis = v[0];
         long endMillis = v[1];
-        long bandwidth = v[2];
         if (endMillis < intervalStartMillis) {
           continue;
         }
+        long startMillis = v[0];
         if (endMillis - startMillis > dataPointInterval) {
           /* This history interval is too long for this graph's data point
            * interval.  Maybe the next graph will contain it, but not this
@@ -128,6 +127,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
           totalMillis = 0L;
           intervalStartMillis += dataPointInterval;
         }
+        long bandwidth = v[2];
         totalBandwidth += bandwidth;
         totalMillis += (endMillis - startMillis);
       }

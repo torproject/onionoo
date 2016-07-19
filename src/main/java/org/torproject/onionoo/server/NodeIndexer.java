@@ -71,6 +71,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       try {
         this.wait(timeoutMillis);
       } catch (InterruptedException e) {
+        /* Nothing that we could handle, just return what we have
+         * below. */
       }
     }
     return this.lastIndexed;
@@ -84,6 +86,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       try {
         this.wait(timeoutMillis);
       } catch (InterruptedException e) {
+        /* Nothing that we could handle, just return what we have
+         * below. */
       }
     }
     return this.latestNodeIndex;
@@ -110,6 +114,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       try {
         Thread.sleep(ONE_MINUTE);
       } catch (InterruptedException e) {
+        /* Nothing that we could handle, just check if there's new data
+         * to index now. */
       }
     }
   }
@@ -137,14 +143,13 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       }
     }
     documentStore.invalidateDocumentCache();
-    List<String> newRelaysByConsensusWeight = new ArrayList<String>();
     Map<String, SummaryDocument> newRelayFingerprintSummaryLines =
         new HashMap<String, SummaryDocument>();
     Map<String, SummaryDocument> newBridgeFingerprintSummaryLines =
         new HashMap<String, SummaryDocument>();
     Map<String, Set<String>> newRelaysByCountryCode =
         new HashMap<String, Set<String>>();
-    Map<String, Set<String>> newRelaysByASNumber =
+    Map<String, Set<String>> newRelaysByAsNumber =
         new HashMap<String, Set<String>>();
     Map<String, Set<String>> newRelaysByFlag =
         new HashMap<String, Set<String>>();
@@ -208,13 +213,13 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByCountryCode.get(countryCode).add(fingerprint);
         newRelaysByCountryCode.get(countryCode).add(hashedFingerprint);
       }
-      if (entry.getASNumber() != null) {
-        String aSNumber = entry.getASNumber();
-        if (!newRelaysByASNumber.containsKey(aSNumber)) {
-          newRelaysByASNumber.put(aSNumber, new HashSet<String>());
+      if (entry.getAsNumber() != null) {
+        String asNumber = entry.getAsNumber();
+        if (!newRelaysByAsNumber.containsKey(asNumber)) {
+          newRelaysByAsNumber.put(asNumber, new HashSet<String>());
         }
-        newRelaysByASNumber.get(aSNumber).add(fingerprint);
-        newRelaysByASNumber.get(aSNumber).add(hashedFingerprint);
+        newRelaysByAsNumber.get(asNumber).add(fingerprint);
+        newRelaysByAsNumber.get(asNumber).add(hashedFingerprint);
       }
       for (String flag : entry.getRelayFlags()) {
         String flagLowerCase = flag.toLowerCase();
@@ -261,7 +266,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       newRelaysByContact.get(contact).add(hashedFingerprint);
     }
     Collections.sort(orderRelaysByConsensusWeight);
-    newRelaysByConsensusWeight = new ArrayList<String>();
+    List<String> newRelaysByConsensusWeight = new ArrayList<String>();
     for (String relay : orderRelaysByConsensusWeight) {
       newRelaysByConsensusWeight.add(relay.split(" ")[1]);
     }
@@ -325,7 +330,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     newNodeIndex.setBridgeFingerprintSummaryLines(
         newBridgeFingerprintSummaryLines);
     newNodeIndex.setRelaysByCountryCode(newRelaysByCountryCode);
-    newNodeIndex.setRelaysByASNumber(newRelaysByASNumber);
+    newNodeIndex.setRelaysByAsNumber(newRelaysByAsNumber);
     newNodeIndex.setRelaysByFlag(newRelaysByFlag);
     newNodeIndex.setBridgesByFlag(newBridgesByFlag);
     newNodeIndex.setRelaysByContact(newRelaysByContact);

@@ -156,6 +156,12 @@ public class DescriptorSource {
       case BRIDGE_EXTRA_INFOS:
         log.info("Read recent bridge extra-info descriptors");
         break;
+      default:
+        /* We shouldn't run into this default case, but if we do, it's
+         * because we added a new type to DescriptorType but forgot to
+         * update this switch statement.  It's just logging, so not the
+         * end of the world. */
+        log.info("Read recent descriptors of type " + descriptorType);
     }
   }
 

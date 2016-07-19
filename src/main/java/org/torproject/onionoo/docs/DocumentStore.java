@@ -420,7 +420,7 @@ public class DocumentStore {
     String nickname = detailsDocument.getNickname();
     List<String> addresses = new ArrayList<String>();
     String countryCode = null;
-    String aSNumber = null;
+    String asNumber = null;
     String contact = null;
     for (String orAddressAndPort : detailsDocument.getOrAddresses()) {
       if (!orAddressAndPort.contains(":")) {
@@ -451,7 +451,7 @@ public class DocumentStore {
     SummaryDocument summaryDocument = new SummaryDocument(isRelay,
         nickname, fingerprint, addresses, lastSeenMillis, running,
         relayFlags, consensusWeight, countryCode, firstSeenMillis,
-        aSNumber, contact, family, family);
+        asNumber, contact, family, family);
     return summaryDocument;
   }
 

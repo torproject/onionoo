@@ -15,6 +15,7 @@ public class HttpServletRequestWrapper {
     this.request = request;
   }
 
+  @SuppressWarnings("abbreviationaswordinname")
   protected String getRequestURI() {
     return this.request.getRequestURI();
   }

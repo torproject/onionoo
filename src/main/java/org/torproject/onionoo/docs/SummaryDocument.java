@@ -16,6 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("checkstyle:membername")
 public class SummaryDocument extends Document {
 
   private boolean t;
@@ -133,9 +134,9 @@ public class SummaryDocument extends Document {
     String[] stringArray = null;
     if (collection != null && !collection.isEmpty()) {
       stringArray = new String[collection.size()];
-      int i = 0;
+      int index = 0;
       for (String string : collection) {
-        stringArray[i++] = string;
+        stringArray[index++] = string;
       }
     }
     return stringArray;
@@ -171,11 +172,11 @@ public class SummaryDocument extends Document {
 
   private String as;
 
-  public void setASNumber(String aSNumber) {
-    this.as = aSNumber;
+  public void setAsNumber(String asNumber) {
+    this.as = asNumber;
   }
 
-  public String getASNumber() {
+  public String getAsNumber() {
     return this.as;
   }
 
@@ -274,7 +275,7 @@ public class SummaryDocument extends Document {
   public SummaryDocument(boolean isRelay, String nickname,
       String fingerprint, List<String> addresses, long lastSeenMillis,
       boolean running, SortedSet<String> relayFlags, long consensusWeight,
-      String countryCode, long firstSeenMillis, String aSNumber,
+      String countryCode, long firstSeenMillis, String asNumber,
       String contact, SortedSet<String> familyFingerprints,
       SortedSet<String> effectiveFamily) {
     this.setRelay(isRelay);
@@ -287,7 +288,7 @@ public class SummaryDocument extends Document {
     this.setConsensusWeight(consensusWeight);
     this.setCountryCode(countryCode);
     this.setFirstSeenMillis(firstSeenMillis);
-    this.setASNumber(aSNumber);
+    this.setAsNumber(asNumber);
     this.setContact(contact);
     this.setFamilyFingerprints(familyFingerprints);
     this.setEffectiveFamily(effectiveFamily);

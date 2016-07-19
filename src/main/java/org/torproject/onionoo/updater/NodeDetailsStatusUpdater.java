@@ -492,7 +492,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           updatedNodeStatus.setDefaultPolicy(
               nodeStatus.getDefaultPolicy());
           updatedNodeStatus.setPortList(nodeStatus.getPortList());
-          updatedNodeStatus.setASNumber(nodeStatus.getASNumber());
+          updatedNodeStatus.setAsNumber(nodeStatus.getAsNumber());
           updatedNodeStatus.setRecommendedVersion(
               nodeStatus.getRecommendedVersion());
         }
@@ -862,10 +862,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         detailsStatus.setCityName(lookupResult.getCityName());
         detailsStatus.setLatitude(lookupResult.getLatitude());
         detailsStatus.setLongitude(lookupResult.getLongitude());
-        detailsStatus.setASNumber(lookupResult.getAsNumber());
-        detailsStatus.setASName(lookupResult.getAsName());
+        detailsStatus.setAsNumber(lookupResult.getAsNumber());
+        detailsStatus.setAsName(lookupResult.getAsName());
         nodeStatus.setCountryCode(lookupResult.getCountryCode());
-        nodeStatus.setASNumber(lookupResult.getAsNumber());
+        nodeStatus.setAsNumber(lookupResult.getAsNumber());
       }
 
       if (this.consensusWeightFractions.containsKey(fingerprint)) {

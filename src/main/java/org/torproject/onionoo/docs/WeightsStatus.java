@@ -32,8 +32,10 @@ public class WeightsStatus extends Document {
   private SortedMap<long[], double[]> history =
       new TreeMap<long[], double[]>(
       new Comparator<long[]>() {
-        public int compare(long[] a, long[] b) {
-          return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
+        public int compare(long[] first, long[] second) {
+          return first[0] < second[0] ? -1
+              : first[0] > second[0] ? 1
+              : 0;
         }
       }
   );

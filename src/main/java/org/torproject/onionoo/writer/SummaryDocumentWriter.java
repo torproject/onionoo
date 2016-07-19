@@ -65,8 +65,6 @@ public class SummaryDocumentWriter implements DocumentWriter {
         }
         continue;
       }
-      boolean isRelay = nodeStatus.isRelay();
-      String nickname = nodeStatus.getNickname();
       List<String> addresses = new ArrayList<String>();
       addresses.add(nodeStatus.getAddress());
       for (String orAddress : nodeStatus.getOrAddresses()) {
@@ -81,20 +79,22 @@ public class SummaryDocumentWriter implements DocumentWriter {
       }
       long lastSeenMillis = nodeStatus.getLastSeenMillis();
       SortedSet<String> relayFlags = nodeStatus.getRelayFlags();
+      boolean isRelay = nodeStatus.isRelay();
       boolean running = relayFlags.contains("Running") && (isRelay
           ? lastSeenMillis == relaysLastValidAfterMillis
           : lastSeenMillis == bridgesLastPublishedMillis);
       long consensusWeight = nodeStatus.getConsensusWeight();
       String countryCode = nodeStatus.getCountryCode();
       long firstSeenMillis = nodeStatus.getFirstSeenMillis();
-      String aSNumber = nodeStatus.getASNumber();
+      String asNumber = nodeStatus.getAsNumber();
       String contact = nodeStatus.getContact();
       SortedSet<String> declaredFamily = nodeStatus.getDeclaredFamily();
       SortedSet<String> effectiveFamily = nodeStatus.getEffectiveFamily();
+      String nickname = nodeStatus.getNickname();
       SummaryDocument summaryDocument = new SummaryDocument(isRelay,
           nickname, fingerprint, addresses, lastSeenMillis, running,
           relayFlags, consensusWeight, countryCode, firstSeenMillis,
-          aSNumber, contact, declaredFamily, effectiveFamily);
+          asNumber, contact, declaredFamily, effectiveFamily);
       if (this.documentStore.store(summaryDocument, fingerprint)) {
         this.writtenDocuments++;
       }

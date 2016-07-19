@@ -5,6 +5,7 @@ package org.torproject.onionoo.docs;
 
 import java.util.Map;
 
+@SuppressWarnings("checkstyle:membername")
 public class BandwidthDocument extends Document {
 
   @SuppressWarnings("unused")

@@ -67,9 +67,9 @@ public class NodeStatus extends Document {
     String[] stringArray = null;
     if (collection != null && !collection.isEmpty()) {
       stringArray = new String[collection.size()];
-      int i = 0;
+      int index = 0;
       for (String string : collection) {
-        stringArray[i++] = string;
+        stringArray[index++] = string;
       }
     }
     return stringArray;
@@ -337,14 +337,14 @@ public class NodeStatus extends Document {
     return this.countryCode;
   }
 
-  private String aSNumber;
+  private String asNumber;
 
-  public void setASNumber(String aSNumber) {
-    this.aSNumber = aSNumber;
+  public void setAsNumber(String asNumber) {
+    this.asNumber = asNumber;
   }
 
-  public String getASNumber() {
-    return this.aSNumber;
+  public String getAsNumber() {
+    return this.asNumber;
   }
 
   /* Reverse DNS lookup result */
@@ -501,7 +501,7 @@ public class NodeStatus extends Document {
       }
       nodeStatus.addLastAddresses(lastChangedAddresses, address, orPort,
           dirPort, orAddressesAndPorts);
-      nodeStatus.setASNumber(parts[19]);
+      nodeStatus.setAsNumber(parts[19]);
       nodeStatus.setContact(parts[20]);
       if (!parts[21].equals("null")) {
         nodeStatus.setRecommendedVersion(parts[21].equals("true"));
@@ -588,7 +588,7 @@ public class NodeStatus extends Document {
       sb.append("\t" + DateTimeHelper.format(
           this.getLastChangedOrAddressOrPort(),
           DateTimeHelper.ISO_DATETIME_TAB_FORMAT));
-      sb.append("\t" + (this.aSNumber != null ? this.aSNumber : "null"));
+      sb.append("\t" + (this.asNumber != null ? this.asNumber : "null"));
     } else {
       sb.append("\tnull\tnull\tnull");
     }

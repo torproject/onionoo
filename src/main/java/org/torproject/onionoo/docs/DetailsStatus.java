@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+@SuppressWarnings("checkstyle:membername")
 public class DetailsStatus extends Document {
 
   /* We must ensure that details files only contain ASCII characters
@@ -20,12 +21,12 @@ public class DetailsStatus extends Document {
    * to write six characters '\', 'u', '0', '0', 'F', '2'.  The only thing
    * we'll have to do is to change back the '\\' that Gson writes for the
    * '\'. */
-  private static String escapeJSON(String s) {
-    return StringEscapeUtils.escapeJava(s);
+  private static String escapeJson(String stringToEscape) {
+    return StringEscapeUtils.escapeJava(stringToEscape);
   }
 
-  private static String unescapeJSON(String s) {
-    return StringEscapeUtils.unescapeJava(s);
+  private static String unescapeJson(String stringToUnescape) {
+    return StringEscapeUtils.unescapeJava(stringToUnescape);
   }
 
   /* From most recently published server descriptor: */
@@ -105,21 +106,21 @@ public class DetailsStatus extends Document {
   private String contact;
 
   public void setContact(String contact) {
-    this.contact = escapeJSON(contact);
+    this.contact = escapeJson(contact);
   }
 
   public String getContact() {
-    return unescapeJSON(this.contact);
+    return unescapeJson(this.contact);
   }
 
   private String platform;
 
   public void setPlatform(String platform) {
-    this.platform = escapeJSON(platform);
+    this.platform = escapeJson(platform);
   }
 
   public String getPlatform() {
-    return unescapeJSON(this.platform);
+    return unescapeJson(this.platform);
   }
 
   private SortedSet<String> alleged_family;
@@ -470,51 +471,51 @@ public class DetailsStatus extends Document {
   private String country_name;
 
   public void setCountryName(String countryName) {
-    this.country_name = escapeJSON(countryName);
+    this.country_name = escapeJson(countryName);
   }
 
   public String getCountryName() {
-    return unescapeJSON(this.country_name);
+    return unescapeJson(this.country_name);
   }
 
   private String region_name;
 
   public void setRegionName(String regionName) {
-    this.region_name = escapeJSON(regionName);
+    this.region_name = escapeJson(regionName);
   }
 
   public String getRegionName() {
-    return unescapeJSON(this.region_name);
+    return unescapeJson(this.region_name);
   }
 
   private String city_name;
 
   public void setCityName(String cityName) {
-    this.city_name = escapeJSON(cityName);
+    this.city_name = escapeJson(cityName);
   }
 
   public String getCityName() {
-    return unescapeJSON(this.city_name);
+    return unescapeJson(this.city_name);
   }
 
   private String as_name;
 
-  public void setASName(String aSName) {
-    this.as_name = escapeJSON(aSName);
+  public void setAsName(String asName) {
+    this.as_name = escapeJson(asName);
   }
 
-  public String getASName() {
-    return unescapeJSON(this.as_name);
+  public String getAsName() {
+    return unescapeJson(this.as_name);
   }
 
   private String as_number;
 
-  public void setASNumber(String aSNumber) {
-    this.as_number = escapeJSON(aSNumber);
+  public void setAsNumber(String asNumber) {
+    this.as_number = escapeJson(asNumber);
   }
 
-  public String getASNumber() {
-    return unescapeJSON(this.as_number);
+  public String getAsNumber() {
+    return unescapeJson(this.as_number);
   }
 
   /* Reverse DNS lookup result: */
@@ -522,11 +523,11 @@ public class DetailsStatus extends Document {
   private String host_name;
 
   public void setHostName(String hostName) {
-    this.host_name = escapeJSON(hostName);
+    this.host_name = escapeJson(hostName);
   }
 
   public String getHostName() {
-    return unescapeJSON(this.host_name);
+    return unescapeJson(this.host_name);
   }
 }
 

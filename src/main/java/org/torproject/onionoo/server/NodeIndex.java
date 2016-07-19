@@ -86,15 +86,15 @@ class NodeIndex {
     return relaysByCountryCode;
   }
 
-  private Map<String, Set<String>> relaysByASNumber = null;
+  private Map<String, Set<String>> relaysByAsNumber = null;
 
-  public void setRelaysByASNumber(
-      Map<String, Set<String>> relaysByASNumber) {
-    this.relaysByASNumber = relaysByASNumber;
+  public void setRelaysByAsNumber(
+      Map<String, Set<String>> relaysByAsNumber) {
+    this.relaysByAsNumber = relaysByAsNumber;
   }
 
-  public Map<String, Set<String>> getRelaysByASNumber() {
-    return relaysByASNumber;
+  public Map<String, Set<String>> getRelaysByAsNumber() {
+    return relaysByAsNumber;
   }
 
   private Map<String, Set<String>> relaysByFlag = null;

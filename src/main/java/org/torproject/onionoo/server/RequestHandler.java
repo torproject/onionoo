@@ -153,7 +153,7 @@ public class RequestHandler {
     this.filterByLookup();
     this.filterByFingerprint();
     this.filterByCountryCode();
-    this.filterByASNumber();
+    this.filterByAsNumber();
     this.filterByFlag();
     this.filterNodesByFirstSeenDays();
     this.filterNodesByLastSeenDays();
@@ -369,23 +369,23 @@ public class RequestHandler {
     this.filteredBridges.clear();
   }
 
-  private void filterByASNumber() {
+  private void filterByAsNumber() {
     if (this.as == null) {
       /* Not filtering by AS number. */
       return;
     }
-    String aSNumber = this.as.toUpperCase();
-    if (!aSNumber.startsWith("AS")) {
-      aSNumber = "AS" + aSNumber;
+    String asNumber = this.as.toUpperCase();
+    if (!asNumber.startsWith("AS")) {
+      asNumber = "AS" + asNumber;
     }
-    if (!this.nodeIndex.getRelaysByASNumber().containsKey(aSNumber)) {
+    if (!this.nodeIndex.getRelaysByAsNumber().containsKey(asNumber)) {
       this.filteredRelays.clear();
     } else {
-      Set<String> relaysWithASNumber =
-          this.nodeIndex.getRelaysByASNumber().get(aSNumber);
+      Set<String> relaysWithAsNumber =
+          this.nodeIndex.getRelaysByAsNumber().get(asNumber);
       Set<String> removeRelays = new HashSet<String>();
       for (String fingerprint : this.filteredRelays.keySet()) {
-        if (!relaysWithASNumber.contains(fingerprint)) {
+        if (!relaysWithAsNumber.contains(fingerprint)) {
           removeRelays.add(fingerprint);
         }
       }
