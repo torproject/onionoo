@@ -3,7 +3,7 @@
   <property name="onionoo.protocol.version" value="3.1"/>
   <property name="release.version"
             value="${onionoo.protocol.version}.0"/>
-  <property name="descriptorversion" value="1.2.0"/>
+  <property name="descriptorversion" value="1.3.0"/>
   <property name="javasources" value="src/main/java"/>
   <property name="tests" value="src/test/java"/>
   <property name="generated" value="generated/"/>

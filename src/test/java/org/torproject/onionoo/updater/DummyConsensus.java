@@ -115,5 +115,13 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
   public String getConsensusDigest() {
     return null;
   }
+
+  public List<String> getPackageLines() {
+    return null;
+  }
+
+  public List<DirectorySignature> getSignatures() {
+    return null;
+  }
 }
 
