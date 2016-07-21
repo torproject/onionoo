@@ -5,21 +5,19 @@
             value="${onionoo.protocol.version}.0"/>
   <property name="descriptorversion" value="1.3.0"/>
   <property name="javasources" value="src/main/java"/>
-  <property name="tests" value="src/test/java"/>
-  <property name="generated" value="generated/"/>
-  <property name="classes" value="classes"/>
+  <property name="testsources" value="src/test/java"/>
+  <property name="generated" value="generated"/>
+  <property name="classes" value="${generated}/classes"/>
+  <property name="testclasses" value="${generated}/testclasses/"/>
+  <property name="resources" value="src/main/resources/"/>
   <property name="testresources" value="src/test/resources/"/>
-  <property name="dist" value="dist"/>
+  <property name="testresult" value="${generated}/test-results"/>
+  <property name="coverageresult" value="${generated}/coverage-report/"/>
+  <property name="instrument" value="${generated}/instrument/"/>
+  <property name="cobertura.ser.file" value="${basedir}/cobertura.ser" />
+  <property name="dist" value="${generated}/dist"/>
   <property name="docs" value="${generated}/javadoc/"/>
-  <property name="libs" value="lib"/>
-  <property name="config" value="etc"/>
-  <property name="webxmlfile" value="${config}/web.xml"/>
-  <property name="contextxmltemplate"
-            value="${config}/context.xml.template"/>
-  <property name="contextxml" value="${config}/context.xml"/>
-  <property name="webxmltemplate"
-            value="${config}/web.xml.template"/>
-  <property name="webxml" value="${config}/web.xml"/>
+  <property name="libs" value="${basedir}/lib"/>
   <property name="warfile"
             value="${dist}/onionoo-${release.version}.war"/>
   <property name="onionoo.jarfile"
@@ -28,13 +26,13 @@
 
   <patternset id="runtime" >
     <include name="descriptor-${descriptorversion}.jar"/>
-    <include name="commons-codec-1.6.jar"/>
-    <include name="commons-compress-1.4.1.jar"/>
-    <include name="commons-lang3-3.1.jar"/>
-    <include name="gson-2.1.jar"/>
-    <include name="logback-classic-1.0.4.jar"/>
-    <include name="logback-core-1.0.4.jar"/>
-    <include name="slf4j-api-1.6.5.jar"/>
+    <include name="commons-codec-1.9.jar"/>
+    <include name="commons-compress-1.9.jar"/>
+    <include name="commons-lang3-3.3.2.jar"/>
+    <include name="gson-2.2.4.jar"/>
+    <include name="logback-classic-1.1.2.jar"/>
+    <include name="logback-core-1.1.2.jar"/>
+    <include name="slf4j-api-1.7.7.jar"/>
   </patternset>
 
   <patternset id="web" >
@@ -52,7 +50,7 @@
   </patternset>
 
   <patternset id="test" >
-    <include name="junit4-4.10.jar"/>
+    <include name="junit4-4.11.jar"/>
     <include name="hamcrest-core-1.3.jar"/>
   </patternset>
 
@@ -62,13 +60,14 @@
       <patternset refid="runtime" />
       <patternset refid="web" />
     </fileset>
-    <fileset dir="${config}">
+    <fileset dir="${resources}">
       <include name="logback.xml,jetty.xml"/>
     </fileset>
   </path>
 
-  <path id="testclasspath">
+  <path id="test.classpath">
     <path refid="classpath" />
+    <pathelement path="${testclasses}"/>
     <fileset dir="${libs}">
       <patternset refid="runtime" />
       <patternset refid="test" />
@@ -82,20 +81,42 @@
     </fileset>
   </path>
 
+  <path id="cobertura.classpath">
+    <fileset dir="${libs}">
+      <include name="descriptor-${descriptorversion}.jar"/>
+      <include name="cobertura-2.1.1.jar" />
+      <include name="slf4j-api-1.7.7.jar" />
+      <include name="commons-lang3-3.3.2.jar" />
+      <include name="asm4-5.0.3.jar" />
+      <include name="asm4-util-5.0.3.jar" />
+      <include name="asm4-tree-5.0.3.jar" />
+      <include name="asm4-commons-5.0.3.jar" />
+      <include name="asm4-analysis-5.0.3.jar" />
+      <include name="oro-2.0.8.jar" />
+      <include name="logback-core-1.1.2.jar" />
+      <include name="logback-classic-1.1.2.jar" />
+    </fileset>
+  </path>
+
+  <path id="cobertura.test.classpath">
+    <path location="${instrument}" />
+    <path refid="test.classpath" />
+    <path refid="cobertura.classpath" />
+  </path>
+
   <target name="init">
-    <copy file="${contextxmltemplate}" tofile="${contextxml}"/>
-    <copy file="${webxmltemplate}" tofile="${webxml}"/>
     <mkdir dir="${classes}"/>
+    <mkdir dir="${testclasses}"/>
+    <mkdir dir="${testresult}"/>
     <mkdir dir="${docs}"/>
     <mkdir dir="${dist}"/>
-    <mkdir dir="${generated}"/>
   </target>
 
   <target name="clean" >
-    <delete includeEmptyDirs="true">
-      <fileset dir="${classes}" defaultexcludes="false" includes="**" />
-      <fileset dir="${dist}" defaultexcludes="false" includes="**" />
+    <delete includeEmptyDirs="true" quiet="true" >
+      <fileset dir="${generated}" defaultexcludes="false" includes="**" />
     </delete>
+    <delete file="${cobertura.ser.file}" quiet="true"/>
   </target>
 
   <target name="compile"
@@ -113,6 +134,20 @@
     </javac>
   </target>
 
+  <target name="compile-tests" depends="compile">
+    <javac destdir="${testclasses}"
+            srcdir="${testsources}"
+            source="${source-and-target-java-version}"
+            target="${source-and-target-java-version}"
+            debug="true" debuglevel="lines,source"
+            deprecation="true"
+            optimize="false"
+            failonerror="true"
+            includeantruntime="false">
+      <classpath refid="test.classpath"/>
+    </javac>
+  </target>
+
   <target name="docs" depends="init">
     <javadoc destdir="${docs}"
              footer="&amp;copy; 2016 The Tor Project"
@@ -124,23 +159,12 @@
     </javadoc>
   </target>
 
-  <target name="test" depends="compile">
-    <javac destdir="${classes}"
-           srcdir="${tests}"
-           source="${source-and-target-java-version}"
-           target="${source-and-target-java-version}"
-           debug="true"
-           deprecation="true"
-           optimize="false"
-           failonerror="true"
-           includeantruntime="false">
-      <classpath refid="testclasspath" />
-    </javac>
-    <junit fork="true" haltonfailure="true" printsummary="off">
-      <classpath refid="testclasspath" />
+  <target name="test" depends="compile,compile-tests">
+    <junit fork="true" haltonfailure="true" printsummary="on">
+      <classpath refid="test.classpath" />
       <formatter type="plain" usefile="false"/>
       <batchtest>
-        <fileset dir="${classes}"
+        <fileset dir="${testclasses}"
                  includes="**/*Test.class"/>
       </batchtest>
     </junit>
@@ -165,8 +189,8 @@
   <target name="war"
           depends="compile">
     <war destfile="${warfile}"
-         webxml="${webxmlfile}">
-      <fileset dir="web"/>
+         webxml="${resources}/web.xml">
+      <fileset dir="${resources}/web"/>
       <restrict>
         <not>
           <name name="META-INF/*" />
@@ -183,14 +207,14 @@
       <fileset dir="${classes}"
                includes="**/*"
                excludes="**/Test*.class"/>
-      <fileset dir="${config}" includes="jetty.xml" />
-      <zipfileset dir="${config}"
+      <fileset dir="${resources}" includes="jetty.xml" />
+      <zipfileset dir="${resources}"
                   prefix=""
                   includes="logback.xml"/>
-      <zipfileset dir="${config}"
+      <zipfileset dir="${resources}"
                   prefix="WEB-INF/classes"
                   includes="logback.xml"/>
-      <metainf dir="${config}"
+      <metainf dir="${resources}"
                includes="context.xml"/>
       <manifest>
         <attribute name="Created-By" value="The Tor Project" />
@@ -222,7 +246,7 @@
       </restrict>
       <fileset dir="${classes}"
                excludes="org/torproject/onionoo/server/" />
-      <fileset dir="${config}" includes="logback.xml" />
+      <fileset dir="${resources}" includes="logback.xml" />
       <exclude name="**/Test*.class"/>
       <manifest>
         <attribute name="Created-By" value="The Tor Project" />
@@ -238,6 +262,40 @@
   </target>
 
   <target name="dist" depends="test, war, jar"/>
+
+  <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+  <target name="coverage" depends="compile,compile-tests">
+    <copy todir="${instrument}" >
+      <fileset dir="${classes}" >
+       <include name="**/*"/>
+      </fileset>
+    </copy>
+    <cobertura-instrument ignoreTrivial="true">
+      <fileset dir="${instrument}">
+        <include name="**/**/*.class" />
+      </fileset>
+    </cobertura-instrument>
+    <junit fork="true" haltonfailure="false" printsummary="on">
+      <sysproperty key="net.sourceforge.cobertura.datafile"
+                   file="${cobertura.ser.file}" />
+      <classpath refid="cobertura.test.classpath" />
+      <formatter type="xml" />
+      <batchtest toDir="${testresult}" >
+        <fileset dir="${testclasses}" includes="**/*Test.class" />
+      </batchtest>
+    </junit>
+    <cobertura-report format="html" destdir="${coverageresult}" >
+      <fileset dir="${javasources}">
+        <include name="**/*.java" />
+      </fileset>
+    </cobertura-report>
+    <cobertura-check branchrate="0" linerate="0" totallinerate="34" totalbranchrate="30" >
+      <regex pattern="org.torproject.onionoo.server" branchrate="67" linerate="77"/>
+      <regex pattern="org.torproject.onionoo.docs" branchrate="19" linerate="29"/>
+      <regex pattern="org.torproject.onionoo.updater" branchrate="17" linerate="18"/>
+      <regex pattern="org.torproject.onionoo.writer" branchrate="22" linerate="20"/>
+    </cobertura-check>
+  </target>
 
 </project>
 
