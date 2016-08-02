@@ -184,6 +184,17 @@
       <formatter type="plain"
                  toFile="${generated}/checkstyle_report.txt"/>
     </checkstyle>
+    <exec executable="cat" outputproperty="checkstyle.result">
+      <arg value="${generated}/checkstyle_report.txt" />
+    </exec>
+    <fail message="Checkstyle complaints: ${checkstyle.result}" >
+      <condition>
+        <not>
+          <length string="${checkstyle.result}"
+                  length="29" />
+        </not>
+      </condition>
+    </fail>
   </target>
 
   <target name="war"
