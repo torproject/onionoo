@@ -59,7 +59,7 @@ public class SummaryDocument extends Document {
   public String getHashedFingerprint() {
     if (this.hashedFingerprint == null && this.f != null) {
       try {
-        this.hashedFingerprint = DigestUtils.shaHex(Hex.decodeHex(
+        this.hashedFingerprint = DigestUtils.sha1Hex(Hex.decodeHex(
             this.f.toCharArray())).toUpperCase();
       } catch (DecoderException e) {
         /* Format tested in setFingerprint(). */
