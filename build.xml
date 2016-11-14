@@ -2,8 +2,9 @@
 
   <property name="onionoo.protocol.version" value="3.1"/>
   <property name="release.version"
-            value="${onionoo.protocol.version}.0"/>
-  <property name="descriptorversion" value="1.4.0"/>
+            value="${onionoo.protocol.version}-1.0.0-dev"/>
+  <property name="descriptorversion" value="1.5.0"/>
+  <property name="jetty.version" value="8.1.16.v20140903" />
   <property name="javasources" value="src/main/java"/>
   <property name="testsources" value="src/test/java"/>
   <property name="generated" value="generated"/>
@@ -37,16 +38,16 @@
 
   <patternset id="web" >
       <include name="servlet-api-3.0.jar"/>
-      <include name="jetty8-server-8.1.16.v20140903.jar"/>
-      <include name="jetty8-servlets-8.1.16.v20140903.jar"/>
-      <include name="jetty8-servlet-8.1.16.v20140903.jar"/>
-      <include name="jetty8-util-8.1.16.v20140903.jar"/>
-      <include name="jetty8-http-8.1.16.v20140903.jar"/>
-      <include name="jetty8-io-8.1.16.v20140903.jar"/>
-      <include name="jetty8-xml-8.1.16.v20140903.jar"/>
-      <include name="jetty8-webapp-8.1.16.v20140903.jar"/>
-      <include name="jetty8-continuation-8.1.16.v20140903.jar"/>
-      <include name="jetty8-security-8.1.16.v20140903.jar"/>
+      <include name="jetty8-server-${jetty.version}.jar"/>
+      <include name="jetty8-servlets-${jetty.version}.jar"/>
+      <include name="jetty8-servlet-${jetty.version}.jar"/>
+      <include name="jetty8-util-${jetty.version}.jar"/>
+      <include name="jetty8-http-${jetty.version}.jar"/>
+      <include name="jetty8-io-${jetty.version}.jar"/>
+      <include name="jetty8-xml-${jetty.version}.jar"/>
+      <include name="jetty8-webapp-${jetty.version}.jar"/>
+      <include name="jetty8-continuation-${jetty.version}.jar"/>
+      <include name="jetty8-security-${jetty.version}.jar"/>
   </patternset>
 
   <patternset id="test" >
