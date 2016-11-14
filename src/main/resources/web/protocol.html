@@ -2287,7 +2287,10 @@ rather than to find an Onionoo client that provides the desired
 information.
 </p>
 
-<pre>https://onionoo.torproject.org/summary?limit=4</pre>
+<p>
+<code>/summary?limit=4</code>
+(<a href="/summary?limit=4">view result</a>)
+</p>
 
 <p>
 This first query returns the first four summary documents that Onionoo can
@@ -2296,21 +2299,30 @@ The <code>limit</code> parameter should always be used while developing
 new queries to avoid downloading huge responses.
 </p>
 
-<pre>https://onionoo.torproject.org/summary?limit=4&search=moria</pre>
+<p>
+<code>/summary?limit=4&search=moria</code>
+(<a href="/summary?limit=4&search=moria">view result</a>)
+</p>
 
 <p>
 The second query restricts results to relays and bridges containing the
 string "moria" in one of a few searched fields.
 </p>
 
-<pre>https://onionoo.torproject.org/details?limit=4&search=moria</pre>
+<p>
+<code>/details?limit=4&search=moria</code>
+(<a href="/details?limit=4&search=moria">view result</a>)
+</p>
 
 <p>
 The third query switches from the short summary documents to the longer
 details documents containing, well, more details.
 </p>
 
-<pre>https://onionoo.torproject.org/details?limit=4&search=moria&fields=nickname</pre>
+<p>
+<code>/details?limit=4&search=moria&fields=nickname</code>
+(<a href="/details?limit=4&search=moria&fields=nickname">view result</a>)
+</p>
 
 <p>
 The fourth query adds the <code>fields</code> parameter which removes all
@@ -2318,7 +2330,10 @@ fields except the specified ones from the result.
 This parameter is only implemented for details documents.
 </p>
 
-<pre>https://onionoo.torproject.org/details?limit=4&search=moria&fields=nickname&order=-consensus_weight</pre>
+<p>
+<code>/details?limit=4&search=moria&fields=nickname&order=-consensus_weight</code>
+(<a href="/details?limit=4&search=moria&fields=nickname&order=-consensus_weight">view result</a>)
+</p>
 
 <p>
 The fifth query sorts results by relay consensus weight from largest to
