@@ -29,16 +29,19 @@ public class WeightsStatus extends Document {
     this.isDirty = false;
   }
 
-  private SortedMap<long[], double[]> history =
-      new TreeMap<long[], double[]>(
-      new Comparator<long[]>() {
-        public int compare(long[] first, long[] second) {
-          return first[0] < second[0] ? -1
-              : first[0] > second[0] ? 1
-              : 0;
+  private Comparator<long[]> histComparator = new Comparator<long[]>() {
+      public int compare(long[] first, long[] second) {
+        int relation = Long.compare(first[0], second[0]);
+        if (0 != relation) {
+          return relation;
+        } else {
+          return Long.compare(first[1], second[1]);
         }
       }
-  );
+    };
+
+  private SortedMap<long[], double[]> history =
+      new TreeMap<long[], double[]>(histComparator);
 
   public void setHistory(SortedMap<long[], double[]> history) {
     this.history = history;
@@ -53,7 +56,7 @@ public class WeightsStatus extends Document {
     try (Scanner s = new Scanner(documentString)) {
       while (s.hasNextLine()) {
         String line = s.nextLine();
-        String[] parts = line.split(" ");
+        String[] parts = line.split(" ", 11);
         if (parts.length == 2) {
           /* Skip lines containing descriptor digest and advertised
            * bandwidth. */
@@ -69,28 +72,41 @@ public class WeightsStatus extends Document {
            * after. */
           continue;
         }
-        long validAfterMillis = DateTimeHelper.parse(parts[0] + " "
-            + parts[1]);
-        long freshUntilMillis = DateTimeHelper.parse(parts[2] + " "
-            + parts[3]);
+        long validAfterMillis = DateTimeHelper.parse(parts[0] + " " + parts[1]);
+        long freshUntilMillis = DateTimeHelper.parse(parts[2] + " " + parts[3]);
         if (validAfterMillis < 0L || freshUntilMillis < 0L) {
           log.error("Could not parse timestamp while reading "
               + "weights status file.  Skipping.");
           break;
         }
-        long[] interval = new long[] { validAfterMillis,
-            freshUntilMillis };
-        double[] weights = new double[] { -1.0,
-            Double.parseDouble(parts[5]),
-            Double.parseDouble(parts[6]),
-            Double.parseDouble(parts[7]),
-            Double.parseDouble(parts[8]), -1.0, -1.0 };
-        if (parts.length == 11) {
-          weights[6] = Double.parseDouble(parts[10]);
+        if (validAfterMillis > freshUntilMillis) {
+          log.error("Illegal dates in '" + line + "' of weights "
+              + "status file.  Skipping.");
+          break;
+        }
+        long[] interval = new long[] { validAfterMillis, freshUntilMillis };
+        double[] weights;
+        try {
+          weights = new double[] { -1.0,
+              parseWeightDouble(parts[5]),
+              parseWeightDouble(parts[6]),
+              parseWeightDouble(parts[7]),
+              parseWeightDouble(parts[8]), -1.0, -1.0 };
+          if (parts.length == 11) {
+            weights[6] = parseWeightDouble(parts[10]);
+          }
+        } catch (NumberFormatException e) {
+          log.error("Could not parse weights values in line '" + line
+              + "' while reading weights status file.  Skipping.");
+          break;
         }
         this.history.put(interval, weights);
       }
     }
+  }
+
+  private double parseWeightDouble(String in) throws NumberFormatException {
+    return in.isEmpty() ? Double.NaN : Double.parseDouble(in);
   }
 
   /** Adds all given weights history objects that don't overlap with
@@ -113,7 +129,8 @@ public class WeightsStatus extends Document {
    * intervals, depending on how far back in the past they lie. */
   public void compressHistory() {
     SortedMap<long[], double[]> uncompressedHistory =
-        new TreeMap<long[], double[]>(this.history);
+        new TreeMap<>(histComparator);
+    uncompressedHistory.putAll(this.history);
     history.clear();
     long lastStartMillis = 0L;
     long lastEndMillis = 0L;
@@ -144,7 +161,7 @@ public class WeightsStatus extends Document {
           DateTimeHelper.ISO_YEARMONTH_FORMAT);
       int missingValues = 0;
       for (int i = 0; i < weights.length; i++) {
-        if (weights[i] < -0.5) {
+        if (Double.valueOf(weights[i]).isNaN()) {
           missingValues += 1 << i;
         }
       }
@@ -193,7 +210,7 @@ public class WeightsStatus extends Document {
           + DateTimeHelper.format(fresh[1]));
       for (int i = 0; i < weights.length; i++) {
         sb.append(" ");
-        if (i != 0 && i != 5) {
+        if (i != 0 && i != 5 && !Double.valueOf(weights[i]).isNaN()) {
           sb.append(String.format("%.12f", weights[i]));
         }
       }
