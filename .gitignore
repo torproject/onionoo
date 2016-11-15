@@ -1,11 +1,10 @@
+/generated/
+/lib/
+/geoip/
+/in/
+/out/
+/status/
+*~
 .classpath
 .project
-classes/
-etc/context.xml
-etc/web.xml
-geoip/
-in/
-dist/
-out/
-status/
 
