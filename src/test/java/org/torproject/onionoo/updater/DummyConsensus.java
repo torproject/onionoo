@@ -1,5 +1,6 @@
-/* Copyright 2014 The Tor Project
+/* Copyright 2014--2016 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
 
 import org.torproject.descriptor.DirSourceEntry;
@@ -40,9 +41,11 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
   }
 
   private long validAfterMillis;
+
   public void setValidAfterMillis(long validAfterMillis) {
     this.validAfterMillis = validAfterMillis;
   }
+
   public long getValidAfterMillis() {
     return this.validAfterMillis;
   }
@@ -72,9 +75,11 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
   }
 
   private SortedSet<String> knownFlags = new TreeSet<String>();
+
   public void addKnownFlag(String flag) {
     this.knownFlags.add(flag);
   }
+
   public SortedSet<String> getKnownFlags() {
     return this.knownFlags;
   }
@@ -88,10 +93,12 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
   }
 
   private SortedMap<String, NetworkStatusEntry> statusEntries =
-      new TreeMap<String, NetworkStatusEntry>();
+      new TreeMap<>();
+
   public void addStatusEntry(NetworkStatusEntry statusEntry) {
     this.statusEntries.put(statusEntry.getFingerprint(), statusEntry);
   }
+
   public SortedMap<String, NetworkStatusEntry> getStatusEntries() {
     return this.statusEntries;
   }

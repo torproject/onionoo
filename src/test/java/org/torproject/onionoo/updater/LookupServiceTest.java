@@ -1,4 +1,4 @@
-/* Copyright 2013 The Tor Project
+/* Copyright 2013--2016 The Tor Project
  * See LICENSE for licensing information */
 
 package org.torproject.onionoo.updater;
@@ -26,8 +26,9 @@ import java.util.TreeSet;
 
 public class LookupServiceTest {
 
-  private List<String> geoLite2CityBlocksIPv4Lines,
-      geoLite2CityLocationsEnLines, geoipASNum2Lines;
+  private List<String> geoLite2CityBlocksIPv4Lines;
+  private List<String> geoLite2CityLocationsEnLines;
+  private List<String> geoipAsNum2Lines;
 
   private LookupService lookupService;
 
@@ -58,12 +59,12 @@ public class LookupServiceTest {
     this.geoLite2CityLocationsEnLines.add("5375480,en,NA,"
         + "\"North America\",US,\"United States\",CA,California,,,"
         + "\"Mountain View\",807,America/Los_Angeles");
-    this.geoipASNum2Lines = new ArrayList<String>();
-    this.geoipASNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
+    this.geoipAsNum2Lines = new ArrayList<String>();
+    this.geoipAsNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
         + "Communications\"");
-    this.geoipASNum2Lines.add("134744064,134744319,\"AS15169 Google "
+    this.geoipAsNum2Lines.add("134744064,134744319,\"AS15169 Google "
         + "Inc.\"");
-    this.geoipASNum2Lines.add("134744320,134750463,\"AS3356 Level 3 "
+    this.geoipAsNum2Lines.add("134744320,134750463,\"AS3356 Level 3 "
         + "Communications\"");
   }
 
@@ -73,7 +74,7 @@ public class LookupServiceTest {
           "GeoLite2-City-Blocks-IPv4.csv", "UTF-8");
       this.writeCsvFile(this.geoLite2CityLocationsEnLines,
           "GeoLite2-City-Locations-en.csv", "UTF-8");
-      this.writeCsvFile(this.geoipASNum2Lines, "GeoIPASNum2.csv",
+      this.writeCsvFile(this.geoipAsNum2Lines, "GeoIPASNum2.csv",
           "ISO-8859-1");
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -102,10 +103,10 @@ public class LookupServiceTest {
 
   private void assertLookupResult(List<String> geoLite2CityBlocksLines,
       List<String> geoLite2CityLocationsLines,
-      List<String> geoipASNum2Lines, String addressString,
+      List<String> geoipAsNum2Lines, String addressString,
       String countryCode, String countryName, String regionName,
-      String cityName, Float latitude, Float longitude, String aSNumber,
-      String aSName) {
+      String cityName, Float latitude, Float longitude, String asNumber,
+      String asName) {
     this.addressStrings.add(addressString);
     this.populateLines();
     if (geoLite2CityBlocksLines != null) {
@@ -114,70 +115,70 @@ public class LookupServiceTest {
     if (geoLite2CityLocationsLines != null) {
       this.geoLite2CityLocationsEnLines = geoLite2CityLocationsLines;
     }
-    if (geoipASNum2Lines != null) {
-      this.geoipASNum2Lines = geoipASNum2Lines;
+    if (geoipAsNum2Lines != null) {
+      this.geoipAsNum2Lines = geoipAsNum2Lines;
     }
     this.writeCsvFiles();
     /* Disable log messages printed to System.err. */
     System.setErr(new PrintStream(new OutputStream() {
-      public void write(int b) {
+      public void write(int someInt) {
       }
     }));
     this.performLookups();
     if (countryCode == null) {
-      assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).getCountryCode() == null);
+      assertTrue(!this.lookupResults.containsKey(addressString)
+          || this.lookupResults.get(addressString).getCountryCode() == null);
     } else {
       assertEquals(countryCode,
           this.lookupResults.get(addressString).getCountryCode());
     }
     if (countryName == null) {
-      assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).getCountryName() == null);
+      assertTrue(!this.lookupResults.containsKey(addressString)
+          || this.lookupResults.get(addressString).getCountryName() == null);
     } else {
       assertEquals(countryName,
           this.lookupResults.get(addressString).getCountryName());
     }
     if (regionName == null) {
-      assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).getRegionName() == null);
+      assertTrue(!this.lookupResults.containsKey(addressString)
+          || this.lookupResults.get(addressString).getRegionName() == null);
     } else {
       assertEquals(regionName,
           this.lookupResults.get(addressString).getRegionName());
     }
     if (cityName == null) {
-      assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).getCityName() == null);
+      assertTrue(!this.lookupResults.containsKey(addressString)
+          || this.lookupResults.get(addressString).getCityName() == null);
     } else {
       assertEquals(cityName,
           this.lookupResults.get(addressString).getCityName());
     }
     if (latitude == null) {
-      assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).getLatitude() == null);
+      assertTrue(!this.lookupResults.containsKey(addressString)
+          || this.lookupResults.get(addressString).getLatitude() == null);
     } else {
       assertEquals(latitude,
           this.lookupResults.get(addressString).getLatitude(), 0.01);
     }
     if (longitude == null) {
-      assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).getLongitude() == null);
+      assertTrue(!this.lookupResults.containsKey(addressString)
+          || this.lookupResults.get(addressString).getLongitude() == null);
     } else {
       assertEquals(longitude,
           this.lookupResults.get(addressString).getLongitude(), 0.01);
     }
-    if (aSNumber == null) {
-      assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).getAsNumber() == null);
+    if (asNumber == null) {
+      assertTrue(!this.lookupResults.containsKey(addressString)
+          || this.lookupResults.get(addressString).getAsNumber() == null);
     } else {
-      assertEquals(aSNumber,
+      assertEquals(asNumber,
           this.lookupResults.get(addressString).getAsNumber());
     }
-    if (aSName == null) {
-      assertTrue(!this.lookupResults.containsKey(addressString) ||
-          this.lookupResults.get(addressString).getAsName() == null);
+    if (asName == null) {
+      assertTrue(!this.lookupResults.containsKey(addressString)
+          || this.lookupResults.get(addressString).getAsName() == null);
     } else {
-      assertEquals(aSName,
+      assertEquals(asName,
           this.lookupResults.get(addressString).getAsName());
     }
   }
@@ -244,7 +245,7 @@ public class LookupServiceTest {
   }
 
   @Test()
-  public void testLookupNoGeoipASNum2Lines() {
+  public void testLookupNoGeoipAsNum2Lines() {
     this.assertLookupResult(null, null, new ArrayList<String>(),
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
@@ -376,55 +377,56 @@ public class LookupServiceTest {
   }
 
   @Test()
-  public void testLookupGeoipASNum2EndBeforeStart() {
-    List<String> geoipASNum2Lines = new ArrayList<String>();
-    geoipASNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
+  public void testLookupGeoipAsNum2EndBeforeStart() {
+    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    geoipAsNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
         + "Communications\"");
-    geoipASNum2Lines.add("134744319,134744064,\"AS15169 Google Inc.\"");
-    geoipASNum2Lines.add("134744320,134750463,\"AS3356 Level 3 "
+    geoipAsNum2Lines.add("134744319,134744064,\"AS15169 Google Inc.\"");
+    geoipAsNum2Lines.add("134744320,134750463,\"AS3356 Level 3 "
         + "Communications\"");
-    this.assertLookupResult(null, null, geoipASNum2Lines, "8.8.8.8", "us",
+    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", "us",
         "United States", "California", "Mountain View", 37.3860f,
         -122.0838f, null, null);
   }
 
   @Test()
-  public void testLookupGeoipASNum2StartNotANumber() {
-    List<String> geoipASNum2Lines = new ArrayList<String>();
-    geoipASNum2Lines.add("one,134744319,\"AS15169 Google Inc.\"");
-    this.assertLookupResult(null, null, geoipASNum2Lines, "8.8.8.8", null,
+  public void testLookupGeoipAsNum2StartNotANumber() {
+    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    geoipAsNum2Lines.add("one,134744319,\"AS15169 Google Inc.\"");
+    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
         null, null, null, null, null, null, null);
   }
 
   @Test()
-  public void testLookupGeoipASNum2StartTooLarge() {
-    List<String> geoipASNum2Lines = new ArrayList<String>();
-    geoipASNum2Lines.add("1" + String.valueOf(Long.MAX_VALUE)
+  public void testLookupGeoipAsNum2StartTooLarge() {
+    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    geoipAsNum2Lines.add("1" + String.valueOf(Long.MAX_VALUE)
         + ",134744319,\"AS15169 Google Inc.\"");
-    this.assertLookupResult(null, null, geoipASNum2Lines, "8.8.8.8", null,
+    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
         null, null, null, null, null, null, null);
   }
 
   @Test()
-  public void testLookupGeoipASNum2TooFewFields() {
-    List<String> geoipASNum2Lines = new ArrayList<String>();
-    geoipASNum2Lines.add("134744064,134744319");
-    this.assertLookupResult(null, null, geoipASNum2Lines, "8.8.8.8", null,
+  public void testLookupGeoipAsNum2TooFewFields() {
+    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    geoipAsNum2Lines.add("134744064,134744319");
+    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
         null, null, null, null, null, null, null);
   }
 
   @Test()
-  public void testLookupGeoipASNum2NoASName() {
-    List<String> geoipASNum2Lines = new ArrayList<String>();
-    geoipASNum2Lines.add("134743296,134744063,AS3356");
-    geoipASNum2Lines.add("134744064,134744319,AS15169");
-    geoipASNum2Lines.add("134744320,134750463,AS3356");
-    this.assertLookupResult(null, null, geoipASNum2Lines, "8.8.8.8", "us",
+  public void testLookupGeoipAsNum2NoAsName() {
+    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    geoipAsNum2Lines.add("134743296,134744063,AS3356");
+    geoipAsNum2Lines.add("134744064,134744319,AS15169");
+    geoipAsNum2Lines.add("134744320,134750463,AS3356");
+    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", "us",
         "United States", "California", "Mountain View", 37.3860f,
         -122.0838f, "AS15169", "");
   }
 
   @Test()
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationTurkey() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
@@ -472,6 +474,7 @@ public class LookupServiceTest {
   }
 
   @Test()
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationLatvia() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
@@ -494,6 +497,7 @@ public class LookupServiceTest {
   }
 
   @Test()
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationAzerbaijan() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
@@ -517,6 +521,7 @@ public class LookupServiceTest {
   }
 
   @Test()
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationVietnam() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
@@ -540,6 +545,7 @@ public class LookupServiceTest {
   }
 
   @Test()
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationJapan() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
@@ -563,6 +569,7 @@ public class LookupServiceTest {
   }
 
   @Test()
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationDenmark() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
@@ -587,6 +594,7 @@ public class LookupServiceTest {
   }
 
   @Test()
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationGermany() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
@@ -611,6 +619,7 @@ public class LookupServiceTest {
   }
 
   @Test()
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationPoland() {
     List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
@@ -634,20 +643,21 @@ public class LookupServiceTest {
   }
 
   @Test()
-  public void testLookupLocationASNameNonAscii() {
-    List<String> geoipASNum2Lines = new ArrayList<String>();
-    geoipASNum2Lines.add("3207917568,3207919615,\"AS52693 Conectel "
+  @SuppressWarnings("AvoidEscapedUnicodeCharacters")
+  public void testLookupLocationAsNameNonAscii() {
+    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    geoipAsNum2Lines.add("3207917568,3207919615,\"AS52693 Conectel "
         + "Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME\"");
-    geoipASNum2Lines.add("3211196416,3211198463,\"AS262934 "
+    geoipAsNum2Lines.add("3211196416,3211198463,\"AS262934 "
         + "IP\u00B7RED\"");
-    geoipASNum2Lines.add("3227819264,3227819519,\"AS263226 "
+    geoipAsNum2Lines.add("3227819264,3227819519,\"AS263226 "
         + "COMPA\u00D1\u00CDA FINANCIERA ARGENTINA S.A.\"");
-    this.assertLookupResult(null, null, geoipASNum2Lines, "191.52.240.0",
+    this.assertLookupResult(null, null, geoipAsNum2Lines, "191.52.240.0",
         null, null, null, null, null, null, "AS52693", "Conectel "
         + "Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME");
-    this.assertLookupResult(null, null, geoipASNum2Lines, "191.102.248.0",
+    this.assertLookupResult(null, null, geoipAsNum2Lines, "191.102.248.0",
         null, null, null, null, null, null, "AS262934", "IP\u00B7RED");
-    this.assertLookupResult(null, null, geoipASNum2Lines, "192.100.157.0",
+    this.assertLookupResult(null, null, geoipAsNum2Lines, "192.100.157.0",
         null, null, null, null, null, null, "AS263226",
         "COMPA\u00D1\u00CDA FINANCIERA ARGENTINA S.A.");
   }

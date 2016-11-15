@@ -1,5 +1,6 @@
-/* Copyright 2014 The Tor Project
+/* Copyright 2014--2016 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.server;
 
 import static org.junit.Assert.assertEquals;
@@ -10,39 +11,39 @@ public class PerformanceMetricsTest {
 
   @Test
   public void testCounterZero() {
-    Counter c = new Counter();
-    assertEquals("0", c.toString());
+    Counter count = new Counter();
+    assertEquals("0", count.toString());
   }
 
   @Test
   public void testCounterClear() {
-    Counter c = new Counter();
-    c.increment();
-    c.clear();
-    assertEquals("0", c.toString());
+    Counter count = new Counter();
+    count.increment();
+    count.clear();
+    assertEquals("0", count.toString());
   }
 
   @Test
   public void testCounterOne() {
-    Counter c = new Counter();
-    c.increment();
-    assertEquals("1", c.toString());
+    Counter count = new Counter();
+    count.increment();
+    assertEquals("1", count.toString());
   }
 
   @Test
   public void testCounterTwo() {
-    Counter c = new Counter();
-    c.increment();
-    c.increment();
-    assertEquals("2", c.toString());
+    Counter count = new Counter();
+    count.increment();
+    count.increment();
+    assertEquals("2", count.toString());
   }
 
   @Test
   public void testCounterOverflow() {
-    Counter c = new Counter();
-    c.value = Integer.MAX_VALUE;
-    c.increment();
-    assertEquals(String.valueOf(Integer.MIN_VALUE), c.toString());
+    Counter count = new Counter();
+    count.value = Integer.MAX_VALUE;
+    count.increment();
+    assertEquals(String.valueOf(Integer.MIN_VALUE), count.toString());
   }
 
   @Test
@@ -84,7 +85,7 @@ public class PerformanceMetricsTest {
   }
 
   @Test
-  public void testMostFrequentStringABCD() {
+  public void testMostFrequentStringAbcd() {
     MostFrequentString mfs = new MostFrequentString();
     mfs.addString("A");
     mfs.addString("B");
@@ -184,14 +185,18 @@ public class PerformanceMetricsTest {
   @Test
   public void testIntegerDistributionToThirtyTwo() {
     IntegerDistribution id = new IntegerDistribution();
-    for (int i = 13; i <= 32; i++) id.addLong(i);
+    for (int i = 13; i <= 32; i++) {
+      id.addLong(i);
+    }
     assertEquals(".500<32, .900<32, .990<64, .999<64", id.toString());
   }
 
   @Test
   public void testIntegerDistributionToOneHundredTwentyEight() {
     IntegerDistribution id = new IntegerDistribution();
-    for (int i = 27; i <= 128; i++) id.addLong(i);
+    for (int i = 27; i <= 128; i++) {
+      id.addLong(i);
+    }
     assertEquals(".500<128, .900<128, .990<128, .999<256",
         id.toString());
   }

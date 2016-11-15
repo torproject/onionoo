@@ -1,5 +1,6 @@
-/* Copyright 2014 The Tor Project
+/* Copyright 2014--2016 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
 
 import org.torproject.descriptor.NetworkStatusEntry;
@@ -25,6 +26,7 @@ public class DummyStatusEntry implements NetworkStatusEntry {
   }
 
   private String fingerprint;
+
   public String getFingerprint() {
     return this.fingerprint;
   }
@@ -58,9 +60,11 @@ public class DummyStatusEntry implements NetworkStatusEntry {
   }
 
   private SortedSet<String> flags = new TreeSet<String>();
+
   public void addFlag(String flag) {
     this.flags.add(flag);
   }
+
   public SortedSet<String> getFlags() {
     return this.flags;
   }

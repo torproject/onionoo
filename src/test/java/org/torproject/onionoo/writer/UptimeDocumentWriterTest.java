@@ -1,5 +1,6 @@
-/* Copyright 2014 The Tor Project
+/* Copyright 2014--2016 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.writer;
 
 import static org.junit.Assert.assertEquals;
@@ -75,8 +76,9 @@ public class UptimeDocumentWriterTest {
     this.documentStore.addDocument(status, GABELMOO_FINGERPRINT);
   }
 
-  private static final long ONE_SECOND = 1000L,
-      ONE_HOUR = 60L * 60L * ONE_SECOND, FOUR_HOURS = 4L * ONE_HOUR;
+  private static final long ONE_SECOND = 1000L;
+  private static final long ONE_HOUR = 60L * 60L * ONE_SECOND;
+  private static final long FOUR_HOURS = 4L * ONE_HOUR;
 
   private void assertOneWeekGraph(UptimeDocument document, int graphs,
       String first, String last, int count, List<Integer> values) {

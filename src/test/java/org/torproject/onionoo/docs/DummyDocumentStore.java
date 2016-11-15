@@ -1,3 +1,6 @@
+/* Copyright 2015--2016 The Tor Project
+ * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
 
 import java.util.HashMap;
@@ -10,8 +13,7 @@ import java.util.TreeSet;
 public class DummyDocumentStore extends DocumentStore {
 
   private Map<Class<? extends Document>, SortedMap<String, Document>>
-      storedDocuments = new HashMap<Class<? extends Document>,
-      SortedMap<String, Document>>();
+      storedDocuments = new HashMap<>();
 
   private static final String FINGERPRINT_NULL = "";
 
@@ -32,8 +34,8 @@ public class DummyDocumentStore extends DocumentStore {
 
   public <T extends Document> T getDocument(Class<T> documentType,
       String fingerprint) {
-    return documentType.cast(this.getStoredDocumentsByClass(documentType).
-        get(fingerprint == null ? FINGERPRINT_NULL : fingerprint));
+    return documentType.cast(this.getStoredDocumentsByClass(documentType)
+        .get(fingerprint == null ? FINGERPRINT_NULL : fingerprint));
   }
 
   public void flushDocumentCache() {
@@ -46,15 +48,18 @@ public class DummyDocumentStore extends DocumentStore {
   }
 
   private int performedListOperations = 0;
+
   public int getPerformedListOperations() {
     return this.performedListOperations;
   }
 
+  @SuppressWarnings("JavadocMethod")
   public <T extends Document> SortedSet<String> list(
       Class<T> documentType, long modifiedAfter) {
     return this.list(documentType);
   }
 
+  @SuppressWarnings("JavadocMethod")
   public <T extends Document> SortedSet<String> list(
       Class<T> documentType) {
     this.performedListOperations++;
@@ -65,6 +70,8 @@ public class DummyDocumentStore extends DocumentStore {
   }
 
   private int performedRemoveOperations = 0;
+
+  @SuppressWarnings("JavadocMethod")
   public int getPerformedRemoveOperations() {
     return this.performedRemoveOperations;
   }
@@ -73,6 +80,7 @@ public class DummyDocumentStore extends DocumentStore {
     return this.remove(documentType, null);
   }
 
+  @SuppressWarnings("JavadocMethod")
   public <T extends Document> boolean remove(Class<T> documentType,
       String fingerprint) {
     this.performedRemoveOperations++;
@@ -81,6 +89,7 @@ public class DummyDocumentStore extends DocumentStore {
   }
 
   private int performedRetrieveOperations = 0;
+
   public int getPerformedRetrieveOperations() {
     return this.performedRetrieveOperations;
   }
@@ -90,14 +99,16 @@ public class DummyDocumentStore extends DocumentStore {
     return this.retrieve(documentType, parse, null);
   }
 
+  @SuppressWarnings("JavadocMethod")
   public <T extends Document> T retrieve(Class<T> documentType,
       boolean parse, String fingerprint) {
     this.performedRetrieveOperations++;
-    return documentType.cast(this.getStoredDocumentsByClass(documentType).
-        get(fingerprint == null ? FINGERPRINT_NULL : fingerprint));
+    return documentType.cast(this.getStoredDocumentsByClass(documentType)
+        .get(fingerprint == null ? FINGERPRINT_NULL : fingerprint));
   }
 
   private int performedStoreOperations = 0;
+
   public int getPerformedStoreOperations() {
     return this.performedStoreOperations;
   }
@@ -106,6 +117,7 @@ public class DummyDocumentStore extends DocumentStore {
     return this.store(document, null);
   }
 
+  @SuppressWarnings("JavadocMethod")
   public <T extends Document> boolean store(T document,
       String fingerprint) {
     this.performedStoreOperations++;

@@ -1,5 +1,6 @@
-/* Copyright 2014 The Tor Project
+/* Copyright 2014--2016 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
 
 import static org.junit.Assert.assertEquals;

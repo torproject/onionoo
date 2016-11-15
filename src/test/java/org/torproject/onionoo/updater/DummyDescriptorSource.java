@@ -1,3 +1,6 @@
+/* Copyright 2014--2016 The Tor Project
+ * See LICENSE for licensing information */
+
 package org.torproject.onionoo.updater;
 
 import org.torproject.descriptor.Descriptor;
@@ -13,6 +16,7 @@ public class DummyDescriptorSource extends DescriptorSource {
   private Map<DescriptorType, Set<Descriptor>> descriptors =
       new HashMap<DescriptorType, Set<Descriptor>>();
 
+  /** Fills the given collection with descriptors of the requested type. */
   public void provideDescriptors(DescriptorType descriptorType,
       Collection<Descriptor> descriptors) {
     for (Descriptor descriptor : descriptors) {
@@ -20,6 +24,7 @@ public class DummyDescriptorSource extends DescriptorSource {
     }
   }
 
+  /** Add a descriptor of the given type. */
   public void addDescriptor(DescriptorType descriptorType,
       Descriptor descriptor) {
     this.getDescriptorsByType(descriptorType).add(descriptor);
@@ -34,9 +39,9 @@ public class DummyDescriptorSource extends DescriptorSource {
   }
 
   private Map<DescriptorType, Set<DescriptorListener>>
-      descriptorListeners = new HashMap<DescriptorType,
-      Set<DescriptorListener>>();
+      descriptorListeners = new HashMap<>();
 
+  /** Register a listener to receive descriptors of the demanded type. */
   public void registerDescriptorListener(DescriptorListener listener,
       DescriptorType descriptorType) {
     if (!this.descriptorListeners.containsKey(descriptorType)) {
@@ -46,27 +51,28 @@ public class DummyDescriptorSource extends DescriptorSource {
     this.descriptorListeners.get(descriptorType).add(listener);
   }
 
+  @Override
   public void readDescriptors() {
     Set<DescriptorType> descriptorTypes = new HashSet<DescriptorType>();
     descriptorTypes.addAll(this.descriptorListeners.keySet());
     for (DescriptorType descriptorType : descriptorTypes) {
       boolean relay;
       switch (descriptorType) {
-      case RELAY_CONSENSUSES:
-      case RELAY_SERVER_DESCRIPTORS:
-      case RELAY_EXTRA_INFOS:
-      case EXIT_LISTS:
-        relay = true;
-        break;
-      case BRIDGE_STATUSES:
-      case BRIDGE_SERVER_DESCRIPTORS:
-      case BRIDGE_EXTRA_INFOS:
-      default:
-        relay = false;
-        break;
+        case RELAY_CONSENSUSES:
+        case RELAY_SERVER_DESCRIPTORS:
+        case RELAY_EXTRA_INFOS:
+        case EXIT_LISTS:
+          relay = true;
+          break;
+        case BRIDGE_STATUSES:
+        case BRIDGE_SERVER_DESCRIPTORS:
+        case BRIDGE_EXTRA_INFOS:
+        default:
+          relay = false;
+          break;
       }
-      if (this.descriptors.containsKey(descriptorType) &&
-          this.descriptorListeners.containsKey(descriptorType)) {
+      if (this.descriptors.containsKey(descriptorType)
+          && this.descriptorListeners.containsKey(descriptorType)) {
         Set<DescriptorListener> listeners =
             this.descriptorListeners.get(descriptorType);
         for (Descriptor descriptor :

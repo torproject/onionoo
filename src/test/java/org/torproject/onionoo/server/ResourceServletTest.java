@@ -1,4 +1,4 @@
-/* Copyright 2013 The Tor Project
+/* Copyright 2013--2016 The Tor Project
  * See LICENSE for licensing information */
 
 package org.torproject.onionoo.server;
@@ -37,35 +37,42 @@ import java.util.TreeSet;
  * which tests servlet specifics. */
 public class ResourceServletTest {
 
+  private SortedMap<String, org.torproject.onionoo.docs.SummaryDocument> relays;
   private SortedMap<String, org.torproject.onionoo.docs.SummaryDocument>
-      relays, bridges;
+      bridges;
 
   private long currentTimeMillis = DateTimeHelper.parse(
       "2013-04-24 12:22:22");
 
   private class TestingHttpServletRequestWrapper
       extends HttpServletRequestWrapper {
-    private String requestURI;
+    private String requestUri;
     private String queryString;
     private Map<String, String[]> parameterMap;
-    private TestingHttpServletRequestWrapper(String requestURI,
+
+    private TestingHttpServletRequestWrapper(String requestUri,
         String queryString, Map<String, String[]> parameterMap) {
       super(null);
-      this.requestURI = requestURI;
+      this.requestUri = requestUri;
       this.queryString = queryString;
       this.parameterMap = parameterMap == null
           ? new HashMap<String, String[]>() : parameterMap;
     }
+
+    @Override
     protected String getRequestURI() {
-      return this.requestURI;
+      return this.requestUri;
     }
+
     @SuppressWarnings("rawtypes")
     protected Map getParameterMap() {
       return this.parameterMap;
     }
+
     protected String[] getParameterValues(String parameterKey) {
       return this.parameterMap.get(parameterKey);
     }
+
     protected String getQueryString() {
       return this.queryString;
     }
@@ -73,22 +80,31 @@ public class ResourceServletTest {
 
   private class TestingHttpServletResponseWrapper extends
       HttpServletResponseWrapper {
+
     private TestingHttpServletResponseWrapper() {
       super(null);
     }
+
     private int errorStatusCode;
+
     protected void sendError(int errorStatusCode) throws IOException {
       this.errorStatusCode = errorStatusCode;
     }
-    private Map<String, String> headers = new HashMap<String, String>();
+
+    private Map<String, String> headers = new HashMap<>();
+
     protected void setHeader(String headerName, String headerValue) {
       this.headers.put(headerName, headerValue);
     }
+
     protected void setContentType(String contentType) {
     }
+
     protected void setCharacterEncoding(String characterEncoding) {
     }
+
     private StringWriter stringWriter;
+
     protected PrintWriter getWriter() throws IOException {
       if (this.stringWriter == null) {
         this.stringWriter = new StringWriter();
@@ -97,6 +113,7 @@ public class ResourceServletTest {
         throw new IOException("Can only request writer once");
       }
     }
+
     private String getWrittenContent() {
       return this.stringWriter == null ? null
           : this.stringWriter.toString();
@@ -111,20 +128,21 @@ public class ResourceServletTest {
 
   private SummaryDocument summaryDocument;
 
+  @SuppressWarnings("JavadocMethod")
   @Before
   public void createSampleRelaysAndBridges() {
     org.torproject.onionoo.docs.SummaryDocument relayTorkaZ =
         new org.torproject.onionoo.docs.SummaryDocument(true, "TorkaZ",
         "000C5F55BD4814B917CC474BD537F1A3B33CCE2A", Arrays.asList(
         new String[] { "62.216.201.221", "62.216.201.222",
-        "62.216.201.223" }), DateTimeHelper.parse("2013-04-19 05:00:00"),
+            "62.216.201.223" }), DateTimeHelper.parse("2013-04-19 05:00:00"),
         false, new TreeSet<String>(Arrays.asList(new String[] { "Running",
-        "Valid" })), 20L, "de",
+            "Valid" })), 20L, "de",
         DateTimeHelper.parse("2013-04-18 05:00:00"), "AS8767",
         "torkaz <klaus dot zufall at gmx dot de> "
         + "<fb-token:np5_g_83jmf=>", new TreeSet<String>(Arrays.asList(
         new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC",
-        "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B" })),
+            "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B" })),
         new TreeSet<String>(Arrays.asList(
         new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC" })));
     org.torproject.onionoo.docs.SummaryDocument relayFerrari458 =
@@ -133,12 +151,18 @@ public class ResourceServletTest {
         new String[] { "68.38.171.200", "[2001:4f8:3:2e::51]" }),
         DateTimeHelper.parse("2013-04-24 12:00:00"), true,
         new TreeSet<String>(Arrays.asList(new String[] { "Fast", "Named",
-        "Running", "V2Dir", "Valid" })), 1140L, "us",
+            "Running", "V2Dir", "Valid" })), 1140L, "us",
         DateTimeHelper.parse("2013-02-12 16:00:00"), "AS7922", null,
         new TreeSet<String>(Arrays.asList(new String[] {
-        "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })),
+            "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })),
         new TreeSet<String>(Arrays.asList(new String[] {
-        "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })));
+            "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })));
+    this.relays =
+        new TreeMap<String, org.torproject.onionoo.docs.SummaryDocument>();
+    this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
+        relayTorkaZ);
+    this.relays.put("001C13B3A55A71B977CA65EC85539D79C653A3FC",
+        relayFerrari458);
     org.torproject.onionoo.docs.SummaryDocument relayTimMayTribute =
         new org.torproject.onionoo.docs.SummaryDocument(true, "TimMayTribute",
         "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B", Arrays.asList(
@@ -150,6 +174,10 @@ public class ResourceServletTest {
         "1024D/51E2A1C7 steven j. murdoch "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>",
         new TreeSet<String>(), new TreeSet<String>());
+    this.relays.put("0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B",
+        relayTimMayTribute);
+    this.bridges =
+        new TreeMap<String, org.torproject.onionoo.docs.SummaryDocument>();
     org.torproject.onionoo.docs.SummaryDocument bridgeec2bridgercc7f31fe =
         new org.torproject.onionoo.docs.SummaryDocument(false,
         "ec2bridgercc7f31fe", "0000831B236DFF73D409AD17B40E2A728A53994F",
@@ -158,6 +186,8 @@ public class ResourceServletTest {
         new TreeSet<String>(Arrays.asList(new String[] { "Valid" })), -1L,
         null, DateTimeHelper.parse("2013-04-20 15:37:04"), null, null,
         null, null);
+    this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
+        bridgeec2bridgercc7f31fe);
     org.torproject.onionoo.docs.SummaryDocument bridgeUnnamed =
         new org.torproject.onionoo.docs.SummaryDocument(false, "Unnamed",
         "0002D9BDBBC230BD9C78FF502A16E0033EF87E0C", Arrays.asList(
@@ -166,29 +196,17 @@ public class ResourceServletTest {
         new TreeSet<String>(Arrays.asList(new String[] { "Valid" })), -1L,
         null, DateTimeHelper.parse("2013-04-14 07:07:05"), null, null,
         null, null);
+    this.bridges.put("0002D9BDBBC230BD9C78FF502A16E0033EF87E0C",
+        bridgeUnnamed);
     org.torproject.onionoo.docs.SummaryDocument bridgegummy =
         new org.torproject.onionoo.docs.SummaryDocument(false, "gummy",
         "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756", Arrays.asList(
         new String[] { "10.63.169.98" }),
         DateTimeHelper.parse("2013-04-24 01:07:04"), true,
         new TreeSet<String>(Arrays.asList(new String[] { "Running",
-        "Valid" })), -1L, null,
+            "Valid" })), -1L, null,
         DateTimeHelper.parse("2013-01-16 21:07:04"), null, null, null,
         null);
-    this.relays =
-        new TreeMap<String, org.torproject.onionoo.docs.SummaryDocument>();
-    this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
-        relayTorkaZ);
-    this.relays.put("001C13B3A55A71B977CA65EC85539D79C653A3FC",
-        relayFerrari458);
-    this.relays.put("0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B",
-        relayTimMayTribute);
-    this.bridges =
-        new TreeMap<String, org.torproject.onionoo.docs.SummaryDocument>();
-    this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
-        bridgeec2bridgercc7f31fe);
-    this.bridges.put("0002D9BDBBC230BD9C78FF502A16E0033EF87E0C",
-        bridgeUnnamed);
     this.bridges.put("1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756",
         bridgegummy);
   }
@@ -234,7 +252,7 @@ public class ResourceServletTest {
 
   private void makeRequest(String request) throws IOException {
     ResourceServlet rs = new ResourceServlet();
-    String requestParts[] = request.split("\\?");
+    String[] requestParts = request.split("\\?");
     String path = requestParts[0];
     String queryString = requestParts.length > 1 ? requestParts[1] : null;
     Map<String, String[]> parameterMap = parseParameters(request);
@@ -287,7 +305,7 @@ public class ResourceServletTest {
     String[] uriParts = request.split("\\?");
     if (uriParts.length == 2) {
       Map<String, List<String>> parameterLists =
-          new HashMap<String, List<String>>();
+          new HashMap<>();
       for (String parameter : uriParts[1].split("&")) {
         String[] parameterParts = parameter.split("=");
         if (!parameterLists.containsKey(parameterParts[0])) {
@@ -296,7 +314,7 @@ public class ResourceServletTest {
         }
         parameterLists.get(parameterParts[0]).add(parameterParts[1]);
       }
-      parameters = new HashMap<String, String[]>();
+      parameters = new HashMap<>();
       for (Map.Entry<String, List<String>> e :
           parameterLists.entrySet()) {
         parameters.put(e.getKey(),
@@ -306,6 +324,7 @@ public class ResourceServletTest {
     return parameters;
   }
 
+  @SuppressWarnings("MemberName")
   private static class SummaryDocument {
     private String relays_published;
     private RelaySummary[] relays;
@@ -313,6 +332,7 @@ public class ResourceServletTest {
     private BridgeSummary[] bridges;
   }
 
+  @SuppressWarnings("MemberName")
   private static class RelaySummary {
     private String n;
     private String f;
@@ -320,6 +340,7 @@ public class ResourceServletTest {
     private boolean r;
   }
 
+  @SuppressWarnings("MemberName")
   private static class BridgeSummary {
     private String n;
     private String h;
@@ -371,7 +392,7 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testSUMMARYDocument() {
+  public void testSummaryUpperCaseDocument() {
     this.assertErrorStatusCode(
         "/SUMMARY", 400);
   }
@@ -413,13 +434,13 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testTYPERelay() {
+  public void testTypeUpperCaseRelay() {
     this.assertErrorStatusCode(
         "/summary?TYPE=relay", 400);
   }
 
   @Test()
-  public void testTypeRELAY() {
+  public void testTypeRelayUpperCase() {
     this.assertSummaryDocument(
         "/summary?type=RELAY", 3, null, 0, null);
   }
@@ -464,13 +485,13 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testRUNNINGTrue() {
+  public void testRunningUpperCaseTrue() {
     this.assertErrorStatusCode(
         "/summary?RUNNING=true", 400);
   }
 
   @Test()
-  public void testRunningTRUE() {
+  public void testRunningTrueUpperCase() {
     this.assertSummaryDocument(
         "/summary?running=TRUE", 1, null, 1, null);
   }
@@ -500,7 +521,7 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testSearchTORKAZ() {
+  public void testSearchTorkazUpperCase() {
     this.assertSummaryDocument(
         "/summary?search=TORKAZ", 1, new String[] { "TorkaZ" }, 0, null);
   }
@@ -730,7 +751,7 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testSearchGUMMY() {
+  public void testSearchGummyUpperCase() {
     this.assertSummaryDocument(
         "/summary?search=GUMMY", 0, null, 1, new String[] { "gummy" });
   }
@@ -962,7 +983,7 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testCountryDE() {
+  public void testCountryDeUpperCase() {
     this.assertSummaryDocument(
         "/summary?country=DE", 1, new String[] { "TorkaZ" }, 0, null);
   }
@@ -1006,7 +1027,7 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testAsAS() {
+  public void testAsAs() {
     this.assertErrorStatusCode(
         "/summary?as=AS", 400);
   }
@@ -1018,7 +1039,7 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testAsASSpace8767() {
+  public void testAsAsSpace8767() {
     this.assertErrorStatusCode(
         "/summary?as=AS 8767", 400);
   }
@@ -1258,7 +1279,7 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testOrderCONSENSUS_WEIGHT() {
+  public void testOrderConsensusWeight() {
     this.assertSummaryDocument(
         "/summary?order=CONSENSUS_WEIGHT", 3,
         new String[] { "TorkaZ", "TimMayTribute", "Ferrari458" }, 3,

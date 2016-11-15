@@ -1,5 +1,6 @@
-/* Copyright 2014 The Tor Project
+/* Copyright 2014--2016 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
 
 import static org.junit.Assert.assertEquals;
@@ -257,8 +258,7 @@ public class UptimeStatusTest {
   }
 
   private static final SortedSet<String> RUNNING_VALID_FLAGS =
-      new TreeSet<String>(Arrays.asList(new String[] { "Running",
-      "Valid" }));
+      new TreeSet<>(Arrays.asList(new String[] { "Running", "Valid" }));
 
   @Test()
   public void testDontCompressDifferentFlags() {

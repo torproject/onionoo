@@ -1,5 +1,6 @@
-/* Copyright 2014 The Tor Project
+/* Copyright 2014--2016 The Tor Project
  * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
 
 import static org.junit.Assert.assertEquals;
@@ -40,8 +41,8 @@ public class BandwidthStatusTest {
       this.historyEndMillis = DateTimeHelper.parse(parts[1] + " "
           + parts[2]);
       this.intervalLength = Long.parseLong(parts[3].substring(1));
-      long intervalEndMillis = this.historyEndMillis,
-          intervalLengthMillis = this.intervalLength * 1000L;
+      long intervalEndMillis = this.historyEndMillis;
+      long intervalLengthMillis = this.intervalLength * 1000L;
       String[] valueStrings = parts[5].split(",");
       for (int i = valueStrings.length - 1; i >= 0; i--) {
         this.bandwidthValues.put(intervalEndMillis,
@@ -49,20 +50,28 @@ public class BandwidthStatusTest {
         intervalEndMillis -= intervalLengthMillis;
       }
     }
+
     private String line;
+
     public String getLine() {
       return this.line;
     }
+
     private long historyEndMillis;
+
     public long getHistoryEndMillis() {
       return this.historyEndMillis;
     }
+
     private long intervalLength;
+
     public long getIntervalLength() {
       return this.intervalLength;
     }
+
     private SortedMap<Long, Long> bandwidthValues =
-        new TreeMap<Long, Long>();
+        new TreeMap<>();
+
     public SortedMap<Long, Long> getBandwidthValues() {
       return this.bandwidthValues;
     }

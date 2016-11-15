@@ -1,3 +1,6 @@
+/* Copyright 2015--2016 The Tor Project
+ * See LICENSE for licensing information */
+
 package org.torproject.onionoo.docs;
 
 import static org.junit.Assert.assertEquals;
@@ -41,15 +44,15 @@ public class NodeStatusTest {
         deserialized.getEffectiveFamily());
     assertEquals("Extended families don't match", extendedFamily,
         deserialized.getExtendedFamily());
- }
+  }
 
-  private final String A = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-      B = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-      C = "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-      D = "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
-      E = "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
-      F = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-      N = "nickname";
+  private static final String A = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  private static final String B = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  private static final String C = "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
+  private static final String D = "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
+  private static final String E = "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE";
+  private static final String F = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+  private static final String NICK = "nickname";
 
   @Test
   public void testFamiliesEmpty() {
@@ -88,13 +91,13 @@ public class NodeStatusTest {
      * with this relay.  It's a valid case, because B can be in a mutual
      * family relationship with A. */
     assertFamiliesCanBeDeSerialized(
-        new String[] { A, B }, new String[] { A }, new String[] { A, B });
+        new String[] { A, B }, new String[] { A }, new String[] { A, B});
   }
 
   @Test
   public void testFamiliesOneNotMutualOneMutualOneIndirect() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { A, B }, new String[] { B }, new String[] { B, C });
+        new String[] { A, B }, new String[] { B }, new String[] { B, C});
   }
 
   @Test
@@ -107,6 +110,6 @@ public class NodeStatusTest {
   @Test
   public void testFamiliesNickname() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { N }, new String[] {}, new String[] {});
+        new String[] { NICK }, new String[] {}, new String[] {});
   }
 }
