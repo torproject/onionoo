@@ -8,7 +8,6 @@ import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.updater.DescriptorSource;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
 import org.torproject.onionoo.updater.StatusUpdateRunner;
-import org.torproject.onionoo.util.LockFile;
 import org.torproject.onionoo.writer.DocumentWriterRunner;
 
 import org.slf4j.Logger;
@@ -125,7 +124,6 @@ public class Main implements Runnable {
 
   @Override
   public void run() {
-    this.acquireLockOrExit();
     this.initialize();
     this.downloadDescriptors();
     this.updateStatuses();
@@ -133,21 +131,6 @@ public class Main implements Runnable {
     this.shutDown();
     this.gatherStatistics();
     this.cleanUp();
-    this.releaseLock();
-  }
-
-  private LockFile lf;
-
-  private void acquireLockOrExit() {
-    this.log.info("Initializing.");
-    this.lf = new LockFile();
-    if (this.lf.acquireLock()) {
-      this.log.info("Acquired lock");
-    } else {
-      this.log.error("Could not acquire lock.  Is Onionoo already "
-          + "running?  Terminating");
-      System.exit(1);
-    }
   }
 
   private DescriptorSource dso;
@@ -245,16 +228,6 @@ public class Main implements Runnable {
     DocumentStoreFactory.setDocumentStore(null);
     DescriptorSourceFactory.setDescriptorSource(null);
     this.log.info("Done.");
-  }
-
-  private void releaseLock() {
-    this.log.info("Releasing lock.");
-    if (this.lf.releaseLock()) {
-      this.log.info("Released lock");
-    } else {
-      this.log.error("Could not release lock.  The next execution may "
-          + "not start as expected");
-    }
   }
 }
 
