@@ -106,7 +106,8 @@ public class WeightsStatus extends Document {
   }
 
   private double parseWeightDouble(String in) throws NumberFormatException {
-    return in.isEmpty() ? Double.NaN : Double.parseDouble(in);
+    return in.isEmpty() || in.startsWith("-")
+        ? Double.NaN : Double.parseDouble(in);
   }
 
   /** Adds all given weights history objects that don't overlap with
