@@ -17,12 +17,13 @@
   <property name="instrument" value="${generated}/instrument/"/>
   <property name="cobertura.ser.file" value="${basedir}/cobertura.ser" />
   <property name="dist" value="${generated}/dist"/>
+  <property name="signed" value="${dist}/signed"/>
   <property name="docs" value="${generated}/javadoc/"/>
   <property name="libs" value="${basedir}/lib"/>
   <property name="warfile"
-            value="${dist}/onionoo-${release.version}.war"/>
+            value="onionoo-${release.version}.war"/>
   <property name="onionoo.jarfile"
-            value="${dist}/onionoo-${release.version}.jar"/>
+            value="onionoo-${release.version}.jar"/>
   <property name="source-and-target-java-version" value="1.7" />
   <property name="release.tarball"
             value="${dist}/onionoo-${release.version}.tar.gz" />
@@ -108,12 +109,21 @@
     <path refid="cobertura.classpath" />
   </path>
 
+  <target name="find-revision">
+    <exec executable="git" outputproperty="git.revision">
+      <arg value="rev-parse" />
+      <arg value="--short" />
+      <arg value="HEAD" />
+    </exec>
+  </target>
+
   <target name="init">
     <mkdir dir="${classes}"/>
     <mkdir dir="${testclasses}"/>
     <mkdir dir="${testresult}"/>
     <mkdir dir="${docs}"/>
     <mkdir dir="${dist}"/>
+    <mkdir dir="${signed}"/>
   </target>
 
   <target name="clean" >
@@ -204,13 +214,8 @@
   </target>
 
   <target name="war"
-          depends="compile">
-    <exec executable="git" outputproperty="git.revision">
-      <arg value="rev-parse" />
-      <arg value="--short" />
-      <arg value="HEAD" />
-    </exec>
-    <war destfile="${warfile}"
+          depends="compile,find-revision">
+    <war destfile="${dist}/${warfile}"
          webxml="${resources}/web.xml">
       <fileset dir="${resources}/web"/>
       <restrict>
@@ -249,13 +254,8 @@
     </war>
   </target>
 
-  <target name="jar" depends="compile">
-    <exec executable="git" outputproperty="git.revision">
-      <arg value="rev-parse" />
-      <arg value="--short" />
-      <arg value="HEAD" />
-    </exec>
-    <jar destfile="${onionoo.jarfile}"
+  <target name="jar" depends="compile,find-revision">
+    <jar destfile="${dist}/${onionoo.jarfile}"
          basedir="${classes}">
       <restrict>
         <not>
@@ -288,19 +288,19 @@
     <signjar alias="${jarsigner.alias}"
              storepass="${jarsigner.storepass}"
              sigalg="SHA256withRSA"
+             destdir="${signed}"
              digestalg="SHA-256"
              tsaurl="http://timestamp.digicert.com">
       <path>
-        <pathelement path="${onionoo.jarfile}"/>
-        <pathelement path="${warfile}"/>
+        <fileset dir="${dist}" includes="${onionoo.jarfile} ${warfile}"/>
       </path>
     </signjar>
     <fail message="Signing failed." >
       <condition>
         <not>
           <and>
-            <issigned file="${onionoo.jarfile}"/>
-            <issigned file="${warfile}"/>
+            <issigned file="${signed}/${onionoo.jarfile}"/>
+            <issigned file="${signed}/${warfile}"/>
           </and>
         </not>
       </condition>
@@ -310,8 +310,8 @@
   <target name="tar" depends="signjar">
     <tar destfile="${release.tarball}" compression="gzip">
       <tarfileset dir="." prefix="onionoo-${release.version}">
-        <include name="${onionoo.jarfile}"/>
-        <include name="${warfile}"/>
+        <include name="${signed}/${onionoo.jarfile}"/>
+        <include name="${signed}/${warfile}"/>
         <include name="build.xml" />
         <include name="LICENSE" />
         <include name="INSTALL" />
