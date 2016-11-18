@@ -2,7 +2,7 @@
 
   <property name="onionoo.protocol.version" value="3.1"/>
   <property name="release.version"
-            value="${onionoo.protocol.version}-1.0.0-dev"/>
+            value="${onionoo.protocol.version}-0.9.0-dev"/>
   <property name="descriptorversion" value="1.5.0"/>
   <property name="jetty.version" value="8.1.16.v20140903" />
   <property name="javasources" value="src/main/java"/>
@@ -24,6 +24,9 @@
   <property name="onionoo.jarfile"
             value="${dist}/onionoo-${release.version}.jar"/>
   <property name="source-and-target-java-version" value="1.7" />
+  <property name="release.tarball"
+            value="${dist}/onionoo-${release.version}.tar.gz" />
+  <property file="build.properties" />
 
   <patternset id="runtime" >
     <include name="descriptor-${descriptorversion}.jar"/>
@@ -202,6 +205,11 @@
 
   <target name="war"
           depends="compile">
+    <exec executable="git" outputproperty="git.revision">
+      <arg value="rev-parse" />
+      <arg value="--short" />
+      <arg value="HEAD" />
+    </exec>
     <war destfile="${warfile}"
          webxml="${resources}/web.xml">
       <fileset dir="${resources}/web"/>
@@ -218,10 +226,8 @@
           </zips>
         </archives>
       </restrict>
-      <fileset dir="${classes}"
-               includes="**/*"
-               excludes="**/Test*.class"/>
       <fileset dir="${resources}" includes="jetty.xml" />
+      <exclude name="**/Test*.class"/>
       <zipfileset dir="${resources}"
                   prefix=""
                   includes="logback.xml"/>
@@ -234,7 +240,7 @@
         <attribute name="Created-By" value="The Tor Project" />
         <attribute name="Implementation-Title" value="Onionoo Server"/>
         <attribute name="Implementation-Version"
-                   value="${release.version}"/>
+                   value="${release.version}-${git.revision}"/>
         <attribute name="Onionoo-Protocol-Version"
                    value="${onionoo.protocol.version}" />
         <attribute name="Main-Class"
@@ -244,6 +250,11 @@
   </target>
 
   <target name="jar" depends="compile">
+    <exec executable="git" outputproperty="git.revision">
+      <arg value="rev-parse" />
+      <arg value="--short" />
+      <arg value="HEAD" />
+    </exec>
     <jar destfile="${onionoo.jarfile}"
          basedir="${classes}">
       <restrict>
@@ -258,15 +269,13 @@
           </zips>
         </archives>
       </restrict>
-      <fileset dir="${classes}"
-               excludes="org/torproject/onionoo/server/" />
       <fileset dir="${resources}" includes="logback.xml" />
       <exclude name="**/Test*.class"/>
       <manifest>
         <attribute name="Created-By" value="The Tor Project" />
         <attribute name="Implementation-Title" value="Onionoo Server"/>
         <attribute name="Implementation-Version"
-                   value="${release.version}"/>
+                   value="${release.version}-${git.revision}"/>
         <attribute name="Onionoo-Protocol-Version"
                    value="${onionoo.protocol.version}" />
         <attribute name="Main-Class"
@@ -275,7 +284,43 @@
     </jar>
   </target>
 
-  <target name="dist" depends="test, war, jar"/>
+  <target name="signjar" depends="jar,war">
+    <signjar alias="${jarsigner.alias}"
+             storepass="${jarsigner.storepass}"
+             sigalg="SHA256withRSA"
+             digestalg="SHA-256"
+             tsaurl="http://timestamp.digicert.com">
+      <path>
+        <pathelement path="${onionoo.jarfile}"/>
+        <pathelement path="${warfile}"/>
+      </path>
+    </signjar>
+  </target>
+
+  <target name="tar" depends="signjar">
+    <tar destfile="${release.tarball}" compression="gzip">
+      <tarfileset dir="." prefix="onionoo-${release.version}">
+        <include name="${onionoo.jarfile}"/>
+        <include name="${warfile}"/>
+        <include name="build.xml" />
+        <include name="LICENSE" />
+        <include name="INSTALL" />
+        <include name="DESIGN" />
+        <include name="CERT" />
+        <include name="*.md" />
+      </tarfileset>
+      <tarfileset dir="${javasources}"
+                  prefix="onionoo-${release.version}/${javasources}" />
+      <tarfileset dir="${resources}"
+                  prefix="onionoo-${release.version}/${resources}" />
+      <tarfileset dir="${testsources}"
+                  prefix="onionoo-${release.version}/${testsources}" />
+      <tarfileset dir="${testresources}"
+                  prefix="onionoo-${release.version}/${testresources}" />
+      <tarfileset dir="${libs}"
+                  prefix="onionoo-${release.version}/${libs}" />
+    </tar>
+  </target>
 
   <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
   <target name="coverage" depends="compile,compile-tests">
