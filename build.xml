@@ -295,6 +295,16 @@
         <pathelement path="${warfile}"/>
       </path>
     </signjar>
+    <fail message="Signing failed." >
+      <condition>
+        <not>
+          <and>
+            <issigned file="${onionoo.jarfile}"/>
+            <issigned file="${warfile}"/>
+          </and>
+        </not>
+      </condition>
+    </fail>
   </target>
 
   <target name="tar" depends="signjar">
