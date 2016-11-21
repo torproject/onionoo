@@ -19,7 +19,7 @@
   <property name="dist" value="${generated}/dist"/>
   <property name="signed" value="${dist}/signed"/>
   <property name="docs" value="${generated}/javadoc/"/>
-  <property name="libs" value="${basedir}/lib"/>
+  <property name="libs" value="lib"/>
   <property name="warfile"
             value="onionoo-${release.version}.war"/>
   <property name="onionoo.jarfile"
@@ -216,7 +216,8 @@
   <target name="war"
           depends="compile,find-revision">
     <war destfile="${dist}/${warfile}"
-         webxml="${resources}/web.xml">
+         webxml="${resources}/web.xml"
+         basedir="${classes}">
       <fileset dir="${resources}/web"/>
       <restrict>
         <not>
