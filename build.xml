@@ -1,35 +1,47 @@
-<project default="dist" name="onionoo" basedir=".">
+<?xml version="1.0"?>
 
+<!DOCTYPE project [
+       <!ENTITY base SYSTEM "src/build/java/base.xml">
+]>
+
+<project default="usage" name="Onionoo" basedir=".">
+
+  <property name="javadoc-title" value="Onionoo API Documentation"/>
+  <property name="implementation-title" value="Onionoo" />
   <property name="onionoo.protocol.version" value="3.1"/>
   <property name="release.version"
             value="${onionoo.protocol.version}-1.0.1-dev"/>
   <property name="descriptorversion" value="1.5.0"/>
-  <property name="jetty.version" value="8.1.16.v20140903" />
-  <property name="javasources" value="src/main/java"/>
-  <property name="testsources" value="src/test/java"/>
-  <property name="generated" value="generated"/>
-  <property name="classes" value="${generated}/classes"/>
-  <property name="testclasses" value="${generated}/testclasses/"/>
-  <property name="resources" value="src/main/resources/"/>
-  <property name="testresources" value="src/test/resources/"/>
-  <property name="testresult" value="${generated}/test-results"/>
-  <property name="coverageresult" value="${generated}/coverage-report/"/>
-  <property name="instrument" value="${generated}/instrument/"/>
-  <property name="cobertura.ser.file" value="${basedir}/cobertura.ser" />
-  <property name="dist" value="${generated}/dist"/>
-  <property name="signed" value="${dist}/signed"/>
-  <property name="docs" value="${generated}/javadoc/"/>
-  <property name="libs" value="lib"/>
+  <property name="jetty.version" value="" />
   <property name="warfile"
             value="onionoo-${release.version}.war"/>
-  <property name="onionoo.jarfile"
-            value="onionoo-${release.version}.jar"/>
-  <property name="source-and-target-java-version" value="1.7" />
-  <property name="release.tarball"
-            value="${dist}/onionoo-${release.version}.tar.gz" />
-  <property file="build.properties" />
 
-  <patternset id="runtime" >
+  <!-- Name to appear in jar names etc. -->
+  <property name="name" value="onionoo"/>
+
+  <!-- If 'project-main-class' is not provided, a library jar is created. -->
+  <property name="project-main-class"
+            value="org.torproject.onionoo.cron.Main" />
+
+  <property name="jarincludes" value="logback.xml" />
+  <property name="jarpatternprop" value="library" />
+  <property name="additional2sign" value="${warfile}" />
+
+  <target name="coverage-check">
+    <cobertura-check branchrate="0" linerate="0"
+                     totallinerate="34" totalbranchrate="30" >
+      <regex pattern="org.torproject.onionoo.server"
+             branchrate="67" linerate="77"/>
+      <regex pattern="org.torproject.onionoo.docs"
+             branchrate="19" linerate="29"/>
+      <regex pattern="org.torproject.onionoo.updater"
+             branchrate="17" linerate="18"/>
+      <regex pattern="org.torproject.onionoo.writer"
+             branchrate="22" linerate="20"/>
+    </cobertura-check>
+  </target>
+
+  <patternset id="library" >
     <include name="descriptor-${descriptorversion}.jar"/>
     <include name="commons-codec-1.9.jar"/>
     <include name="commons-compress-1.9.jar"/>
@@ -41,180 +53,26 @@
   </patternset>
 
   <patternset id="web" >
-      <include name="servlet-api-3.0.jar"/>
-      <include name="jetty8-server-${jetty.version}.jar"/>
-      <include name="jetty8-servlets-${jetty.version}.jar"/>
-      <include name="jetty8-servlet-${jetty.version}.jar"/>
-      <include name="jetty8-util-${jetty.version}.jar"/>
-      <include name="jetty8-http-${jetty.version}.jar"/>
-      <include name="jetty8-io-${jetty.version}.jar"/>
-      <include name="jetty8-xml-${jetty.version}.jar"/>
-      <include name="jetty8-webapp-${jetty.version}.jar"/>
-      <include name="jetty8-continuation-${jetty.version}.jar"/>
-      <include name="jetty8-security-${jetty.version}.jar"/>
+    <include name="servlet-api-3.0.jar"/>
+    <include name="jetty8-server${jetty.version}.jar"/>
+    <include name="jetty8-servlets${jetty.version}.jar"/>
+    <include name="jetty8-servlet${jetty.version}.jar"/>
+    <include name="jetty8-util${jetty.version}.jar"/>
+    <include name="jetty8-http${jetty.version}.jar"/>
+    <include name="jetty8-io${jetty.version}.jar"/>
+    <include name="jetty8-xml${jetty.version}.jar"/>
+    <include name="jetty8-webapp${jetty.version}.jar"/>
+    <include name="jetty8-continuation${jetty.version}.jar"/>
+    <include name="jetty8-security${jetty.version}.jar"/>
   </patternset>
 
-  <patternset id="test" >
-    <include name="junit4-4.11.jar"/>
-    <include name="hamcrest-core-1.3.jar"/>
+  <patternset id="runtime" >
+    <patternset refid="library" />
+    <patternset refid="web" />
   </patternset>
-
-  <path id="classpath">
-    <pathelement path="${classes}"/>
-    <fileset dir="${libs}">
-      <patternset refid="runtime" />
-      <patternset refid="web" />
-    </fileset>
-    <fileset dir="${resources}">
-      <include name="logback.xml,jetty.xml"/>
-    </fileset>
-  </path>
-
-  <path id="test.classpath">
-    <path refid="classpath" />
-    <pathelement path="${testclasses}"/>
-    <fileset dir="${libs}">
-      <patternset refid="runtime" />
-      <patternset refid="test" />
-      <patternset refid="web" />
-    </fileset>
-  </path>
-
-  <path id="checkstyle.classpath" >
-    <fileset dir="${libs}">
-      <include name="checkstyle-6.17-all.jar" />
-    </fileset>
-  </path>
-
-  <path id="cobertura.classpath">
-    <fileset dir="${libs}">
-      <include name="descriptor-${descriptorversion}.jar"/>
-      <include name="cobertura-2.1.1.jar" />
-      <include name="slf4j-api-1.7.7.jar" />
-      <include name="commons-lang3-3.3.2.jar" />
-      <include name="asm4-5.0.3.jar" />
-      <include name="asm4-util-5.0.3.jar" />
-      <include name="asm4-tree-5.0.3.jar" />
-      <include name="asm4-commons-5.0.3.jar" />
-      <include name="asm4-analysis-5.0.3.jar" />
-      <include name="oro-2.0.8.jar" />
-      <include name="logback-core-1.1.2.jar" />
-      <include name="logback-classic-1.1.2.jar" />
-    </fileset>
-  </path>
-
-  <path id="cobertura.test.classpath">
-    <path location="${instrument}" />
-    <path refid="test.classpath" />
-    <path refid="cobertura.classpath" />
-  </path>
-
-  <target name="find-revision">
-    <exec executable="git" outputproperty="git.revision">
-      <arg value="rev-parse" />
-      <arg value="--short" />
-      <arg value="HEAD" />
-    </exec>
-  </target>
-
-  <target name="init">
-    <mkdir dir="${classes}"/>
-    <mkdir dir="${testclasses}"/>
-    <mkdir dir="${testresult}"/>
-    <mkdir dir="${docs}"/>
-    <mkdir dir="${dist}"/>
-    <mkdir dir="${signed}"/>
-  </target>
-
-  <target name="clean" >
-    <delete includeEmptyDirs="true" quiet="true" >
-      <fileset dir="${generated}" defaultexcludes="false" includes="**" />
-    </delete>
-    <delete file="${cobertura.ser.file}" quiet="true"/>
-  </target>
-
-  <target name="compile"
-          depends="init">
-    <javac destdir="${classes}"
-           srcdir="${javasources}"
-           source="${source-and-target-java-version}"
-           target="${source-and-target-java-version}"
-           debug="true"
-           deprecation="true"
-           optimize="false"
-           failonerror="true"
-           includeantruntime="false">
-      <classpath refid="classpath"/>
-    </javac>
-  </target>
-
-  <target name="compile-tests" depends="compile">
-    <javac destdir="${testclasses}"
-            srcdir="${testsources}"
-            source="${source-and-target-java-version}"
-            target="${source-and-target-java-version}"
-            debug="true" debuglevel="lines,source"
-            deprecation="true"
-            optimize="false"
-            failonerror="true"
-            includeantruntime="false">
-      <classpath refid="test.classpath"/>
-    </javac>
-  </target>
-
-  <target name="docs" depends="init">
-    <javadoc destdir="${docs}"
-             footer="&amp;copy; 2016 The Tor Project"
-             doctitle="Onionoo Documentation"
-             use="true"
-             windowtitle="Onionoo Documentation">
-      <classpath refid="classpath"/>
-      <fileset dir="${javasources}/" includes="**/*.java" />
-    </javadoc>
-  </target>
-
-  <target name="test" depends="compile,compile-tests">
-    <junit fork="true" haltonfailure="true" printsummary="on">
-      <classpath refid="test.classpath" />
-      <formatter type="plain" usefile="false"/>
-      <batchtest>
-        <fileset dir="${testclasses}"
-                 includes="**/*Test.class"/>
-      </batchtest>
-    </junit>
-  </target>
-
-  <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties">
-    <classpath refid="checkstyle.classpath" />
-  </taskdef>
-  <target name="checks" depends="compile,compile-tests">
-    <checkstyle config="${testresources}/metrics_checks.xml">
-      <fileset dir="${javasources}"
-               includes="**/*.java" />
-      <fileset dir="${testsources}"
-               includes="**/*.java" />
-      <classpath>
-        <path refid="classpath" />
-        <path refid="checkstyle.classpath" />
-      </classpath>
-      <formatter type="plain"
-                 toFile="${generated}/checkstyle_report.txt"/>
-    </checkstyle>
-    <exec executable="cat" outputproperty="checkstyle.result">
-      <arg value="${generated}/checkstyle_report.txt" />
-    </exec>
-    <fail message="Checkstyle complaints: ${checkstyle.result}" >
-      <condition>
-        <not>
-          <length string="${checkstyle.result}"
-                  length="29" />
-        </not>
-      </condition>
-    </fail>
-  </target>
 
   <target name="war"
-          depends="compile,find-revision">
+          depends="compile,gitrev">
     <war destfile="${dist}/${warfile}"
          webxml="${resources}/web.xml"
          basedir="${classes}">
@@ -227,7 +85,6 @@
           <zips>
             <fileset dir="${libs}">
               <patternset refid="runtime" />
-              <patternset refid="web" />
             </fileset>
           </zips>
         </archives>
@@ -247,125 +104,16 @@
         <attribute name="Implementation-Title" value="Onionoo Server"/>
         <attribute name="Implementation-Version"
                    value="${release.version}-${git.revision}"/>
-        <attribute name="Onionoo-Protocol-Version"
-                   value="${onionoo.protocol.version}" />
         <attribute name="Main-Class"
                    value="org.torproject.onionoo.server.ServerMain" />
       </manifest>
     </war>
   </target>
 
-  <target name="jar" depends="compile,find-revision">
-    <jar destfile="${dist}/${onionoo.jarfile}"
-         basedir="${classes}">
-      <restrict>
-        <not>
-          <name name="META-INF/*" />
-        </not>
-        <archives>
-          <zips>
-            <fileset dir="${libs}">
-              <patternset refid="runtime" />
-            </fileset>
-          </zips>
-        </archives>
-      </restrict>
-      <fileset dir="${resources}" includes="logback.xml" />
-      <exclude name="**/Test*.class"/>
-      <manifest>
-        <attribute name="Created-By" value="The Tor Project" />
-        <attribute name="Implementation-Title" value="Onionoo Server"/>
-        <attribute name="Implementation-Version"
-                   value="${release.version}-${git.revision}"/>
-        <attribute name="Onionoo-Protocol-Version"
-                   value="${onionoo.protocol.version}" />
-        <attribute name="Main-Class"
-                   value="org.torproject.onionoo.cron.Main" />
-      </manifest>
-    </jar>
-  </target>
-
-  <target name="signjar" depends="jar,war">
-    <signjar alias="${jarsigner.alias}"
-             storepass="${jarsigner.storepass}"
-             sigalg="SHA256withRSA"
-             destdir="${signed}"
-             digestalg="SHA-256"
-             tsaurl="http://timestamp.digicert.com">
-      <path>
-        <fileset dir="${dist}" includes="${onionoo.jarfile} ${warfile}"/>
-      </path>
-    </signjar>
-    <fail message="Signing failed." >
-      <condition>
-        <not>
-          <and>
-            <issigned file="${signed}/${onionoo.jarfile}"/>
-            <issigned file="${signed}/${warfile}"/>
-          </and>
-        </not>
-      </condition>
-    </fail>
-  </target>
-
-  <target name="tar" depends="signjar">
-    <tar destfile="${release.tarball}" compression="gzip">
-      <tarfileset dir="." prefix="onionoo-${release.version}">
-        <include name="${signed}/${onionoo.jarfile}"/>
-        <include name="${signed}/${warfile}"/>
-        <include name="build.xml" />
-        <include name="LICENSE" />
-        <include name="INSTALL" />
-        <include name="DESIGN" />
-        <include name="CERT" />
-        <include name="*.md" />
-      </tarfileset>
-      <tarfileset dir="${javasources}"
-                  prefix="onionoo-${release.version}/${javasources}" />
-      <tarfileset dir="${resources}"
-                  prefix="onionoo-${release.version}/${resources}" />
-      <tarfileset dir="${testsources}"
-                  prefix="onionoo-${release.version}/${testsources}" />
-      <tarfileset dir="${testresources}"
-                  prefix="onionoo-${release.version}/${testresources}" />
-      <tarfileset dir="${libs}"
-                  prefix="onionoo-${release.version}/${libs}" />
-    </tar>
-  </target>
-
-  <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
-  <target name="coverage" depends="compile,compile-tests">
-    <copy todir="${instrument}" >
-      <fileset dir="${classes}" >
-       <include name="**/*"/>
-      </fileset>
-    </copy>
-    <cobertura-instrument ignoreTrivial="true">
-      <fileset dir="${instrument}">
-        <include name="**/**/*.class" />
-      </fileset>
-    </cobertura-instrument>
-    <junit fork="true" haltonfailure="false" printsummary="on">
-      <sysproperty key="net.sourceforge.cobertura.datafile"
-                   file="${cobertura.ser.file}" />
-      <classpath refid="cobertura.test.classpath" />
-      <formatter type="xml" />
-      <batchtest toDir="${testresult}" >
-        <fileset dir="${testclasses}" includes="**/*Test.class" />
-      </batchtest>
-    </junit>
-    <cobertura-report format="html" destdir="${coverageresult}" >
-      <fileset dir="${javasources}">
-        <include name="**/*.java" />
-      </fileset>
-    </cobertura-report>
-    <cobertura-check branchrate="0" linerate="0" totallinerate="34" totalbranchrate="30" >
-      <regex pattern="org.torproject.onionoo.server" branchrate="67" linerate="77"/>
-      <regex pattern="org.torproject.onionoo.docs" branchrate="19" linerate="29"/>
-      <regex pattern="org.torproject.onionoo.updater" branchrate="17" linerate="18"/>
-      <regex pattern="org.torproject.onionoo.writer" branchrate="22" linerate="20"/>
-    </cobertura-check>
-  </target>
+  <!-- The following line adds the common targets and properties
+       for Metrics' Java Projects.
+  -->
+  &base;
 
 </project>
 
