@@ -26,6 +26,7 @@
   <property name="jarincludes" value="logback.xml" />
   <property name="jarpatternprop" value="library" />
   <property name="additional2sign" value="${warfile}" />
+  <property name="tardepends" value="war" />
 
   <target name="coverage-check">
     <cobertura-check branchrate="0" linerate="0"
