@@ -101,7 +101,7 @@
       <metainf dir="${resources}"
                includes="context.xml"/>
       <manifest>
-        <attribute name="Created-By" value="The Tor Project" />
+        <attribute name="Implemented-By" value="The Tor Project" />
         <attribute name="Implementation-Title" value="Onionoo Server"/>
         <attribute name="Implementation-Version"
                    value="${release.version}-${git.revision}"/>
