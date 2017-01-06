@@ -869,6 +869,14 @@ public class ResourceServletTest {
     this.assertErrorStatusCode("/summary?search=limit:1", 400);
   }
 
+
+  @Test()
+  public void testSearchEmailAddress() {
+    this.assertSummaryDocument(
+        "/summary?search=contact:<tor+steven.murdoch@cl.cam.ac.uk>", 1,
+        new String[] { "TimMayTribute" }, 0, null);
+  }
+
   @Test()
   public void testLookupFingerprint() {
     this.assertSummaryDocument(

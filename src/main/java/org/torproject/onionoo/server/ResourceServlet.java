@@ -362,7 +362,7 @@ public class ResourceServlet extends HttpServlet {
 
   private static Pattern searchQueryStringPattern =
       Pattern.compile("(?:.*[\\?&])*?" // lazily skip other parameters
-          + "search=([0-9a-zA-Z+/\\.: \\$\\[\\]%]+)" // capture parameter
+          + "search=([\\p{Graph} &&[^&]]+)" // capture parameter
           + "(?:&.*)*"); // skip remaining parameters
 
   private static Pattern searchParameterPattern =
@@ -370,7 +370,7 @@ public class ResourceServlet extends HttpServlet {
       + "^[0-9a-zA-Z+/]{1,27}$|" /* Base64 fingerprint. */
       + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
       + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$|" /* IPv6 address. */
-      + "^[a-zA-Z_]+:[0-9a-zA-Z_,-]+$" /* Qualified search term. */);
+      + "^[a-zA-Z_]+:\\p{Graph}+$" /* Qualified search term. */);
 
   protected static String[] parseSearchParameters(String queryString) {
     Matcher searchQueryStringMatcher = searchQueryStringPattern.matcher(
