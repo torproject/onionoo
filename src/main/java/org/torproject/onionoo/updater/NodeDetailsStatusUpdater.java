@@ -126,8 +126,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   /* Step 1: parse descriptors. */
 
-  private SortedSet<String> updatedNodes = new TreeSet<String>();
-
   @Override
   public void processDescriptor(Descriptor descriptor, boolean relay) {
     if (descriptor instanceof ServerDescriptor && relay) {
@@ -335,7 +333,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     detailsStatus.setAdvertisedBandwidth(advertisedBandwidth);
     detailsStatus.setPlatform(descriptor.getPlatform());
     this.documentStore.store(detailsStatus, fingerprint);
-    this.updatedNodes.add(fingerprint);
   }
 
   private void processBridgeExtraInfoDescriptor(
@@ -352,7 +349,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           descriptor.getPublishedMillis());
       detailsStatus.setTransports(descriptor.getTransports());
       this.documentStore.store(detailsStatus, fingerprint);
-      this.updatedNodes.add(fingerprint);
     }
   }
 
@@ -446,7 +442,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     for (Map.Entry<String, NodeStatus> e : this.knownNodes.entrySet()) {
       String fingerprint = e.getKey();
       NodeStatus nodeStatus = e.getValue();
-      this.updatedNodes.add(fingerprint);
       if (nodeStatus.isRelay()
           && nodeStatus.getLastSeenMillis() >= cutoff) {
         this.currentRelays.add(fingerprint);
@@ -510,15 +505,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       } else {
         updatedNodeStatus = nodeStatus;
         this.knownNodes.put(fingerprint, nodeStatus);
-        if (nodeStatus.getLastSeenMillis() == (nodeStatus.isRelay()
-            ? previousRelaysLastValidAfterMillis
-            : previousBridgesLastValidAfterMillis)) {
-          /* This relay or bridge was previously running, but we didn't
-           * parse any descriptors with its fingerprint.  Make sure to
-           * update its details status file later on, so it has the
-           * correct running bit. */
-          this.updatedNodes.add(fingerprint);
-        }
       }
       if (updatedNodeStatus.isRelay()
           && updatedNodeStatus.getLastSeenMillis() >= cutoff) {
@@ -581,7 +567,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           nodeStatus.getAddress());
       if (lookupResult != null) {
         this.geoIpLookupResults.put(fingerprint, lookupResult);
-        this.updatedNodes.add(fingerprint);
       }
     }
   }
@@ -683,22 +668,18 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       if (consensusWeights.containsKey(fingerprint)) {
         this.consensusWeightFractions.put(fingerprint, (float)
             (consensusWeights.get(fingerprint) / totalConsensusWeight));
-        this.updatedNodes.add(fingerprint);
       }
       if (guardWeights.containsKey(fingerprint)) {
         this.guardProbabilities.put(fingerprint, (float)
             (guardWeights.get(fingerprint) / totalGuardWeight));
-        this.updatedNodes.add(fingerprint);
       }
       if (middleWeights.containsKey(fingerprint)) {
         this.middleProbabilities.put(fingerprint, (float)
             (middleWeights.get(fingerprint) / totalMiddleWeight));
-        this.updatedNodes.add(fingerprint);
       }
       if (exitWeights.containsKey(fingerprint)) {
         this.exitProbabilities.put(fingerprint, (float)
             (exitWeights.get(fingerprint) / totalExitWeight));
-        this.updatedNodes.add(fingerprint);
       }
     }
   }
@@ -766,21 +747,16 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
     for (String fingerprint : this.currentRelays) {
       NodeStatus nodeStatus = this.knownNodes.get(fingerprint);
-      if (nodeStatus == null) {
-        continue;
-      }
       if (effectiveFamilies.containsKey(fingerprint)
           || extendedFamilies.containsKey(fingerprint)) {
         nodeStatus.setEffectiveFamily(effectiveFamilies.get(fingerprint));
         nodeStatus.setExtendedFamily(extendedFamilies.get(fingerprint));
-        this.updatedNodes.add(fingerprint);
       } else if ((nodeStatus.getEffectiveFamily() != null
           && !nodeStatus.getEffectiveFamily().isEmpty())
           || (nodeStatus.getIndirectFamily() != null
           && !nodeStatus.getIndirectFamily().isEmpty())) {
         nodeStatus.setEffectiveFamily(null);
         nodeStatus.setExtendedFamily(null);
-        this.updatedNodes.add(fingerprint);
       }
     }
   }
@@ -801,7 +777,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       String hostName = lookupResults.get(nodeStatus.getAddress());
       if (hostName != null) {
         this.rdnsLookupResults.put(fingerprint, hostName);
-        this.updatedNodes.add(fingerprint);
       }
     }
   }
@@ -809,11 +784,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   /* Step 4: update details statuses and then node statuses. */
 
   private void updateNodeDetailsStatuses() {
-    for (String fingerprint : this.updatedNodes) {
-      NodeStatus nodeStatus = this.knownNodes.get(fingerprint);
-      if (nodeStatus == null) {
-        nodeStatus = new NodeStatus(fingerprint);
-      }
+    for (Map.Entry<String, NodeStatus> entry : this.knownNodes.entrySet()) {
+      String fingerprint = entry.getKey();
+      NodeStatus nodeStatus = entry.getValue();
       DetailsStatus detailsStatus = this.documentStore.retrieve(
           DetailsStatus.class, true, fingerprint);
       if (detailsStatus == null) {
