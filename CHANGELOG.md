@@ -7,6 +7,9 @@
    - Accept the same characters in qualified search terms as in their
      parameter equivalents.
 
+ * Minor changes
+   - Include XZ binaries in release binaries.
+
 
 # Changes in version 3.1-1.0.0 - 2016-11-23
 
