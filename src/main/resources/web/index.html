@@ -346,10 +346,9 @@ characters of a space-separated fingerprint on November 15, 2015.</li>
 <li><strong>3.2</strong>: Extended order parameter to "first_seen" and
 added response meta data fields "relays_skipped", "relays_truncated",
 "bridges_skipped", and "bridges_truncated" on January 27, 2017.</li>
-<li><strong>4.0</strong>: (scheduled, but not deployed yet!): Extend
-search parameter to not require leading or enclosing square brackets
-around IPv6 addresses anymore, to be deployed by February 27,
-2017.</li>
+<li><strong>4.0</strong>: Extended search parameter to not require
+leading or enclosing square brackets around IPv6 addresses anymore on
+February 28, 2017.</li>
 </ul>
 
 
@@ -456,7 +455,8 @@ Return only (1) relays with the parameter value matching (part of a)
 nickname, (possibly $-prefixed) beginning of a hex-encoded fingerprint,
 any 4 hex characters of a space-separated fingerprint, beginning of a
 base64-encoded fingerprint without trailing equal signs, or beginning of
-an IP address, (2) bridges with (part of a) nickname or (possibly
+an IP address (possibly enclosed in square brackets in case of IPv6),
+(2) bridges with (part of a) nickname or (possibly
 $-prefixed) beginning of a hashed hex-encoded fingerprint, and (3) relays
 and/or bridges matching a given qualified search term.
 Searches by relay IP address include all known addresses used for onion

@@ -261,7 +261,8 @@ public class RequestHandler {
       } else {
         List<String> addresses = entry.getAddresses();
         for (String address : addresses) {
-          if (address.startsWith(searchTerm.toLowerCase())) {
+          if (address.startsWith(searchTerm.toLowerCase())
+              || address.startsWith("[" + searchTerm.toLowerCase())) {
             /* Address matches. */
             lineMatches = true;
             break;

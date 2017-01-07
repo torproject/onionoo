@@ -1,3 +1,10 @@
+# Changes in version 4.0-x.x.x - 2017-xx-xx
+
+ * Medium changes
+   - Accept searches by IPv6 addresses even without leading or
+     enclosing square brackets.
+
+
 # Changes in version 3.2-1.1.0 - 2017-01-27
 
  * Major changes

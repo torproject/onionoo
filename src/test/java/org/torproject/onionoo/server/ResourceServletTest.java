@@ -707,6 +707,34 @@ public class ResourceServletTest {
   }
 
   @Test()
+  public void testSearchIpv6Slash64NoBrackets() {
+    this.assertSummaryDocument(
+        "/summary?search=2001:4f8:3:2e::", 1,
+        new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchIpv6Slash8Colon() {
+    this.assertSummaryDocument(
+        "/summary?search=[2001:", 1,
+        new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchIpv6Slash8NoColon() {
+    this.assertSummaryDocument(
+        "/summary?search=[2001", 1,
+        new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test()
+  public void testSearchIpv6Slash8NoColonNoBrackets() {
+    this.assertSummaryDocument(
+        "/summary?search=2001", 1,
+        new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test()
   public void testSearchIpv6Uncompressed() {
     this.assertSummaryDocument(
         "/summary?search=[2001:04f8:0003:002e:0000:0000:0000:0051]", 0,
@@ -887,6 +915,13 @@ public class ResourceServletTest {
     this.assertErrorStatusCode("/summary?search=limit:1", 400);
   }
 
+  @Test()
+  public void testSearchDeadBeef() {
+    /* This does not return 400 Bad Request, even though "dead" is not a valid
+     * search term qualifier, because this could be the start of an IPv6 address
+     * without leading bracket. */
+    this.assertSummaryDocument("/summary?search=dead:beef", 0, null, 0, null);
+  }
 
   @Test()
   public void testSearchEmailAddress() {

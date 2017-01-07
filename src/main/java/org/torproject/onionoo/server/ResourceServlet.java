@@ -75,6 +75,12 @@ public class ResourceServlet extends HttpServlet {
       new HashSet<>(Arrays.asList(("search,fingerprint,order,limit,"
           + "offset,fields").split(",")));
 
+  private static String ipv6AddressPatternString =
+      "^\\[?[0-9a-fA-F:\\.]{1,39}\\]?$";
+
+  private static Pattern ipv6AddressPattern =
+      Pattern.compile(ipv6AddressPatternString);
+
   /** Handles the HTTP GET request in the wrapped <code>request</code> by
    * writing an HTTP GET response to the likewise <code>response</code>,
    * both of which are wrapped to facilitate testing. */
@@ -150,13 +156,17 @@ public class ResourceServlet extends HttpServlet {
       }
       List<String> unqualifiedSearchTerms = new ArrayList<>();
       for (String searchTerm : searchTerms) {
-        if (searchTerm.contains(":") && !searchTerm.startsWith("[")) {
+        if (searchTerm.contains(":")) {
           String[] parts = searchTerm.split(":", 2);
           String parameterKey = parts[0];
           if (!knownParameters.contains(parameterKey)
               || illegalSearchQualifiers.contains(parameterKey)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            if (ipv6AddressPattern.matcher(parameterKey).matches()) {
+              unqualifiedSearchTerms.add(searchTerm);
+            } else {
+              response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+              return;
+            }
           }
           if (!parameterMap.containsKey(parameterKey)) {
             String parameterValue = parts[1];
@@ -369,7 +379,7 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Hex fingerprint. */
       + "^[0-9a-zA-Z+/]{1,27}$|" /* Base64 fingerprint. */
       + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
-      + "^\\[[0-9a-fA-F:\\.]{1,39}\\]?$|" /* IPv6 address. */
+      + ipv6AddressPatternString + "|" /* IPv6 address. */
       + "^[a-zA-Z_]+:\\p{Graph}+$" /* Qualified search term. */);
 
   protected static String[] parseSearchParameters(String queryString) {
