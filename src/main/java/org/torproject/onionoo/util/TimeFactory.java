@@ -9,13 +9,19 @@ public class TimeFactory {
 
   /** Sets a custom singleton time instance that will be returned by
    * {@link #getTime} rather than creating an instance upon first
-   * invocation. */
+   * invocation.
+   *
+   * @deprecated Try to use other time setting methods for testing.
+   */
   public static void setTime(Time time) {
     timeInstance = time;
   }
 
   /** Returns the singleton node indexer instance that gets created upon
-   * first invocation of this method. */
+   * first invocation of this method.
+   *
+   * @deprecated Try to use other time setting methods for testing.
+   */
   public static Time getTime() {
     if (timeInstance == null) {
       timeInstance = new Time();
