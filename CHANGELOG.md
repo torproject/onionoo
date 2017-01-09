@@ -12,6 +12,7 @@
      process.
    - Accept the same characters in qualified search terms as in their
      parameter equivalents.
+   - Exclude bandwidth history values from the future.
 
  * Minor changes
    - Include XZ binaries in release binaries.

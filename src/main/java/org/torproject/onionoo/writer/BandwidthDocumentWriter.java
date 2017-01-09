@@ -112,6 +112,9 @@ public class BandwidthDocumentWriter implements DocumentWriter {
           continue;
         }
         long startMillis = v[0];
+        if (startMillis > this.now) {
+          break;
+        }
         if (endMillis - startMillis > dataPointInterval) {
           /* This history interval is too long for this graph's data point
            * interval.  Maybe the next graph will contain it, but not this
