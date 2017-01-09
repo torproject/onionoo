@@ -60,6 +60,30 @@ public class ResponseBuilder {
     this.orderedBridges = orderedBridges;
   }
 
+  private int relaysSkipped;
+
+  public void setRelaysSkipped(int relaysSkipped) {
+    this.relaysSkipped = relaysSkipped;
+  }
+
+  private int bridgesSkipped;
+
+  public void setBridgesSkipped(int bridgesSkipped) {
+    this.bridgesSkipped = bridgesSkipped;
+  }
+
+  private int relaysTruncated;
+
+  public void setRelaysTruncated(int relaysTruncated) {
+    this.relaysTruncated = relaysTruncated;
+  }
+
+  private int bridgesTruncated;
+
+  public void setBridgesTruncated(int bridgesTruncated) {
+    this.bridgesTruncated = bridgesTruncated;
+  }
+
   private String[] fields;
 
   public void setFields(String[] fields) {
@@ -83,47 +107,57 @@ public class ResponseBuilder {
   private static final String NEXT_MAJOR_VERSION_SCHEDULED = null;
 
   private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
-    String nextMajorVersionScheduledLine =
-        NEXT_MAJOR_VERSION_SCHEDULED == null
-        ? ""
-        : String.format("\"next_major_version_scheduled\":\"%s\",\n",
+    this.write(pw, "{\"version\":\"%s\",\n", PROTOCOL_VERSION);
+    if (null != NEXT_MAJOR_VERSION_SCHEDULED) {
+      this.write(pw, "\"next_major_version_scheduled\":\"%s\",\n",
           NEXT_MAJOR_VERSION_SCHEDULED);
-    String header = String.format("{\"version\":\"%s\",\n"
-        + "%s\"relays_published\":\"%s\",\n\"relays\":[",
-        PROTOCOL_VERSION, nextMajorVersionScheduledLine,
-        relaysPublishedString);
-    this.charsWritten += header.length();
-    pw.write(header);
+    }
+    this.write(pw, "\"relays_published\":\"%s\",\n",
+        this.relaysPublishedString);
+    if (this.relaysSkipped > 0) {
+      this.write(pw, "\"relays_skipped\":%d,\n", this.relaysSkipped);
+    }
+    this.write(pw, "\"relays\":[");
+
     int written = 0;
     for (SummaryDocument entry : relays) {
       String lines = this.formatNodeStatus(entry);
       if (lines.length() > 0) {
-        this.charsWritten += (written > 0 ? 2 : 1) + lines.length();
-        pw.print((written++ > 0 ? ",\n" : "\n") + lines);
+        this.write(pw, "%s%s", written++ > 0 ? ",\n" : "\n", lines);
       }
     }
-    String footer = "\n],\n";
-    this.charsWritten += footer.length();
-    pw.print(footer);
+    this.write(pw, "\n],\n");
+    if (this.relaysTruncated > 0) {
+      this.write(pw, "\"relays_truncated\":%d,\n", this.relaysTruncated);
+    }
   }
 
   private void writeBridges(List<SummaryDocument> bridges,
       PrintWriter pw) {
-    String header = "\"bridges_published\":\"" + bridgesPublishedString
-        + "\",\n\"bridges\":[";
-    this.charsWritten += header.length();
-    pw.write(header);
+    this.write(pw, "\"bridges_published\":\"" + bridgesPublishedString
+        + "\",\n");
+    if (this.bridgesSkipped > 0) {
+      this.write(pw, "\"bridges_skipped\":%d,\n", this.bridgesSkipped);
+    }
+    this.write(pw, "\"bridges\":[");
     int written = 0;
     for (SummaryDocument entry : bridges) {
       String lines = this.formatNodeStatus(entry);
       if (lines.length() > 0) {
-        this.charsWritten += (written > 0 ? 2 : 1) + lines.length();
-        pw.print((written++ > 0 ? ",\n" : "\n") + lines);
+        this.write(pw, (written++ > 0 ? ",\n" : "\n") + lines);
       }
     }
-    String footer = "\n]}\n";
-    this.charsWritten += footer.length();
-    pw.print(footer);
+    this.write(pw, "\n]");
+    if (this.bridgesTruncated > 0) {
+      this.write(pw, ",\n\"bridges_truncated\":%d", this.bridgesTruncated);
+    }
+    this.write(pw, "}\n");
+  }
+
+  private void write(PrintWriter pw, String format, Object ... args) {
+    String stringToWrite = String.format(format, args);
+    this.charsWritten += stringToWrite.length();
+    pw.write(stringToWrite);
   }
 
   private String formatNodeStatus(SummaryDocument entry) {

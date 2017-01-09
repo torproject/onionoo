@@ -536,6 +536,18 @@ public class RequestHandler {
     this.orderedBridges.addAll(uniqueBridges);
   }
 
+  private int relaysSkipped = 0;
+
+  public int getRelaysSkipped() {
+    return this.relaysSkipped;
+  }
+
+  private int bridgesSkipped = 0;
+
+  public int getBridgesSkipped() {
+    return this.bridgesSkipped;
+  }
+
   private void offset() {
     if (this.offset == null) {
       /* Not skipping first results. */
@@ -547,10 +559,24 @@ public class RequestHandler {
         || !this.orderedBridges.isEmpty())) {
       if (!this.orderedRelays.isEmpty()) {
         this.orderedRelays.remove(0);
+        this.relaysSkipped++;
       } else {
         this.orderedBridges.remove(0);
+        this.bridgesSkipped++;
       }
     }
+  }
+
+  private int relaysTruncated = 0;
+
+  public int getRelaysTruncated() {
+    return this.relaysTruncated;
+  }
+
+  private int bridgesTruncated = 0;
+
+  public int getBridgesTruncated() {
+    return this.bridgesTruncated;
   }
 
   private void limit() {
@@ -562,11 +588,13 @@ public class RequestHandler {
     while (!this.orderedRelays.isEmpty()
         && limitValue < this.orderedRelays.size()) {
       this.orderedRelays.remove(this.orderedRelays.size() - 1);
+      this.relaysTruncated++;
     }
     limitValue -= this.orderedRelays.size();
     while (!this.orderedBridges.isEmpty()
         && limitValue < this.orderedBridges.size()) {
       this.orderedBridges.remove(this.orderedBridges.size() - 1);
+      this.bridgesTruncated++;
     }
   }
 

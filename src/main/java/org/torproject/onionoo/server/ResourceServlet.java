@@ -321,6 +321,10 @@ public class ResourceServlet extends HttpServlet {
     rb.setBridgesPublishedString(rh.getBridgesPublishedString());
     rb.setOrderedRelays(rh.getOrderedRelays());
     rb.setOrderedBridges(rh.getOrderedBridges());
+    rb.setRelaysSkipped(rh.getRelaysSkipped());
+    rb.setBridgesSkipped(rh.getBridgesSkipped());
+    rb.setRelaysTruncated(rh.getRelaysTruncated());
+    rb.setBridgesTruncated(rh.getBridgesTruncated());
     String[] fields = null;
     if (parameterMap.containsKey("fields")) {
       fields = this.parseFieldsParameter(parameterMap.get("fields"));

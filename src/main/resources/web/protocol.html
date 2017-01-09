@@ -17,6 +17,7 @@
     <ul>
         <li><a href="#general">General</a></li>
         <li><a href="#methods">Methods</a></li>
+        <li><a href="#responses">Responses</a></li>
         <li><a href="#summary">Summary documents</a></li>
         <li><a href="#details">Details documents</a></li>
         <li><a href="#history">History objects</a></li>
@@ -187,8 +188,9 @@ documents on August 25, 2015.</li>
 characters of a space-separated fingerprint on November 15, 2015.</li>
 <li><strong>3.1</strong>: Removed optional "family" field on January 18,
 2016.</li>
-<li><strong>3.2</strong>: Extended order parameter to "first_seen" on
-January 11, 2017.</li>
+<li><strong>3.2</strong>: Extended order parameter to "first_seen" and
+added response meta data fields "relays_skipped", "relays_truncated",
+"bridges_skipped", and "bridges_truncated" on January 27, 2017.</li>
 </ul>
 
 </div> <!-- box -->
@@ -523,17 +525,12 @@ limiting step.
 </div> <!-- box -->
 
 <div class="box">
-<a name="summary"></a>
-<h3>Summary documents <a href="#summary">#</a>
-<span class="request-response">
-<a href="summary?limit=4">example request</a>
-</span>
-</h3>
+<a name="responses"></a>
+<h3>Responses <a href="#responses">#</a></h3>
 
-<p>Summary documents contain short summaries of relays with nicknames,
-fingerprints, IP addresses, and running information as well as bridges
-with hashed fingerprints and running information.
-Summary documents contain the following fields:</p>
+<p>Responses all have the same structure, regardless of requested
+method and provided parameters.
+Responses contain the following fields:</p>
 
 <ul class="properties">
 
@@ -564,7 +561,19 @@ Omitted if no major protocol changes are planned.
 <p>
 UTC timestamp (YYYY-MM-DD hh:mm:ss) when the last known relay network
 status consensus started being valid.
-Indicates how recent the relay summaries in this document are.
+Indicates how recent the relay objects in this document are.
+</p>
+</li>
+
+<li>
+<b><font color="blue">relays_skipped</font></b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of skipped relays as requested by a positive "offset" parameter
+value.
+Omitted if zero.
+<font color="blue">Added on January 27, 2017.</font>
 </p>
 </li>
 
@@ -573,7 +582,19 @@ Indicates how recent the relay summaries in this document are.
 <code class="typeof">array of objects</code>
 <span class="required-true">required</span>
 <p>
-Array of relay summary objects as specified below.
+Array of relay objects as specified below.
+</p>
+</li>
+
+<li>
+<b><font color="blue">relays_truncated</font></b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of truncated relays as requested by a positive "limit"
+parameter value.
+Omitted if zero.
+<font color="blue">Added on January 27, 2017.</font>
 </p>
 </li>
 
@@ -584,7 +605,19 @@ Array of relay summary objects as specified below.
 <p>
 UTC timestamp (YYYY-MM-DD hh:mm:ss) when
 the last known bridge network status was published.
-Indicates how recent the bridge summaries in this document are.
+Indicates how recent the bridge objects in this document are.
+</p>
+</li>
+
+<li>
+<b><font color="blue">bridge_skipped</font></b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of skipped bridges as requested by a positive "offset"
+parameter value.
+Omitted if zero.
+<font color="blue">Added on January 27, 2017.</font>
 </p>
 </li>
 
@@ -593,11 +626,37 @@ Indicates how recent the bridge summaries in this document are.
 <code class="typeof">array of objects</code>
 <span class="required-true">required</span>
 <p>
-Array of bridge summary objects as specified below.
+Array of bridge objects as specified below.
+</p>
+</li>
+
+<li>
+<b><font color="blue">bridges_truncated</font></b>
+<code class="typeof">number</code>
+<span class="required-false">optional</span>
+<p>
+Number of truncated bridges as requested by a positive "limit"
+parameter value.
+Omitted if zero.
+<font color="blue">Added on January 27, 2017.</font>
 </p>
 </li>
 
 </ul>
+
+</div> <!-- box -->
+
+<div class="box">
+<a name="summary"></a>
+<h3>Summary documents <a href="#summary">#</a>
+<span class="request-response">
+<a href="summary?limit=4">example request</a>
+</span>
+</h3>
+
+<p>Summary documents contain short summaries of relays with nicknames,
+fingerprints, IP addresses, and running information as well as bridges
+with hashed fingerprints and running information.</p>
 
 <h4>Relay summary objects</h4>
 
@@ -709,73 +768,7 @@ published by Tor network services TorDNSEL and BridgeDB.
 Details documents use the most recently published data from these sources,
 which may lead to contradictions between fields based on different sources
 in rare edge cases.
-Details documents contain the following fields:
 </p>
-
-<ul class="properties">
-
-<li>
-<b>version</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-Onionoo protocol version string.
-</p>
-</li>
-
-<li>
-<b>next_major_version_scheduled</b>
-<code class="typeof">string</code>
-<span class="required-false">optional</span>
-<p>
-UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
-be deployed.
-Omitted if no major protocol changes are planned.
-</p>
-</li>
-
-<li>
-<b>relays_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known relay network status consensus started being valid.
-Indicates how recent the relay details in this document are.
-</p>
-</li>
-
-<li>
-<b>relays</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of relay details objects as specified below.
-</p>
-</li>
-
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Indicates how recent the bridge details in this document are.
-</p>
-</li>
-
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of bridge details objects as specified below.
-</p>
-
-</li>
-
-</ul>
 
 <h4>Relay details objects</h4>
 
@@ -1557,72 +1550,7 @@ bridge's consumed bandwidth for different time intervals.
 Bandwidth documents are only updated when a relay or bridge publishes a
 new server descriptor, which may take up to 18 hours during normal
 operation.
-Bandwidth documents contain the following fields:
 </p>
-
-<ul class="properties">
-
-<li>
-<b>version</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-Onionoo protocol version string.
-</p>
-</li>
-
-<li>
-<b>next_major_version_scheduled</b>
-<code class="typeof">string</code>
-<span class="required-false">optional</span>
-<p>
-UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
-be deployed.
-Omitted if no major protocol changes are planned.
-</p>
-</li>
-
-<li>
-<b>relays_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known relay network status consensus started being valid.
-Indicates how recent the relay bandwidth documents in this document are.
-</p>
-</li>
-
-<li>
-<b>relays</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of relay bandwidth objects as specified below.
-</p>
-</li>
-
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Indicates how recent the bridge bandwidth documents in this document are.
-</p>
-</li>
-
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of bridge bandwidth objects as specified below.
-</p>
-</li>
-
-</ul>
 
 <h4>Relay bandwidth objects</h4>
 
@@ -1742,73 +1670,7 @@ Weights documents contain aggregate statistics of a relay's probability
 to be selected by clients for building paths.
 Weights documents contain different time intervals and are available for
 relays only.
-Weights documents contain the following fields:
 </p>
-
-<ul class="properties">
-
-<li>
-<b>version</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-Onionoo protocol version string.
-</p>
-</li>
-
-<li>
-<b>next_major_version_scheduled</b>
-<code class="typeof">string</code>
-<span class="required-false">optional</span>
-<p>
-UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
-be deployed.
-Omitted if no major protocol changes are planned.
-</p>
-</li>
-
-<li>
-<b>relays_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known relay network status consensus started being valid.
-Indicates how recent the relay weights documents in this document are.
-</p>
-</li>
-
-<li>
-<b>relays</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of relay weights objects as specified below.
-</p>
-</li>
-
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Only included for compatibility reasons with the other document types.
-</p>
-</li>
-
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Empty array of objects that would represent bridge weights documents.
-Only included for compatibility reasons with the other document types.
-</p>
-</li>
-
-</ul>
 
 <h4>Relay weights objects</h4>
 
@@ -1931,74 +1793,7 @@ connecting to a bridge every day.
 There are no clients documents available for relays, just for bridges.
 Clients documents contain different time intervals and are available for
 bridges only.
-Clients documents contain the following fields:
 </p>
-
-<ul class="properties">
-
-<li>
-<b>version</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-Onionoo protocol version string.
-</p>
-</li>
-
-<li>
-<b>next_major_version_scheduled</b>
-<code class="typeof">string</code>
-<span class="required-false">optional</span>
-<p>
-UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
-be deployed.
-Omitted if no major protocol changes are planned.
-</p>
-</li>
-
-<li>
-<b>relays_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known relay network status consensus started being valid.
-Only included for compatibility reasons with the other document types.
-</p>
-</li>
-
-<li>
-<b>relays</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Empty array of objects that would represent relay clients documents.
-Only included for compatibility reasons with the other document types.
-</p>
-</li>
-
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Indicates how recent the bridge clients documents in this document are.
-</p>
-</li>
-
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of bridge clients objects as specified below.
-</p>
-
-</li>
-
-</ul>
 
 <h4>Bridge clients objects</h4>
 
@@ -2119,72 +1914,7 @@ It might be removed in the future without notice.</font>
 Uptime documents contain fractional uptimes of relays and bridges.
 Uptime documents contain different time intervals and are available for
 relays and bridges.
-Uptime documents contain the following fields:
 </p>
-
-<ul class="properties">
-
-<li>
-<b>version</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-Onionoo protocol version string.
-</p>
-</li>
-
-<li>
-<b>next_major_version_scheduled</b>
-<code class="typeof">string</code>
-<span class="required-false">optional</span>
-<p>
-UTC date (YYYY-MM-DD) when the next major protocol version is scheduled to
-be deployed.
-Omitted if no major protocol changes are planned.
-</p>
-</li>
-
-<li>
-<b>relays_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known relay network status consensus started being valid.
-Indicates how recent the relay uptime documents in this document are.
-</p>
-</li>
-
-<li>
-<b>relays</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of relay uptime objects as specified below.
-</p>
-</li>
-
-<li>
-<b>bridges_published</b>
-<code class="typeof">string</code>
-<span class="required-true">required</span>
-<p>
-UTC timestamp (YYYY-MM-DD hh:mm:ss) when
-the last known bridge network status was published.
-Indicates how recent the bridge uptime documents in this document are.
-</p>
-</li>
-
-<li>
-<b>bridges</b>
-<code class="typeof">array of objects</code>
-<span class="required-true">required</span>
-<p>
-Array of bridge uptime objects as specified below.
-</p>
-</li>
-
-</ul>
 
 <h4>Relay uptime objects</h4>
 

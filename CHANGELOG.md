@@ -14,6 +14,8 @@
      parameter equivalents.
    - Exclude bandwidth history values from the future.
    - Extend order parameter to "first_seen".
+   - Add response meta data fields "relays_skipped",
+     "relays_truncated", "bridges_skipped", and "bridges_truncated".
 
  * Minor changes
    - Include XZ binaries in release binaries.

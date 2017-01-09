@@ -298,6 +298,22 @@ public class ResourceServletTest {
     }
   }
 
+  private void assertSkippedReturnedTruncated(String request,
+      int expectedRelaysSkipped, int expectedRelaysReturned,
+      int expectedRelaysTruncated, int expectedBridgesSkipped,
+      int expectedBridgesReturned, int expectedBridgesTruncated) {
+    this.runTest(request);
+    assertNotNull(this.summaryDocument);
+    assertEquals(expectedRelaysSkipped, this.summaryDocument.relays_skipped);
+    assertEquals(expectedRelaysReturned, this.summaryDocument.relays.length);
+    assertEquals(expectedRelaysTruncated,
+        this.summaryDocument.relays_truncated);
+    assertEquals(expectedBridgesSkipped, this.summaryDocument.bridges_skipped);
+    assertEquals(expectedBridgesReturned, this.summaryDocument.bridges.length);
+    assertEquals(expectedBridgesTruncated,
+        this.summaryDocument.bridges_truncated);
+  }
+
   private Map<String, String[]> parseParameters(String request) {
     Map<String, String[]> parameters = null;
     String[] uriParts = request.split("\\?");
@@ -325,8 +341,12 @@ public class ResourceServletTest {
   @SuppressWarnings("MemberName")
   private static class SummaryDocument {
     private String relays_published;
+    private int relays_skipped;
+    private int relays_truncated;
     private RelaySummary[] relays;
     private String bridges_published;
+    private int bridges_skipped;
+    private int bridges_truncated;
     private BridgeSummary[] bridges;
   }
 
@@ -1349,44 +1369,44 @@ public class ResourceServletTest {
 
   @Test()
   public void testOffsetOne() {
-    this.assertSummaryDocument(
-        "/summary?offset=1", 2, null, 3, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?offset=1", 1, 2, 0, 0, 3, 0);
   }
 
   @Test()
   public void testOffsetAllRelays() {
-    this.assertSummaryDocument(
-        "/summary?offset=3", 0, null, 3, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?offset=3", 3, 0, 0, 0, 3, 0);
   }
 
   @Test()
   public void testOffsetAllRelaysAndOneBridge() {
-    this.assertSummaryDocument(
-        "/summary?offset=4", 0, null, 2, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?offset=4", 3, 0, 0, 1, 2, 0);
   }
 
   @Test()
   public void testOffsetAllRelaysAndAllBridges() {
-    this.assertSummaryDocument(
-        "/summary?offset=6", 0, null, 0, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?offset=6", 3, 0, 0, 3, 0, 0);
   }
 
   @Test()
   public void testOffsetMoreThanAllRelaysAndAllBridges() {
-    this.assertSummaryDocument(
-        "/summary?offset=7", 0, null, 0, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?offset=7", 3, 0, 0, 3, 0, 0);
   }
 
   @Test()
   public void testOffsetZero() {
-    this.assertSummaryDocument(
-        "/summary?offset=0", 3, null, 3, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?offset=0", 0, 3, 0, 0, 3, 0);
   }
 
   @Test()
   public void testOffsetMinusOne() {
-    this.assertSummaryDocument(
-        "/summary?offset=-1", 3, null, 3, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?offset=-1", 0, 3, 0, 0, 3, 0);
   }
 
   @Test()
@@ -1397,44 +1417,44 @@ public class ResourceServletTest {
 
   @Test()
   public void testLimitOne() {
-    this.assertSummaryDocument(
-        "/summary?limit=1", 1, null, 0, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?limit=1", 0, 1, 2, 0, 0, 3);
   }
 
   @Test()
   public void testLimitAllRelays() {
-    this.assertSummaryDocument(
-        "/summary?limit=3", 3, null, 0, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?limit=3", 0, 3, 0, 0, 0, 3);
   }
 
   @Test()
   public void testLimitAllRelaysAndOneBridge() {
-    this.assertSummaryDocument(
-        "/summary?limit=4", 3, null, 1, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?limit=4", 0, 3, 0, 0, 1, 2);
   }
 
   @Test()
   public void testLimitAllRelaysAndAllBridges() {
-    this.assertSummaryDocument(
-        "/summary?limit=6", 3, null, 3, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?limit=6", 0, 3, 0, 0, 3, 0);
   }
 
   @Test()
   public void testLimitMoreThanAllRelaysAndAllBridges() {
-    this.assertSummaryDocument(
-        "/summary?limit=7", 3, null, 3, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?limit=7", 0, 3, 0, 0, 3, 0);
   }
 
   @Test()
   public void testLimitZero() {
-    this.assertSummaryDocument(
-        "/summary?limit=0", 0, null, 0, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?limit=0", 0, 0, 3, 0, 0, 3);
   }
 
   @Test()
   public void testLimitMinusOne() {
-    this.assertSummaryDocument(
-        "/summary?limit=-1", 0, null, 0, null);
+    this.assertSkippedReturnedTruncated(
+        "/summary?limit=-1", 0, 0, 3, 0, 0, 3);
   }
 
   @Test()
