@@ -1,4 +1,4 @@
-/* Copyright 2015--2016 The Tor Project
+/* Copyright 2015--2017 The Tor Project
  * See LICENSE for licensing information */
 
 package org.torproject.onionoo.docs;
