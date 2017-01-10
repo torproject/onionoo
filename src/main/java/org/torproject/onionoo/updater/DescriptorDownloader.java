@@ -61,7 +61,7 @@ class DescriptorDownloader {
     }
   }
 
-  private SortedSet<String> localFiles = new TreeSet<String>();
+  private SortedSet<String> localFiles = new TreeSet<>();
 
   public int statLocalFiles() {
     File localDirectory = new File(this.inDir, this.directory);
@@ -73,7 +73,7 @@ class DescriptorDownloader {
     return this.localFiles.size();
   }
 
-  private SortedSet<String> remoteFiles = new TreeSet<String>();
+  private SortedSet<String> remoteFiles = new TreeSet<>();
 
   public int fetchRemoteDirectory() {
     String directoryUrl = this.protocolHostNameResourcePrefix

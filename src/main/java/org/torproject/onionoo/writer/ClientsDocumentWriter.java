@@ -112,8 +112,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       SortedSet<ClientsHistory> history) {
     ClientsDocument clientsDocument = new ClientsDocument();
     clientsDocument.setFingerprint(hashedFingerprint);
-    Map<String, ClientsGraphHistory> averageClients =
-        new LinkedHashMap<String, ClientsGraphHistory>();
+    Map<String, ClientsGraphHistory> averageClients = new LinkedHashMap<>();
     for (int graphIntervalIndex = 0; graphIntervalIndex
         < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
@@ -132,18 +131,15 @@ public class ClientsDocumentWriter implements DocumentWriter {
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
-    List<Double> dataPoints = new ArrayList<Double>();
+    List<Double> dataPoints = new ArrayList<>();
     long intervalStartMillis = ((this.now - graphInterval)
         / dataPointInterval) * dataPointInterval;
     long millis = 0L;
     double responses = 0.0;
     double totalResponses = 0.0;
-    SortedMap<String, Double> totalResponsesByCountry =
-        new TreeMap<String, Double>();
-    SortedMap<String, Double> totalResponsesByTransport =
-        new TreeMap<String, Double>();
-    SortedMap<String, Double> totalResponsesByVersion =
-        new TreeMap<String, Double>();
+    SortedMap<String, Double> totalResponsesByCountry = new TreeMap<>();
+    SortedMap<String, Double> totalResponsesByTransport = new TreeMap<>();
+    SortedMap<String, Double> totalResponsesByVersion = new TreeMap<>();
     for (ClientsHistory hist : history) {
       if (hist.getEndMillis() < intervalStartMillis) {
         continue;
@@ -231,7 +227,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
     graphHistory.setCount(count);
     int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
-    List<Integer> values = new ArrayList<Integer>();
+    List<Integer> values = new ArrayList<>();
     for (int dataPointIndex = firstNonNullIndex; dataPointIndex
         <= lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);
@@ -246,7 +242,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
     }
     graphHistory.setValues(values);
     if (!totalResponsesByCountry.isEmpty()) {
-      SortedMap<String, Float> countries = new TreeMap<String, Float>();
+      SortedMap<String, Float> countries = new TreeMap<>();
       for (Map.Entry<String, Double> e :
           totalResponsesByCountry.entrySet()) {
         if (e.getValue() > totalResponses / 100.0) {
@@ -257,7 +253,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       graphHistory.setCountries(countries);
     }
     if (!totalResponsesByTransport.isEmpty()) {
-      SortedMap<String, Float> transports = new TreeMap<String, Float>();
+      SortedMap<String, Float> transports = new TreeMap<>();
       for (Map.Entry<String, Double> e :
           totalResponsesByTransport.entrySet()) {
         if (e.getValue() > totalResponses / 100.0) {
@@ -268,7 +264,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       graphHistory.setTransports(transports);
     }
     if (!totalResponsesByVersion.isEmpty()) {
-      SortedMap<String, Float> versions = new TreeMap<String, Float>();
+      SortedMap<String, Float> versions = new TreeMap<>();
       for (Map.Entry<String, Double> e :
           totalResponsesByVersion.entrySet()) {
         if (e.getValue() > totalResponses / 100.0) {

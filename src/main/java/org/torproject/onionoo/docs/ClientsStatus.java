@@ -27,8 +27,7 @@ public class ClientsStatus extends Document {
     this.isDirty = false;
   }
 
-  private SortedSet<ClientsHistory> history =
-      new TreeSet<ClientsHistory>();
+  private SortedSet<ClientsHistory> history = new TreeSet<>();
 
   public void setHistory(SortedSet<ClientsHistory> history) {
     this.history = history;
@@ -73,8 +72,7 @@ public class ClientsStatus extends Document {
   /** Compresses the history of clients objects by merging adjacent
    * intervals, depending on how far back in the past they lie. */
   public void compressHistory() {
-    SortedSet<ClientsHistory> uncompressedHistory =
-        new TreeSet<ClientsHistory>(this.history);
+    SortedSet<ClientsHistory> uncompressedHistory = new TreeSet<>(this.history);
     history.clear();
     ClientsHistory lastResponses = null;
     String lastMonthString = "1970-01";

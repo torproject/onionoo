@@ -78,7 +78,7 @@ public class DateTimeHelper {
     }
 
     protected Map<String, DateFormat> initialValue() {
-      return new HashMap<String, DateFormat>();
+      return new HashMap<>();
     }
 
     public void remove() {

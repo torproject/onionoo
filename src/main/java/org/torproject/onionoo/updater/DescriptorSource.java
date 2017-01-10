@@ -34,9 +34,8 @@ public class DescriptorSource {
 
   /** Instantiates a new descriptor source. */
   public DescriptorSource() {
-    this.descriptorQueues = new ArrayList<DescriptorQueue>();
-    this.descriptorListeners =
-        new HashMap<DescriptorType, Set<DescriptorListener>>();
+    this.descriptorQueues = new ArrayList<>();
+    this.descriptorListeners = new HashMap<>();
   }
 
   private DescriptorQueue getDescriptorQueue(

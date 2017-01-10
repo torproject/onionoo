@@ -14,7 +14,7 @@ import java.util.TreeSet;
 
 class MostFrequentString {
 
-  Map<String, Integer> stringFrequencies = new HashMap<String, Integer>();
+  Map<String, Integer> stringFrequencies = new HashMap<>();
 
   void addString(String string) {
     if (!this.stringFrequencies.containsKey(string)) {
@@ -27,15 +27,14 @@ class MostFrequentString {
 
   @Override
   public String toString() {
-    SortedMap<Integer, SortedSet<String>> sortedFrequencies =
-        new TreeMap<Integer, SortedSet<String>>(
+    SortedMap<Integer, SortedSet<String>> sortedFrequencies = new TreeMap<>(
         Collections.reverseOrder());
     if (this.stringFrequencies.isEmpty()) {
       return "null (0)";
     }
     for (Map.Entry<String, Integer> e : stringFrequencies.entrySet()) {
       if (!sortedFrequencies.containsKey(e.getValue())) {
-        sortedFrequencies.put(e.getValue(), new TreeSet<String>(
+        sortedFrequencies.put(e.getValue(), new TreeSet<>(
             Arrays.asList(new String[] { e.getKey() } )));
       } else {
         sortedFrequencies.get(e.getValue()).add(e.getKey());

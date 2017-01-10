@@ -66,13 +66,13 @@ public class ResourceServlet extends HttpServlet {
 
   private static final long CACHE_INTERVAL = 5L * 60L * 1000L;
 
-  private static Set<String> knownParameters = new HashSet<String>(
+  private static Set<String> knownParameters = new HashSet<>(
       Arrays.asList(("type,running,search,lookup,fingerprint,country,as,"
           + "flag,first_seen_days,last_seen_days,contact,order,limit,"
           + "offset,fields,family").split(",")));
 
   private static Set<String> illegalSearchQualifiers =
-      new HashSet<String>(Arrays.asList(("search,fingerprint,order,limit,"
+      new HashSet<>(Arrays.asList(("search,fingerprint,order,limit,"
           + "offset,fields").split(",")));
 
   /** Handles the HTTP GET request in the wrapped <code>request</code> by
@@ -124,7 +124,7 @@ public class ResourceServlet extends HttpServlet {
 
     /* Extract parameters either from the old-style URI or from request
      * parameters. */
-    Map<String, String> parameterMap = new HashMap<String, String>();
+    Map<String, String> parameterMap = new HashMap<>();
     for (Object parameterKey : request.getParameterMap().keySet()) {
       String[] parameterValues =
           request.getParameterValues((String) parameterKey);
@@ -148,7 +148,7 @@ public class ResourceServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      List<String> unqualifiedSearchTerms = new ArrayList<String>();
+      List<String> unqualifiedSearchTerms = new ArrayList<>();
       for (String searchTerm : searchTerms) {
         if (searchTerm.contains(":") && !searchTerm.startsWith("[")) {
           String[] parts = searchTerm.split(":", 2);

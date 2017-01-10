@@ -47,15 +47,13 @@ public class ResponseBuilder {
     this.bridgesPublishedString = bridgesPublishedString;
   }
 
-  private List<SummaryDocument> orderedRelays =
-      new ArrayList<SummaryDocument>();
+  private List<SummaryDocument> orderedRelays = new ArrayList<>();
 
   public void setOrderedRelays(List<SummaryDocument> orderedRelays) {
     this.orderedRelays = orderedRelays;
   }
 
-  private List<SummaryDocument> orderedBridges =
-      new ArrayList<SummaryDocument>();
+  private List<SummaryDocument> orderedBridges = new ArrayList<>();
 
   public void setOrderedBridges(List<SummaryDocument> orderedBridges) {
     this.orderedBridges = orderedBridges;

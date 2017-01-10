@@ -26,11 +26,11 @@ public class NodeStatusTest {
   private void assertFamiliesCanBeDeSerialized(
       String[] declaredFamilyArray, String[] effectiveFamilyArray,
       String[] extendedFamilyArray) {
-    SortedSet<String> declaredFamily = new TreeSet<String>(
+    SortedSet<String> declaredFamily = new TreeSet<>(
         Arrays.asList(declaredFamilyArray));
-    SortedSet<String> effectiveFamily = new TreeSet<String>(
+    SortedSet<String> effectiveFamily = new TreeSet<>(
         Arrays.asList(effectiveFamilyArray));
-    SortedSet<String> extendedFamily = new TreeSet<String>(
+    SortedSet<String> extendedFamily = new TreeSet<>(
         Arrays.asList(extendedFamilyArray));
     NodeStatus nodeStatus = NodeStatus.fromString(GABELMOO_NODE_STATUS);
     nodeStatus.setDeclaredFamily(declaredFamily);

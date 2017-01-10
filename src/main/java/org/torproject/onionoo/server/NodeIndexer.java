@@ -144,31 +144,21 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     }
     documentStore.invalidateDocumentCache();
     Map<String, SummaryDocument> newRelayFingerprintSummaryLines =
-        new HashMap<String, SummaryDocument>();
+        new HashMap<>();
     Map<String, SummaryDocument> newBridgeFingerprintSummaryLines =
-        new HashMap<String, SummaryDocument>();
-    Map<String, Set<String>> newRelaysByCountryCode =
-        new HashMap<String, Set<String>>();
-    Map<String, Set<String>> newRelaysByAsNumber =
-        new HashMap<String, Set<String>>();
-    Map<String, Set<String>> newRelaysByFlag =
-        new HashMap<String, Set<String>>();
-    Map<String, Set<String>> newBridgesByFlag =
-        new HashMap<String, Set<String>>();
-    Map<String, Set<String>> newRelaysByContact =
-        new HashMap<String, Set<String>>();
-    Map<String, Set<String>> newRelaysByFamily =
-        new HashMap<String, Set<String>>();
-    SortedMap<Integer, Set<String>> newRelaysByFirstSeenDays =
-        new TreeMap<Integer, Set<String>>();
-    SortedMap<Integer, Set<String>> newBridgesByFirstSeenDays =
-        new TreeMap<Integer, Set<String>>();
-    SortedMap<Integer, Set<String>> newRelaysByLastSeenDays =
-        new TreeMap<Integer, Set<String>>();
-    SortedMap<Integer, Set<String>> newBridgesByLastSeenDays =
-        new TreeMap<Integer, Set<String>>();
-    Set<SummaryDocument> currentRelays = new HashSet<SummaryDocument>();
-    Set<SummaryDocument> currentBridges = new HashSet<SummaryDocument>();
+        new HashMap<>();
+    Map<String, Set<String>> newRelaysByCountryCode = new HashMap<>();
+    Map<String, Set<String>> newRelaysByAsNumber = new HashMap<>();
+    Map<String, Set<String>> newRelaysByFlag = new HashMap<>();
+    Map<String, Set<String>> newBridgesByFlag = new HashMap<>();
+    Map<String, Set<String>> newRelaysByContact = new HashMap<>();
+    Map<String, Set<String>> newRelaysByFamily = new HashMap<>();
+    SortedMap<Integer, Set<String>> newRelaysByFirstSeenDays = new TreeMap<>();
+    SortedMap<Integer, Set<String>> newBridgesByFirstSeenDays = new TreeMap<>();
+    SortedMap<Integer, Set<String>> newRelaysByLastSeenDays = new TreeMap<>();
+    SortedMap<Integer, Set<String>> newBridgesByLastSeenDays = new TreeMap<>();
+    Set<SummaryDocument> currentRelays = new HashSet<>();
+    Set<SummaryDocument> currentBridges = new HashSet<>();
     SortedSet<String> fingerprints = documentStore.list(
         SummaryDocument.class);
     long relaysLastValidAfterMillis = 0L;
@@ -191,8 +181,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     /* This variable can go away once all Onionoo services had their
      * hourly updater write effective families to summary documents at
      * least once.  Remove this code after September 8, 2015. */
-    SortedMap<String, Set<String>> computedEffectiveFamilies =
-        new TreeMap<String, Set<String>>();
+    SortedMap<String, Set<String>> computedEffectiveFamilies = new TreeMap<>();
     for (SummaryDocument entry : currentRelays) {
       String fingerprint = entry.getFingerprint().toUpperCase();
       String hashedFingerprint = entry.getHashedFingerprint()
@@ -276,7 +265,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     for (Map.Entry<String, Set<String>> e :
         computedEffectiveFamilies.entrySet()) {
       String fingerprint = e.getKey();
-      Set<String> inMutualFamilyRelation = new HashSet<String>();
+      Set<String> inMutualFamilyRelation = new HashSet<>();
       for (String otherFingerprint : e.getValue()) {
         if (computedEffectiveFamilies.containsKey(otherFingerprint)
             && computedEffectiveFamilies.get(otherFingerprint).contains(

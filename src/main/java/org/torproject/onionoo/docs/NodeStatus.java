@@ -76,7 +76,7 @@ public class NodeStatus extends Document {
   }
 
   private SortedSet<String> stringArrayToSortedSet(String[] stringArray) {
-    SortedSet<String> sortedSet = new TreeSet<String>();
+    SortedSet<String> sortedSet = new TreeSet<>();
     if (stringArray != null) {
       sortedSet.addAll(Arrays.asList(stringArray));
     }
@@ -137,7 +137,7 @@ public class NodeStatus extends Document {
    * includes the primary address and all additionally configured
    * onion-routing addresses. */
   public SortedSet<String> getOrAddresses() {
-    SortedSet<String> orAddresses = new TreeSet<String>();
+    SortedSet<String> orAddresses = new TreeSet<>();
     if (this.address != null) {
       orAddresses.add(this.address);
     }
@@ -193,11 +193,9 @@ public class NodeStatus extends Document {
     return this.dirPort;
   }
 
-  private static Map<String, Integer> relayFlagIndexes =
-      new HashMap<String, Integer>();
+  private static Map<String, Integer> relayFlagIndexes = new HashMap<>();
 
-  private static Map<Integer, String> relayFlagStrings =
-      new HashMap<Integer, String>();
+  private static Map<Integer, String> relayFlagStrings = new HashMap<>();
 
   private BitSet relayFlags;
 
@@ -226,7 +224,7 @@ public class NodeStatus extends Document {
 
   @SuppressWarnings("checkstyle:javadocmethod")
   public SortedSet<String> getRelayFlags() {
-    SortedSet<String> result = new TreeSet<String>();
+    SortedSet<String> result = new TreeSet<>();
     if (this.relayFlags != null) {
       for (int i = this.relayFlags.nextSetBit(0); i >= 0;
           i = this.relayFlags.nextSetBit(i + 1)) {
@@ -267,10 +265,10 @@ public class NodeStatus extends Document {
   }
 
   private SortedMap<Long, Set<String>> lastAddresses =
-      new TreeMap<Long, Set<String>>(Collections.reverseOrder());
+      new TreeMap<>(Collections.reverseOrder());
 
   public SortedMap<Long, Set<String>> getLastAddresses() {
-    return new TreeMap<Long, Set<String>>(this.lastAddresses);
+    return new TreeMap<>(this.lastAddresses);
   }
 
   /** Adds addresses and ports together with the time in milliseconds
@@ -278,7 +276,7 @@ public class NodeStatus extends Document {
    * addresses and ports. */
   public void addLastAddresses(long lastSeenMillis, String address,
       int orPort, int dirPort, SortedSet<String> orAddressesAndPorts) {
-    Set<String> addressesAndPorts = new HashSet<String>();
+    Set<String> addressesAndPorts = new HashSet<>();
     addressesAndPorts.add(address + ":" + orPort);
     if (dirPort > 0) {
       addressesAndPorts.add(address + ":" + dirPort);
@@ -332,7 +330,7 @@ public class NodeStatus extends Document {
   }
 
   public SortedSet<String> getExitAddresses() {
-    return new TreeSet<String>(this.exitAddresses);
+    return new TreeSet<>(this.exitAddresses);
   }
 
   /* GeoIP lookup results: */
@@ -396,7 +394,7 @@ public class NodeStatus extends Document {
    * declared family that are not in a mutual family relationship with
    * this relay. */
   public SortedSet<String> getAllegedFamily() {
-    SortedSet<String> allegedFamily = new TreeSet<String>(
+    SortedSet<String> allegedFamily = new TreeSet<>(
         stringArrayToSortedSet(this.declaredFamily));
     allegedFamily.removeAll(stringArrayToSortedSet(this.effectiveFamily));
     return allegedFamily;
@@ -406,7 +404,7 @@ public class NodeStatus extends Document {
    * reached via mutual family relationships except for those that can be
    * reached directly via such a relationship. */
   public SortedSet<String> getIndirectFamily() {
-    SortedSet<String> indirectFamily = new TreeSet<String>(
+    SortedSet<String> indirectFamily = new TreeSet<>(
         stringArrayToSortedSet(this.extendedFamily));
     indirectFamily.removeAll(stringArrayToSortedSet(this.effectiveFamily));
     return indirectFamily;
@@ -433,8 +431,8 @@ public class NodeStatus extends Document {
       NodeStatus nodeStatus = new NodeStatus(fingerprint);
       nodeStatus.setRelay(parts[0].equals("r"));
       nodeStatus.setNickname(parts[1]);
-      SortedSet<String> orAddressesAndPorts = new TreeSet<String>();
-      SortedSet<String> exitAddresses = new TreeSet<String>();
+      SortedSet<String> orAddressesAndPorts = new TreeSet<>();
+      SortedSet<String> exitAddresses = new TreeSet<>();
       String addresses = parts[3];
       String address = null;
       if (addresses.contains(";")) {
@@ -471,7 +469,7 @@ public class NodeStatus extends Document {
       int dirPort = Integer.parseInt(parts[7]);
       nodeStatus.setOrPort(orPort);
       nodeStatus.setDirPort(dirPort);
-      nodeStatus.setRelayFlags(new TreeSet<String>(
+      nodeStatus.setRelayFlags(new TreeSet<>(
           Arrays.asList(parts[8].split(","))));
       nodeStatus.setConsensusWeight(Long.parseLong(parts[9]));
       nodeStatus.setCountryCode(parts[10]);
@@ -523,9 +521,9 @@ public class NodeStatus extends Document {
          *  2. indirect members that can be reached via others only.
          * Each group contains zero or more ';'-separated fingerprints. */
         String[] groups = parts[22].split(":", -1);
-        SortedSet<String> allegedFamily = new TreeSet<String>();
-        SortedSet<String> effectiveFamily = new TreeSet<String>();
-        SortedSet<String> indirectFamily = new TreeSet<String>();
+        SortedSet<String> allegedFamily = new TreeSet<>();
+        SortedSet<String> effectiveFamily = new TreeSet<>();
+        SortedSet<String> indirectFamily = new TreeSet<>();
         if (groups[0].length() > 0) {
           allegedFamily.addAll(Arrays.asList(groups[0].split(";")));
         }
@@ -535,12 +533,12 @@ public class NodeStatus extends Document {
         if (groups.length > 2 && groups[2].length() > 0) {
           indirectFamily.addAll(Arrays.asList(groups[2].split(";")));
         }
-        SortedSet<String> declaredFamily = new TreeSet<String>();
+        SortedSet<String> declaredFamily = new TreeSet<>();
         declaredFamily.addAll(allegedFamily);
         declaredFamily.addAll(effectiveFamily);
         nodeStatus.setDeclaredFamily(declaredFamily);
         nodeStatus.setEffectiveFamily(effectiveFamily);
-        SortedSet<String> extendedFamily = new TreeSet<String>();
+        SortedSet<String> extendedFamily = new TreeSet<>();
         extendedFamily.addAll(effectiveFamily);
         extendedFamily.addAll(indirectFamily);
         nodeStatus.setExtendedFamily(extendedFamily);

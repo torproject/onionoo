@@ -32,12 +32,12 @@ public class LookupServiceTest {
 
   private LookupService lookupService;
 
-  private SortedSet<String> addressStrings = new TreeSet<String>();
+  private SortedSet<String> addressStrings = new TreeSet<>();
 
   private SortedMap<String, LookupResult> lookupResults;
 
   private void populateLines() {
-    this.geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    this.geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     this.geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
@@ -48,7 +48,7 @@ public class LookupServiceTest {
         + "0,94035,37.3860,-122.0838");
     this.geoLite2CityBlocksIPv4Lines.add("8.8.9.0/24,6252001,6252001,,0,"
         + "0,,38.0000,-97.0000");
-    this.geoLite2CityLocationsEnLines = new ArrayList<String>();
+    this.geoLite2CityLocationsEnLines = new ArrayList<>();
     this.geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -59,7 +59,7 @@ public class LookupServiceTest {
     this.geoLite2CityLocationsEnLines.add("5375480,en,NA,"
         + "\"North America\",US,\"United States\",CA,California,,,"
         + "\"Mountain View\",807,America/Los_Angeles");
-    this.geoipAsNum2Lines = new ArrayList<String>();
+    this.geoipAsNum2Lines = new ArrayList<>();
     this.geoipAsNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
         + "Communications\"");
     this.geoipAsNum2Lines.add("134744064,134744319,\"AS15169 Google "
@@ -252,7 +252,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupNoCorrespondingLocation() {
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -267,7 +267,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupBlocksStartNotANumber() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
@@ -281,7 +281,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupBlocksLocationX() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
@@ -294,7 +294,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupBlocksLocationEmpty() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
@@ -307,7 +307,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupBlocksTooFewFields() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
@@ -320,7 +320,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupBlocksExtraneousField() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
@@ -334,7 +334,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupBlocksThreeExtraneousFields() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
@@ -348,7 +348,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupLocationLocIdNotANumber() {
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -363,7 +363,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupLocationTooFewFields() {
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -378,7 +378,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupGeoipAsNum2EndBeforeStart() {
-    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    List<String> geoipAsNum2Lines = new ArrayList<>();
     geoipAsNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
         + "Communications\"");
     geoipAsNum2Lines.add("134744319,134744064,\"AS15169 Google Inc.\"");
@@ -391,7 +391,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupGeoipAsNum2StartNotANumber() {
-    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    List<String> geoipAsNum2Lines = new ArrayList<>();
     geoipAsNum2Lines.add("one,134744319,\"AS15169 Google Inc.\"");
     this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
         null, null, null, null, null, null, null);
@@ -399,7 +399,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupGeoipAsNum2StartTooLarge() {
-    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    List<String> geoipAsNum2Lines = new ArrayList<>();
     geoipAsNum2Lines.add("1" + String.valueOf(Long.MAX_VALUE)
         + ",134744319,\"AS15169 Google Inc.\"");
     this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
@@ -408,7 +408,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupGeoipAsNum2TooFewFields() {
-    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    List<String> geoipAsNum2Lines = new ArrayList<>();
     geoipAsNum2Lines.add("134744064,134744319");
     this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
         null, null, null, null, null, null, null);
@@ -416,7 +416,7 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupGeoipAsNum2NoAsName() {
-    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    List<String> geoipAsNum2Lines = new ArrayList<>();
     geoipAsNum2Lines.add("134743296,134744063,AS3356");
     geoipAsNum2Lines.add("134744064,134744319,AS15169");
     geoipAsNum2Lines.add("134744320,134750463,AS3356");
@@ -428,7 +428,7 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationTurkey() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
@@ -441,7 +441,7 @@ public class LookupServiceTest {
         + "40.0781,29.5133");
     geoLite2CityBlocksIPv4Lines.add("81.215.1.0/24,749748,298795,,0,0,,"
         + "40.6000,33.6153");
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -476,14 +476,14 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationLatvia() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
         + "longitude");
     geoLite2CityBlocksIPv4Lines.add("78.28.192.0/24,456202,458258,,0,0,,"
         + "56.5000,27.3167");
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -499,14 +499,14 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationAzerbaijan() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
         + "longitude");
     geoLite2CityBlocksIPv4Lines.add("94.20.148.0/24,585170,587116,,0,0,,"
         + "41.1919,47.1706");
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -523,14 +523,14 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationVietnam() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
         + "longitude");
     geoLite2CityBlocksIPv4Lines.add("115.78.92.0/23,1587976,1562822,,0,0,"
         + ",10.2333,106.3833");
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -547,14 +547,14 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationJapan() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
         + "longitude");
     geoLite2CityBlocksIPv4Lines.add("113.154.131.0/24,1848333,1861060,,0,"
         + "0,1012236,35.8000,139.1833");
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -571,14 +571,14 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationDenmark() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
         + "longitude");
     geoLite2CityBlocksIPv4Lines.add("2.110.246.0/24,2625001,2623032,,0,0,"
         + "5970,54.8880,10.4112");
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -596,14 +596,14 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationGermany() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
         + "longitude");
     geoLite2CityBlocksIPv4Lines.add("37.209.30.128/25,2947444,2921044,,0,"
         + "0,,48.6833,9.0167");
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -621,14 +621,14 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationPoland() {
-    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<String>();
+    List<String> geoLite2CityBlocksIPv4Lines = new ArrayList<>();
     geoLite2CityBlocksIPv4Lines.add("network,geoname_id,"
         + "registered_country_geoname_id,represented_country_geoname_id,"
         + "is_anonymous_proxy,is_satellite_provider,postal_code,latitude,"
         + "longitude");
     geoLite2CityBlocksIPv4Lines.add("5.185.94.0/24,3099434,798544,,0,0,,"
         + "54.3608,18.6583");
-    List<String> geoLite2CityLocationsEnLines = new ArrayList<String>();
+    List<String> geoLite2CityLocationsEnLines = new ArrayList<>();
     geoLite2CityLocationsEnLines.add("geoname_id,locale_code,"
         + "continent_code,continent_name,country_iso_code,country_name,"
         + "subdivision_1_iso_code,subdivision_1_name,"
@@ -645,7 +645,7 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationAsNameNonAscii() {
-    List<String> geoipAsNum2Lines = new ArrayList<String>();
+    List<String> geoipAsNum2Lines = new ArrayList<>();
     geoipAsNum2Lines.add("3207917568,3207919615,\"AS52693 Conectel "
         + "Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME\"");
     geoipAsNum2Lines.add("3211196416,3211198463,\"AS262934 "

@@ -29,8 +29,7 @@ public class BandwidthStatus extends Document {
     this.isDirty = false;
   }
 
-  private SortedMap<Long, long[]> writeHistory =
-      new TreeMap<Long, long[]>();
+  private SortedMap<Long, long[]> writeHistory = new TreeMap<>();
 
   public void setWriteHistory(SortedMap<Long, long[]> writeHistory) {
     this.writeHistory = writeHistory;
@@ -40,8 +39,7 @@ public class BandwidthStatus extends Document {
     return this.writeHistory;
   }
 
-  private SortedMap<Long, long[]> readHistory =
-      new TreeMap<Long, long[]>();
+  private SortedMap<Long, long[]> readHistory = new TreeMap<>();
 
   public void setReadHistory(SortedMap<Long, long[]> readHistory) {
     this.readHistory = readHistory;
@@ -117,8 +115,7 @@ public class BandwidthStatus extends Document {
   }
 
   private void compressHistory(SortedMap<Long, long[]> history) {
-    SortedMap<Long, long[]> uncompressedHistory =
-        new TreeMap<Long, long[]>(history);
+    SortedMap<Long, long[]> uncompressedHistory = new TreeMap<>(history);
     history.clear();
     long lastStartMillis = 0L;
     long lastEndMillis = 0L;

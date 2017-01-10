@@ -56,7 +56,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     DetailsDocument detailsDocument = new DetailsDocument();
     detailsDocument.setNickname(detailsStatus.getNickname());
     detailsDocument.setFingerprint(fingerprint);
-    List<String> orAddresses = new ArrayList<String>();
+    List<String> orAddresses = new ArrayList<>();
     orAddresses.add(detailsStatus.getAddress() + ":"
         + detailsStatus.getOrPort());
     for (String orAddress : detailsStatus.getOrAddressesAndPorts()) {
@@ -80,8 +80,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     String portList = detailsStatus.getPortList();
     if (defaultPolicy != null && (defaultPolicy.equals("accept")
         || defaultPolicy.equals("reject")) && portList != null) {
-      Map<String, List<String>> exitPolicySummary =
-          new HashMap<String, List<String>>();
+      Map<String, List<String>> exitPolicySummary = new HashMap<>();
       List<String> portsOrPortRanges = Arrays.asList(portList.split(","));
       exitPolicySummary.put(defaultPolicy, portsOrPortRanges);
       detailsDocument.setExitPolicySummary(exitPolicySummary);
@@ -118,7 +117,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setPlatform(detailsStatus.getPlatform());
     if (detailsStatus.getAllegedFamily() != null
         && !detailsStatus.getAllegedFamily().isEmpty()) {
-      SortedSet<String> allegedFamily = new TreeSet<String>();
+      SortedSet<String> allegedFamily = new TreeSet<>();
       for (String familyMember : detailsStatus.getAllegedFamily()) {
         if (familyMember.length() >= 40) {
           allegedFamily.add("$" + familyMember);
@@ -130,7 +129,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     }
     if (detailsStatus.getEffectiveFamily() != null
         && !detailsStatus.getEffectiveFamily().isEmpty()) {
-      SortedSet<String> effectiveFamily = new TreeSet<String>();
+      SortedSet<String> effectiveFamily = new TreeSet<>();
       for (String familyMember : detailsStatus.getEffectiveFamily()) {
         effectiveFamily.add("$" + familyMember);
       }
@@ -138,7 +137,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     }
     if (detailsStatus.getIndirectFamily() != null
         && !detailsStatus.getIndirectFamily().isEmpty()) {
-      SortedSet<String> indirectFamily = new TreeSet<String>();
+      SortedSet<String> indirectFamily = new TreeSet<>();
       for (String familyMember : detailsStatus.getIndirectFamily()) {
         indirectFamily.add("$" + familyMember);
       }
@@ -149,10 +148,10 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setHibernating(detailsStatus.getHibernating());
     if (detailsStatus.getExitAddresses() != null) {
       SortedSet<String> exitAddressesWithoutOrAddresses =
-          new TreeSet<String>(detailsStatus.getExitAddresses().keySet());
+          new TreeSet<>(detailsStatus.getExitAddresses().keySet());
       exitAddressesWithoutOrAddresses.removeAll(
           detailsStatus.getOrAddresses());
-      detailsDocument.setExitAddresses(new ArrayList<String>(
+      detailsDocument.setExitAddresses(new ArrayList<>(
           exitAddressesWithoutOrAddresses));
     }
     detailsDocument.setMeasured(detailsStatus.getMeasured());
@@ -165,7 +164,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setNickname(detailsStatus.getNickname());
     detailsDocument.setHashedFingerprint(fingerprint);
     String address = detailsStatus.getAddress();
-    List<String> orAddresses = new ArrayList<String>();
+    List<String> orAddresses = new ArrayList<>();
     orAddresses.add(address + ":" + detailsStatus.getOrPort());
     SortedSet<String> orAddressesAndPorts =
         detailsStatus.getOrAddressesAndPorts();

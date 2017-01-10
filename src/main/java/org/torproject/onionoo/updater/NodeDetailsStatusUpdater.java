@@ -82,8 +82,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   private long now;
 
-  private SortedMap<String, NodeStatus> knownNodes =
-      new TreeMap<String, NodeStatus>();
+  private SortedMap<String, NodeStatus> knownNodes = new TreeMap<>();
 
   private long relaysLastValidAfterMillis = -1L;
 
@@ -145,8 +144,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
-  private Map<String, SortedSet<String>> declaredFamilies =
-      new HashMap<String, SortedSet<String>>();
+  private Map<String, SortedSet<String>> declaredFamilies = new HashMap<>();
 
   private void processRelayServerDescriptor(
       ServerDescriptor descriptor) {
@@ -178,7 +176,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     detailsStatus.setContact(descriptor.getContact());
     detailsStatus.setPlatform(descriptor.getPlatform());
     if (descriptor.getFamilyEntries() != null) {
-      SortedSet<String> declaredFamily = new TreeSet<String>();
+      SortedSet<String> declaredFamily = new TreeSet<>();
       for (String familyMember : descriptor.getFamilyEntries()) {
         if (familyMember.startsWith("$") && familyMember.length() >= 41) {
           declaredFamily.add(
@@ -193,8 +191,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         && (descriptor.getIpv6DefaultPolicy().equals("accept")
         || descriptor.getIpv6DefaultPolicy().equals("reject"))
         && descriptor.getIpv6PortList() != null) {
-      Map<String, List<String>> exitPolicyV6Summary =
-          new HashMap<String, List<String>>();
+      Map<String, List<String>> exitPolicyV6Summary = new HashMap<>();
       List<String> portsOrPortRanges = Arrays.asList(
           descriptor.getIpv6PortList().split(","));
       exitPolicyV6Summary.put(descriptor.getIpv6DefaultPolicy(),
@@ -206,8 +203,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.documentStore.store(detailsStatus, fingerprint);
   }
 
-  private Map<String, Map<String, Long>> exitListEntries =
-      new HashMap<String, Map<String, Long>>();
+  private Map<String, Map<String, Long>> exitListEntries = new HashMap<>();
 
   private void processExitList(ExitList exitList) {
     for (ExitList.Entry exitListEntry : exitList.getEntries()) {
@@ -219,8 +215,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           continue;
         }
         if (!this.exitListEntries.containsKey(fingerprint)) {
-          this.exitListEntries.put(fingerprint,
-              new HashMap<String, Long>());
+          this.exitListEntries.put(fingerprint, new HashMap<String, Long>());
         }
         String exitAddress = exitAddressScanMillis.getKey();
         if (!this.exitListEntries.get(fingerprint).containsKey(
@@ -234,11 +229,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
-  private Map<String, Long> lastSeenUnmeasured =
-      new HashMap<String, Long>();
+  private Map<String, Long> lastSeenUnmeasured = new HashMap<>();
 
-  private Map<String, Long> lastSeenMeasured =
-      new HashMap<String, Long>();
+  private Map<String, Long> lastSeenMeasured = new HashMap<>();
 
   private void processRelayNetworkStatusConsensus(
       RelayNetworkStatusConsensus consensus) {
@@ -248,7 +241,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
     Set<String> recommendedVersions = null;
     if (consensus.getRecommendedServerVersions() != null) {
-      recommendedVersions = new HashSet<String>();
+      recommendedVersions = new HashSet<>();
       for (String recommendedVersion :
           consensus.getRecommendedServerVersions()) {
         recommendedVersions.add("Tor " + recommendedVersion);
@@ -266,7 +259,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       String address = entry.getAddress();
       int orPort = entry.getOrPort();
       int dirPort = entry.getDirPort();
-      SortedSet<String> orAddressesAndPorts = new TreeSet<String>(
+      SortedSet<String> orAddressesAndPorts = new TreeSet<>(
           entry.getOrAddresses());
       nodeStatus.addLastAddresses(validAfterMillis, address, orPort,
           dirPort, orAddressesAndPorts);
@@ -374,7 +367,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         nodeStatus.setRelay(false);
         nodeStatus.setNickname(entry.getNickname());
         nodeStatus.setAddress(entry.getAddress());
-        nodeStatus.setOrAddressesAndPorts(new TreeSet<String>(
+        nodeStatus.setOrAddressesAndPorts(new TreeSet<>(
             entry.getOrAddresses()));
         nodeStatus.setOrPort(entry.getOrPort());
         nodeStatus.setDirPort(entry.getDirPort());
@@ -405,9 +398,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   /* Step 2: read node statuses from disk. */
 
-  private SortedSet<String> currentRelays = new TreeSet<String>();
+  private SortedSet<String> currentRelays = new TreeSet<>();
 
-  private SortedSet<String> runningRelays = new TreeSet<String>();
+  private SortedSet<String> runningRelays = new TreeSet<>();
 
   private void readNodeStatuses() {
     SortedSet<String> previouslyKnownNodes = this.documentStore.list(
@@ -534,8 +527,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
    * probabilities. */
 
   private void startReverseDomainNameLookups() {
-    Map<String, Long> addressLastLookupTimes =
-        new HashMap<String, Long>();
+    Map<String, Long> addressLastLookupTimes = new HashMap<>();
     for (String fingerprint : this.currentRelays) {
       NodeStatus nodeStatus = this.knownNodes.get(fingerprint);
       addressLastLookupTimes.put(nodeStatus.getAddress(),
@@ -545,11 +537,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.reverseDomainNameResolver.startReverseDomainNameLookups();
   }
 
-  private SortedMap<String, LookupResult> geoIpLookupResults =
-      new TreeMap<String, LookupResult>();
+  private SortedMap<String, LookupResult> geoIpLookupResults = new TreeMap<>();
 
   private void lookUpCitiesAndASes() {
-    SortedSet<String> addressStrings = new TreeSet<String>();
+    SortedSet<String> addressStrings = new TreeSet<>();
     for (String fingerprint : this.currentRelays) {
       NodeStatus nodeStatus = this.knownNodes.get(fingerprint);
       addressStrings.add(nodeStatus.getAddress());
@@ -571,17 +562,13 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
   }
 
-  private SortedMap<String, Float> consensusWeightFractions =
-      new TreeMap<String, Float>();
+  private SortedMap<String, Float> consensusWeightFractions = new TreeMap<>();
 
-  private SortedMap<String, Float> guardProbabilities =
-      new TreeMap<String, Float>();
+  private SortedMap<String, Float> guardProbabilities = new TreeMap<>();
 
-  private SortedMap<String, Float> middleProbabilities =
-      new TreeMap<String, Float>();
+  private SortedMap<String, Float> middleProbabilities = new TreeMap<>();
 
-  private SortedMap<String, Float> exitProbabilities =
-      new TreeMap<String, Float>();
+  private SortedMap<String, Float> exitProbabilities = new TreeMap<>();
 
   private void calculatePathSelectionProbabilities() {
     boolean consensusContainsBandwidthWeights = false;
@@ -594,7 +581,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     double wee = 0.0;
     double wed = 0.0;
     if (this.lastBandwidthWeights != null) {
-      SortedSet<String> weightKeys = new TreeSet<String>(Arrays.asList(
+      SortedSet<String> weightKeys = new TreeSet<>(Arrays.asList(
           "Wgg,Wgd,Wmg,Wmm,Wme,Wmd,Wee,Wed".split(",")));
       weightKeys.removeAll(this.lastBandwidthWeights.keySet());
       if (weightKeys.isEmpty()) {
@@ -615,14 +602,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           + "this execution.");
       return;
     }
-    SortedMap<String, Double> consensusWeights =
-        new TreeMap<String, Double>();
-    SortedMap<String, Double> guardWeights =
-        new TreeMap<String, Double>();
-    SortedMap<String, Double> middleWeights =
-        new TreeMap<String, Double>();
-    SortedMap<String, Double> exitWeights =
-        new TreeMap<String, Double>();
+    SortedMap<String, Double> consensusWeights = new TreeMap<>();
+    SortedMap<String, Double> guardWeights = new TreeMap<>();
+    SortedMap<String, Double> middleWeights = new TreeMap<>();
+    SortedMap<String, Double> exitWeights = new TreeMap<>();
     double totalConsensusWeight = 0.0;
     double totalGuardWeight = 0.0;
     double totalMiddleWeight = 0.0;
@@ -685,8 +668,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   }
 
   private void computeEffectiveAndExtendedFamilies() {
-    SortedMap<String, SortedSet<String>> declaredFamilies =
-        new TreeMap<String, SortedSet<String>>();
+    SortedMap<String, SortedSet<String>> declaredFamilies = new TreeMap<>();
     for (String fingerprint : this.currentRelays) {
       NodeStatus nodeStatus = this.knownNodes.get(fingerprint);
       if (nodeStatus != null && nodeStatus.getDeclaredFamily() != null
@@ -694,13 +676,12 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         declaredFamilies.put(fingerprint, nodeStatus.getDeclaredFamily());
       }
     }
-    SortedMap<String, SortedSet<String>> effectiveFamilies =
-        new TreeMap<String, SortedSet<String>>();
+    SortedMap<String, SortedSet<String>> effectiveFamilies = new TreeMap<>();
     for (Map.Entry<String, SortedSet<String>> e :
         declaredFamilies.entrySet()) {
       String fingerprint = e.getKey();
       SortedSet<String> declaredFamily = e.getValue();
-      SortedSet<String> effectiveFamily = new TreeSet<String>();
+      SortedSet<String> effectiveFamily = new TreeSet<>();
       for (String declaredFamilyMember : declaredFamily) {
         if (declaredFamilies.containsKey(declaredFamilyMember)
             && declaredFamilies.get(declaredFamilyMember).contains(
@@ -712,16 +693,15 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         effectiveFamilies.put(fingerprint, effectiveFamily);
       }
     }
-    SortedMap<String, SortedSet<String>> extendedFamilies =
-        new TreeMap<String, SortedSet<String>>();
-    SortedSet<String> visited = new TreeSet<String>();
+    SortedMap<String, SortedSet<String>> extendedFamilies = new TreeMap<>();
+    SortedSet<String> visited = new TreeSet<>();
     for (String fingerprint : effectiveFamilies.keySet()) {
       if (visited.contains(fingerprint)) {
         continue;
       }
-      SortedSet<String> toVisit = new TreeSet<String>();
+      SortedSet<String> toVisit = new TreeSet<>();
       toVisit.add(fingerprint);
-      SortedSet<String> extendedFamily = new TreeSet<String>();
+      SortedSet<String> extendedFamily = new TreeSet<>();
       while (!toVisit.isEmpty()) {
         String visiting = toVisit.first();
         toVisit.remove(visiting);
@@ -739,7 +719,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       if (extendedFamily.size() > 1) {
         for (String member : extendedFamily) {
           SortedSet<String> extendedFamilyWithoutMember =
-              new TreeSet<String>(extendedFamily);
+              new TreeSet<>(extendedFamily);
           extendedFamilyWithoutMember.remove(member);
           extendedFamilies.put(member, extendedFamilyWithoutMember);
         }
@@ -763,8 +743,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   private long startedRdnsLookups = -1L;
 
-  private SortedMap<String, String> rdnsLookupResults =
-      new TreeMap<String, String>();
+  private SortedMap<String, String> rdnsLookupResults = new TreeMap<>();
 
   private void finishReverseDomainNameLookups() {
     this.reverseDomainNameResolver.finishReverseDomainNameLookups();
@@ -795,7 +774,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
       nodeStatus.setContact(detailsStatus.getContact());
 
-      Map<String, Long> exitAddresses = new HashMap<String, Long>();
+      Map<String, Long> exitAddresses = new HashMap<>();
       if (detailsStatus.getExitAddresses() != null) {
         for (Map.Entry<String, Long> e :
             detailsStatus.getExitAddresses().entrySet()) {
@@ -817,7 +796,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       }
       detailsStatus.setExitAddresses(exitAddresses);
       SortedSet<String> exitAddressesWithoutOrAddresses =
-          new TreeSet<String>(exitAddresses.keySet());
+          new TreeSet<>(exitAddresses.keySet());
       exitAddressesWithoutOrAddresses.removeAll(
           nodeStatus.getOrAddresses());
       nodeStatus.setExitAddresses(exitAddressesWithoutOrAddresses);

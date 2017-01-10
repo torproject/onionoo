@@ -98,8 +98,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
 
   private Map<String, GraphHistory> compileGraphType(
       SortedMap<long[], double[]> history, int graphTypeIndex) {
-    Map<String, GraphHistory> graphs =
-        new LinkedHashMap<String, GraphHistory>();
+    Map<String, GraphHistory> graphs = new LinkedHashMap<>();
     for (int graphIntervalIndex = 0; graphIntervalIndex
         < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
@@ -117,7 +116,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
-    List<Double> dataPoints = new ArrayList<Double>();
+    List<Double> dataPoints = new ArrayList<>();
     long intervalStartMillis = ((this.now - graphInterval)
         / dataPointInterval) * dataPointInterval;
     long totalMillis = 0L;
@@ -188,7 +187,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
     graphHistory.setCount(count);
     int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
-    List<Integer> values = new ArrayList<Integer>();
+    List<Integer> values = new ArrayList<>();
     for (int dataPointIndex = firstNonNullIndex; dataPointIndex
         <= lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);

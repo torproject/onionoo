@@ -52,7 +52,7 @@ public class ReverseDomainNameResolver {
    * threads and returns immediately. */
   public void startReverseDomainNameLookups() {
     this.startedRdnsLookups = this.time.currentTimeMillis();
-    this.rdnsLookupJobs = new HashSet<String>();
+    this.rdnsLookupJobs = new HashSet<>();
     for (Map.Entry<String, Long> e :
         this.addressLastLookupTimes.entrySet()) {
       if (e.getValue() < this.startedRdnsLookups
@@ -60,9 +60,9 @@ public class ReverseDomainNameResolver {
         this.rdnsLookupJobs.add(e.getKey());
       }
     }
-    this.rdnsLookupResults = new HashMap<String, String>();
-    this.rdnsLookupMillis = new ArrayList<Long>();
-    this.rdnsLookupWorkers = new ArrayList<RdnsLookupWorker>();
+    this.rdnsLookupResults = new HashMap<>();
+    this.rdnsLookupMillis = new ArrayList<>();
+    this.rdnsLookupWorkers = new ArrayList<>();
     for (int i = 0; i < RDNS_LOOKUP_WORKERS_NUM; i++) {
       RdnsLookupWorker rdnsLookupWorker = new RdnsLookupWorker(this);
       this.rdnsLookupWorkers.add(rdnsLookupWorker);
@@ -87,7 +87,7 @@ public class ReverseDomainNameResolver {
   /** Returns reverse domain name lookup results. */
   public Map<String, String> getLookupResults() {
     synchronized (this.rdnsLookupResults) {
-      return new HashMap<String, String>(this.rdnsLookupResults);
+      return new HashMap<>(this.rdnsLookupResults);
     }
   }
 

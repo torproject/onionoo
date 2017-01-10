@@ -26,15 +26,13 @@ public class UptimeStatus extends Document {
     this.isDirty = false;
   }
 
-  private SortedSet<UptimeHistory> relayHistory =
-      new TreeSet<UptimeHistory>();
+  private SortedSet<UptimeHistory> relayHistory = new TreeSet<>();
 
   public SortedSet<UptimeHistory> getRelayHistory() {
     return this.relayHistory;
   }
 
-  private SortedSet<UptimeHistory> bridgeHistory =
-      new TreeSet<UptimeHistory>();
+  private SortedSet<UptimeHistory> bridgeHistory = new TreeSet<>();
 
   public SortedSet<UptimeHistory> getBridgeHistory() {
     return this.bridgeHistory;
@@ -69,7 +67,7 @@ public class UptimeStatus extends Document {
     UptimeHistory interval = new UptimeHistory(relay, startMillis, 1,
         flags);
     NavigableSet<UptimeHistory> existingIntervals =
-        new TreeSet<UptimeHistory>(history.headSet(new UptimeHistory(
+        new TreeSet<>(history.headSet(new UptimeHistory(
         relay, startMillis + DateTimeHelper.ONE_HOUR, 0, flags)));
     for (UptimeHistory prev : existingIntervals.descendingSet()) {
       if (prev.isRelay() != interval.isRelay()
@@ -116,8 +114,7 @@ public class UptimeStatus extends Document {
   }
 
   private void compressHistory(SortedSet<UptimeHistory> history) {
-    SortedSet<UptimeHistory> uncompressedHistory =
-        new TreeSet<UptimeHistory>(history);
+    SortedSet<UptimeHistory> uncompressedHistory = new TreeSet<>(history);
     history.clear();
     UptimeHistory lastInterval = null;
     for (UptimeHistory interval : uncompressedHistory) {

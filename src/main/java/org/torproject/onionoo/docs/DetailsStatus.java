@@ -255,7 +255,7 @@ public class DetailsStatus extends Document {
    * includes the primary address and all additionally configured
    * onion-routing addresses. */
   public SortedSet<String> getOrAddresses() {
-    SortedSet<String> orAddresses = new TreeSet<String>();
+    SortedSet<String> orAddresses = new TreeSet<>();
     if (this.address != null) {
       orAddresses.add(this.address);
     }

@@ -59,7 +59,7 @@ public class ClientsGraphHistory {
     return this.count;
   }
 
-  private List<Integer> values = new ArrayList<Integer>();
+  private List<Integer> values = new ArrayList<>();
 
   public void setValues(List<Integer> values) {
     this.values = values;

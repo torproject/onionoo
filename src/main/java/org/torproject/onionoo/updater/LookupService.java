@@ -104,15 +104,14 @@ public class LookupService {
   public SortedMap<String, LookupResult> lookup(
       SortedSet<String> addressStrings) {
 
-    SortedMap<String, LookupResult> lookupResults =
-        new TreeMap<String, LookupResult>();
+    SortedMap<String, LookupResult> lookupResults = new TreeMap<>();
 
     if (!this.hasAllFiles) {
       return lookupResults;
     }
 
     /* Obtain a map from relay IP address strings to numbers. */
-    Map<String, Long> addressStringNumbers = new HashMap<String, Long>();
+    Map<String, Long> addressStringNumbers = new HashMap<>();
     for (String addressString : addressStrings) {
       long addressNumber = this.parseAddressString(addressString);
       if (addressNumber >= 0L) {
@@ -125,12 +124,11 @@ public class LookupService {
 
     /* Obtain a map from IP address numbers to blocks and to latitudes and
        longitudes. */
-    Map<Long, Long> addressNumberBlocks = new HashMap<Long, Long>();
-    Map<Long, Float[]> addressNumberLatLong =
-        new HashMap<Long, Float[]>();
+    Map<Long, Long> addressNumberBlocks = new HashMap<>();
+    Map<Long, Float[]> addressNumberLatLong = new HashMap<>();
     try (BufferedReader br = this.createBufferedReaderFromUtf8File(
         this.geoLite2CityBlocksIPv4CsvFile)) {
-      SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
+      SortedSet<Long> sortedAddressNumbers = new TreeSet<>(
           addressStringNumbers.values());
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
@@ -193,11 +191,10 @@ public class LookupService {
     }
 
     /* Obtain a map from relevant blocks to location lines. */
-    Map<Long, String> blockLocations = new HashMap<Long, String>();
+    Map<Long, String> blockLocations = new HashMap<>();
     try (BufferedReader br = this.createBufferedReaderFromUtf8File(
         this.geoLite2CityLocationsEnCsvFile)) {
-      Set<Long> blockNumbers = new HashSet<Long>(
-          addressNumberBlocks.values());
+      Set<Long> blockNumbers = new HashSet<>(addressNumberBlocks.values());
       String line = br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 13);
@@ -229,10 +226,10 @@ public class LookupService {
     }
 
     /* Obtain a map from IP address numbers to ASN. */
-    Map<Long, String> addressNumberAsn = new HashMap<Long, String>();
+    Map<Long, String> addressNumberAsn = new HashMap<>();
     try (BufferedReader br = this.createBufferedReaderFromIso88591File(
         this.geoIpAsNum2CsvFile)) {
-      SortedSet<Long> sortedAddressNumbers = new TreeSet<Long>(
+      SortedSet<Long> sortedAddressNumbers = new TreeSet<>(
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
       String line;

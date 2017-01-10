@@ -133,11 +133,9 @@ public class RequestHandler {
     this.family = family;
   }
 
-  private Map<String, SummaryDocument> filteredRelays =
-      new HashMap<String, SummaryDocument>();
+  private Map<String, SummaryDocument> filteredRelays = new HashMap<>();
 
-  private Map<String, SummaryDocument> filteredBridges =
-      new HashMap<String, SummaryDocument>();
+  private Map<String, SummaryDocument> filteredBridges = new HashMap<>();
 
   /** Handles this request by filtering by all given parameters and then
    * possibly ordering, offsetting, and limiting results. */
@@ -190,7 +188,7 @@ public class RequestHandler {
       return;
     }
     boolean runningRequested = this.running.equals("true");
-    Set<String> removeRelays = new HashSet<String>();
+    Set<String> removeRelays = new HashSet<>();
     for (Map.Entry<String, SummaryDocument> e
         : filteredRelays.entrySet()) {
       if (e.getValue().isRunning() != runningRequested) {
@@ -200,7 +198,7 @@ public class RequestHandler {
     for (String fingerprint : removeRelays) {
       this.filteredRelays.remove(fingerprint);
     }
-    Set<String> removeBridges = new HashSet<String>();
+    Set<String> removeBridges = new HashSet<>();
     for (Map.Entry<String, SummaryDocument> e
         : filteredBridges.entrySet()) {
       if (e.getValue().isRunning() != runningRequested) {
@@ -223,7 +221,7 @@ public class RequestHandler {
   }
 
   private void filterBySearchTerm(String searchTerm) {
-    Set<String> removeRelays = new HashSet<String>();
+    Set<String> removeRelays = new HashSet<>();
     for (Map.Entry<String, SummaryDocument> e
         : filteredRelays.entrySet()) {
       String fingerprint = e.getKey();
@@ -276,7 +274,7 @@ public class RequestHandler {
     for (String fingerprint : removeRelays) {
       this.filteredRelays.remove(fingerprint);
     }
-    Set<String> removeBridges = new HashSet<String>();
+    Set<String> removeBridges = new HashSet<>();
     for (Map.Entry<String, SummaryDocument> e :
         filteredBridges.entrySet()) {
       String hashedFingerprint = e.getKey();
@@ -356,7 +354,7 @@ public class RequestHandler {
     } else {
       Set<String> relaysWithCountryCode =
           this.nodeIndex.getRelaysByCountryCode().get(countryCode);
-      Set<String> removeRelays = new HashSet<String>();
+      Set<String> removeRelays = new HashSet<>();
       for (String fingerprint : this.filteredRelays.keySet()) {
         if (!relaysWithCountryCode.contains(fingerprint)) {
           removeRelays.add(fingerprint);
@@ -383,7 +381,7 @@ public class RequestHandler {
     } else {
       Set<String> relaysWithAsNumber =
           this.nodeIndex.getRelaysByAsNumber().get(asNumber);
-      Set<String> removeRelays = new HashSet<String>();
+      Set<String> removeRelays = new HashSet<>();
       for (String fingerprint : this.filteredRelays.keySet()) {
         if (!relaysWithAsNumber.contains(fingerprint)) {
           removeRelays.add(fingerprint);
@@ -407,7 +405,7 @@ public class RequestHandler {
     } else {
       Set<String> relaysWithFlag = this.nodeIndex.getRelaysByFlag().get(
           flag);
-      Set<String> removeRelays = new HashSet<String>();
+      Set<String> removeRelays = new HashSet<>();
       for (String fingerprint : this.filteredRelays.keySet()) {
         if (!relaysWithFlag.contains(fingerprint)) {
           removeRelays.add(fingerprint);
@@ -422,7 +420,7 @@ public class RequestHandler {
     } else {
       Set<String> bridgesWithFlag = this.nodeIndex.getBridgesByFlag().get(
           flag);
-      Set<String> removeBridges = new HashSet<String>();
+      Set<String> removeBridges = new HashSet<>();
       for (String fingerprint : this.filteredBridges.keySet()) {
         if (!bridgesWithFlag.contains(fingerprint)) {
           removeBridges.add(fingerprint);
@@ -459,7 +457,7 @@ public class RequestHandler {
   private void filterNodesByDays(
       Map<String, SummaryDocument> filteredNodes,
       SortedMap<Integer, Set<String>> nodesByDays, int[] days) {
-    Set<String> removeNodes = new HashSet<String>();
+    Set<String> removeNodes = new HashSet<>();
     for (Set<String> nodes : nodesByDays.headMap(days[0]).values()) {
       removeNodes.addAll(nodes);
     }
@@ -479,7 +477,7 @@ public class RequestHandler {
       /* Not filtering by contact information. */
       return;
     }
-    Set<String> removeRelays = new HashSet<String>();
+    Set<String> removeRelays = new HashSet<>();
     for (Map.Entry<String, Set<String>> e :
         this.nodeIndex.getRelaysByContact().entrySet()) {
       String contact = e.getKey();
@@ -502,8 +500,7 @@ public class RequestHandler {
       /* Not filtering by relay family. */
       return;
     }
-    Set<String> removeRelays = new HashSet<String>(
-        this.filteredRelays.keySet());
+    Set<String> removeRelays = new HashSet<>(this.filteredRelays.keySet());
     removeRelays.remove(this.family);
     if (this.nodeIndex.getRelaysByFamily().containsKey(this.family)) {
       removeRelays.removeAll(this.nodeIndex.getRelaysByFamily()
@@ -580,15 +577,13 @@ public class RequestHandler {
     }
   }
 
-  private List<SummaryDocument> orderedRelays =
-      new ArrayList<SummaryDocument>();
+  private List<SummaryDocument> orderedRelays = new ArrayList<>();
 
   public List<SummaryDocument> getOrderedRelays() {
     return this.orderedRelays;
   }
 
-  private List<SummaryDocument> orderedBridges =
-      new ArrayList<SummaryDocument>();
+  private List<SummaryDocument> orderedBridges = new ArrayList<>();
 
   public List<SummaryDocument> getOrderedBridges() {
     return this.orderedBridges;

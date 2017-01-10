@@ -20,8 +20,7 @@ public class DummyDocumentStore extends DocumentStore {
   private <T extends Document> SortedMap<String, Document>
       getStoredDocumentsByClass(Class<T> documentType) {
     if (!this.storedDocuments.containsKey(documentType)) {
-      this.storedDocuments.put(documentType,
-          new TreeMap<String, Document>());
+      this.storedDocuments.put(documentType, new TreeMap<String, Document>());
     }
     return this.storedDocuments.get(documentType);
   }
@@ -63,7 +62,7 @@ public class DummyDocumentStore extends DocumentStore {
   public <T extends Document> SortedSet<String> list(
       Class<T> documentType) {
     this.performedListOperations++;
-    SortedSet<String> fingerprints = new TreeSet<String>(
+    SortedSet<String> fingerprints = new TreeSet<>(
         this.getStoredDocumentsByClass(documentType).keySet());
     fingerprints.remove(FINGERPRINT_NULL);
     return fingerprints;

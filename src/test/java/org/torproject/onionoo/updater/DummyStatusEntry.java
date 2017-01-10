@@ -59,7 +59,7 @@ public class DummyStatusEntry implements NetworkStatusEntry {
     return null;
   }
 
-  private SortedSet<String> flags = new TreeSet<String>();
+  private SortedSet<String> flags = new TreeSet<>();
 
   public void addFlag(String flag) {
     this.flags.add(flag);

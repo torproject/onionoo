@@ -66,7 +66,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
   }
 
   private SortedMap<String, SortedSet<ClientsHistory>> newResponses =
-      new TreeMap<String, SortedSet<ClientsHistory>>();
+      new TreeMap<>();
 
   private void processBridgeExtraInfoDescriptor(
       ExtraInfoDescriptor descriptor) {
@@ -125,8 +125,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
   private SortedMap<String, Double> weightResponsesWithUniqueIps(
       double totalResponses, SortedMap<String, Integer> uniqueIps,
       String omitString) {
-    SortedMap<String, Double> weightedResponses =
-        new TreeMap<String, Double>();
+    SortedMap<String, Double> weightedResponses = new TreeMap<>();
     int totalUniqueIps = 0;
     if (uniqueIps != null) {
       for (Map.Entry<String, Integer> e : uniqueIps.entrySet()) {

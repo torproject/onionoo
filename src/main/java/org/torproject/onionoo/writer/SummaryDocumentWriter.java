@@ -65,7 +65,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
         }
         continue;
       }
-      List<String> addresses = new ArrayList<String>();
+      List<String> addresses = new ArrayList<>();
       addresses.add(nodeStatus.getAddress());
       for (String orAddress : nodeStatus.getOrAddresses()) {
         if (!addresses.contains(orAddress)) {

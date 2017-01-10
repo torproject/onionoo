@@ -95,13 +95,12 @@ public class BandwidthDocumentWriter implements DocumentWriter {
 
   private Map<String, GraphHistory> compileGraphType(
       SortedMap<Long, long[]> history) {
-    Map<String, GraphHistory> graphs =
-        new LinkedHashMap<String, GraphHistory>();
+    Map<String, GraphHistory> graphs = new LinkedHashMap<>();
     for (int i = 0; i < this.graphIntervals.length; i++) {
       String graphName = this.graphNames[i];
       long graphInterval = this.graphIntervals[i];
       long dataPointInterval = this.dataPointIntervals[i];
-      List<Long> dataPoints = new ArrayList<Long>();
+      List<Long> dataPoints = new ArrayList<>();
       long intervalStartMillis = ((this.now - graphInterval)
           / dataPointInterval) * dataPointInterval;
       long totalMillis = 0L;
@@ -180,7 +179,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       graphHistory.setCount(count);
       int previousNonNullIndex = -2;
       boolean foundTwoAdjacentDataPoints = false;
-      List<Integer> values = new ArrayList<Integer>();
+      List<Integer> values = new ArrayList<>();
       for (int j = firstNonNullIndex; j <= lastNonNullIndex; j++) {
         long dataPoint = dataPoints.get(j);
         if (dataPoint >= 0L) {

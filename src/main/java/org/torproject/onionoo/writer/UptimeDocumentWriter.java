@@ -107,8 +107,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
       SortedSet<UptimeHistory> knownStatuses) {
     UptimeDocument uptimeDocument = new UptimeDocument();
     uptimeDocument.setFingerprint(fingerprint);
-    Map<String, GraphHistory> uptime =
-        new LinkedHashMap<String, GraphHistory>();
+    Map<String, GraphHistory> uptime = new LinkedHashMap<>();
     for (int graphIntervalIndex = 0; graphIntervalIndex
         < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
@@ -119,17 +118,15 @@ public class UptimeDocumentWriter implements DocumentWriter {
       }
     }
     uptimeDocument.setUptime(uptime);
-    SortedMap<String, Map<String, GraphHistory>> flags =
-        new TreeMap<String, Map<String, GraphHistory>>();
-    SortedSet<String> allFlags = new TreeSet<String>();
+    SortedMap<String, Map<String, GraphHistory>> flags = new TreeMap<>();
+    SortedSet<String> allFlags = new TreeSet<>();
     for (UptimeHistory hist : history) {
       if (hist.getFlags() != null) {
         allFlags.addAll(hist.getFlags());
       }
     }
     for (String flag : allFlags) {
-      Map<String, GraphHistory> graphsForFlags =
-          new LinkedHashMap<String, GraphHistory>();
+      Map<String, GraphHistory> graphsForFlags = new LinkedHashMap<>();
       for (int graphIntervalIndex = 0; graphIntervalIndex
           < this.graphIntervals.length; graphIntervalIndex++) {
         String graphName = this.graphNames[graphIntervalIndex];
@@ -157,7 +154,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
         this.dataPointIntervals[graphIntervalIndex];
     int dataPointIntervalHours = (int) (dataPointInterval
         / DateTimeHelper.ONE_HOUR);
-    List<Integer> uptimeDataPoints = new ArrayList<Integer>();
+    List<Integer> uptimeDataPoints = new ArrayList<>();
     long intervalStartMillis = ((this.now - graphInterval)
         / dataPointInterval) * dataPointInterval;
     int uptimeHours = 0;
@@ -200,7 +197,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
           / DateTimeHelper.ONE_HOUR);
     }
     uptimeDataPoints.add(uptimeHours);
-    List<Integer> statusDataPoints = new ArrayList<Integer>();
+    List<Integer> statusDataPoints = new ArrayList<>();
     intervalStartMillis = ((this.now - graphInterval)
         / dataPointInterval) * dataPointInterval;
     int statusHours = -1;
@@ -246,7 +243,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
       statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
           ? statusHours : -1);
     }
-    List<Double> dataPoints = new ArrayList<Double>();
+    List<Double> dataPoints = new ArrayList<>();
     for (int dataPointIndex = 0; dataPointIndex < statusDataPoints.size();
         dataPointIndex++) {
       if (dataPointIndex >= uptimeDataPoints.size()) {
@@ -297,7 +294,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
     graphHistory.setCount(count);
     int previousNonNullIndex = -2;
     boolean foundTwoAdjacentDataPoints = false;
-    List<Integer> values = new ArrayList<Integer>();
+    List<Integer> values = new ArrayList<>();
     for (int dataPointIndex = firstNonNullIndex; dataPointIndex
         <= lastNonNullIndex; dataPointIndex++) {
       double dataPoint = dataPoints.get(dataPointIndex);

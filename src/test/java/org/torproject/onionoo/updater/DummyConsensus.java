@@ -74,7 +74,7 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
     return null;
   }
 
-  private SortedSet<String> knownFlags = new TreeSet<String>();
+  private SortedSet<String> knownFlags = new TreeSet<>();
 
   public void addKnownFlag(String flag) {
     this.knownFlags.add(flag);

@@ -13,8 +13,7 @@ import java.util.Set;
 
 public class DummyDescriptorSource extends DescriptorSource {
 
-  private Map<DescriptorType, Set<Descriptor>> descriptors =
-      new HashMap<DescriptorType, Set<Descriptor>>();
+  private Map<DescriptorType, Set<Descriptor>> descriptors = new HashMap<>();
 
   /** Fills the given collection with descriptors of the requested type. */
   public void provideDescriptors(DescriptorType descriptorType,
@@ -53,7 +52,7 @@ public class DummyDescriptorSource extends DescriptorSource {
 
   @Override
   public void readDescriptors() {
-    Set<DescriptorType> descriptorTypes = new HashSet<DescriptorType>();
+    Set<DescriptorType> descriptorTypes = new HashSet<>();
     descriptorTypes.addAll(this.descriptorListeners.keySet());
     for (DescriptorType descriptorType : descriptorTypes) {
       boolean relay;

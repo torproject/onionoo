@@ -145,7 +145,7 @@ public class SummaryDocument extends Document {
   private List<String> stringArrayToList(String[] stringArray) {
     List<String> list;
     if (stringArray == null) {
-      list = new ArrayList<String>();
+      list = new ArrayList<>();
     } else {
       list = Arrays.asList(stringArray);
     }
@@ -153,7 +153,7 @@ public class SummaryDocument extends Document {
   }
 
   private SortedSet<String> stringArrayToSortedSet(String[] stringArray) {
-    SortedSet<String> sortedSet = new TreeSet<String>();
+    SortedSet<String> sortedSet = new TreeSet<>();
     if (stringArray != null) {
       sortedSet.addAll(Arrays.asList(stringArray));
     }

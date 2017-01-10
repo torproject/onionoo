@@ -115,15 +115,14 @@ public class DocumentStore {
       this.cacheNodeStatuses();
     }
     if (updatedAfter >= this.lastModifiedNodeStatuses) {
-      return new TreeSet<String>(this.updatedNodeStatuses);
+      return new TreeSet<>(this.updatedNodeStatuses);
     } else {
-      return new TreeSet<String>(this.cachedNodeStatuses.keySet());
+      return new TreeSet<>(this.cachedNodeStatuses.keySet());
     }
   }
 
   private void cacheNodeStatuses() {
-    SortedMap<String, NodeStatus> parsedNodeStatuses =
-        new TreeMap<String, NodeStatus>();
+    SortedMap<String, NodeStatus> parsedNodeStatuses = new TreeMap<>();
     File directory = this.statusDir;
     if (directory != null) {
       File summaryFile = new File(directory, "summary");
@@ -150,7 +149,7 @@ public class DocumentStore {
       }
     }
     this.cachedNodeStatuses = parsedNodeStatuses;
-    this.updatedNodeStatuses = new TreeSet<String>();
+    this.updatedNodeStatuses = new TreeSet<>();
   }
 
   private SortedSet<String> listSummaryDocuments(long updatedAfter) {
@@ -158,15 +157,14 @@ public class DocumentStore {
       this.cacheSummaryDocuments();
     }
     if (updatedAfter >= this.lastModifiedSummaryDocuments) {
-      return new TreeSet<String>(this.updatedSummaryDocuments);
+      return new TreeSet<>(this.updatedSummaryDocuments);
     } else {
-      return new TreeSet<String>(this.cachedSummaryDocuments.keySet());
+      return new TreeSet<>(this.cachedSummaryDocuments.keySet());
     }
   }
 
   private void cacheSummaryDocuments() {
-    SortedMap<String, SummaryDocument> parsedSummaryDocuments =
-        new TreeMap<String, SummaryDocument>();
+    SortedMap<String, SummaryDocument> parsedSummaryDocuments = new TreeMap<>();
     if (this.outDir != null) {
       File summaryFile = new File(this.outDir, "summary");
       if (summaryFile.exists()) {
@@ -198,12 +196,12 @@ public class DocumentStore {
       }
     }
     this.cachedSummaryDocuments = parsedSummaryDocuments;
-    this.updatedSummaryDocuments = new TreeSet<String>();
+    this.updatedSummaryDocuments = new TreeSet<>();
   }
 
   private <T extends Document> SortedSet<String> listDocumentFiles(
       Class<T> documentType, long updatedAfter) {
-    SortedSet<String> fingerprints = new TreeSet<String>();
+    SortedSet<String> fingerprints = new TreeSet<>();
     File directory = null;
     String subdirectory = null;
     if (documentType.equals(DetailsStatus.class)) {
@@ -238,7 +236,7 @@ public class DocumentStore {
       subdirectory = "uptimes";
     }
     if (directory != null && subdirectory != null) {
-      Stack<File> files = new Stack<File>();
+      Stack<File> files = new Stack<>();
       files.add(new File(directory, subdirectory));
       while (!files.isEmpty()) {
         File file = files.pop();
@@ -418,7 +416,7 @@ public class DocumentStore {
     boolean isRelay = detailsDocument.getHashedFingerprint() == null;
     boolean running = false;
     String nickname = detailsDocument.getNickname();
-    List<String> addresses = new ArrayList<String>();
+    List<String> addresses = new ArrayList<>();
     String countryCode = null;
     String asNumber = null;
     String contact = null;
@@ -443,7 +441,7 @@ public class DocumentStore {
         }
       }
     }
-    SortedSet<String> relayFlags = new TreeSet<String>();
+    SortedSet<String> relayFlags = new TreeSet<>();
     SortedSet<String> family = null;
     long lastSeenMillis = -1L;
     long consensusWeight = -1L;
@@ -727,10 +725,8 @@ public class DocumentStore {
       return;
     }
     File summaryFile = new File(directory, "summary");
-    SortedMap<String, NodeStatus> cachedRelays =
-        new TreeMap<String, NodeStatus>();
-    SortedMap<String, NodeStatus> cachedBridges =
-        new TreeMap<String, NodeStatus>();
+    SortedMap<String, NodeStatus> cachedRelays = new TreeMap<>();
+    SortedMap<String, NodeStatus> cachedBridges = new TreeMap<>();
     for (Map.Entry<String, NodeStatus> e :
         this.cachedNodeStatuses.entrySet()) {
       if (e.getValue().isRelay()) {

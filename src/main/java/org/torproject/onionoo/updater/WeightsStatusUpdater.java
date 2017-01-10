@@ -97,7 +97,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
     SortedMap<String, Integer> bandwidthWeights =
         consensus.getBandwidthWeights();
     if (bandwidthWeights != null) {
-      SortedSet<String> missingWeightKeys = new TreeSet<String>(
+      SortedSet<String> missingWeightKeys = new TreeSet<>(
           Arrays.asList("Wgg,Wgd,Wmg,Wmm,Wme,Wmd,Wee,Wed".split(",")));
       missingWeightKeys.removeAll(bandwidthWeights.keySet());
       if (missingWeightKeys.isEmpty()) {
@@ -112,14 +112,10 @@ public class WeightsStatusUpdater implements DescriptorListener,
         containsBandwidthWeights = true;
       }
     }
-    SortedMap<String, Double> consensusWeights =
-        new TreeMap<String, Double>();
-    SortedMap<String, Double> guardWeights =
-        new TreeMap<String, Double>();
-    SortedMap<String, Double> middleWeights =
-        new TreeMap<String, Double>();
-    SortedMap<String, Double> exitWeights =
-        new TreeMap<String, Double>();
+    SortedMap<String, Double> consensusWeights = new TreeMap<>();
+    SortedMap<String, Double> guardWeights = new TreeMap<>();
+    SortedMap<String, Double> middleWeights = new TreeMap<>();
+    SortedMap<String, Double> exitWeights = new TreeMap<>();
     double totalConsensusWeight = 0.0;
     double totalGuardWeight = 0.0;
     double totalMiddleWeight = 0.0;
@@ -167,8 +163,7 @@ public class WeightsStatusUpdater implements DescriptorListener,
         }
       }
     }
-    SortedMap<String, double[]> pathSelectionProbabilities =
-        new TreeMap<String, double[]>();
+    SortedMap<String, double[]> pathSelectionProbabilities = new TreeMap<>();
     for (String fingerprint : consensusWeights.keySet()) {
       double[] probabilities = new double[] { -1.0, -1.0, -1.0, -1.0,
           -1.0, -1.0, -1.0 };

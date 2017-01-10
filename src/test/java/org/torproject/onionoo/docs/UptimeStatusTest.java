@@ -208,7 +208,7 @@ public class UptimeStatusTest {
   }
 
   private static final SortedSet<String> RUNNING_FLAG =
-      new TreeSet<String>(Arrays.asList(new String[] { "Running" }));
+      new TreeSet<>(Arrays.asList(new String[] { "Running" }));
 
   @Test()
   public void testAddFlagsToNoFlagsEnd() {

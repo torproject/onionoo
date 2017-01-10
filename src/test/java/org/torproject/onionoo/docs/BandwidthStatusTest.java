@@ -69,8 +69,7 @@ public class BandwidthStatusTest {
       return this.intervalLength;
     }
 
-    private SortedMap<Long, Long> bandwidthValues =
-        new TreeMap<>();
+    private SortedMap<Long, Long> bandwidthValues = new TreeMap<>();
 
     public SortedMap<Long, Long> getBandwidthValues() {
       return this.bandwidthValues;

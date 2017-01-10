@@ -117,7 +117,7 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
 
   private static SortedMap<String, Double> parseResponses(
       String responsesString) {
-    SortedMap<String, Double> responses = new TreeMap<String, Double>();
+    SortedMap<String, Double> responses = new TreeMap<>();
     if (responsesString.length() > 0) {
       for (String pair : responsesString.split(",")) {
         String[] keyValue = pair.split("=");

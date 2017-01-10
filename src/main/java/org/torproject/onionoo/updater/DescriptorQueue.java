@@ -156,7 +156,7 @@ class DescriptorQueue {
     }
     this.historyFile = new File(this.statusDir, historyFileName);
     if (this.historyFile.exists() && this.historyFile.isFile()) {
-      SortedMap<String, Long> excludedFiles = new TreeMap<String, Long>();
+      SortedMap<String, Long> excludedFiles = new TreeMap<>();
       try (BufferedReader br = new BufferedReader(new FileReader(
           this.historyFile))) {
         String line;
@@ -184,8 +184,7 @@ class DescriptorQueue {
     if (this.historyFile == null) {
       return;
     }
-    SortedMap<String, Long> excludedAndParsedFiles =
-        new TreeMap<String, Long>();
+    SortedMap<String, Long> excludedAndParsedFiles = new TreeMap<>();
     excludedAndParsedFiles.putAll(
         this.descriptorReader.getExcludedFiles());
     excludedAndParsedFiles.putAll(this.descriptorReader.getParsedFiles());

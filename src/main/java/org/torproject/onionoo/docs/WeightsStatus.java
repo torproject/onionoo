@@ -40,8 +40,7 @@ public class WeightsStatus extends Document {
       }
     };
 
-  private SortedMap<long[], double[]> history =
-      new TreeMap<long[], double[]>(histComparator);
+  private SortedMap<long[], double[]> history = new TreeMap<>(histComparator);
 
   public void setHistory(SortedMap<long[], double[]> history) {
     this.history = history;

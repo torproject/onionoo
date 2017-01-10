@@ -83,7 +83,7 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     }
     SortedSet<String> flags = null;
     if (parts[0].equals("R")) {
-      flags = new TreeSet<String>();
+      flags = new TreeSet<>();
       for (int i = 3; i < parts.length; i++) {
         flags.add(parts[i]);
       }
