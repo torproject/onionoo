@@ -267,16 +267,12 @@ public class ResourceServlet extends HttpServlet {
       rh.setContact(contactParts);
     }
     if (parameterMap.containsKey("order")) {
-      String orderParameter = parameterMap.get("order").toLowerCase();
-      String orderByField = orderParameter;
-      if (orderByField.startsWith("-")) {
-        orderByField = orderByField.substring(1);
-      }
-      if (!orderByField.equals("consensus_weight")) {
+      String[] order = this.parseOrderParameter(parameterMap.get("order"));
+      if (order == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      rh.setOrder(new String[] { orderParameter });
+      rh.setOrder(order);
     }
     if (parameterMap.containsKey("offset")) {
       String offsetParameter = parameterMap.get("offset");
@@ -481,6 +477,36 @@ public class ResourceServlet extends HttpServlet {
       }
     }
     return parameter.split(" ");
+  }
+
+  private static Pattern orderParameterPattern =
+      Pattern.compile("^[0-9a-zA-Z_,-]*$");
+
+  private static HashSet<String> knownOrderParameters = new HashSet<>(
+      Arrays.asList(new String[] { OrderParameterValues.CONSENSUS_WEIGHT_ASC,
+          OrderParameterValues.CONSENSUS_WEIGHT_DES,
+          OrderParameterValues.FIRST_SEEN_ASC,
+          OrderParameterValues.FIRST_SEEN_DES }));
+
+  private String[] parseOrderParameter(String parameter) {
+    if (!orderParameterPattern.matcher(parameter).matches()) {
+      /* Orders contain illegal character(s). */
+      return null;
+    }
+    String[] orderParameters = parameter.toLowerCase().split(",");
+    Set<String> seenOrderParameters = new HashSet<>();
+    for (String orderParameter : orderParameters) {
+      if (!knownOrderParameters.contains(orderParameter)) {
+        /* Unknown order parameter. */
+        return null;
+      }
+      if (!seenOrderParameters.add(orderParameter.startsWith("-")
+          ? orderParameter.substring(1) : orderParameter)) {
+        /* Duplicate parameter. */
+        return null;
+      }
+    }
+    return orderParameters;
   }
 
   private static Pattern fieldsParameterPattern =

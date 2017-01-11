@@ -8,7 +8,7 @@
 
   <property name="javadoc-title" value="Onionoo API Documentation"/>
   <property name="implementation-title" value="Onionoo" />
-  <property name="onionoo.protocol.version" value="3.1"/>
+  <property name="onionoo.protocol.version" value="3.2"/>
   <property name="release.version"
             value="${onionoo.protocol.version}-1.0.0-dev"/>
   <property name="descriptorversion" value="1.5.0"/>

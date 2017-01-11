@@ -14,11 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -177,7 +174,6 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       }
     }
     Time time = TimeFactory.getTime();
-    List<String> orderRelaysByConsensusWeight = new ArrayList<String>();
     /* This variable can go away once all Onionoo services had their
      * hourly updater write effective families to summary documents at
      * least once.  Remove this code after September 8, 2015. */
@@ -188,11 +184,6 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           .toUpperCase();
       newRelayFingerprintSummaryLines.put(fingerprint, entry);
       newRelayFingerprintSummaryLines.put(hashedFingerprint, entry);
-      long consensusWeight = entry.getConsensusWeight();
-      orderRelaysByConsensusWeight.add(String.format("%020d %s",
-          consensusWeight, fingerprint));
-      orderRelaysByConsensusWeight.add(String.format("%020d %s",
-          consensusWeight, hashedFingerprint));
       if (entry.getCountryCode() != null) {
         String countryCode = entry.getCountryCode();
         if (!newRelaysByCountryCode.containsKey(countryCode)) {
@@ -254,11 +245,6 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       newRelaysByContact.get(contact).add(fingerprint);
       newRelaysByContact.get(contact).add(hashedFingerprint);
     }
-    Collections.sort(orderRelaysByConsensusWeight);
-    List<String> newRelaysByConsensusWeight = new ArrayList<String>();
-    for (String relay : orderRelaysByConsensusWeight) {
-      newRelaysByConsensusWeight.add(relay.split(" ")[1]);
-    }
     /* This loop can go away once all Onionoo services had their hourly
      * updater write effective families to summary documents at least
      * once.  Remove this code after September 8, 2015. */
@@ -313,7 +299,6 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           hashedHashedFingerprint);
     }
     NodeIndex newNodeIndex = new NodeIndex();
-    newNodeIndex.setRelaysByConsensusWeight(newRelaysByConsensusWeight);
     newNodeIndex.setRelayFingerprintSummaryLines(
         newRelayFingerprintSummaryLines);
     newNodeIndex.setBridgeFingerprintSummaryLines(

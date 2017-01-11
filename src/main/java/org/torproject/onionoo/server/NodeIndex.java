@@ -6,7 +6,6 @@ package org.torproject.onionoo.server;
 import org.torproject.onionoo.docs.SummaryDocument;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -40,17 +39,6 @@ class NodeIndex {
 
   public String getBridgesPublishedString() {
     return bridgesPublishedString;
-  }
-
-  private List<String> relaysByConsensusWeight;
-
-  public void setRelaysByConsensusWeight(
-      List<String> relaysByConsensusWeight) {
-    this.relaysByConsensusWeight = relaysByConsensusWeight;
-  }
-
-  public List<String> getRelaysByConsensusWeight() {
-    return relaysByConsensusWeight;
   }
 
   private Map<String, SummaryDocument> relayFingerprintSummaryLines;

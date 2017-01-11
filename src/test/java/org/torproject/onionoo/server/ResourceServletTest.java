@@ -1123,9 +1123,9 @@ public class ResourceServletTest {
   }
 
   @Test()
-  public void testFirstSeenDaysSixToSixteen() {
+  public void testFirstSeenDaysSevenToSixteen() {
     this.assertSummaryDocument(
-        "/summary?first_seen_days=6-16", 2, null, 1, null);
+        "/summary?first_seen_days=7-16", 2, null, 1, null);
   }
 
   @Test()
@@ -1253,7 +1253,7 @@ public class ResourceServletTest {
   @Test()
   public void testOrderConsensusWeightAscending() {
     this.assertSummaryDocument(
-        "/summary?order=consensus_weight", 3,
+        "/summary?order=" + OrderParameterValues.CONSENSUS_WEIGHT_ASC, 3,
         new String[] { "TorkaZ", "TimMayTribute", "Ferrari458" }, 3,
         null);
   }
@@ -1261,7 +1261,7 @@ public class ResourceServletTest {
   @Test()
   public void testOrderConsensusWeightDescending() {
     this.assertSummaryDocument(
-        "/summary?order=-consensus_weight", 3,
+        "/summary?order=" + OrderParameterValues.CONSENSUS_WEIGHT_DES, 3,
         new String[] { "Ferrari458", "TimMayTribute", "TorkaZ" }, 3,
         null);
   }
@@ -1269,13 +1269,15 @@ public class ResourceServletTest {
   @Test()
   public void testOrderConsensusWeightAscendingTwice() {
     this.assertErrorStatusCode(
-        "/summary?order=consensus_weight,consensus_weight", 400);
+        "/summary?order=" + OrderParameterValues.CONSENSUS_WEIGHT_ASC
+        + "," + OrderParameterValues.CONSENSUS_WEIGHT_ASC, 400);
   }
 
   @Test()
   public void testOrderConsensusWeightAscendingThenDescending() {
     this.assertErrorStatusCode(
-        "/summary?order=consensus_weight,-consensus_weight", 400);
+        "/summary?order=" + OrderParameterValues.CONSENSUS_WEIGHT_ASC + ","
+        + OrderParameterValues.CONSENSUS_WEIGHT_DES + "", 400);
   }
 
   @Test()
@@ -1295,15 +1297,54 @@ public class ResourceServletTest {
   @Test()
   public void testOrderConsensusWeightAscendingLimit1() {
     this.assertSummaryDocument(
-        "/summary?order=consensus_weight&limit=1", 1,
+        "/summary?order=" + OrderParameterValues.CONSENSUS_WEIGHT_ASC
+        + "&limit=1", 1,
         new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test()
-  public void testOrderConsensusWeightDecendingLimit1() {
+  public void testOrderConsensusWeightDescendingLimit1() {
     this.assertSummaryDocument(
-        "/summary?order=-consensus_weight&limit=1", 1,
+        "/summary?order=" + OrderParameterValues.CONSENSUS_WEIGHT_DES
+        + "&limit=1", 1,
         new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test()
+  public void testOrderConsensusWeightFiveTimes() {
+    this.assertErrorStatusCode(
+        "/summary?order=" + OrderParameterValues.CONSENSUS_WEIGHT_ASC + ","
+        + OrderParameterValues.CONSENSUS_WEIGHT_ASC + ","
+        + OrderParameterValues.CONSENSUS_WEIGHT_ASC + ","
+        + OrderParameterValues.CONSENSUS_WEIGHT_ASC + ","
+        + OrderParameterValues.CONSENSUS_WEIGHT_ASC, 400);
+  }
+
+  @Test()
+  public void testOrderFirstSeenThenConsensusWeight() {
+    this.assertSummaryDocument(
+        "/summary?order=" + OrderParameterValues.FIRST_SEEN_ASC + ","
+        + OrderParameterValues.CONSENSUS_WEIGHT_ASC, 3,
+        new String[] { "TimMayTribute", "Ferrari458", "TorkaZ" }, 3,
+        new String[] { "gummy", null, "ec2bridgercc7f31fe" });
+  }
+
+  @Test()
+  public void testOrderFirstSeenDescendingThenConsensusWeight() {
+    this.assertSummaryDocument("/summary?order="
+        + OrderParameterValues.FIRST_SEEN_DES + ","
+        + OrderParameterValues.CONSENSUS_WEIGHT_ASC, 3,
+        new String[] { "TorkaZ", "TimMayTribute", "Ferrari458" }, 3,
+        new String[] { "ec2bridgercc7f31fe", null, "gummy" });
+  }
+
+  @Test()
+  public void testOrderConsensusWeightThenFirstSeenDescending() {
+    this.assertSummaryDocument(
+        "/summary?order=" + OrderParameterValues.CONSENSUS_WEIGHT_ASC + ","
+        + OrderParameterValues.FIRST_SEEN_DES, 3,
+        new String[] { "TorkaZ", "TimMayTribute", "Ferrari458" }, 3,
+        null);
   }
 
   @Test()

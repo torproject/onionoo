@@ -1,4 +1,4 @@
-# Changes in version x.x.x - 2017-xx-xx
+# Changes in version 3.2-1.x.x - 2017-xx-xx
 
  * Major changes
    - Fix a bug where we'd believe that we have first seen a bridge on
@@ -13,6 +13,7 @@
    - Accept the same characters in qualified search terms as in their
      parameter equivalents.
    - Exclude bandwidth history values from the future.
+   - Extend order parameter to "first_seen".
 
  * Minor changes
    - Include XZ binaries in release binaries.

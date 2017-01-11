@@ -10,6 +10,7 @@ import org.torproject.onionoo.docs.SummaryDocument;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -513,34 +514,26 @@ public class RequestHandler {
   }
 
   private void order() {
-    if (this.order != null && this.order.length == 1) {
-      List<String> orderBy = new ArrayList<String>(
-          this.nodeIndex.getRelaysByConsensusWeight());
-      if (this.order[0].startsWith("-")) {
-        Collections.reverse(orderBy);
+    List<SummaryDocument> uniqueRelays = new ArrayList<>();
+    List<SummaryDocument> uniqueBridges = new ArrayList<>();
+    for (SummaryDocument relay : this.filteredRelays.values()) {
+      if (!uniqueRelays.contains(relay)) {
+        uniqueRelays.add(relay);
       }
-      for (String relay : orderBy) {
-        if (this.filteredRelays.containsKey(relay)
-            && !this.orderedRelays.contains(filteredRelays.get(relay))) {
-          this.orderedRelays.add(this.filteredRelays.remove(relay));
-        }
-      }
-      for (String relay : this.filteredRelays.keySet()) {
-        if (!this.orderedRelays.contains(this.filteredRelays.get(relay))) {
-          this.orderedRelays.add(this.filteredRelays.remove(relay));
-        }
-      }
-      Set<SummaryDocument> uniqueBridges = new HashSet<SummaryDocument>(
-          this.filteredBridges.values());
-      this.orderedBridges.addAll(uniqueBridges);
-    } else {
-      Set<SummaryDocument> uniqueRelays = new HashSet<SummaryDocument>(
-          this.filteredRelays.values());
-      this.orderedRelays.addAll(uniqueRelays);
-      Set<SummaryDocument> uniqueBridges = new HashSet<SummaryDocument>(
-          this.filteredBridges.values());
-      this.orderedBridges.addAll(uniqueBridges);
     }
+    for (SummaryDocument bridge : this.filteredBridges.values()) {
+      if (!uniqueBridges.contains(bridge)) {
+        uniqueBridges.add(bridge);
+      }
+    }
+    if (this.order != null) {
+      Comparator<SummaryDocument> comparator
+          = new SummaryDocumentComparator(this.order);
+      Collections.sort(uniqueRelays, comparator);
+      Collections.sort(uniqueBridges, comparator);
+    }
+    this.orderedRelays.addAll(uniqueRelays);
+    this.orderedBridges.addAll(uniqueBridges);
   }
 
   private void offset() {
