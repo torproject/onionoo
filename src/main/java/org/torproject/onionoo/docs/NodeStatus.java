@@ -463,6 +463,10 @@ public class NodeStatus extends Document {
         log.error("Parse exception while parsing node status "
             + "line '" + documentString + "'.  Skipping.");
         return null;
+      } else if (lastSeenMillis == 0L) {
+        log.debug("Skipping node status with fingerprint {} that has so far "
+            + "never been seen in a network status.", fingerprint);
+        return null;
       }
       nodeStatus.setLastSeenMillis(lastSeenMillis);
       int orPort = Integer.parseInt(parts[6]);

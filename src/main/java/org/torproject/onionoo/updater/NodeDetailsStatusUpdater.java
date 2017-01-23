@@ -485,7 +485,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
               nodeStatus.getRecommendedVersion());
         }
         if (nodeStatus.getFirstSeenMillis()
-            < updatedNodeStatus.getFirstSeenMillis()) {
+            < updatedNodeStatus.getFirstSeenMillis()
+            && nodeStatus.getFirstSeenMillis() > 0L) {
           updatedNodeStatus.setFirstSeenMillis(
               nodeStatus.getFirstSeenMillis());
         }

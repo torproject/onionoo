@@ -4,6 +4,7 @@
 package org.torproject.onionoo.docs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -111,5 +112,15 @@ public class NodeStatusTest {
   public void testFamiliesNickname() {
     assertFamiliesCanBeDeSerialized(
         new String[] { NICK }, new String[] {}, new String[] {});
+  }
+
+  private static final String KI_LAST_SEEN_1970_NODE_STATUS =
+      "b\tnull\t0016C76AC19753A65F8E122046079CD09D355BA1\tnull;;\t1970-01-01\t"
+      + "00:00:00\t0\t0\t\t-1\t??\t\t-1\tnull\tnull\t1970-01-01\t00:00:00\t"
+      + "null\tnull\tnull\t\tnull\t::";
+
+  @Test
+  public void testLastSeen19700101Skipped() {
+    assertNull(NodeStatus.fromString(KI_LAST_SEEN_1970_NODE_STATUS));
   }
 }
