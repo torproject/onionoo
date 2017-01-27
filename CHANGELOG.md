@@ -1,4 +1,4 @@
-# Changes in version 3.2-1.x.x - 2017-xx-xx
+# Changes in version 3.2-1.1.0 - 2017-01-27
 
  * Major changes
    - Fix a bug where we'd believe that we have first seen a bridge on
