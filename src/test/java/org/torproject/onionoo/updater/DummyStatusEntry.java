@@ -7,6 +7,7 @@ import org.torproject.descriptor.NetworkStatusEntry;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -95,6 +96,10 @@ public class DummyStatusEntry implements NetworkStatusEntry {
 
   @Override
   public String getMasterKeyEd25519() {
+    return null;
+  }
+
+  public SortedMap<String, SortedSet<Long>> getProtocols() {
     return null;
   }
 }

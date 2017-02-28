@@ -130,5 +130,38 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
   public List<DirectorySignature> getSignatures() {
     return null;
   }
+
+  public int getSharedRandPreviousNumReveals() {
+    return -1;
+  }
+
+  public String getSharedRandPreviousValue() {
+    return null;
+  }
+
+  public int getSharedRandCurrentNumReveals() {
+    return -1;
+  }
+
+  public String getSharedRandCurrentValue() {
+    return null;
+  }
+
+  public SortedMap<String, SortedSet<Long>> getRecommendedClientProtocols() {
+    return null;
+  }
+
+  public SortedMap<String, SortedSet<Long>> getRecommendedRelayProtocols() {
+    return null;
+  }
+
+  public SortedMap<String, SortedSet<Long>> getRequiredClientProtocols() {
+    return null;
+  }
+
+  public SortedMap<String, SortedSet<Long>> getRequiredRelayProtocols() {
+    return null;
+  }
+
 }
 
