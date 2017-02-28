@@ -1,4 +1,4 @@
-# Changes in version 4.0-x.x.x - 2017-xx-xx
+# Changes in version 4.0-1.2.0 - 2017-02-28
 
  * Medium changes
    - Accept searches by IPv6 addresses even without leading or
