@@ -93,27 +93,26 @@ public class DescriptorSource {
    * any registered listeners. */
   public void readDescriptors() {
     this.readArchivedDescriptors();
-    log.debug("Reading recent " + DescriptorType.RELAY_SERVER_DESCRIPTORS
-        + " ...");
+    log.debug("Reading recent {} ...", DescriptorType.RELAY_SERVER_DESCRIPTORS);
     this.readDescriptors(DescriptorType.RELAY_SERVER_DESCRIPTORS,
         DescriptorHistory.RELAY_SERVER_HISTORY, true);
-    log.debug("Reading recent " + DescriptorType.RELAY_EXTRA_INFOS + " ...");
+    log.debug("Reading recent {} ...", DescriptorType.RELAY_EXTRA_INFOS);
     this.readDescriptors(DescriptorType.RELAY_EXTRA_INFOS,
         DescriptorHistory.RELAY_EXTRAINFO_HISTORY, true);
-    log.debug("Reading recent " + DescriptorType.EXIT_LISTS + " ...");
+    log.debug("Reading recent {} ...", DescriptorType.EXIT_LISTS);
     this.readDescriptors(DescriptorType.EXIT_LISTS,
         DescriptorHistory.EXIT_LIST_HISTORY, true);
-    log.debug("Reading recent " + DescriptorType.RELAY_CONSENSUSES + " ...");
+    log.debug("Reading recent {} ...", DescriptorType.RELAY_CONSENSUSES);
     this.readDescriptors(DescriptorType.RELAY_CONSENSUSES,
         DescriptorHistory.RELAY_CONSENSUS_HISTORY, true);
-    log.debug("Reading recent " + DescriptorType.BRIDGE_SERVER_DESCRIPTORS
-        + " ...");
+    log.debug("Reading recent {} ...",
+        DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
     this.readDescriptors(DescriptorType.BRIDGE_SERVER_DESCRIPTORS,
         DescriptorHistory.BRIDGE_SERVER_HISTORY, false);
-    log.debug("Reading recent " + DescriptorType.BRIDGE_EXTRA_INFOS + " ...");
+    log.debug("Reading recent {} ...", DescriptorType.BRIDGE_EXTRA_INFOS);
     this.readDescriptors(DescriptorType.BRIDGE_EXTRA_INFOS,
         DescriptorHistory.BRIDGE_EXTRAINFO_HISTORY, false);
-    log.debug("Reading recent " + DescriptorType.BRIDGE_STATUSES + " ...");
+    log.debug("Reading recent {} ...", DescriptorType.BRIDGE_STATUSES);
     this.readDescriptors(DescriptorType.BRIDGE_STATUSES,
         DescriptorHistory.BRIDGE_STATUS_HISTORY, false);
   }
@@ -133,35 +132,7 @@ public class DescriptorSource {
         descriptorListener.processDescriptor(descriptor, relay);
       }
     }
-    switch (descriptorType) {
-      case RELAY_CONSENSUSES:
-        log.info("Read recent relay network consensuses");
-        break;
-      case RELAY_SERVER_DESCRIPTORS:
-        log.info("Read recent relay server descriptors");
-        break;
-      case RELAY_EXTRA_INFOS:
-        log.info("Read recent relay extra-info descriptors");
-        break;
-      case EXIT_LISTS:
-        log.info("Read recent exit lists");
-        break;
-      case BRIDGE_STATUSES:
-        log.info("Read recent bridge network statuses");
-        break;
-      case BRIDGE_SERVER_DESCRIPTORS:
-        log.info("Read recent bridge server descriptors");
-        break;
-      case BRIDGE_EXTRA_INFOS:
-        log.info("Read recent bridge extra-info descriptors");
-        break;
-      default:
-        /* We shouldn't run into this default case, but if we do, it's
-         * because we added a new type to DescriptorType but forgot to
-         * update this switch statement.  It's just logging, so not the
-         * end of the world. */
-        log.info("Read recent descriptors of type " + descriptorType);
-    }
+    log.info("Read recent/{}.", descriptorType.getDir());
   }
 
   /** Reads archived descriptors from disk and feeds them into any
