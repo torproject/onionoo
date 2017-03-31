@@ -192,9 +192,9 @@ class DescriptorQueue {
         this.descriptorReader.getExcludedFiles());
     excludedAndParsedFiles.putAll(this.descriptorReader.getParsedFiles());
     this.historySizeAfter = excludedAndParsedFiles.size();
+    this.historyFile.getParentFile().mkdirs();
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(
         this.historyFile))) {
-      this.historyFile.getParentFile().mkdirs();
       for (Map.Entry<String, Long> e : excludedAndParsedFiles.entrySet()) {
         String absolutePath = e.getKey();
         long lastModifiedMillis = e.getValue();
