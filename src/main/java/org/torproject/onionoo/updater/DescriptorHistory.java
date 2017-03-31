@@ -3,14 +3,26 @@
 
 package org.torproject.onionoo.updater;
 
-enum DescriptorHistory {
-  RELAY_CONSENSUS_HISTORY,
-  RELAY_SERVER_HISTORY,
-  RELAY_EXTRAINFO_HISTORY,
-  EXIT_LIST_HISTORY,
-  BRIDGE_STATUS_HISTORY,
-  BRIDGE_SERVER_HISTORY,
-  BRIDGE_EXTRAINFO_HISTORY,
-  ARCHIVED_HISTORY
+public enum DescriptorHistory {
+
+  RELAY_CONSENSUS_HISTORY("relay-consensus-history"),
+  RELAY_SERVER_HISTORY("relay-server-history"),
+  RELAY_EXTRAINFO_HISTORY("relay-extrainfo-history"),
+  EXIT_LIST_HISTORY("exit-list-history"),
+  BRIDGE_STATUS_HISTORY("bridge-status-history"),
+  BRIDGE_SERVER_HISTORY("bridge-server-history"),
+  BRIDGE_EXTRAINFO_HISTORY("bridge-extrainfo-history"),
+  ARCHIVED_HISTORY("archived-history");
+
+  private String fileName;
+
+  private DescriptorHistory(String fileName) {
+    this.fileName = fileName;
+  }
+
+  public String getFileName() {
+    return this.fileName;
+  }
+
 }
 

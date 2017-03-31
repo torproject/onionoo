@@ -66,46 +66,12 @@ class DescriptorQueue {
       File statusDir) {
     File directory = inDir;
     if (descriptorType != null) {
-      directory = this.getDirectoryForDescriptorType(inDir,
-          descriptorType);
+      directory = new File(inDir, descriptorType.getDir());
     }
     this.statusDir = statusDir;
     this.descriptorReader =
         DescriptorSourceFactory.createDescriptorReader();
     this.addDirectory(directory);
-  }
-
-  public File getDirectoryForDescriptorType(File inDir,
-      DescriptorType descriptorType) {
-    String directoryName = null;
-    switch (descriptorType) {
-      case RELAY_CONSENSUSES:
-        directoryName = "relay-descriptors/consensuses";
-        break;
-      case RELAY_SERVER_DESCRIPTORS:
-        directoryName = "relay-descriptors/server-descriptors";
-        break;
-      case RELAY_EXTRA_INFOS:
-        directoryName = "relay-descriptors/extra-infos";
-        break;
-      case BRIDGE_STATUSES:
-        directoryName = "bridge-descriptors/statuses";
-        break;
-      case BRIDGE_SERVER_DESCRIPTORS:
-        directoryName = "bridge-descriptors/server-descriptors";
-        break;
-      case BRIDGE_EXTRA_INFOS:
-        directoryName = "bridge-descriptors/extra-infos";
-        break;
-      case EXIT_LISTS:
-        directoryName = "exit-lists";
-        break;
-      default:
-        log.error("Unknown descriptor type.  Not adding directory "
-            + "to descriptor reader.");
-        return null;
-    }
-    return new File(inDir, directoryName);
   }
 
   private void addDirectory(File directory) {
@@ -126,38 +92,8 @@ class DescriptorQueue {
     if (this.statusDir == null) {
       return;
     }
-    String historyFileName = null;
-    switch (descriptorHistory) {
-      case RELAY_EXTRAINFO_HISTORY:
-        historyFileName = "relay-extrainfo-history";
-        break;
-      case BRIDGE_EXTRAINFO_HISTORY:
-        historyFileName = "bridge-extrainfo-history";
-        break;
-      case EXIT_LIST_HISTORY:
-        historyFileName = "exit-list-history";
-        break;
-      case RELAY_CONSENSUS_HISTORY:
-        historyFileName = "relay-consensus-history";
-        break;
-      case BRIDGE_STATUS_HISTORY:
-        historyFileName = "bridge-status-history";
-        break;
-      case RELAY_SERVER_HISTORY:
-        historyFileName = "relay-server-history";
-        break;
-      case BRIDGE_SERVER_HISTORY:
-        historyFileName = "bridge-server-history";
-        break;
-      case ARCHIVED_HISTORY:
-        historyFileName = "archived-history";
-        break;
-      default:
-        log.error("Unknown descriptor history.  Not excluding "
-            + "files.");
-        return;
-    }
-    this.historyFile = new File(this.statusDir, historyFileName);
+    this.historyFile = new File(this.statusDir,
+        descriptorHistory.getFileName());
     if (this.historyFile.exists() && this.historyFile.isFile()) {
       SortedMap<String, Long> excludedFiles = new TreeMap<>();
       try (BufferedReader br = new BufferedReader(new FileReader(
