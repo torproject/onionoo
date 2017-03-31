@@ -206,16 +206,16 @@ public class DescriptorSource {
    * descriptors during the current execution. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + this.localFilesBefore + " recent descriptor files "
-        + "found locally\n");
-    sb.append("    " + this.foundRemoteFiles + " recent descriptor files "
-        + "found remotely\n");
-    sb.append("    " + this.downloadedFiles + " recent descriptor files "
-        + "downloaded from remote\n");
-    sb.append("    " + this.deletedLocalFiles + " recent descriptor "
-        + "files deleted locally\n");
-    sb.append("    " + this.descriptorQueues.size() + " descriptor "
-        + "queues created for recent descriptors\n");
+    sb.append("    ").append(this.localFilesBefore)
+      .append(" recent descriptor files ").append("found locally\n");
+    sb.append("    ").append(this.foundRemoteFiles)
+      .append(" recent descriptor files ").append("found remotely\n");
+    sb.append("    ").append(this.downloadedFiles)
+      .append(" recent descriptor files ").append("downloaded from remote\n");
+    sb.append("    ").append(this.deletedLocalFiles)
+      .append(" recent descriptor ").append("files deleted locally\n");
+    sb.append("    ").append(this.descriptorQueues.size())
+      .append(" descriptor ").append("queues created for recent descriptors\n");
     int historySizeBefore = 0;
     int historySizeAfter = 0;
     long descriptors = 0L;
@@ -226,23 +226,23 @@ public class DescriptorSource {
       descriptors += descriptorQueue.getReturnedDescriptors();
       bytes += descriptorQueue.getReturnedBytes();
     }
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        historySizeBefore) + " recent descriptors excluded from this "
-        + "execution\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(descriptors)
-        + " recent descriptors provided\n");
-    sb.append("    " + FormattingUtils.formatBytes(bytes)
-        + " of recent descriptors provided\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        historySizeAfter) + " recent descriptors excluded from next "
-        + "execution\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        historySizeBefore)).append(" recent descriptors excluded from this ")
+        .append("execution\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(descriptors))
+        .append(" recent descriptors provided\n");
+    sb.append("    ").append(FormattingUtils.formatBytes(bytes))
+        .append(" of recent descriptors provided\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        historySizeAfter)).append(" recent descriptors excluded from next ")
+        .append("execution\n");
     if (this.archiveDescriptorQueue != null) {
-      sb.append("    " + FormattingUtils.formatDecimalNumber(
-          this.archiveDescriptorQueue.getReturnedDescriptors())
-          + " archived descriptors provided\n");
-      sb.append("    " + FormattingUtils.formatBytes(
-          this.archiveDescriptorQueue.getReturnedBytes()) + " of "
-          + "archived descriptors provided\n");
+      sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+          this.archiveDescriptorQueue.getReturnedDescriptors()))
+        .append(" archived descriptors provided\n");
+      sb.append("    ").append(FormattingUtils.formatBytes(
+          this.archiveDescriptorQueue.getReturnedBytes())).append(" of ")
+        .append("archived descriptors provided\n");
     }
     return sb.toString();
   }
