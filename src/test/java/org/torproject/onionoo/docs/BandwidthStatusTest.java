@@ -8,10 +8,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.torproject.descriptor.BandwidthHistory;
-import org.torproject.onionoo.util.DummyTime;
-import org.torproject.onionoo.util.TimeFactory;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.SortedMap;
@@ -19,13 +16,8 @@ import java.util.TreeMap;
 
 public class BandwidthStatusTest {
 
-  private long currentTimeMillis = DateTimeHelper.parse(
+  private static final long TEST_TIME = DateTimeHelper.parse(
       "2014-08-01 02:22:22");
-
-  @Before
-  public void createDummyTime() {
-    TimeFactory.setTime(new DummyTime(this.currentTimeMillis));
-  }
 
   @Test()
   public void testEmptyStatusNotDirty() {
@@ -123,7 +115,7 @@ public class BandwidthStatusTest {
         "w 2014-08-01 00:07:22 2014-08-01 00:22:22 30720\n"
         + "w 2014-08-01 00:22:22 2014-08-01 00:37:22 4096\n";
     bandwidthStatus.setFromDocumentString(existingLines);
-    bandwidthStatus.compressHistory();
+    bandwidthStatus.compressHistory(TEST_TIME);
     assertEquals("Two recent intervals should not be compressed.",
         existingLines, bandwidthStatus.toDocumentString());
   }
@@ -134,7 +126,7 @@ public class BandwidthStatusTest {
     bandwidthStatus.setFromDocumentString(
         "w 2013-08-01 00:07:22 2013-08-01 00:22:22 30720\n"
         + "w 2013-08-01 00:22:22 2013-08-01 00:37:22 4096\n");
-    bandwidthStatus.compressHistory();
+    bandwidthStatus.compressHistory(TEST_TIME);
     assertEquals("Two old intervals should be compressed into one.",
         "w 2013-08-01 00:07:22 2013-08-01 00:37:22 34816\n",
         bandwidthStatus.toDocumentString());
@@ -147,7 +139,7 @@ public class BandwidthStatusTest {
         "w 2013-07-31 23:52:22 2013-08-01 00:07:22 4096\n"
         + "w 2013-08-01 00:07:22 2013-08-01 00:22:22 30720\n";
     bandwidthStatus.setFromDocumentString(statusLines);
-    bandwidthStatus.compressHistory();
+    bandwidthStatus.compressHistory(TEST_TIME);
     assertEquals("Two old intervals should not be merged over month end.",
         statusLines, bandwidthStatus.toDocumentString());
   }

@@ -4,7 +4,6 @@
 package org.torproject.onionoo.docs;
 
 import org.torproject.descriptor.BandwidthHistory;
-import org.torproject.onionoo.util.TimeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,18 +109,21 @@ public class BandwidthStatus extends Document {
   }
 
   public void compressHistory() {
-    this.compressHistory(this.writeHistory);
-    this.compressHistory(this.readHistory);
+    this.compressHistory(System.currentTimeMillis());
   }
 
-  private void compressHistory(SortedMap<Long, long[]> history) {
+  public void compressHistory(long now) {
+    this.compressHistory(this.writeHistory, now);
+    this.compressHistory(this.readHistory, now);
+  }
+
+  private void compressHistory(SortedMap<Long, long[]> history, long now) {
     SortedMap<Long, long[]> uncompressedHistory = new TreeMap<>(history);
     history.clear();
     long lastStartMillis = 0L;
     long lastEndMillis = 0L;
     long lastBandwidth = 0L;
     String lastMonthString = "1970-01";
-    long now = TimeFactory.getTime().currentTimeMillis();
     for (long[] v : uncompressedHistory.values()) {
       long startMillis = v[0];
       long endMillis = v[1];

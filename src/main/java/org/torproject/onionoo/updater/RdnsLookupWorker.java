@@ -13,7 +13,7 @@ class RdnsLookupWorker extends Thread {
 
   @Override
   public void run() {
-    while (this.reverseDomainNameResolver.time.currentTimeMillis()
+    while (System.currentTimeMillis()
         - ReverseDomainNameResolver.RDNS_LOOKUP_MAX_DURATION_MILLIS
         <= this.reverseDomainNameResolver.startedRdnsLookups) {
       String rdnsLookupJob = null;

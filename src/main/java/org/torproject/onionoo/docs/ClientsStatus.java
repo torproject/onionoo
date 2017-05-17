@@ -3,8 +3,6 @@
 
 package org.torproject.onionoo.docs;
 
-import org.torproject.onionoo.util.TimeFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +74,7 @@ public class ClientsStatus extends Document {
     history.clear();
     ClientsHistory lastResponses = null;
     String lastMonthString = "1970-01";
-    long now = TimeFactory.getTime().currentTimeMillis();
+    long now = System.currentTimeMillis();
     for (ClientsHistory responses : uncompressedHistory) {
       long intervalLengthMillis;
       if (now - responses.getEndMillis()

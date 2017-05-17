@@ -30,8 +30,7 @@ class RdnsLookupRequest extends Thread {
 
   @Override
   public void run() {
-    this.lookupStartedMillis =
-        this.reverseDomainNameResolver.time.currentTimeMillis();
+    this.lookupStartedMillis = System.currentTimeMillis();
     try {
       String result = InetAddress.getByName(this.address).getHostName();
       synchronized (this) {
@@ -40,8 +39,7 @@ class RdnsLookupRequest extends Thread {
     } catch (UnknownHostException e) {
       /* We'll try again the next time. */
     }
-    this.lookupCompletedMillis =
-        this.reverseDomainNameResolver.time.currentTimeMillis();
+    this.lookupCompletedMillis = System.currentTimeMillis();
     this.parent.interrupt();
   }
 

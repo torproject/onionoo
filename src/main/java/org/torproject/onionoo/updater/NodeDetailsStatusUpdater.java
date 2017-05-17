@@ -16,7 +16,6 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.util.FormattingUtils;
-import org.torproject.onionoo.util.TimeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +103,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.reverseDomainNameResolver = reverseDomainNameResolver;
     this.lookupService = lookupService;
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = TimeFactory.getTime().currentTimeMillis();
+    this.now = System.currentTimeMillis();
     this.registerDescriptorListeners();
   }
 

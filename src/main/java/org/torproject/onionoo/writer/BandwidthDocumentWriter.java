@@ -10,7 +10,6 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
 import org.torproject.onionoo.docs.UpdateStatus;
-import org.torproject.onionoo.util.TimeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
 
   public BandwidthDocumentWriter() {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = TimeFactory.getTime().currentTimeMillis();
+    this.now = System.currentTimeMillis();
   }
 
   @Override

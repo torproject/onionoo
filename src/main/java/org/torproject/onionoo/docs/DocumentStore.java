@@ -4,8 +4,6 @@
 package org.torproject.onionoo.docs;
 
 import org.torproject.onionoo.util.FormattingUtils;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -50,12 +48,6 @@ public class DocumentStore {
 
   public void setOutDir(File outDir) {
     this.outDir = outDir;
-  }
-
-  private Time time;
-
-  public DocumentStore() {
-    this.time = TimeFactory.getTime();
   }
 
   private long listOperations = 0L;
@@ -814,7 +806,7 @@ public class DocumentStore {
       return;
     }
     UpdateStatus updateStatus = new UpdateStatus();
-    updateStatus.setUpdatedMillis(this.time.currentTimeMillis());
+    updateStatus.setUpdatedMillis(System.currentTimeMillis());
     this.store(updateStatus);
   }
 

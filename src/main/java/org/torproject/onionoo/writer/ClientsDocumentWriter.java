@@ -12,7 +12,6 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.FormattingUtils;
-import org.torproject.onionoo.util.TimeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +58,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
 
   public ClientsDocumentWriter() {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = TimeFactory.getTime().currentTimeMillis();
+    this.now = System.currentTimeMillis();
   }
 
   private int writtenDocuments = 0;

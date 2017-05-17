@@ -12,7 +12,6 @@ import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.UptimeHistory;
 import org.torproject.onionoo.docs.UptimeStatus;
 import org.torproject.onionoo.util.FormattingUtils;
-import org.torproject.onionoo.util.TimeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
 
   public UptimeDocumentWriter() {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = TimeFactory.getTime().currentTimeMillis();
+    this.now = System.currentTimeMillis();
   }
 
   @Override

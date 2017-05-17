@@ -3,8 +3,6 @@
 
 package org.torproject.onionoo.docs;
 
-import org.torproject.onionoo.util.TimeFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +135,7 @@ public class WeightsStatus extends Document {
     double[] lastWeights = null;
     String lastMonthString = "1970-01";
     int lastMissingValues = -1;
-    long now = TimeFactory.getTime().currentTimeMillis();
+    long now = System.currentTimeMillis();
     for (Map.Entry<long[], double[]> e : uncompressedHistory.entrySet()) {
       long startMillis = e.getKey()[0];
       long endMillis = e.getKey()[1];

@@ -4,8 +4,6 @@
 package org.torproject.onionoo.updater;
 
 import org.torproject.onionoo.util.FormattingUtils;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,12 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class ReverseDomainNameResolver {
-
-  Time time;
-
-  public ReverseDomainNameResolver() {
-    this.time = TimeFactory.getTime();
-  }
 
   static final long RDNS_LOOKUP_MAX_REQUEST_MILLIS = 10L * 1000L;
 
@@ -51,7 +43,7 @@ public class ReverseDomainNameResolver {
   /** Starts reverse domain name lookups in one or more background
    * threads and returns immediately. */
   public void startReverseDomainNameLookups() {
-    this.startedRdnsLookups = this.time.currentTimeMillis();
+    this.startedRdnsLookups = System.currentTimeMillis();
     this.rdnsLookupJobs = new HashSet<>();
     for (Map.Entry<String, Long> e :
         this.addressLastLookupTimes.entrySet()) {

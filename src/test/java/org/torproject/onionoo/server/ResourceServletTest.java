@@ -6,14 +6,12 @@ package org.torproject.onionoo.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.UpdateStatus;
-import org.torproject.onionoo.util.DummyTime;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
 
 import com.google.gson.Gson;
 
@@ -23,6 +21,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,8 +40,7 @@ public class ResourceServletTest {
   private SortedMap<String, org.torproject.onionoo.docs.SummaryDocument>
       bridges;
 
-  private long currentTimeMillis = DateTimeHelper.parse(
-      "2013-04-24 12:22:22");
+  private static long TEST_TIME = DateTimeHelper.parse("2013-04-24 12:22:22");
 
   private class TestingHttpServletRequestWrapper
       extends HttpServletRequestWrapper {
@@ -211,7 +209,6 @@ public class ResourceServletTest {
 
   private void runTest(String request) {
     try {
-      this.createDummyTime();
       this.createDummyDocumentStore();
       this.createNodeIndexer();
       this.makeRequest(request);
@@ -221,15 +218,10 @@ public class ResourceServletTest {
     }
   }
 
-  private void createDummyTime() {
-    Time dummyTime = new DummyTime(this.currentTimeMillis);
-    TimeFactory.setTime(dummyTime);
-  }
-
   private void createDummyDocumentStore() {
     DummyDocumentStore documentStore = new DummyDocumentStore();
     UpdateStatus updateStatus = new UpdateStatus();
-    updateStatus.setUpdatedMillis(this.currentTimeMillis);
+    updateStatus.setUpdatedMillis(TEST_TIME);
     documentStore.addDocument(updateStatus, null);
     for (Map.Entry<String, org.torproject.onionoo.docs.SummaryDocument> e :
         this.relays.entrySet()) {
@@ -244,6 +236,14 @@ public class ResourceServletTest {
 
   private void createNodeIndexer() {
     NodeIndexer newNodeIndexer = new NodeIndexer();
+    try {
+      Field specialTimeField = newNodeIndexer.getClass()
+          .getDeclaredField("specialTime");
+      specialTimeField.setAccessible(true);
+      specialTimeField.set(newNodeIndexer, TEST_TIME);
+    } catch (Exception ex) {
+      fail("Cannot manipulate test-time.  Failing all.");
+    }
     newNodeIndexer.startIndexing();
     NodeIndexerFactory.setNodeIndexer(newNodeIndexer);
   }
@@ -257,7 +257,7 @@ public class ResourceServletTest {
     this.request = new TestingHttpServletRequestWrapper(path, queryString,
         parameterMap);
     this.response = new TestingHttpServletResponseWrapper();
-    rs.doGet(this.request, this.response);
+    rs.doGet(this.request, this.response, TEST_TIME);
   }
 
   private void parseResponse() {

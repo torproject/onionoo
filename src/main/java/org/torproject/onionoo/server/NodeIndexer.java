@@ -7,8 +7,6 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
 import org.torproject.onionoo.docs.UpdateStatus;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,6 +123,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     indexerThread.interrupt();
   }
 
+  private long specialTime = -1L;
+
   private void indexNodeStatuses() {
     long updateStatusMillis = -1L;
     DocumentStore documentStore = DocumentStoreFactory.getDocumentStore();
@@ -173,7 +173,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         currentBridges.add(node);
       }
     }
-    Time time = TimeFactory.getTime();
+
     /* This variable can go away once all Onionoo services had their
      * hourly updater write effective families to summary documents at
      * least once.  Remove this code after September 8, 2015. */
@@ -220,7 +220,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       if (entry.getEffectiveFamily() != null) {
         newRelaysByFamily.put(fingerprint, entry.getEffectiveFamily());
       }
-      int daysSinceFirstSeen = (int) ((time.currentTimeMillis()
+      int daysSinceFirstSeen = (int) ((
+          (specialTime < 0 ? System.currentTimeMillis() : specialTime)
           - entry.getFirstSeenMillis()) / ONE_DAY);
       if (!newRelaysByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
         newRelaysByFirstSeenDays.put(daysSinceFirstSeen,
@@ -229,7 +230,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       newRelaysByFirstSeenDays.get(daysSinceFirstSeen).add(fingerprint);
       newRelaysByFirstSeenDays.get(daysSinceFirstSeen).add(
           hashedFingerprint);
-      int daysSinceLastSeen = (int) ((time.currentTimeMillis()
+      int daysSinceLastSeen = (int) ((
+          (specialTime < 0 ? System.currentTimeMillis() : specialTime)
           - entry.getLastSeenMillis()) / ONE_DAY);
       if (!newRelaysByLastSeenDays.containsKey(daysSinceLastSeen)) {
         newRelaysByLastSeenDays.put(daysSinceLastSeen,
@@ -277,7 +279,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newBridgesByFlag.get(flagLowerCase).add(
             hashedHashedFingerprint);
       }
-      int daysSinceFirstSeen = (int) ((time.currentTimeMillis()
+      int daysSinceFirstSeen = (int) ((
+          (specialTime < 0 ? System.currentTimeMillis() : specialTime)
           - entry.getFirstSeenMillis()) / ONE_DAY);
       if (!newBridgesByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
         newBridgesByFirstSeenDays.put(daysSinceFirstSeen,
@@ -287,7 +290,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           hashedFingerprint);
       newBridgesByFirstSeenDays.get(daysSinceFirstSeen).add(
           hashedHashedFingerprint);
-      int daysSinceLastSeen = (int) ((time.currentTimeMillis()
+      int daysSinceLastSeen = (int) ((
+          (specialTime < 0 ? System.currentTimeMillis() : specialTime)
           - entry.getLastSeenMillis()) / ONE_DAY);
       if (!newBridgesByLastSeenDays.containsKey(daysSinceLastSeen)) {
         newBridgesByLastSeenDays.put(daysSinceLastSeen,

@@ -4,8 +4,6 @@
 package org.torproject.onionoo.server;
 
 import org.torproject.onionoo.docs.DateTimeHelper;
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +18,6 @@ public class PerformanceMetrics {
       PerformanceMetrics.class);
 
   private static final Object lock = new Object();
-
-  private static Time time;
 
   private static long lastLoggedMillis = -1L;
 
@@ -62,11 +58,8 @@ public class PerformanceMetrics {
       int bridgeDocumentsWritten, int charsWritten,
       long writtenResponseMillis) {
     synchronized (lock) {
-      if (time == null) {
-        time = TimeFactory.getTime();
-      }
       if (lastLoggedMillis < 0L) {
-        lastLoggedMillis = time.currentTimeMillis();
+        lastLoggedMillis = System.currentTimeMillis();
       } else if (receivedRequestMillis - lastLoggedMillis
           > LOG_INTERVAL_MILLIS) {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat(

@@ -3,9 +3,6 @@
 
 package org.torproject.onionoo.server;
 
-import org.torproject.onionoo.util.Time;
-import org.torproject.onionoo.util.TimeFactory;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -81,12 +78,18 @@ public class ResourceServlet extends HttpServlet {
   private static Pattern ipv6AddressPattern =
       Pattern.compile(ipv6AddressPatternString);
 
+  public void doGet(HttpServletRequestWrapper request,
+      HttpServletResponseWrapper response) throws IOException {
+    doGet(request, response, System.currentTimeMillis());
+  }
+
   /** Handles the HTTP GET request in the wrapped <code>request</code> by
    * writing an HTTP GET response to the likewise <code>response</code>,
    * both of which are wrapped to facilitate testing. */
   @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
   public void doGet(HttpServletRequestWrapper request,
-      HttpServletResponseWrapper response) throws IOException {
+      HttpServletResponseWrapper response, long receivedRequestMillis)
+      throws IOException {
 
     if (this.maintenanceMode) {
       response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
@@ -99,10 +102,6 @@ public class ResourceServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
-
-    Time time = TimeFactory.getTime();
-    long receivedRequestMillis = time.currentTimeMillis();
-
     String uri = request.getRequestURI();
     if (uri.startsWith("/onionoo/")) {
       uri = uri.substring("/onionoo".length());
@@ -323,7 +322,7 @@ public class ResourceServlet extends HttpServlet {
       rh.setFamily(family);
     }
     rh.handleRequest();
-    long parsedRequestMillis = time.currentTimeMillis();
+    long parsedRequestMillis = System.currentTimeMillis();
 
     ResponseBuilder rb = new ResponseBuilder();
     rb.setResourceType(resourceType);
@@ -364,7 +363,7 @@ public class ResourceServlet extends HttpServlet {
     int relayDocumentsWritten = rh.getOrderedRelays().size();
     int bridgeDocumentsWritten = rh.getOrderedBridges().size();
     int charsWritten = rb.getCharsWritten();
-    long writtenResponseMillis = time.currentTimeMillis();
+    long writtenResponseMillis = System.currentTimeMillis();
     PerformanceMetrics.logStatistics(receivedRequestMillis, resourceType,
         parameterMap.keySet(), parsedRequestMillis, relayDocumentsWritten,
         bridgeDocumentsWritten, charsWritten, writtenResponseMillis);
