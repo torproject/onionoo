@@ -56,6 +56,10 @@ public class DummyStatusEntry implements NetworkStatusEntry {
     return null;
   }
 
+  public Set<String> getMicrodescriptorDigestsSha256Base64() {
+    return null;
+  }
+
   public List<String> getOrAddresses() {
     return null;
   }

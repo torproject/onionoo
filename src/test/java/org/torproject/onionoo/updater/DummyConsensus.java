@@ -123,6 +123,10 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
     return null;
   }
 
+  public String getDigestSha1Hex() {
+    return null;
+  }
+
   public List<String> getPackageLines() {
     return null;
   }
