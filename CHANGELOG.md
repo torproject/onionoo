@@ -6,6 +6,8 @@
    - Remove optional fields "countries", "transports", and "versions"
      from clients objects which were still labeled as beta.
    - Add new "version" parameter to filter for Tor version.
+   - Switch from our own CollecTor downloader to metrics-lib's
+     DescriptorCollector.
 
 
 # Changes in version 4.0-1.3.0 - 2017-08-04

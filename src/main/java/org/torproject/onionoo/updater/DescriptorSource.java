@@ -4,6 +4,7 @@
 package org.torproject.onionoo.updater;
 
 import org.torproject.descriptor.Descriptor;
+import org.torproject.descriptor.DescriptorCollector;
 import org.torproject.onionoo.util.FormattingUtils;
 
 import org.slf4j.Logger;
@@ -22,9 +23,11 @@ public class DescriptorSource {
   private static final Logger log = LoggerFactory.getLogger(
       DescriptorSource.class);
 
-  private final File inRecentDir = new File("in/recent");
+  private final File inDir = new File("in");
 
-  private final File inArchiveDir = new File("in/archive");
+  private final File inRecentDir = new File(inDir, "recent");
+
+  private final File inArchiveDir = new File(inDir, "archive");
 
   private final File statusDir = new File("status");
 
@@ -65,28 +68,14 @@ public class DescriptorSource {
 
   /** Downloads descriptors from CollecTor. */
   public void downloadDescriptors() {
+    List<String> remoteDirectories = new ArrayList<>();
     for (DescriptorType descriptorType : DescriptorType.values()) {
-      log.info("Loading: " + descriptorType);
-      this.downloadDescriptors(descriptorType);
+      remoteDirectories.add("/recent/" + descriptorType.getDir());
     }
-  }
-
-  private int localFilesBefore = 0;
-
-  private int foundRemoteFiles = 0;
-
-  private int downloadedFiles = 0;
-
-  private int deletedLocalFiles = 0;
-
-  private void downloadDescriptors(DescriptorType descriptorType) {
-    DescriptorDownloader descriptorDownloader =
-        new DescriptorDownloader(descriptorType);
-    this.localFilesBefore += descriptorDownloader.statLocalFiles();
-    this.foundRemoteFiles +=
-        descriptorDownloader.fetchRemoteDirectory();
-    this.downloadedFiles += descriptorDownloader.fetchRemoteFiles();
-    this.deletedLocalFiles += descriptorDownloader.deleteOldLocalFiles();
+    DescriptorCollector dc = org.torproject.descriptor.DescriptorSourceFactory
+        .createDescriptorCollector();
+    dc.collectDescriptors("https://collector.torproject.org",
+        remoteDirectories.toArray(new String[0]), 0L, inDir, true);
   }
 
   /** Reads archived and recent descriptors from disk and feeds them into
@@ -206,14 +195,6 @@ public class DescriptorSource {
    * descriptors during the current execution. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    ").append(this.localFilesBefore)
-      .append(" recent descriptor files ").append("found locally\n");
-    sb.append("    ").append(this.foundRemoteFiles)
-      .append(" recent descriptor files ").append("found remotely\n");
-    sb.append("    ").append(this.downloadedFiles)
-      .append(" recent descriptor files ").append("downloaded from remote\n");
-    sb.append("    ").append(this.deletedLocalFiles)
-      .append(" recent descriptor ").append("files deleted locally\n");
     sb.append("    ").append(this.descriptorQueues.size())
       .append(" descriptor ").append("queues created for recent descriptors\n");
     int historySizeBefore = 0;
