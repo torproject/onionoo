@@ -1,3 +1,10 @@
+# Changes in version 4.0-1.?.? - 2017-0?-??
+
+ * Medium changes
+   - Reset IPv6 exit-policy summary in details status if a newer
+     server descriptor doesn't contain such a summary anymore.
+
+
 # Changes in version 4.0-1.3.0 - 2017-08-04
 
  * Medium changes

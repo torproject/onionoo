@@ -196,6 +196,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       exitPolicyV6Summary.put(descriptor.getIpv6DefaultPolicy(),
           portsOrPortRanges);
       detailsStatus.setExitPolicyV6Summary(exitPolicyV6Summary);
+    } else {
+      detailsStatus.setExitPolicyV6Summary(null);
     }
     detailsStatus.setHibernating(descriptor.isHibernating() ? true :
         null);
