@@ -537,8 +537,9 @@ public class DocumentStore {
     Gson gson = new Gson();
     try {
       result = gson.fromJson(documentString, documentType);
-    } catch (JsonParseException e) {
+    } catch (Throwable e) {
       /* Handle below. */
+      log.error(documentString);
       log.error(e.getMessage(), e);
     }
     if (result == null) {
