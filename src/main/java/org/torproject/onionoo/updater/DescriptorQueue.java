@@ -4,9 +4,9 @@
 package org.torproject.onionoo.updater;
 
 import org.torproject.descriptor.Descriptor;
-import org.torproject.descriptor.DescriptorFile;
 import org.torproject.descriptor.DescriptorReader;
 import org.torproject.descriptor.DescriptorSourceFactory;
+import org.torproject.descriptor.UnparseableDescriptor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -34,9 +33,9 @@ class DescriptorQueue {
 
   private File historyFile;
 
-  private Iterator<DescriptorFile> descriptorFiles;
+  private File directory;
 
-  private List<Descriptor> descriptors;
+  private Iterator<Descriptor> descriptors;
 
   private int historySizeBefore;
 
@@ -64,28 +63,14 @@ class DescriptorQueue {
 
   public DescriptorQueue(File inDir, DescriptorType descriptorType,
       File statusDir) {
-    File directory = inDir;
+    this.directory = inDir;
     if (descriptorType != null) {
-      directory = new File(inDir, descriptorType.getDir());
+      this.directory = new File(inDir, descriptorType.getDir());
     }
     this.statusDir = statusDir;
     this.descriptorReader =
         DescriptorSourceFactory.createDescriptorReader();
-    this.addDirectory(directory);
-  }
-
-  private void addDirectory(File directory) {
-    if (directory == null) {
-      return;
-    }
-    if (directory.exists() && directory.isDirectory()) {
-      this.descriptorReader.addDirectory(directory);
-      this.descriptorReader.setMaxDescriptorFilesInQueue(1);
-    } else {
-      log.error("Directory " + directory.getAbsolutePath()
-          + " either does not exist or is not a directory.  Not adding "
-          + "to descriptor reader.");
-    }
+    this.descriptorReader.setMaxDescriptorsInQueue(20);
   }
 
   public void readHistoryFile(DescriptorHistory descriptorHistory) {
@@ -146,27 +131,26 @@ class DescriptorQueue {
 
   public Descriptor nextDescriptor() {
     Descriptor nextDescriptor = null;
-    if (this.descriptorFiles == null) {
-      this.descriptorFiles = this.descriptorReader.readDescriptors();
-    }
-    while (this.descriptors == null && this.descriptorFiles.hasNext()) {
-      DescriptorFile descriptorFile = this.descriptorFiles.next();
-      if (descriptorFile.getException() != null) {
-        log.error("Could not parse " + descriptorFile.getFileName(), 
-            descriptorFile.getException());
-      }
-      if (descriptorFile.getDescriptors() != null
-          && !descriptorFile.getDescriptors().isEmpty()) {
-        this.descriptors = descriptorFile.getDescriptors();
+    if (null == this.descriptors) {
+      if (this.directory.exists()
+          && directory.isDirectory()) {
+        this.descriptors = this.descriptorReader.readDescriptors(
+            this.directory).iterator();
+      } else {
+        log.error("Directory " + this.directory.getAbsolutePath()
+            + " either does not exist or is not a directory.  Not adding "
+            + "to descriptor reader.");
+        return null;
       }
     }
-    if (this.descriptors != null) {
-      nextDescriptor = this.descriptors.remove(0);
+    while (null == nextDescriptor && this.descriptors.hasNext()) {
+      nextDescriptor = this.descriptors.next();
+      if (nextDescriptor instanceof UnparseableDescriptor) {
+        nextDescriptor = null;
+        continue;
+      }
       this.returnedDescriptors++;
-      this.returnedBytes += nextDescriptor.getRawDescriptorBytes().length;
-      if (this.descriptors.isEmpty()) {
-        this.descriptors = null;
-      }
+      this.returnedBytes += nextDescriptor.getRawDescriptorLength();
     }
     return nextDescriptor;
   }

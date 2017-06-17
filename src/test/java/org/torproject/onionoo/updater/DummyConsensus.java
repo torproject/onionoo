@@ -8,6 +8,7 @@ import org.torproject.descriptor.DirectorySignature;
 import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 
+import java.io.File;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -20,11 +21,19 @@ public class DummyConsensus implements RelayNetworkStatusConsensus {
     return null;
   }
 
+  public int getRawDescriptorLength() {
+    return 0;
+  }
+
   public List<String> getAnnotations() {
     return null;
   }
 
   public List<String> getUnrecognizedLines() {
+    return null;
+  }
+
+  public File getDescriptorFile() {
     return null;
   }
 

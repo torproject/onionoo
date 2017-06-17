@@ -6,6 +6,7 @@ package org.torproject.onionoo.updater;
 import org.torproject.descriptor.BridgeNetworkStatus;
 import org.torproject.descriptor.NetworkStatusEntry;
 
+import java.io.File;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -16,11 +17,19 @@ public class DummyBridgeStatus implements BridgeNetworkStatus {
     return null;
   }
 
+  public int getRawDescriptorLength() {
+    return 0;
+  }
+
   public List<String> getAnnotations() {
     return null;
   }
 
   public List<String> getUnrecognizedLines() {
+    return null;
+  }
+
+  public File getDescriptorFile() {
     return null;
   }
 

@@ -11,7 +11,7 @@
   <property name="onionoo.protocol.version" value="4.0"/>
   <property name="release.version"
             value="${onionoo.protocol.version}-1.2.0-dev"/>
-  <property name="descriptorversion" value="1.8.2"/>
+  <property name="descriptorversion" value="1.9.0"/>
   <property name="jetty.version" value="-8.1.16.v20140903" />
   <property name="warfile"
             value="onionoo-${release.version}.war"/>
