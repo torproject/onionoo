@@ -129,6 +129,8 @@ class DescriptorQueue {
     }
   }
 
+  /** Returns the next parseable Descriptor, or null if there are no further
+   * parseable Descriptors available. */
   public Descriptor nextDescriptor() {
     Descriptor nextDescriptor = null;
     if (null == this.descriptors) {
@@ -143,14 +145,13 @@ class DescriptorQueue {
         return null;
       }
     }
-    while (null == nextDescriptor && this.descriptors.hasNext()) {
+    while (this.descriptors.hasNext()) {
       nextDescriptor = this.descriptors.next();
-      if (nextDescriptor instanceof UnparseableDescriptor) {
-        nextDescriptor = null;
-        continue;
+      if (!(nextDescriptor instanceof UnparseableDescriptor)) {
+        this.returnedDescriptors++;
+        this.returnedBytes += nextDescriptor.getRawDescriptorLength();
+        break;
       }
-      this.returnedDescriptors++;
-      this.returnedBytes += nextDescriptor.getRawDescriptorLength();
     }
     return nextDescriptor;
   }
