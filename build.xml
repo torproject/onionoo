@@ -11,7 +11,7 @@
   <property name="onionoo.protocol.version" value="4.0"/>
   <property name="release.version"
             value="${onionoo.protocol.version}-1.2.0-dev"/>
-  <property name="descriptorversion" value="1.9.0"/>
+  <property name="metricslibversion" value="2.0.0"/>
   <property name="jetty.version" value="-8.1.16.v20140903" />
   <property name="warfile"
             value="onionoo-${release.version}.war"/>
@@ -43,7 +43,7 @@
   </target>
 
   <patternset id="library" >
-    <include name="descriptor-${descriptorversion}.jar"/>
+    <include name="metrics-lib-${metricslibversion}.jar"/>
     <include name="commons-codec-1.9.jar"/>
     <include name="commons-compress-1.9.jar"/>
     <include name="commons-lang3-3.3.2.jar"/>
