@@ -2,6 +2,7 @@
 
  * Medium changes
    - Add a parse history for imported descriptor archives.
+   - Upgrade to Jetty9 and other Debian stretch dependencies.
 
 
 # Changes in version 4.0-1.2.0 - 2017-02-28

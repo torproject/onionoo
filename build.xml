@@ -12,7 +12,7 @@
   <property name="release.version"
             value="${onionoo.protocol.version}-1.2.0-dev"/>
   <property name="metricslibversion" value="2.0.0"/>
-  <property name="jetty.version" value="-8.1.16.v20140903" />
+  <property name="jetty.version" value="-9.2.21.v20170120" />
   <property name="warfile"
             value="onionoo-${release.version}.war"/>
 
@@ -55,17 +55,17 @@
   </patternset>
 
   <patternset id="web" >
-    <include name="servlet-api-3.0.jar"/>
-    <include name="jetty8-server${jetty.version}.jar"/>
-    <include name="jetty8-servlets${jetty.version}.jar"/>
-    <include name="jetty8-servlet${jetty.version}.jar"/>
-    <include name="jetty8-util${jetty.version}.jar"/>
-    <include name="jetty8-http${jetty.version}.jar"/>
-    <include name="jetty8-io${jetty.version}.jar"/>
-    <include name="jetty8-xml${jetty.version}.jar"/>
-    <include name="jetty8-webapp${jetty.version}.jar"/>
-    <include name="jetty8-continuation${jetty.version}.jar"/>
-    <include name="jetty8-security${jetty.version}.jar"/>
+    <include name="servlet-api-3.1.jar"/>
+    <include name="jetty9-server${jetty.version}.jar"/>
+    <include name="jetty9-servlets${jetty.version}.jar"/>
+    <include name="jetty9-servlet${jetty.version}.jar"/>
+    <include name="jetty9-util${jetty.version}.jar"/>
+    <include name="jetty9-http${jetty.version}.jar"/>
+    <include name="jetty9-io${jetty.version}.jar"/>
+    <include name="jetty9-xml${jetty.version}.jar"/>
+    <include name="jetty9-webapp${jetty.version}.jar"/>
+    <include name="jetty9-continuation${jetty.version}.jar"/>
+    <include name="jetty9-security${jetty.version}.jar"/>
   </patternset>
 
   <patternset id="runtime" >

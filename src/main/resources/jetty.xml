@@ -5,13 +5,11 @@
 <Configure id="server" class="org.eclipse.jetty.server.Server" >
   <Set name="dumpAfterStart">false</Set>
 
-  <Set name="threadPool">
-    <New class="org.eclipse.jetty.util.thread.QueuedThreadPool">
-      <Set name="minThreads">25</Set>
-      <Set name="maxThreads">250</Set>
-      <Set name="detailedDump">false</Set>
-    </New>
-  </Set>
+  <New class="org.eclipse.jetty.util.thread.QueuedThreadPool">
+    <Set name="minThreads">25</Set>
+    <Set name="maxThreads">250</Set>
+    <Set name="detailedDump">false</Set>
+  </New>
 
   <New id="webAppContext" class="org.eclipse.jetty.webapp.WebAppContext">
     <Set name="logUrlOnStart">true</Set>
@@ -24,7 +22,10 @@
 
   <Call name="addConnector">
     <Arg>
-      <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+      <New class="org.eclipse.jetty.server.ServerConnector">
+        <Arg>
+          <Ref id="server"/>
+        </Arg>
         <Set name="port">8080</Set>
       </New>
     </Arg>
