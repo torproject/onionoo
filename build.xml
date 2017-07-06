@@ -44,14 +44,14 @@
 
   <patternset id="library" >
     <include name="metrics-lib-${metricslibversion}.jar"/>
-    <include name="commons-codec-1.9.jar"/>
-    <include name="commons-compress-1.9.jar"/>
-    <include name="commons-lang3-3.3.2.jar"/>
-    <include name="gson-2.2.4.jar"/>
-    <include name="logback-classic-1.1.2.jar"/>
-    <include name="logback-core-1.1.2.jar"/>
-    <include name="slf4j-api-1.7.7.jar"/>
-    <include name="xz-1.5.jar"/>
+    <include name="commons-codec-1.10.jar"/>
+    <include name="commons-compress-1.13.jar"/>
+    <include name="commons-lang3-3.5.jar"/>
+    <include name="gson-2.4.jar"/>
+    <include name="logback-classic-1.1.9.jar"/>
+    <include name="logback-core-1.1.9.jar"/>
+    <include name="slf4j-api-1.7.22.jar"/>
+    <include name="xz-1.6.jar"/>
   </patternset>
 
   <patternset id="web" >
