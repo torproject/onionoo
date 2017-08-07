@@ -321,6 +321,16 @@ public class NodeStatus extends Document {
     return this.recommendedVersion;
   }
 
+  private String version;
+
+  public void setVersion(String version) {
+    this.version = version.substring(version.lastIndexOf(" ") + 1);
+  }
+
+  public String getVersion() {
+    return this.version;
+  }
+
   /* From exit lists: */
 
   private SortedSet<String> exitAddresses;
@@ -547,6 +557,9 @@ public class NodeStatus extends Document {
         extendedFamily.addAll(indirectFamily);
         nodeStatus.setExtendedFamily(extendedFamily);
       }
+      if (parts.length >= 24 && !parts[23].isEmpty()) {
+        nodeStatus.setVersion(parts[23]);
+      }
       return nodeStatus;
     } catch (NumberFormatException e) {
       log.error("Number format exception while parsing node "
@@ -610,6 +623,7 @@ public class NodeStatus extends Document {
     sb.append("\t" + StringUtils.join(this.getAllegedFamily(), ";") + ":"
         + StringUtils.join(this.getEffectiveFamily(), ";") + ":"
         + StringUtils.join(this.getIndirectFamily(), ";"));
+    sb.append("\t" + (this.getVersion() != null ? this.getVersion() : ""));
     return sb.toString();
   }
 }

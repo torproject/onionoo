@@ -7,6 +7,9 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -91,6 +94,12 @@ public class RequestHandler {
     System.arraycopy(contact, 0, this.contact, 0, contact.length);
   }
 
+  private String version;
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
   private String[] order;
 
   public void setOrder(String[] order) {
@@ -158,6 +167,7 @@ public class RequestHandler {
     this.filterNodesByLastSeenDays();
     this.filterByContact();
     this.filterByFamily();
+    this.filterByVersion();
     this.order();
     this.offset();
     this.limit();
@@ -511,6 +521,22 @@ public class RequestHandler {
     for (String fingerprint : removeRelays) {
       this.filteredRelays.remove(fingerprint);
     }
+    this.filteredBridges.clear();
+  }
+
+  private void filterByVersion() {
+    if (null == this.version) {
+      /* Not filtering by version. */
+      return;
+    }
+    Set<String> keepRelays = new HashSet<>();
+    for (Map.Entry<String, Set<String>> e
+        : this.nodeIndex.getRelaysByVersion().entrySet()) {
+      if (e.getKey().startsWith(this.version)) {
+        keepRelays.addAll(e.getValue());
+      }
+    }
+    this.filteredRelays.keySet().retainAll(keepRelays);
     this.filteredBridges.clear();
   }
 

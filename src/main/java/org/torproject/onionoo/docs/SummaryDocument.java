@@ -269,6 +269,16 @@ public class SummaryDocument extends Document {
     return this.stringArrayToSortedSet(this.ef);
   }
 
+  private String v;
+
+  public void setVersion(String version) {
+    this.v = version;
+  }
+
+  public String getVersion() {
+    return this.v;
+  }
+
   /* The familyFingerprints parameter can go away after September 8, 2015.
    * See above. */
   /** Instantiates a summary document with all given properties. */
@@ -277,7 +287,7 @@ public class SummaryDocument extends Document {
       boolean running, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, long firstSeenMillis, String asNumber,
       String contact, SortedSet<String> familyFingerprints,
-      SortedSet<String> effectiveFamily) {
+      SortedSet<String> effectiveFamily, String version) {
     this.setRelay(isRelay);
     this.setNickname(nickname);
     this.setFingerprint(fingerprint);
@@ -292,6 +302,7 @@ public class SummaryDocument extends Document {
     this.setContact(contact);
     this.setFamilyFingerprints(familyFingerprints);
     this.setEffectiveFamily(effectiveFamily);
+    this.setVersion(version);
   }
 }
 

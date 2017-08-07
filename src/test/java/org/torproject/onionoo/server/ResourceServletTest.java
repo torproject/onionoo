@@ -142,7 +142,8 @@ public class ResourceServletTest {
         new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC",
             "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B" })),
         new TreeSet<>(Arrays.asList(
-        new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC" })));
+        new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC" })),
+        "0.2.3.25");
     org.torproject.onionoo.docs.SummaryDocument relayFerrari458 =
         new org.torproject.onionoo.docs.SummaryDocument(true, "Ferrari458",
         "001C13B3A55A71B977CA65EC85539D79C653A3FC", Arrays.asList(
@@ -154,7 +155,7 @@ public class ResourceServletTest {
         new TreeSet<String>(Arrays.asList(new String[] {
             "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })),
         new TreeSet<>(Arrays.asList(new String[] {
-            "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })));
+            "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })), "0.2.3.24-rc-dev");
     this.relays = new TreeMap<>();
     this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
         relayTorkaZ);
@@ -170,7 +171,7 @@ public class ResourceServletTest {
         DateTimeHelper.parse("2013-04-16 18:00:00"), "AS6830",
         "1024D/51E2A1C7 steven j. murdoch "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>",
-        new TreeSet<String>(), new TreeSet<String>());
+        new TreeSet<String>(), new TreeSet<String>(), "0.2.3.25");
     this.relays.put("0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B",
         relayTimMayTribute);
     this.bridges = new TreeMap<>();
@@ -181,7 +182,7 @@ public class ResourceServletTest {
         DateTimeHelper.parse("2013-04-21 18:07:03"), false,
         new TreeSet<>(Arrays.asList(new String[] { "Valid" })), -1L,
         null, DateTimeHelper.parse("2013-04-20 15:37:04"), null, null,
-        null, null);
+        null, null, null);
     this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
         bridgeec2bridgercc7f31fe);
     org.torproject.onionoo.docs.SummaryDocument bridgeUnnamed =
@@ -191,7 +192,7 @@ public class ResourceServletTest {
         DateTimeHelper.parse("2013-04-20 17:37:04"), false,
         new TreeSet<>(Arrays.asList(new String[] { "Valid" })), -1L,
         null, DateTimeHelper.parse("2013-04-14 07:07:05"), null, null,
-        null, null);
+        null, null, null);
     this.bridges.put("0002D9BDBBC230BD9C78FF502A16E0033EF87E0C",
         bridgeUnnamed);
     org.torproject.onionoo.docs.SummaryDocument bridgegummy =
@@ -202,7 +203,7 @@ public class ResourceServletTest {
         new TreeSet<>(Arrays.asList(new String[] { "Running",
             "Valid" })), -1L, null,
         DateTimeHelper.parse("2013-01-16 21:07:04"), null, null, null,
-        null);
+        null, null);
     this.bridges.put("1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756",
         bridgegummy);
   }
@@ -279,7 +280,8 @@ public class ResourceServletTest {
       int expectedRelaysNumber, String[] expectedRelaysNicknames,
       int expectedBridgesNumber, String[] expectedBridgesNicknames) {
     this.runTest(request);
-    assertNotNull(this.summaryDocument);
+    assertNotNull("Summary document is null, status code is "
+        + this.response.errorStatusCode, this.summaryDocument);
     assertEquals(expectedRelaysNumber,
         this.summaryDocument.relays.length);
     if (expectedRelaysNicknames != null) {
@@ -1530,6 +1532,62 @@ public class ResourceServletTest {
   public void testFamily39Characters() {
     this.assertErrorStatusCode(
         "/summary?family=00000000000000000000000000000000000000", 400);
+  }
+
+  @Test
+  public void testVersion02325() {
+    this.assertSummaryDocument("/summary?version=0.2.3.25", 2,
+        new String[] { "TorkaZ", "TimMayTribute" }, 0, null);
+  }
+
+  @Test
+  public void testVersion02324() {
+    this.assertSummaryDocument("/summary?version=0.2.3.24-rc-dev", 1,
+        new String[] { "Ferrari458" }, 0, null);
+  }
+
+  @Test
+  public void testVersion12345() {
+    this.assertSummaryDocument("/summary?version=1.2.3.4.5", 0, null, 0, null);
+  }
+
+  @Test
+  public void testVersionBlaBlaBla() {
+    this.assertSummaryDocument("/summary?version=bla-bla-bla", 0, null, 0,
+        null);
+  }
+
+  @Test
+  public void testVersion0() {
+    this.assertSummaryDocument("/summary?version=0", 3, null, 0, null);
+  }
+
+  @Test
+  public void testVersion02() {
+    this.assertSummaryDocument("/summary?version=0.2", 3, null, 0, null);
+  }
+
+  @Test
+  public void testVersion023() {
+    this.assertSummaryDocument("/summary?version=0.2.3", 3, null, 0, null);
+  }
+
+  @Test
+  public void testVersion0232() {
+    /* This is correct when comparing strings. */
+    this.assertSummaryDocument("/summary?version=0.2.3.2", 3, null, 0, null);
+  }
+
+  @Test
+  public void testVersion023Dot() {
+    /* This is also correct when comparing strings. */
+    this.assertSummaryDocument("/summary?version=0.2.3.", 3, null, 0, null);
+  }
+
+  @Test
+  public void testVersionStart() {
+    /* This is also correct when comparing strings. */
+    this.assertErrorStatusCode("/summary?version=*", 400);
   }
 }
 

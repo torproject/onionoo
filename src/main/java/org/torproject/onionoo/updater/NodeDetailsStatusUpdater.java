@@ -283,6 +283,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         nodeStatus.setRecommendedVersion((recommendedVersions == null
             || entry.getVersion() == null) ? null :
             recommendedVersions.contains(entry.getVersion()));
+        nodeStatus.setVersion(entry.getVersion());
       }
       if (entry.getUnmeasured()) {
         if (!this.lastSeenUnmeasured.containsKey(fingerprint)
@@ -484,6 +485,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           updatedNodeStatus.setAsNumber(nodeStatus.getAsNumber());
           updatedNodeStatus.setRecommendedVersion(
               nodeStatus.getRecommendedVersion());
+          updatedNodeStatus.setVersion(nodeStatus.getVersion());
         }
         if (nodeStatus.getFirstSeenMillis()
             < updatedNodeStatus.getFirstSeenMillis()

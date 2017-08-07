@@ -169,5 +169,15 @@ class NodeIndex {
   public SortedMap<Integer, Set<String>> getBridgesByLastSeenDays() {
     return bridgesByLastSeenDays;
   }
+
+  private Map<String, Set<String>> relaysByVersion;
+
+  public void setRelaysByVersion(Map<String, Set<String>> relaysByVersion) {
+    this.relaysByVersion = relaysByVersion;
+  }
+
+  public Map<String, Set<String>> getRelaysByVersion() {
+    return this.relaysByVersion;
+  }
 }
 

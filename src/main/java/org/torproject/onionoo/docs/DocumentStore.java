@@ -435,13 +435,14 @@ public class DocumentStore {
     }
     SortedSet<String> relayFlags = new TreeSet<>();
     SortedSet<String> family = null;
+    String version = null;
     long lastSeenMillis = -1L;
     long consensusWeight = -1L;
     long firstSeenMillis = -1L;
     SummaryDocument summaryDocument = new SummaryDocument(isRelay,
         nickname, fingerprint, addresses, lastSeenMillis, running,
         relayFlags, consensusWeight, countryCode, firstSeenMillis,
-        asNumber, contact, family, family);
+        asNumber, contact, family, family, version);
     return summaryDocument;
   }
 

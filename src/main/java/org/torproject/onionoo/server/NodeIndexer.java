@@ -150,6 +150,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     Map<String, Set<String>> newBridgesByFlag = new HashMap<>();
     Map<String, Set<String>> newRelaysByContact = new HashMap<>();
     Map<String, Set<String>> newRelaysByFamily = new HashMap<>();
+    Map<String, Set<String>> newRelaysByVersion = new HashMap<>();
     SortedMap<Integer, Set<String>> newRelaysByFirstSeenDays = new TreeMap<>();
     SortedMap<Integer, Set<String>> newBridgesByFirstSeenDays = new TreeMap<>();
     SortedMap<Integer, Set<String>> newRelaysByLastSeenDays = new TreeMap<>();
@@ -246,6 +247,12 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       }
       newRelaysByContact.get(contact).add(fingerprint);
       newRelaysByContact.get(contact).add(hashedFingerprint);
+      String version = entry.getVersion();
+      if (!newRelaysByVersion.containsKey(version)) {
+        newRelaysByVersion.put(version, new HashSet<String>());
+      }
+      newRelaysByVersion.get(version).add(fingerprint);
+      newRelaysByVersion.get(version).add(hashedFingerprint);
     }
     /* This loop can go away once all Onionoo services had their hourly
      * updater write effective families to summary documents at least
@@ -319,6 +326,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     newNodeIndex.setBridgesByLastSeenDays(newBridgesByLastSeenDays);
     newNodeIndex.setRelaysPublishedMillis(relaysLastValidAfterMillis);
     newNodeIndex.setBridgesPublishedMillis(bridgesLastPublishedMillis);
+    newNodeIndex.setRelaysByVersion(newRelaysByVersion);
     synchronized (this) {
       this.lastIndexed = updateStatusMillis;
       this.latestNodeIndex = newNodeIndex;

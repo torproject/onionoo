@@ -3,6 +3,8 @@
 
 package org.torproject.onionoo.server;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -66,7 +68,7 @@ public class ResourceServlet extends HttpServlet {
   private static Set<String> knownParameters = new HashSet<>(
       Arrays.asList(("type,running,search,lookup,fingerprint,country,as,"
           + "flag,first_seen_days,last_seen_days,contact,order,limit,"
-          + "offset,fields,family").split(",")));
+          + "offset,fields,family,version").split(",")));
 
   private static Set<String> illegalSearchQualifiers =
       new HashSet<>(Arrays.asList(("search,fingerprint,order,limit,"
@@ -274,6 +276,15 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       rh.setContact(contactParts);
+    }
+    if (parameterMap.containsKey("version")) {
+      String versionParameter = this.parseVersionParameter(
+          parameterMap.get("version"));
+      if (null == versionParameter) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      rh.setVersion(versionParameter);
     }
     if (parameterMap.containsKey("order")) {
       String[] order = this.parseOrderParameter(parameterMap.get("order"));
@@ -531,6 +542,17 @@ public class ResourceServlet extends HttpServlet {
       return null;
     }
     return parameter.toLowerCase().split(",");
+  }
+
+  private static Pattern versionParameterPattern =
+      Pattern.compile("^[0-9a-zA-Z\\.-]+$");
+
+  private String parseVersionParameter(String parameter) {
+    if (!versionParameterPattern.matcher(parameter).matches()) {
+      /* Version contains illegal character(s). */
+      return null;
+    }
+    return parameter;
   }
 }
 

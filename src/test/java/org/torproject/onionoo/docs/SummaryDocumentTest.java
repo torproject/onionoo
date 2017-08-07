@@ -26,7 +26,7 @@ public class SummaryDocumentTest {
         new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC",
             "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B" })),
         new TreeSet<>(Arrays.asList(
-        new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC" })));
+        new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC" })), null);
   }
 
   @Test()
