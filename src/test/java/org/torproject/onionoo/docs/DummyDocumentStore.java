@@ -12,7 +12,7 @@ import java.util.TreeSet;
 
 public class DummyDocumentStore extends DocumentStore {
 
-  private Map<Class<? extends Document>, SortedMap<String, Document>>
+  public Map<Class<? extends Document>, SortedMap<String, Document>>
       storedDocuments = new HashMap<>();
 
   private static final String FINGERPRINT_NULL = "";
