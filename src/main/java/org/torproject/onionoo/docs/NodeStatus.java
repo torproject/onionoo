@@ -580,9 +580,9 @@ public class NodeStatus extends Document {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(this.isRelay ? "r" : "b");
-    sb.append("\t" + this.nickname);
-    sb.append("\t" + this.fingerprint);
-    sb.append("\t" + this.address + ";");
+    sb.append("\t").append(this.nickname);
+    sb.append("\t").append(this.fingerprint);
+    sb.append("\t").append(this.address).append(";");
     if (this.orAddressesAndPorts != null) {
       sb.append(StringUtils.join(this.orAddressesAndPorts, "+"));
     }
@@ -590,40 +590,42 @@ public class NodeStatus extends Document {
     if (this.isRelay) {
       sb.append(StringUtils.join(this.exitAddresses, "+"));
     }
-    sb.append("\t" + DateTimeHelper.format(this.lastSeenMillis,
+    sb.append("\t").append(DateTimeHelper.format(this.lastSeenMillis,
         DateTimeHelper.ISO_DATETIME_TAB_FORMAT));
-    sb.append("\t" + this.orPort);
-    sb.append("\t" + this.dirPort + "\t");
+    sb.append("\t").append(this.orPort);
+    sb.append("\t").append(this.dirPort).append("\t");
     sb.append(StringUtils.join(this.getRelayFlags(), ","));
     if (this.isRelay) {
-      sb.append("\t" + String.valueOf(this.consensusWeight));
-      sb.append("\t"
-          + (this.countryCode != null ? this.countryCode : "??"));
+      sb.append("\t").append(String.valueOf(this.consensusWeight));
+      sb.append("\t")
+          .append((this.countryCode != null ? this.countryCode : "??"));
       sb.append("\t"); /* formerly used for storing host names */
-      sb.append("\t" + String.valueOf(this.lastRdnsLookup));
-      sb.append("\t" + (this.defaultPolicy != null ? this.defaultPolicy
-          : "null"));
-      sb.append("\t" + (this.portList != null ? this.portList : "null"));
+      sb.append("\t").append(String.valueOf(this.lastRdnsLookup));
+      sb.append("\t").append((this.defaultPolicy != null
+          ? this.defaultPolicy : "null"));
+      sb.append("\t").append((this.portList != null ? this.portList : "null"));
     } else {
       sb.append("\t-1\t??\t\t-1\tnull\tnull");
     }
-    sb.append("\t" + DateTimeHelper.format(this.firstSeenMillis,
+    sb.append("\t").append(DateTimeHelper.format(this.firstSeenMillis,
         DateTimeHelper.ISO_DATETIME_TAB_FORMAT));
     if (this.isRelay) {
-      sb.append("\t" + DateTimeHelper.format(
+      sb.append("\t").append(DateTimeHelper.format(
           this.getLastChangedOrAddressOrPort(),
           DateTimeHelper.ISO_DATETIME_TAB_FORMAT));
-      sb.append("\t" + (this.asNumber != null ? this.asNumber : "null"));
+      sb.append("\t").append((this.asNumber != null ? this.asNumber : "null"));
     } else {
       sb.append("\tnull\tnull\tnull");
     }
-    sb.append("\t" + (this.contact != null ? this.contact : ""));
-    sb.append("\t" + (this.recommendedVersion == null ? "null" :
+    sb.append("\t").append((this.contact != null ? this.contact : ""));
+    sb.append("\t").append((this.recommendedVersion == null ? "null" :
         this.recommendedVersion ? "true" : "false"));
-    sb.append("\t" + StringUtils.join(this.getAllegedFamily(), ";") + ":"
-        + StringUtils.join(this.getEffectiveFamily(), ";") + ":"
-        + StringUtils.join(this.getIndirectFamily(), ";"));
-    sb.append("\t" + (this.getVersion() != null ? this.getVersion() : ""));
+    sb.append("\t").append(StringUtils.join(this.getAllegedFamily(), ";"))
+        .append(":")
+        .append(StringUtils.join(this.getEffectiveFamily(), ";")).append(":")
+        .append(StringUtils.join(this.getIndirectFamily(), ";"));
+    sb.append("\t")
+        .append((this.getVersion() != null ? this.getVersion() : ""));
     return sb.toString();
   }
 }
