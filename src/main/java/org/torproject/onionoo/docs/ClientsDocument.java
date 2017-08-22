@@ -16,10 +16,10 @@ public class ClientsDocument extends Document {
   }
 
   @SuppressWarnings("unused")
-  private Map<String, ClientsGraphHistory> average_clients;
+  private Map<String, GraphHistory> average_clients;
 
   public void setAverageClients(
-      Map<String, ClientsGraphHistory> averageClients) {
+      Map<String, GraphHistory> averageClients) {
     this.average_clients = averageClients;
   }
 }

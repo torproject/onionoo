@@ -1,8 +1,10 @@
-# Changes in version 4.0-1.?.? - 2017-0?-??
+# Changes in version 4.1-1.?.? - 2017-0?-??
 
  * Medium changes
    - Reset IPv6 exit-policy summary in details status if a newer
      server descriptor doesn't contain such a summary anymore.
+   - Remove optional fields "countries", "transports", and "versions"
+     from clients objects which were still labeled as beta.
 
 
 # Changes in version 4.0-1.3.0 - 2017-08-04

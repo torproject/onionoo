@@ -4,12 +4,12 @@
 package org.torproject.onionoo.writer;
 
 import org.torproject.onionoo.docs.ClientsDocument;
-import org.torproject.onionoo.docs.ClientsGraphHistory;
 import org.torproject.onionoo.docs.ClientsHistory;
 import org.torproject.onionoo.docs.ClientsStatus;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.GraphHistory;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.FormattingUtils;
 
@@ -20,9 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 
 /*
  * Clients status file produced as intermediate output:
@@ -111,11 +109,11 @@ public class ClientsDocumentWriter implements DocumentWriter {
       SortedSet<ClientsHistory> history) {
     ClientsDocument clientsDocument = new ClientsDocument();
     clientsDocument.setFingerprint(hashedFingerprint);
-    Map<String, ClientsGraphHistory> averageClients = new LinkedHashMap<>();
+    Map<String, GraphHistory> averageClients = new LinkedHashMap<>();
     for (int graphIntervalIndex = 0; graphIntervalIndex
         < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
-      ClientsGraphHistory graphHistory = this.compileClientsHistory(
+      GraphHistory graphHistory = this.compileClientsHistory(
           graphIntervalIndex, history);
       if (graphHistory != null) {
         averageClients.put(graphName, graphHistory);
@@ -125,7 +123,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
     return clientsDocument;
   }
 
-  private ClientsGraphHistory compileClientsHistory(
+  private GraphHistory compileClientsHistory(
       int graphIntervalIndex, SortedSet<ClientsHistory> history) {
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
@@ -135,10 +133,6 @@ public class ClientsDocumentWriter implements DocumentWriter {
         / dataPointInterval) * dataPointInterval;
     long millis = 0L;
     double responses = 0.0;
-    double totalResponses = 0.0;
-    SortedMap<String, Double> totalResponsesByCountry = new TreeMap<>();
-    SortedMap<String, Double> totalResponsesByTransport = new TreeMap<>();
-    SortedMap<String, Double> totalResponsesByVersion = new TreeMap<>();
     for (ClientsHistory hist : history) {
       if (hist.getEndMillis() < intervalStartMillis) {
         continue;
@@ -153,31 +147,6 @@ public class ClientsDocumentWriter implements DocumentWriter {
         intervalStartMillis += dataPointInterval;
       }
       responses += hist.getTotalResponses();
-      totalResponses += hist.getTotalResponses();
-      for (Map.Entry<String, Double> e :
-          hist.getResponsesByCountry().entrySet()) {
-        if (!totalResponsesByCountry.containsKey(e.getKey())) {
-          totalResponsesByCountry.put(e.getKey(), 0.0);
-        }
-        totalResponsesByCountry.put(e.getKey(), e.getValue()
-            + totalResponsesByCountry.get(e.getKey()));
-      }
-      for (Map.Entry<String, Double> e :
-          hist.getResponsesByTransport().entrySet()) {
-        if (!totalResponsesByTransport.containsKey(e.getKey())) {
-          totalResponsesByTransport.put(e.getKey(), 0.0);
-        }
-        totalResponsesByTransport.put(e.getKey(), e.getValue()
-            + totalResponsesByTransport.get(e.getKey()));
-      }
-      for (Map.Entry<String, Double> e :
-          hist.getResponsesByVersion().entrySet()) {
-        if (!totalResponsesByVersion.containsKey(e.getKey())) {
-          totalResponsesByVersion.put(e.getKey(), 0.0);
-        }
-        totalResponsesByVersion.put(e.getKey(), e.getValue()
-            + totalResponsesByVersion.get(e.getKey()));
-      }
       millis += (hist.getEndMillis() - hist.getStartMillis());
     }
     dataPoints.add(millis * 2L < dataPointInterval
@@ -217,7 +186,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
         + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
     double factor = ((double) maxValue) / 999.0;
     int count = lastNonNullIndex - firstNonNullIndex + 1;
-    ClientsGraphHistory graphHistory = new ClientsGraphHistory();
+    GraphHistory graphHistory = new GraphHistory();
     graphHistory.setFirst(firstDataPointMillis);
     graphHistory.setLast(lastDataPointMillis);
     graphHistory.setInterval((int) (dataPointInterval
@@ -240,39 +209,6 @@ public class ClientsDocumentWriter implements DocumentWriter {
           (int) ((dataPoint * 999.0) / maxValue));
     }
     graphHistory.setValues(values);
-    if (!totalResponsesByCountry.isEmpty()) {
-      SortedMap<String, Float> countries = new TreeMap<>();
-      for (Map.Entry<String, Double> e :
-          totalResponsesByCountry.entrySet()) {
-        if (e.getValue() > totalResponses / 100.0) {
-          countries.put(e.getKey(),
-              (float) (e.getValue() / totalResponses));
-        }
-      }
-      graphHistory.setCountries(countries);
-    }
-    if (!totalResponsesByTransport.isEmpty()) {
-      SortedMap<String, Float> transports = new TreeMap<>();
-      for (Map.Entry<String, Double> e :
-          totalResponsesByTransport.entrySet()) {
-        if (e.getValue() > totalResponses / 100.0) {
-          transports.put(e.getKey(),
-              (float) (e.getValue() / totalResponses));
-        }
-      }
-      graphHistory.setTransports(transports);
-    }
-    if (!totalResponsesByVersion.isEmpty()) {
-      SortedMap<String, Float> versions = new TreeMap<>();
-      for (Map.Entry<String, Double> e :
-          totalResponsesByVersion.entrySet()) {
-        if (e.getValue() > totalResponses / 100.0) {
-          versions.put(e.getKey(),
-              (float) (e.getValue() / totalResponses));
-        }
-      }
-      graphHistory.setVersions(versions);
-    }
     if (foundTwoAdjacentDataPoints) {
       return graphHistory;
     } else {
