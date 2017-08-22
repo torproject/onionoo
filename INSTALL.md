@@ -117,6 +117,11 @@ By default, Onionoo is configured to run the updater hourly and provide the
 web pages on http://localhost:8080/.  The exact timing for the hourly update
 runs is logged at start-up.
 
+Onionoo's Jetty configuration is done in 'jetty.xml', which can be replaced
+in the war-file.
+All configuration options can be found at
+```http://www.eclipse.org/jetty/documentation/```
+The build.xml file contains Onionoo's current jetty version.
 
 ### Performing the initial run
 

@@ -27,6 +27,7 @@
           <Ref id="server"/>
         </Arg>
         <Set name="port">8080</Set>
+        <Set name="host">127.0.0.1</Set>
       </New>
     </Arg>
   </Call>
