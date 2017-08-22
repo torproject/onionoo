@@ -20,7 +20,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -31,11 +30,11 @@ public class NodeIndexer implements ServletContextListener, Runnable {
 
   @Override
   public void contextInitialized(ServletContextEvent contextEvent) {
-    ServletContext servletContext = contextEvent.getServletContext();
-    File outDir = new File(servletContext.getInitParameter("outDir"));
+    File outDir = new File(System.getProperty("onionoo.basedir",
+        "/srv/onionoo.torproject.org/onionoo"), "out");
     if (!outDir.exists() || !outDir.isDirectory()) {
       log.error("\n\n\tOut-dir not found! Expected directory: " + outDir
-          + "\n\tVerify the configuration in ./etc/web.xml.template");
+          + "\n\tSet system property 'onionoo.basedir'.");
       System.exit(1);
     }
     DocumentStore documentStore = DocumentStoreFactory.getDocumentStore();

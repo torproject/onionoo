@@ -9,6 +9,10 @@
    - Switch from our own CollecTor downloader to metrics-lib's
      DescriptorCollector.
 
+ * Minor changes
+   - Add a new Java property "onionoo.basedir" to re-configure the
+     base directory used by the web server component.
+
 
 # Changes in version 4.0-1.3.0 - 2017-08-04
 

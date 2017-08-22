@@ -41,11 +41,6 @@
     <url-pattern>/uptime</url-pattern>
   </servlet-mapping>
 
-  <context-param>
-    <param-name>outDir</param-name>
-    <param-value>/srv/onionoo.torproject.org/onionoo/out/</param-value>
-  </context-param>
-
   <listener>
     <listener-class>
       org.torproject.onionoo.server.NodeIndexer

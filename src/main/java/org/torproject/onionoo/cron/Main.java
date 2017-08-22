@@ -22,8 +22,7 @@ import java.util.concurrent.TimeUnit;
 /* Update search data and status data files. */
 public class Main implements Runnable {
 
-  private Main() {
-  }
+  private Main() {}
 
   private Logger log = LoggerFactory.getLogger(Main.class);
 
