@@ -1,4 +1,4 @@
-# Changes in version 4.1-1.?.? - 2017-0?-??
+# Changes in version 4.1-1.4.0 - 2017-08-30
 
  * Medium changes
    - Reset IPv6 exit-policy summary in details status if a newer
@@ -6,10 +6,10 @@
    - Remove optional fields "countries", "transports", and "versions"
      from clients objects which were still labeled as beta.
    - Add new "version" parameter to filter for Tor version.
-   - Switch from our own CollecTor downloader to metrics-lib's
-     DescriptorCollector.
 
  * Minor changes
+   - Switch from our own CollecTor downloader to metrics-lib's
+     DescriptorCollector.
    - Add a new Java property "onionoo.basedir" to re-configure the
      base directory used by the web server component.
 
