@@ -91,7 +91,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
    * background thread. */
   public synchronized void startIndexing() {
     if (this.nodeIndexerThread == null) {
-      this.nodeIndexerThread = new Thread(this);
+      this.nodeIndexerThread = new Thread(this, "Onionoo-Node-Indexer");
       this.nodeIndexerThread.setDaemon(true);
       this.nodeIndexerThread.start();
     }
@@ -103,14 +103,18 @@ public class NodeIndexer implements ServletContextListener, Runnable {
 
   @Override
   public void run() {
-    while (this.nodeIndexerThread != null) {
-      this.indexNodeStatuses();
-      try {
-        Thread.sleep(ONE_MINUTE);
-      } catch (InterruptedException e) {
-        /* Nothing that we could handle, just check if there's new data
-         * to index now. */
+    try {
+      while (this.nodeIndexerThread != null) {
+        this.indexNodeStatuses();
+        try {
+          Thread.sleep(ONE_MINUTE);
+        } catch (InterruptedException e) {
+          /* Nothing that we could handle, just check if there's new data
+           * to index now. */
+        }
       }
+    } catch (Throwable th) { // catch all and log
+      log.error("Indexing failed: {}", th.getMessage(), th);
     }
   }
 
@@ -247,11 +251,13 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       newRelaysByContact.get(contact).add(fingerprint);
       newRelaysByContact.get(contact).add(hashedFingerprint);
       String version = entry.getVersion();
-      if (!newRelaysByVersion.containsKey(version)) {
-        newRelaysByVersion.put(version, new HashSet<String>());
+      if (null != version) {
+        if (!newRelaysByVersion.containsKey(version)) {
+          newRelaysByVersion.put(version, new HashSet<String>());
+        }
+        newRelaysByVersion.get(version).add(fingerprint);
+        newRelaysByVersion.get(version).add(hashedFingerprint);
       }
-      newRelaysByVersion.get(version).add(fingerprint);
-      newRelaysByVersion.get(version).add(hashedFingerprint);
     }
     /* This loop can go away once all Onionoo services had their hourly
      * updater write effective families to summary documents at least
