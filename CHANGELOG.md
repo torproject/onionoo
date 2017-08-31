@@ -1,3 +1,10 @@
+# Changes in version 4.1-1.4.1 - 2017-08-31
+
+ * Medium changes
+   - Fix a NullPointerException in the recently added "version"
+     parameter.
+
+
 # Changes in version 4.1-1.4.0 - 2017-08-30
 
  * Medium changes
