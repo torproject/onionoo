@@ -1,4 +1,4 @@
-# Changes in version 4.1-1.?.? - 2017-??-??
+# Changes in version 4.1-1.5.0 - 2017-09-15
 
  * Major changes
    - Update to metrics-lib 2.1.0 and to Java 8.
