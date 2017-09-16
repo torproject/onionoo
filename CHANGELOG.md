@@ -1,3 +1,9 @@
+# Changes in version 4.?-?.?.? - 2017-??-??
+
+ * Minor changes
+   - Remove placeholder page on index.html.
+
+
 # Changes in version 4.1-1.5.0 - 2017-09-15
 
  * Major changes
