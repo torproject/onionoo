@@ -1,5 +1,10 @@
 # Changes in version 4.?-?.?.? - 2017-??-??
 
+ * Medium changes
+   - Only set the "running" field in a bridge's details document to
+     true if the bridge is both contained in the last known bridge
+     network status and has the "Running" flag assigned there.
+
  * Minor changes
    - Remove placeholder page on index.html.
 

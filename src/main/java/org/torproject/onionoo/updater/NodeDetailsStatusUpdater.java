@@ -863,7 +863,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       }
 
       detailsStatus.setRelay(nodeStatus.isRelay());
-      detailsStatus.setRunning(nodeStatus.getLastSeenMillis()
+      detailsStatus.setRunning(nodeStatus.getRelayFlags().contains("Running")
+          && nodeStatus.getLastSeenMillis()
           == (nodeStatus.isRelay() ? this.relaysLastValidAfterMillis
           : this.bridgesLastPublishedMillis));
       detailsStatus.setNickname(nodeStatus.getNickname());
