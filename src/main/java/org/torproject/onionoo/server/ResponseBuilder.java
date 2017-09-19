@@ -18,16 +18,37 @@ import com.google.gson.GsonBuilder;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class ResponseBuilder {
 
-  private DocumentStore documentStore;
+  private static final Logger logger =
+      LoggerFactory.getLogger(ResponseBuilder.class);
 
+  private DocumentStore documentStore;
+  private String buildRevision;
+
+  /** Initialize document store and the build revision. */
   public ResponseBuilder() {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
+    Properties buildProperties = new Properties();
+    try (InputStream is = getClass().getClassLoader()
+        .getResourceAsStream("onionoo.buildrevision.properties")) {
+      buildProperties.load(is);
+      buildRevision = buildProperties.getProperty("onionoo.build.revision",
+          null);
+    } catch (Exception ex) {
+      // We create documents anyway: only log a warning.
+      logger.warn("No build revision available.", ex);
+      buildRevision = null;
+    }
   }
 
   private String resourceType;
@@ -111,6 +132,9 @@ public class ResponseBuilder {
     if (null != NEXT_MAJOR_VERSION_SCHEDULED) {
       this.write(pw, "\"next_major_version_scheduled\":\"%s\",\n",
           NEXT_MAJOR_VERSION_SCHEDULED);
+    }
+    if (null != buildRevision) {
+      this.write(pw, "\"build_revision\":\"%s\",\n", buildRevision);
     }
     this.write(pw, "\"relays_published\":\"%s\",\n",
         this.relaysPublishedString);

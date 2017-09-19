@@ -4,6 +4,8 @@
    - Only set the "running" field in a bridge's details document to
      true if the bridge is both contained in the last known bridge
      network status and has the "Running" flag assigned there.
+   - Add build_revision to documents, if available.
+   - Update to metrics-lib 2.1.1.
 
  * Minor changes
    - Remove placeholder page on index.html.
