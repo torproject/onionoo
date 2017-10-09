@@ -1,4 +1,4 @@
-# Changes in version 4.?-?.?.? - 2017-??-??
+# Changes in version 4.2-1.6.0 - 2017-10-09
 
  * Medium changes
    - Only set the "running" field in a bridge's details document to
