@@ -97,6 +97,12 @@ public class RequestHandler {
     this.version = version;
   }
 
+  private String hostName;
+
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
+
   private String[] order;
 
   public void setOrder(String[] order) {
@@ -165,6 +171,7 @@ public class RequestHandler {
     this.filterByContact();
     this.filterByFamily();
     this.filterByVersion();
+    this.filterByHostName();
     this.order();
     this.offset();
     this.limit();
@@ -534,6 +541,25 @@ public class RequestHandler {
       }
     }
     this.filteredRelays.keySet().retainAll(keepRelays);
+    this.filteredBridges.clear();
+  }
+
+  private void filterByHostName() {
+    if (this.hostName == null) {
+      /* Not filtering by host name. */
+      return;
+    }
+    String hostName = this.hostName.toLowerCase();
+    Set<String> removeRelays = new HashSet<>(this.filteredRelays.keySet());
+    for (Map.Entry<String, Set<String>> e :
+        this.nodeIndex.getRelaysByHostName().entrySet()) {
+      if (e.getKey().endsWith(hostName)) {
+        removeRelays.removeAll(e.getValue());
+      }
+    }
+    for (String fingerprint : removeRelays) {
+      this.filteredRelays.remove(fingerprint);
+    }
     this.filteredBridges.clear();
   }
 

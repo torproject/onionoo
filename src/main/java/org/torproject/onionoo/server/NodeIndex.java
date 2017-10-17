@@ -179,5 +179,15 @@ class NodeIndex {
   public Map<String, Set<String>> getRelaysByVersion() {
     return this.relaysByVersion;
   }
+
+  private Map<String, Set<String>> relaysByHostName;
+
+  public void setRelaysByHostName(Map<String, Set<String>> relaysByHostName) {
+    this.relaysByHostName = relaysByHostName;
+  }
+
+  public Map<String, Set<String>> getRelaysByHostName() {
+    return this.relaysByHostName;
+  }
 }
 

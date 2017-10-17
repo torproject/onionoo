@@ -4,6 +4,7 @@
    - Support quoted qualified search terms.
    - Skip unrecognized descriptors when importing archives rather than
      aborting the entire import.
+   - Add new "host_name" parameter to filter by host name.
 
 
 # Changes in version 4.2-1.6.1 - 2017-10-26

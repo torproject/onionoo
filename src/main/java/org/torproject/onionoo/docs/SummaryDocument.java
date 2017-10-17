@@ -279,6 +279,16 @@ public class SummaryDocument extends Document {
     return this.v;
   }
 
+  private String h;
+
+  public void setHostName(String hostName) {
+    this.h = hostName;
+  }
+
+  public String getHostName() {
+    return this.h;
+  }
+
   /* The familyFingerprints parameter can go away after September 8, 2015.
    * See above. */
   /** Instantiates a summary document with all given properties. */
@@ -287,7 +297,7 @@ public class SummaryDocument extends Document {
       boolean running, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, long firstSeenMillis, String asNumber,
       String contact, SortedSet<String> familyFingerprints,
-      SortedSet<String> effectiveFamily, String version) {
+      SortedSet<String> effectiveFamily, String version, String hostName) {
     this.setRelay(isRelay);
     this.setNickname(nickname);
     this.setFingerprint(fingerprint);
@@ -303,6 +313,7 @@ public class SummaryDocument extends Document {
     this.setFamilyFingerprints(familyFingerprints);
     this.setEffectiveFamily(effectiveFamily);
     this.setVersion(version);
+    this.setHostName(hostName);
   }
 }
 

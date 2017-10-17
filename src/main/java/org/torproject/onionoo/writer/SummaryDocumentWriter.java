@@ -92,10 +92,12 @@ public class SummaryDocumentWriter implements DocumentWriter {
       SortedSet<String> effectiveFamily = nodeStatus.getEffectiveFamily();
       String nickname = nodeStatus.getNickname();
       String version = nodeStatus.getVersion();
+      String hostName = nodeStatus.getHostName();
       SummaryDocument summaryDocument = new SummaryDocument(isRelay,
           nickname, fingerprint, addresses, lastSeenMillis, running,
           relayFlags, consensusWeight, countryCode, firstSeenMillis,
-          asNumber, contact, declaredFamily, effectiveFamily, version);
+          asNumber, contact, declaredFamily, effectiveFamily, version,
+          hostName);
       if (this.documentStore.store(summaryDocument, fingerprint)) {
         this.writtenDocuments++;
       }

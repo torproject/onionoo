@@ -368,6 +368,16 @@ public class NodeStatus extends Document {
 
   /* Reverse DNS lookup result */
 
+  private String hostName;
+
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
+
+  public String getHostName() {
+    return this.hostName;
+  }
+
   private long lastRdnsLookup = -1L;
 
   public void setLastRdnsLookup(long lastRdnsLookup) {
@@ -561,6 +571,9 @@ public class NodeStatus extends Document {
       if (parts.length >= 24 && !parts[23].isEmpty()) {
         nodeStatus.setVersion(parts[23]);
       }
+      if (parts.length >= 25 && !parts[24].isEmpty()) {
+        nodeStatus.setHostName(parts[24]);
+      }
       return nodeStatus;
     } catch (NumberFormatException e) {
       log.error("Number format exception while parsing node "
@@ -627,6 +640,8 @@ public class NodeStatus extends Document {
         .append(StringUtils.join(this.getIndirectFamily(), ";"));
     sb.append("\t")
         .append((this.getVersion() != null ? this.getVersion() : ""));
+    sb.append("\t")
+        .append((this.getHostName() != null ? this.getHostName() : ""));
     return sb.toString();
   }
 }

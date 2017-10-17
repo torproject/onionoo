@@ -849,6 +849,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       if (this.rdnsLookupResults.containsKey(fingerprint)) {
         String hostName = this.rdnsLookupResults.get(fingerprint);
         detailsStatus.setHostName(hostName);
+        nodeStatus.setHostName(hostName);
         nodeStatus.setLastRdnsLookup(this.startedRdnsLookups);
       }
 
