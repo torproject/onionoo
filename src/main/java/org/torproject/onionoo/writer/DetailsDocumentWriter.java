@@ -119,11 +119,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
         && !detailsStatus.getAllegedFamily().isEmpty()) {
       SortedSet<String> allegedFamily = new TreeSet<>();
       for (String familyMember : detailsStatus.getAllegedFamily()) {
-        if (familyMember.length() >= 40) {
-          allegedFamily.add("$" + familyMember);
-        } else {
-          allegedFamily.add(familyMember);
-        }
+        allegedFamily.add(familyMember);
       }
       detailsDocument.setAllegedFamily(allegedFamily);
     }
@@ -131,7 +127,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
         && !detailsStatus.getEffectiveFamily().isEmpty()) {
       SortedSet<String> effectiveFamily = new TreeSet<>();
       for (String familyMember : detailsStatus.getEffectiveFamily()) {
-        effectiveFamily.add("$" + familyMember);
+        effectiveFamily.add(familyMember);
       }
       detailsDocument.setEffectiveFamily(effectiveFamily);
     }
@@ -139,7 +135,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
         && !detailsStatus.getIndirectFamily().isEmpty()) {
       SortedSet<String> indirectFamily = new TreeSet<>();
       for (String familyMember : detailsStatus.getIndirectFamily()) {
-        indirectFamily.add("$" + familyMember);
+        indirectFamily.add(familyMember);
       }
       detailsDocument.setIndirectFamily(indirectFamily);
     }
