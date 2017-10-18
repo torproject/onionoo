@@ -530,5 +530,15 @@ public class DetailsStatus extends Document {
   public String getHostName() {
     return unescapeJson(this.host_name);
   }
+
+  private List<String> advertised_or_addresses;
+
+  public void setAdvertisedOrAddresses(List<String> advertisedOrAddresses) {
+    this.advertised_or_addresses = advertisedOrAddresses;
+  }
+
+  public List<String> getAdvertisedOrAddresses() {
+    return this.advertised_or_addresses;
+  }
 }
 

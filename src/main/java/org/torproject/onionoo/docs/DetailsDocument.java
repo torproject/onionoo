@@ -473,5 +473,15 @@ public class DetailsDocument extends Document {
   public Boolean getMeasured() {
     return this.measured;
   }
+
+  private List<String> unreachable_or_addresses;
+
+  public void setUnreachableOrAddresses(List<String> unreachableOrAddresses) {
+    this.unreachable_or_addresses = unreachableOrAddresses;
+  }
+
+  public List<String> getUnreachableOrAddresses() {
+    return this.unreachable_or_addresses;
+  }
 }
 

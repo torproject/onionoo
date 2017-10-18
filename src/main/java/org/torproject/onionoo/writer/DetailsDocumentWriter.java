@@ -155,6 +155,16 @@ public class DetailsDocumentWriter implements DocumentWriter {
           exitAddressesWithoutOrAddresses));
     }
     detailsDocument.setMeasured(detailsStatus.getMeasured());
+    List<String> unreachableOrAddresses = new ArrayList<>();
+    if (null != detailsStatus.getAdvertisedOrAddresses()) {
+      unreachableOrAddresses.addAll(detailsStatus.getAdvertisedOrAddresses());
+    }
+    if (null != detailsStatus.getOrAddressesAndPorts()) {
+      unreachableOrAddresses.removeAll(detailsStatus.getOrAddressesAndPorts());
+    }
+    if (!unreachableOrAddresses.isEmpty()) {
+      detailsDocument.setUnreachableOrAddresses(unreachableOrAddresses);
+    }
     this.documentStore.store(detailsDocument, fingerprint);
   }
 

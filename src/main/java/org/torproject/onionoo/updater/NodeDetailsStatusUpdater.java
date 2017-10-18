@@ -199,6 +199,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     }
     detailsStatus.setHibernating(descriptor.isHibernating() ? true :
         null);
+    detailsStatus.setAdvertisedOrAddresses(descriptor.getOrAddresses());
     this.documentStore.store(detailsStatus, fingerprint);
   }
 
