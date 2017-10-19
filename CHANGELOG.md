@@ -1,4 +1,10 @@
-# Changes in version 4.2-1.6.1 - 2017-10-2?
+# Changes in version 4.3-1.7.0 - 2017-1?-??
+
+ * Medium changes
+   - Support quoted qualified search terms.
+
+
+# Changes in version 4.2-1.6.1 - 2017-10-26
 
  * Medium changes
    - Fix two NullPointerExceptions caused by accessing optional parts

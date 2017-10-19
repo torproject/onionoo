@@ -3,6 +3,8 @@
 
 package org.torproject.onionoo.server;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -169,6 +171,12 @@ public class ResourceServlet extends HttpServlet {
           }
           if (!parameterMap.containsKey(parameterKey)) {
             String parameterValue = parts[1];
+            if (parameterValue.startsWith("\"")
+                && parameterValue.endsWith("\"")) {
+              parameterValue = parameterValue
+                  .substring(1, parameterValue.length() - 1)
+                  .replaceAll("\\\\\"", "\"");
+            }
             parameterMap.put(parameterKey, parameterValue);
           }
         } else {
@@ -388,7 +396,7 @@ public class ResourceServlet extends HttpServlet {
       + "^[0-9a-zA-Z+/]{1,27}$|" /* Base64 fingerprint. */
       + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
       + ipv6AddressPatternString + "|" /* IPv6 address. */
-      + "^[a-zA-Z_]+:\\p{Graph}+$" /* Qualified search term. */);
+      + "^[a-zA-Z_]+:\"?[\\p{Graph} ]+\"?$"); /* Qualified search term. */
 
   protected static String[] parseSearchParameters(String queryString) {
     Matcher searchQueryStringMatcher = searchQueryStringPattern.matcher(
@@ -398,15 +406,39 @@ public class ResourceServlet extends HttpServlet {
       return null;
     }
     String parameter = searchQueryStringMatcher.group(1);
-    String[] searchParameters =
+    String[] spaceSeparatedParts =
         parameter.replaceAll("%20", " ").split(" ");
+    List<String> searchParameters = new ArrayList<>();
+    StringBuilder doubleQuotedSearchTerm = null;
+    for (String spaceSeparatedPart : spaceSeparatedParts) {
+      if ((StringUtils.countMatches(spaceSeparatedPart, '"')
+          - StringUtils.countMatches(spaceSeparatedPart, "\\\"")) % 2 == 0) {
+        if (null == doubleQuotedSearchTerm) {
+          searchParameters.add(spaceSeparatedPart);
+        } else {
+          doubleQuotedSearchTerm.append(' ').append(spaceSeparatedPart);
+        }
+      } else {
+        if (null == doubleQuotedSearchTerm) {
+          doubleQuotedSearchTerm = new StringBuilder(spaceSeparatedPart);
+        } else {
+          doubleQuotedSearchTerm.append(' ').append(spaceSeparatedPart);
+          searchParameters.add(doubleQuotedSearchTerm.toString());
+          doubleQuotedSearchTerm = null;
+        }
+      }
+    }
+    if (null != doubleQuotedSearchTerm) {
+      /* Opening double quote is not followed by closing double quote. */
+      return null;
+    }
     for (String searchParameter : searchParameters) {
       if (!searchParameterPattern.matcher(searchParameter).matches()) {
         /* Illegal search term. */
         return null;
       }
     }
-    return searchParameters;
+    return searchParameters.toArray(new String[0]);
   }
 
   private static Pattern fingerprintParameterPattern =

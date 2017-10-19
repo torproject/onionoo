@@ -169,7 +169,7 @@ public class ResourceServletTest {
         new TreeSet<>(Arrays.asList(new String[] { "Fast",
             "Running", "Unnamed", "V2Dir", "Valid" })), 63L, "a1",
         DateTimeHelper.parse("2013-04-16 18:00:00"), "AS6830",
-        "1024D/51E2A1C7 steven j. murdoch "
+        "1024d/51e2a1c7 \"steven j. murdoch\" "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>",
         new TreeSet<String>(), new TreeSet<String>(), "0.2.3.25");
     this.relays.put("0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B",
@@ -930,6 +930,40 @@ public class ResourceServletTest {
     this.assertSummaryDocument(
         "/summary?search=contact:<tor+steven.murdoch@cl.cam.ac.uk>", 1,
         new String[] { "TimMayTribute" }, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testSearchDoubleQuotedEmailAddress() {
+    this.assertSummaryDocument(
+        "/summary?search=contact:\"klaus dot zufall at gmx dot de\"", 1,
+        new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testSearchDoubleQuotedContactAndNickname() {
+    this.assertSummaryDocument(
+        "/summary?search=contact:\"dot de\" TorkaZ", 1,
+        new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testSearchMissingEndingDoubleQuote() {
+    this.assertErrorStatusCode(
+        "/summary?search=contact:\"klaus dot zufall at gmx dot de", 400);
+  }
+
+  @Test(timeout = 100)
+  public void testSearchEvenNumberOfDoubleQuotes() {
+    this.assertSummaryDocument(
+        "/summary?search=contact:\"\"\" \"\"\"", 0,
+        null, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testSearchContactEscapedDoubleQuotes() {
+    this.assertSummaryDocument(
+        "/summary?search=contact:\"1024D/51E2A1C7 \\\"Steven J. Murdoch\\\"\"",
+        1, new String[] { "TimMayTribute" }, 0, null);
   }
 
   @Test(timeout = 100)
