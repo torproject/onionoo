@@ -158,15 +158,13 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       /* Already parsed more recent server descriptor from this relay. */
       return;
     }
-    long lastRestartedMillis = descriptor.getPublishedMillis()
-        - descriptor.getUptime() * DateTimeHelper.ONE_SECOND;
     int bandwidthRate = descriptor.getBandwidthRate();
     int bandwidthBurst = descriptor.getBandwidthBurst();
     int observedBandwidth = descriptor.getBandwidthObserved();
     int advertisedBandwidth = Math.min(bandwidthRate,
         Math.min(bandwidthBurst, observedBandwidth));
     detailsStatus.setDescPublished(descriptor.getPublishedMillis());
-    detailsStatus.setLastRestarted(lastRestartedMillis);
+    detailsStatus.setLastRestarted(calculateLastRestartedMillis(descriptor));
     detailsStatus.setBandwidthRate(bandwidthRate);
     detailsStatus.setBandwidthBurst(bandwidthBurst);
     detailsStatus.setObservedBandwidth(observedBandwidth);
@@ -202,6 +200,15 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     detailsStatus.setHibernating(descriptor.isHibernating() ? true :
         null);
     this.documentStore.store(detailsStatus, fingerprint);
+  }
+
+  private Long calculateLastRestartedMillis(ServerDescriptor descriptor) {
+    Long lastRestartedMillis = null;
+    if (null != descriptor.getUptime()) {
+      lastRestartedMillis = descriptor.getPublishedMillis()
+          - descriptor.getUptime() * DateTimeHelper.ONE_SECOND;
+    }
+    return lastRestartedMillis;
   }
 
   private Map<String, Map<String, Long>> exitListEntries = new HashMap<>();
@@ -318,13 +325,11 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       /* Already parsed more recent server descriptor from this bridge. */
       return;
     }
-    long lastRestartedMillis = descriptor.getPublishedMillis()
-        - descriptor.getUptime() * DateTimeHelper.ONE_SECOND;
     int advertisedBandwidth = Math.min(descriptor.getBandwidthRate(),
         Math.min(descriptor.getBandwidthBurst(),
         descriptor.getBandwidthObserved()));
     detailsStatus.setDescPublished(descriptor.getPublishedMillis());
-    detailsStatus.setLastRestarted(lastRestartedMillis);
+    detailsStatus.setLastRestarted(calculateLastRestartedMillis(descriptor));
     detailsStatus.setAdvertisedBandwidth(advertisedBandwidth);
     detailsStatus.setPlatform(descriptor.getPlatform());
     this.documentStore.store(detailsStatus, fingerprint);

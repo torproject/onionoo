@@ -1,3 +1,11 @@
+# Changes in version 4.2-1.6.1 - 2017-10-2?
+
+ * Medium changes
+   - Fix two NullPointerExceptions caused by accessing optional parts
+     of relay server descriptors and consensuses without checking
+     first whether they're available or not.
+
+
 # Changes in version 4.2-1.6.0 - 2017-10-09
 
  * Medium changes

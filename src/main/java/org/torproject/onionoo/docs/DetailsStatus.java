@@ -45,7 +45,8 @@ public class DetailsStatus extends Document {
   private String last_restarted;
 
   public void setLastRestarted(Long lastRestarted) {
-    this.last_restarted = DateTimeHelper.format(lastRestarted);
+    this.last_restarted = null == lastRestarted ? null
+        : DateTimeHelper.format(lastRestarted);
   }
 
   public Long getLastRestarted() {
