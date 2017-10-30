@@ -3,6 +3,8 @@
 
 package org.torproject.onionoo.docs;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -16,20 +18,23 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("checkstyle:membername")
 public class SummaryDocument extends Document {
 
-  private boolean t;
+  @Expose
+  @SerializedName("t")
+  private boolean isRelay;
 
   public void setRelay(boolean isRelay) {
-    this.t = isRelay;
+    this.isRelay = isRelay;
   }
 
   public boolean isRelay() {
-    return this.t;
+    return this.isRelay;
   }
 
-  private String f;
+  @Expose
+  @SerializedName("f")
+  private String fingerprint;
 
   /** Sets the fingerprint to the given 40 hex characters and clears
    * SHA1-hashed and base64 fingerprints, so that they are re-computed at
@@ -42,14 +47,14 @@ public class SummaryDocument extends Document {
             + "' is not a valid fingerprint.");
       }
     }
-    this.f = fingerprint;
+    this.fingerprint = fingerprint;
     this.hashedFingerprint = null;
     this.base64Fingerprint = null;
     this.fingerprintSortedHexBlocks = null;
   }
 
   public String getFingerprint() {
-    return this.f;
+    return this.fingerprint;
   }
 
   private transient String hashedFingerprint = null;
@@ -57,10 +62,10 @@ public class SummaryDocument extends Document {
   /** Returns the SHA1-hashed fingerprint, or <code>null</code> if no
    * fingerprint is set. */
   public String getHashedFingerprint() {
-    if (this.hashedFingerprint == null && this.f != null) {
+    if (this.hashedFingerprint == null && this.fingerprint != null) {
       try {
         this.hashedFingerprint = DigestUtils.sha1Hex(Hex.decodeHex(
-            this.f.toCharArray())).toUpperCase();
+            this.fingerprint.toCharArray())).toUpperCase();
       } catch (DecoderException e) {
         /* Format tested in setFingerprint(). */
       }
@@ -73,10 +78,10 @@ public class SummaryDocument extends Document {
   /** Returns the base64-encoded fingerprint, or <code>null</code> if no
    * fingerprint is set. */
   public String getBase64Fingerprint() {
-    if (this.base64Fingerprint == null && this.f != null) {
+    if (this.base64Fingerprint == null && this.fingerprint != null) {
       try {
         this.base64Fingerprint = Base64.encodeBase64String(Hex.decodeHex(
-            this.f.toCharArray())).replaceAll("=", "");
+            this.fingerprint.toCharArray())).replaceAll("=", "");
       } catch (DecoderException e) {
         /* Format tested in setFingerprint(). */
       }
@@ -90,8 +95,8 @@ public class SummaryDocument extends Document {
    * characters from the fingerprint, or <code>null</code> if no
    * fingerprint is set. */
   public String[] getFingerprintSortedHexBlocks() {
-    if (this.fingerprintSortedHexBlocks == null && this.f != null) {
-      String fingerprint = this.f.toUpperCase();
+    if (this.fingerprintSortedHexBlocks == null && this.fingerprint != null) {
+      String fingerprint = this.fingerprint.toUpperCase();
       String[] fingerprintSortedHexBlocks =
           new String[fingerprint.length() / 4];
       for (int i = 0; i < fingerprint.length(); i += 4) {
@@ -104,29 +109,33 @@ public class SummaryDocument extends Document {
     return this.fingerprintSortedHexBlocks;
   }
 
-  private String n;
+  @Expose
+  @SerializedName("n")
+  private String nickname;
 
   @SuppressWarnings("checkstyle:javadocmethod")
   public void setNickname(String nickname) {
     if (nickname == null || nickname.equals("Unnamed")) {
-      this.n = null;
+      this.nickname = null;
     } else {
-      this.n = nickname;
+      this.nickname = nickname;
     }
   }
 
   public String getNickname() {
-    return this.n == null ? "Unnamed" : this.n;
+    return this.nickname == null ? "Unnamed" : this.nickname;
   }
 
-  private String[] ad;
+  @Expose
+  @SerializedName("ad")
+  private String[] addresses;
 
   public void setAddresses(List<String> addresses) {
-    this.ad = this.collectionToStringArray(addresses);
+    this.addresses = this.collectionToStringArray(addresses);
   }
 
   public List<String> getAddresses() {
-    return this.stringArrayToList(this.ad);
+    return this.stringArrayToList(this.addresses);
   }
 
   private String[] collectionToStringArray(
@@ -160,133 +169,157 @@ public class SummaryDocument extends Document {
     return sortedSet;
   }
 
-  private String cc;
+  @Expose
+  @SerializedName("cc")
+  private String countryCode;
 
   public void setCountryCode(String countryCode) {
-    this.cc = countryCode;
+    this.countryCode = countryCode;
   }
 
   public String getCountryCode() {
-    return this.cc;
+    return this.countryCode;
   }
 
-  private String as;
+  @Expose
+  @SerializedName("as")
+  private String asNumber;
 
   public void setAsNumber(String asNumber) {
-    this.as = asNumber;
+    this.asNumber = asNumber;
   }
 
   public String getAsNumber() {
-    return this.as;
+    return this.asNumber;
   }
 
-  private String fs;
+  @Expose
+  @SerializedName("fs")
+  private String firstSeenMillis;
 
   public void setFirstSeenMillis(long firstSeenMillis) {
-    this.fs = DateTimeHelper.format(firstSeenMillis);
+    this.firstSeenMillis = DateTimeHelper.format(firstSeenMillis);
   }
 
   public long getFirstSeenMillis() {
-    return DateTimeHelper.parse(this.fs);
+    return DateTimeHelper.parse(this.firstSeenMillis);
   }
 
-  private String ls;
+  @Expose
+  @SerializedName("ls")
+  private String lastSeenMillis;
 
   public void setLastSeenMillis(long lastSeenMillis) {
-    this.ls = DateTimeHelper.format(lastSeenMillis);
+    this.lastSeenMillis = DateTimeHelper.format(lastSeenMillis);
   }
 
   public long getLastSeenMillis() {
-    return DateTimeHelper.parse(this.ls);
+    return DateTimeHelper.parse(this.lastSeenMillis);
   }
 
-  private String[] rf;
+  @Expose
+  @SerializedName("rf")
+  private String[] relayFlags;
 
   public void setRelayFlags(SortedSet<String> relayFlags) {
-    this.rf = this.collectionToStringArray(relayFlags);
+    this.relayFlags = this.collectionToStringArray(relayFlags);
   }
 
   public SortedSet<String> getRelayFlags() {
-    return this.stringArrayToSortedSet(this.rf);
+    return this.stringArrayToSortedSet(this.relayFlags);
   }
 
-  private long cw;
+  @Expose
+  @SerializedName("cw")
+  private long consensusWeight;
 
   public void setConsensusWeight(long consensusWeight) {
-    this.cw = consensusWeight;
+    this.consensusWeight = consensusWeight;
   }
 
   public long getConsensusWeight() {
-    return this.cw;
+    return this.consensusWeight;
   }
 
-  private boolean r;
+  @Expose
+  @SerializedName("r")
+  private boolean running;
 
   public void setRunning(boolean isRunning) {
-    this.r = isRunning;
+    this.running = isRunning;
   }
 
   public boolean isRunning() {
-    return this.r;
+    return this.running;
   }
 
-  private String c;
+  @Expose
+  @SerializedName("c")
+  private String contact;
 
   @SuppressWarnings("checkstyle:javadocmethod")
   public void setContact(String contact) {
     if (contact != null && contact.length() == 0) {
-      this.c = null;
+      this.contact = null;
     } else {
-      this.c = contact;
+      this.contact = contact;
     }
   }
 
   public String getContact() {
-    return this.c;
+    return this.contact;
   }
 
   /* This attribute can go away once all Onionoo services had their hourly
    * updater write effective families to summary documents at least once.
    * Remove this code after September 8, 2015. */
-  private String[] ff;
+  @Expose
+  @SerializedName("ff")
+  private String[] familyFingerprints;
 
   public void setFamilyFingerprints(
       SortedSet<String> familyFingerprints) {
-    this.ff = this.collectionToStringArray(familyFingerprints);
+    this.familyFingerprints = this.collectionToStringArray(familyFingerprints);
   }
 
   public SortedSet<String> getFamilyFingerprints() {
-    return this.stringArrayToSortedSet(this.ff);
+    return this.stringArrayToSortedSet(this.familyFingerprints);
   }
 
-  private String[] ef;
+  @Expose
+  @SerializedName("ef")
+  private String[] effectiveFamily;
 
   public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
-    this.ef = this.collectionToStringArray(effectiveFamily);
+    this.effectiveFamily = this.collectionToStringArray(effectiveFamily);
   }
 
   public SortedSet<String> getEffectiveFamily() {
-    return this.stringArrayToSortedSet(this.ef);
+    return this.stringArrayToSortedSet(this.effectiveFamily);
   }
 
-  private String v;
+  @Expose
+  @SerializedName("v")
+  private String version;
 
   public void setVersion(String version) {
-    this.v = version;
+    this.version = version;
   }
 
   public String getVersion() {
-    return this.v;
+    return this.version;
   }
 
-  private String h;
+  @Expose
+  @SerializedName("h")
+  private String hostName;
 
   public void setHostName(String hostName) {
-    this.h = hostName;
+    this.hostName = hostName;
   }
 
   public String getHostName() {
-    return this.h;
+    return this.hostName;
   }
 
   /* The familyFingerprints parameter can go away after September 8, 2015.
