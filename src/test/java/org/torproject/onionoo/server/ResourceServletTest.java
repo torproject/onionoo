@@ -1104,7 +1104,7 @@ public class ResourceServletTest {
         null);
   }
 
-  @Test(timeout = 100)
+  @Test(timeout = 200)
   public void testCountryDeDe() {
     this.assertSummaryDocument(
         "/summary?country=de&country=de", 1, new String[] { "TorkaZ" }, 0,
