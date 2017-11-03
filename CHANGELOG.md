@@ -2,6 +2,8 @@
 
  * Medium changes
    - Support quoted qualified search terms.
+   - Skip unrecognized descriptors when importing archives rather than
+     aborting the entire import.
 
 
 # Changes in version 4.2-1.6.1 - 2017-10-26

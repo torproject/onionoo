@@ -170,9 +170,8 @@ public class DescriptorSource {
       if (descriptorType == null) {
         log.warn("Unrecognized descriptor in "
             + this.inArchiveDir.getAbsolutePath() + " with annotations "
-            + descriptor.getAnnotations() + ".  Not reading any further"
-            + "archived descriptors.");
-        break;
+            + descriptor.getAnnotations() + ".  Skipping descriptor.");
+        continue;
       }
       for (DescriptorListener descriptorListener :
           this.descriptorListeners.get(descriptorType)) {
