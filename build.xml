@@ -10,7 +10,7 @@
   <property name="implementation-title" value="Onionoo" />
   <property name="onionoo.protocol.version" value="4.3"/>
   <property name="release.version"
-            value="${onionoo.protocol.version}-1.7.0-dev"/>
+            value="${onionoo.protocol.version}-1.7.1"/>
   <property name="metricslibversion" value="2.1.1"/>
   <property name="jetty.version" value="-9.2.21.v20170120" />
   <property name="warfile"
