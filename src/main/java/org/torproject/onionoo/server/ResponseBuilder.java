@@ -339,6 +339,9 @@ public class ResponseBuilder {
             dd.setAllegedFamily(detailsDocument.getAllegedFamily());
           } else if (field.equals("indirect_family")) {
             dd.setIndirectFamily(detailsDocument.getIndirectFamily());
+          } else if (field.equals("unreachable_or_addresses")) {
+            dd.setUnreachableOrAddresses(
+                detailsDocument.getUnreachableOrAddresses());
           }
         }
         /* Don't escape HTML characters, like < and >, contained in

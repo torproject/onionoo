@@ -1,3 +1,10 @@
+# Changes in version 4.3-1.7.1 - 2017-11-17
+
+ * Minor changes
+   - Include "unreachable_or_addresses" as accepted value in the
+     "fields" parameter.
+
+
 # Changes in version 4.3-1.7.0 - 2017-11-17
 
  * Medium changes
