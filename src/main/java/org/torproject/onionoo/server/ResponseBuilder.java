@@ -123,7 +123,7 @@ public class ResponseBuilder {
     return this.charsWritten;
   }
 
-  private static final String PROTOCOL_VERSION = "4.2";
+  private static final String PROTOCOL_VERSION = "4.3";
 
   private static final String NEXT_MAJOR_VERSION_SCHEDULED = "2017-12-17";
 

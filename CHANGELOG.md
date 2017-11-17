@@ -1,4 +1,4 @@
-# Changes in version 4.3-1.7.0 - 2017-1?-??
+# Changes in version 4.3-1.7.0 - 2017-11-17
 
  * Medium changes
    - Support quoted qualified search terms.
