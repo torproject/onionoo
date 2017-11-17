@@ -125,7 +125,7 @@ public class ResponseBuilder {
 
   private static final String PROTOCOL_VERSION = "4.2";
 
-  private static final String NEXT_MAJOR_VERSION_SCHEDULED = "2017-11-30";
+  private static final String NEXT_MAJOR_VERSION_SCHEDULED = "2017-12-17";
 
   private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
     this.write(pw, "{\"version\":\"%s\",\n", PROTOCOL_VERSION);
