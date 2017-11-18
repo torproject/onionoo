@@ -342,6 +342,8 @@ public class ResponseBuilder {
           } else if (field.equals("unreachable_or_addresses")) {
             dd.setUnreachableOrAddresses(
                 detailsDocument.getUnreachableOrAddresses());
+          } else if (field.equals("version")) {
+            dd.setVersion(detailsDocument.getVersion());
           }
         }
         /* Don't escape HTML characters, like < and >, contained in

@@ -291,7 +291,12 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         nodeStatus.setRecommendedVersion((recommendedVersions == null
             || entry.getVersion() == null) ? null :
             recommendedVersions.contains(entry.getVersion()));
-        nodeStatus.setVersion(entry.getVersion());
+        String version = null;
+        if (null != entry.getVersion()
+            && entry.getVersion().startsWith("Tor ")) {
+          version = entry.getVersion().split(" ")[1];
+        }
+        nodeStatus.setVersion(version);
       }
       if (entry.getUnmeasured()) {
         if (!this.lastSeenUnmeasured.containsKey(fingerprint)
@@ -784,6 +789,17 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
       nodeStatus.setContact(detailsStatus.getContact());
 
+      /* Extract tor software version for bridges from their "platform" line.
+       * (We already know this for relays from "v" lines in the consensus.) */
+      if (!nodeStatus.isRelay()) {
+        String version = null;
+        if (null != detailsStatus.getPlatform()
+            && detailsStatus.getPlatform().startsWith("Tor ")) {
+          version = detailsStatus.getPlatform().split(" ")[1];
+        }
+        nodeStatus.setVersion(version);
+      }
+
       Map<String, Long> exitAddresses = new HashMap<>();
       if (detailsStatus.getExitAddresses() != null) {
         for (Map.Entry<String, Long> e :
@@ -890,6 +906,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           nodeStatus.getRecommendedVersion());
       detailsStatus.setLastChangedOrAddressOrPort(
           nodeStatus.getLastChangedOrAddressOrPort());
+      detailsStatus.setVersion(nodeStatus.getVersion());
 
       this.documentStore.store(detailsStatus, fingerprint);
       this.documentStore.store(nodeStatus, fingerprint);

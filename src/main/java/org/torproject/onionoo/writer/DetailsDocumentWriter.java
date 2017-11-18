@@ -165,6 +165,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     if (!unreachableOrAddresses.isEmpty()) {
       detailsDocument.setUnreachableOrAddresses(unreachableOrAddresses);
     }
+    detailsDocument.setVersion(detailsStatus.getVersion());
     this.documentStore.store(detailsDocument, fingerprint);
   }
 
@@ -193,6 +194,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
         detailsStatus.getAdvertisedBandwidth());
     detailsDocument.setPlatform(detailsStatus.getPlatform());
     detailsDocument.setTransports(detailsStatus.getTransports());
+    detailsDocument.setVersion(detailsStatus.getVersion());
     this.documentStore.store(detailsDocument, fingerprint);
   }
 

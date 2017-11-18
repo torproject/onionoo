@@ -540,5 +540,15 @@ public class DetailsStatus extends Document {
   public List<String> getAdvertisedOrAddresses() {
     return this.advertised_or_addresses;
   }
+
+  private String version;
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
+  public String getVersion() {
+    return this.version;
+  }
 }
 

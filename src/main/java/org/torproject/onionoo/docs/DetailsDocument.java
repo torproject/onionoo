@@ -346,6 +346,16 @@ public class DetailsDocument extends Document {
     return unescapeJson(this.platform);
   }
 
+  private String version;
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
+  public String getVersion() {
+    return this.version;
+  }
+
   private SortedSet<String> alleged_family;
 
   public void setAllegedFamily(SortedSet<String> allegedFamily) {

@@ -1,3 +1,12 @@
+# Changes in version 4.4-1.8.0 - 2017-??-??
+
+ * Medium changes
+   - Add a "version" field to relay details documents with the Tor
+     software version listed in the consensus and similarly to bridge
+     details documents with the Tor software version found in the
+     server descriptor.
+
+
 # Changes in version 4.3-1.7.1 - 2017-11-17
 
  * Minor changes

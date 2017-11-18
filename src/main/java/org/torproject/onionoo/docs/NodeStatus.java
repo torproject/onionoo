@@ -324,8 +324,7 @@ public class NodeStatus extends Document {
   private String version;
 
   public void setVersion(String version) {
-    this.version = null == version ? null
-        : version.substring(version.lastIndexOf(" ") + 1);
+    this.version = version;
   }
 
   public String getVersion() {
