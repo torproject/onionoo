@@ -541,7 +541,14 @@ public class RequestHandler {
       }
     }
     this.filteredRelays.keySet().retainAll(keepRelays);
-    this.filteredBridges.clear();
+    Set<String> keepBridges = new HashSet<>();
+    for (Map.Entry<String, Set<String>> e
+        : this.nodeIndex.getBridgesByVersion().entrySet()) {
+      if (e.getKey().startsWith(this.version)) {
+        keepBridges.addAll(e.getValue());
+      }
+    }
+    this.filteredBridges.keySet().retainAll(keepBridges);
   }
 
   private void filterByHostName() {

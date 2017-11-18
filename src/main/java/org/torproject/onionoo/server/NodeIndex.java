@@ -180,6 +180,16 @@ class NodeIndex {
     return this.relaysByVersion;
   }
 
+  private Map<String, Set<String>> bridgesByVersion;
+
+  public void setBridgesByVersion(Map<String, Set<String>> bridgesByVersion) {
+    this.bridgesByVersion = bridgesByVersion;
+  }
+
+  public Map<String, Set<String>> getBridgesByVersion() {
+    return this.bridgesByVersion;
+  }
+
   private Map<String, Set<String>> relaysByHostName;
 
   public void setRelaysByHostName(Map<String, Set<String>> relaysByHostName) {

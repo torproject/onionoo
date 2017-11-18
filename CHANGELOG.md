@@ -5,6 +5,8 @@
      software version listed in the consensus and similarly to bridge
      details documents with the Tor software version found in the
      server descriptor.
+   - Extend the "version" parameter to also return bridges with the
+     given version or version prefix.
 
 
 # Changes in version 4.3-1.7.1 - 2017-11-17

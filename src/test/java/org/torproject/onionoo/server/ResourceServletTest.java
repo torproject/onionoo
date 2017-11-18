@@ -129,6 +129,7 @@ public class ResourceServletTest {
   @SuppressWarnings("JavadocMethod")
   @Before
   public void createSampleRelaysAndBridges() {
+    this.relays = new TreeMap<>();
     org.torproject.onionoo.docs.SummaryDocument relayTorkaZ =
         new org.torproject.onionoo.docs.SummaryDocument(true, "TorkaZ",
         "000C5F55BD4814B917CC474BD537F1A3B33CCE2A", Arrays.asList(
@@ -144,6 +145,8 @@ public class ResourceServletTest {
         new TreeSet<>(Arrays.asList(
         new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC" })),
         "0.2.3.25", "ppp-62-216-201-221.dynamic.mnet-online.de");
+    this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
+        relayTorkaZ);
     org.torproject.onionoo.docs.SummaryDocument relayFerrari458 =
         new org.torproject.onionoo.docs.SummaryDocument(true, "Ferrari458",
         "001C13B3A55A71B977CA65EC85539D79C653A3FC", Arrays.asList(
@@ -157,9 +160,6 @@ public class ResourceServletTest {
         new TreeSet<>(Arrays.asList(new String[] {
             "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })), null,
             "c-68-38-171-200.hsd1.in.comcast.net");
-    this.relays = new TreeMap<>();
-    this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
-        relayTorkaZ);
     this.relays.put("001C13B3A55A71B977CA65EC85539D79C653A3FC",
         relayFerrari458);
     org.torproject.onionoo.docs.SummaryDocument relayTimMayTribute =
@@ -172,7 +172,7 @@ public class ResourceServletTest {
         DateTimeHelper.parse("2013-04-16 18:00:00"), "AS6830",
         "1024d/51e2a1c7 \"steven j. murdoch\" "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>",
-        new TreeSet<String>(), new TreeSet<String>(), "0.2.3.25", null);
+        new TreeSet<String>(), new TreeSet<String>(), "0.2.3.24-rc-dev", null);
     this.relays.put("0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B",
         relayTimMayTribute);
     this.bridges = new TreeMap<>();
@@ -183,7 +183,7 @@ public class ResourceServletTest {
         DateTimeHelper.parse("2013-04-21 18:07:03"), false,
         new TreeSet<>(Arrays.asList(new String[] { "Valid" })), -1L,
         null, DateTimeHelper.parse("2013-04-20 15:37:04"), null, null,
-        null, null, null, null);
+        null, null, "0.2.2.39", null);
     this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
         bridgeec2bridgercc7f31fe);
     org.torproject.onionoo.docs.SummaryDocument bridgeUnnamed =
@@ -204,7 +204,7 @@ public class ResourceServletTest {
         new TreeSet<>(Arrays.asList(new String[] { "Running",
             "Valid" })), -1L, null,
         DateTimeHelper.parse("2013-01-16 21:07:04"), null, null, null,
-        null, null, null);
+        null, "0.2.4.4-alpha-dev", null);
     this.bridges.put("1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756",
         bridgegummy);
   }
@@ -1571,14 +1571,19 @@ public class ResourceServletTest {
 
   @Test
   public void testVersion02325() {
-    this.assertSummaryDocument("/summary?version=0.2.3.25", 2,
-        new String[] { "TorkaZ", "TimMayTribute" }, 0, null);
+    this.assertSummaryDocument("/summary?version=0.2.3.25", 1,
+        new String[] { "TorkaZ" }, 0, null);
   }
 
   @Test
   public void testVersion02324() {
-    this.assertSummaryDocument("/summary?version=0.2.3.24-rc-dev", 0,
-        new String[] { "Ferrari458" }, 0, null);
+    this.assertSummaryDocument("/summary?version=0.2.3.24-rc-dev", 1,
+        new String[] { "TimMayTribute" }, 0, null);
+  }
+
+  @Test
+  public void testVersion02326() {
+    this.assertSummaryDocument("/summary?version=0.2.3.26", 0, null, 0, null);
   }
 
   @Test
@@ -1594,12 +1599,12 @@ public class ResourceServletTest {
 
   @Test
   public void testVersion0() {
-    this.assertSummaryDocument("/summary?version=0", 2, null, 0, null);
+    this.assertSummaryDocument("/summary?version=0", 2, null, 2, null);
   }
 
   @Test
   public void testVersion02() {
-    this.assertSummaryDocument("/summary?version=0.2", 2, null, 0, null);
+    this.assertSummaryDocument("/summary?version=0.2", 2, null, 2, null);
   }
 
   @Test

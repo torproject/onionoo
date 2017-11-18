@@ -154,6 +154,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     Map<String, Set<String>> newRelaysByContact = new HashMap<>();
     Map<String, Set<String>> newRelaysByFamily = new HashMap<>();
     Map<String, Set<String>> newRelaysByVersion = new HashMap<>();
+    Map<String, Set<String>> newBridgesByVersion = new HashMap<>();
     Map<String, Set<String>> newRelaysByHostName = new HashMap<>();
     SortedMap<Integer, Set<String>> newRelaysByFirstSeenDays = new TreeMap<>();
     SortedMap<Integer, Set<String>> newBridgesByFirstSeenDays = new TreeMap<>();
@@ -323,6 +324,14 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           hashedFingerprint);
       newBridgesByLastSeenDays.get(daysSinceLastSeen).add(
           hashedHashedFingerprint);
+      String version = entry.getVersion();
+      if (null != version) {
+        if (!newBridgesByVersion.containsKey(version)) {
+          newBridgesByVersion.put(version, new HashSet<>());
+        }
+        newBridgesByVersion.get(version).add(hashedFingerprint);
+        newBridgesByVersion.get(version).add(hashedHashedFingerprint);
+      }
     }
     NodeIndex newNodeIndex = new NodeIndex();
     newNodeIndex.setRelayFingerprintSummaryLines(
@@ -342,6 +351,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     newNodeIndex.setRelaysPublishedMillis(relaysLastValidAfterMillis);
     newNodeIndex.setBridgesPublishedMillis(bridgesLastPublishedMillis);
     newNodeIndex.setRelaysByVersion(newRelaysByVersion);
+    newNodeIndex.setBridgesByVersion(newBridgesByVersion);
     newNodeIndex.setRelaysByHostName(newRelaysByHostName);
     synchronized (this) {
       this.lastIndexed = updateStatusMillis;
