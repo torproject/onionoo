@@ -189,6 +189,8 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setFirstSeen(detailsStatus.getFirstSeenMillis());
     detailsDocument.setRunning(detailsStatus.isRunning());
     detailsDocument.setFlags(detailsStatus.getRelayFlags());
+    detailsDocument.setRecommendedVersion(
+        detailsStatus.getRecommendedVersion());
     detailsDocument.setLastRestarted(detailsStatus.getLastRestarted());
     detailsDocument.setAdvertisedBandwidth(
         detailsStatus.getAdvertisedBandwidth());

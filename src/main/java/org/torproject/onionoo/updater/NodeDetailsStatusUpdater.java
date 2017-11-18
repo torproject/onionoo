@@ -89,6 +89,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   private SortedMap<String, Integer> lastBandwidthWeights = null;
 
+  private Set<String> lastRecommendedServerVersions = null;
+
   private int relayConsensusesProcessed = 0;
 
   private int bridgeStatusesProcessed = 0;
@@ -248,14 +250,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     if (validAfterMillis > this.relaysLastValidAfterMillis) {
       this.relaysLastValidAfterMillis = validAfterMillis;
     }
-    Set<String> recommendedVersions = null;
-    if (consensus.getRecommendedServerVersions() != null) {
-      recommendedVersions = new HashSet<>();
-      for (String recommendedVersion :
-          consensus.getRecommendedServerVersions()) {
-        recommendedVersions.add("Tor " + recommendedVersion);
-      }
-    }
     for (Map.Entry<String, NetworkStatusEntry> e :
         consensus.getStatusEntries().entrySet()) {
       String fingerprint = e.getKey();
@@ -288,9 +282,6 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         nodeStatus.setConsensusWeight(entry.getBandwidth());
         nodeStatus.setDefaultPolicy(entry.getDefaultPolicy());
         nodeStatus.setPortList(entry.getPortList());
-        nodeStatus.setRecommendedVersion((recommendedVersions == null
-            || entry.getVersion() == null) ? null :
-            recommendedVersions.contains(entry.getVersion()));
         String version = null;
         if (null != entry.getVersion()
             && entry.getVersion().startsWith("Tor ")) {
@@ -315,6 +306,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.relayConsensusesProcessed++;
     if (this.relaysLastValidAfterMillis == validAfterMillis) {
       this.lastBandwidthWeights = consensus.getBandwidthWeights();
+      this.lastRecommendedServerVersions
+          = new HashSet<>(consensus.getRecommendedServerVersions());
     }
   }
 
@@ -798,6 +791,15 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           version = detailsStatus.getPlatform().split(" ")[1];
         }
         nodeStatus.setVersion(version);
+      }
+
+      /* Compare tor software version (for relays and bridges) with the
+       * recommended-server-versions line in the last known consensus and set
+       * the recommended_version field accordingly. */
+      if (null != this.lastRecommendedServerVersions
+          && null != nodeStatus.getVersion()) {
+        nodeStatus.setRecommendedVersion(this.lastRecommendedServerVersions
+            .contains(nodeStatus.getVersion()));
       }
 
       Map<String, Long> exitAddresses = new HashMap<>();

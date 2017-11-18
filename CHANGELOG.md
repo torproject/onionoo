@@ -7,6 +7,9 @@
      server descriptor.
    - Extend the "version" parameter to also return bridges with the
      given version or version prefix.
+   - Add a "recommended_version" field to bridge details documents
+     based on whether the directory authorities recommend the bridge's
+     version.
 
 
 # Changes in version 4.3-1.7.1 - 2017-11-17
