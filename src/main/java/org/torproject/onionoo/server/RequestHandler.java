@@ -103,6 +103,12 @@ public class RequestHandler {
     this.hostName = hostName;
   }
 
+  private Boolean recommendedVersion;
+
+  public void setRecommendedVersion(Boolean recommendedVersion) {
+    this.recommendedVersion = recommendedVersion;
+  }
+
   private String[] order;
 
   public void setOrder(String[] order) {
@@ -172,6 +178,7 @@ public class RequestHandler {
     this.filterByFamily();
     this.filterByVersion();
     this.filterByHostName();
+    this.filterByRecommendedVersion();
     this.order();
     this.offset();
     this.limit();
@@ -568,6 +575,19 @@ public class RequestHandler {
       this.filteredRelays.remove(fingerprint);
     }
     this.filteredBridges.clear();
+  }
+
+  private void filterByRecommendedVersion() {
+    if (null == this.recommendedVersion) {
+      /* Not filtering by recommended version. */
+      return;
+    }
+    Set<String> keepRelays = this.nodeIndex.getRelaysByRecommendedVersion()
+        .get(this.recommendedVersion);
+    this.filteredRelays.keySet().retainAll(keepRelays);
+    Set<String> keepBridges = this.nodeIndex.getBridgesByRecommendedVersion()
+        .get(this.recommendedVersion);
+    this.filteredBridges.keySet().retainAll(keepBridges);
   }
 
   private void order() {

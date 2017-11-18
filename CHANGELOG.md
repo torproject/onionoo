@@ -10,6 +10,9 @@
    - Add a "recommended_version" field to bridge details documents
      based on whether the directory authorities recommend the bridge's
      version.
+   - Add a "recommended_version" parameter to return only relays and
+     bridges running a Tor software version that is recommended or not
+     recommended by the directory authorities.
 
 
 # Changes in version 4.3-1.7.1 - 2017-11-17

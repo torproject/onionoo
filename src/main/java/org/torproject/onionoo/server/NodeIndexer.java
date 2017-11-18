@@ -156,6 +156,12 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     Map<String, Set<String>> newRelaysByVersion = new HashMap<>();
     Map<String, Set<String>> newBridgesByVersion = new HashMap<>();
     Map<String, Set<String>> newRelaysByHostName = new HashMap<>();
+    Map<Boolean, Set<String>> newRelaysByRecommendedVersion = new HashMap<>();
+    newRelaysByRecommendedVersion.put(true, new HashSet<>());
+    newRelaysByRecommendedVersion.put(false, new HashSet<>());
+    Map<Boolean, Set<String>> newBridgesByRecommendedVersion = new HashMap<>();
+    newBridgesByRecommendedVersion.put(true, new HashSet<>());
+    newBridgesByRecommendedVersion.put(false, new HashSet<>());
     SortedMap<Integer, Set<String>> newRelaysByFirstSeenDays = new TreeMap<>();
     SortedMap<Integer, Set<String>> newBridgesByFirstSeenDays = new TreeMap<>();
     SortedMap<Integer, Set<String>> newRelaysByLastSeenDays = new TreeMap<>();
@@ -269,6 +275,12 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByHostName.get(hostNameLowerCase).add(fingerprint);
         newRelaysByHostName.get(hostNameLowerCase).add(hashedFingerprint);
       }
+      Boolean recommendedVersion = entry.getRecommendedVersion();
+      if (null != recommendedVersion) {
+        newRelaysByRecommendedVersion.get(recommendedVersion).add(fingerprint);
+        newRelaysByRecommendedVersion.get(recommendedVersion).add(
+            hashedFingerprint);
+      }
     }
     /* This loop can go away once all Onionoo services had their hourly
      * updater write effective families to summary documents at least
@@ -332,6 +344,13 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newBridgesByVersion.get(version).add(hashedFingerprint);
         newBridgesByVersion.get(version).add(hashedHashedFingerprint);
       }
+      Boolean recommendedVersion = entry.getRecommendedVersion();
+      if (null != recommendedVersion) {
+        newBridgesByRecommendedVersion.get(recommendedVersion).add(
+            hashedFingerprint);
+        newBridgesByRecommendedVersion.get(recommendedVersion).add(
+            hashedHashedFingerprint);
+      }
     }
     NodeIndex newNodeIndex = new NodeIndex();
     newNodeIndex.setRelayFingerprintSummaryLines(
@@ -353,6 +372,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     newNodeIndex.setRelaysByVersion(newRelaysByVersion);
     newNodeIndex.setBridgesByVersion(newBridgesByVersion);
     newNodeIndex.setRelaysByHostName(newRelaysByHostName);
+    newNodeIndex.setRelaysByRecommendedVersion(newRelaysByRecommendedVersion);
+    newNodeIndex.setBridgesByRecommendedVersion(newBridgesByRecommendedVersion);
     synchronized (this) {
       this.lastIndexed = updateStatusMillis;
       this.latestNodeIndex = newNodeIndex;

@@ -440,10 +440,12 @@ public class DocumentStore {
     long consensusWeight = -1L;
     long firstSeenMillis = -1L;
     String hostName = null;
+    Boolean recommendedVersion = null;
     SummaryDocument summaryDocument = new SummaryDocument(isRelay,
         nickname, fingerprint, addresses, lastSeenMillis, running,
         relayFlags, consensusWeight, countryCode, firstSeenMillis,
-        asNumber, contact, family, family, version, hostName);
+        asNumber, contact, family, family, version, hostName,
+        recommendedVersion);
     return summaryDocument;
   }
 

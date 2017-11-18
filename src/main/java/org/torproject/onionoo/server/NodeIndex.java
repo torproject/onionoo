@@ -199,5 +199,27 @@ class NodeIndex {
   public Map<String, Set<String>> getRelaysByHostName() {
     return this.relaysByHostName;
   }
+
+  private Map<Boolean, Set<String>> relaysByRecommendedVersion;
+
+  public void setRelaysByRecommendedVersion(
+      Map<Boolean, Set<String>> relaysByRecommendedVersion) {
+    this.relaysByRecommendedVersion = relaysByRecommendedVersion;
+  }
+
+  public Map<Boolean, Set<String>> getRelaysByRecommendedVersion() {
+    return this.relaysByRecommendedVersion;
+  }
+
+  private Map<Boolean, Set<String>> bridgesByRecommendedVersion;
+
+  public void setBridgesByRecommendedVersion(
+      Map<Boolean, Set<String>> bridgesByRecommendedVersion) {
+    this.bridgesByRecommendedVersion = bridgesByRecommendedVersion;
+  }
+
+  public Map<Boolean, Set<String>> getBridgesByRecommendedVersion() {
+    return this.bridgesByRecommendedVersion;
+  }
 }
 

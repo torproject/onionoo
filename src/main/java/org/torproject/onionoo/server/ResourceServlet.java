@@ -66,9 +66,10 @@ public class ResourceServlet extends HttpServlet {
   private static final long CACHE_INTERVAL = 5L * 60L * 1000L;
 
   private static Set<String> knownParameters = new HashSet<>(
-      Arrays.asList(("type,running,search,lookup,fingerprint,country,as,"
-          + "flag,first_seen_days,last_seen_days,contact,order,limit,"
-          + "offset,fields,family,version,host_name").split(",")));
+      Arrays.asList("type", "running", "search", "lookup", "fingerprint",
+          "country", "as", "flag", "first_seen_days", "last_seen_days",
+          "contact", "order", "limit", "offset", "fields", "family", "version",
+          "host_name", "recommended_version"));
 
   private static Set<String> illegalSearchQualifiers =
       new HashSet<>(Arrays.asList(("search,fingerprint,order,limit,"
@@ -300,6 +301,18 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       rh.setHostName(hostNameParameter);
+    }
+    if (parameterMap.containsKey("recommended_version")) {
+      String recommendedVersionParameterValue =
+          parameterMap.get("recommended_version").toLowerCase();
+      boolean recommendedVersionRequested = true;
+      if (recommendedVersionParameterValue.equals("false")) {
+        recommendedVersionRequested = false;
+      } else if (!recommendedVersionParameterValue.equals("true")) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      rh.setRecommendedVersion(recommendedVersionRequested);
     }
     if (parameterMap.containsKey("order")) {
       String[] order = this.parseOrderParameter(parameterMap.get("order"));
