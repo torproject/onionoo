@@ -1,4 +1,4 @@
-# Changes in version 4.4-1.8.0 - 2017-??-??
+# Changes in version 4.4-1.8.0 - 2017-11-28
 
  * Medium changes
    - Add a "version" field to relay details documents with the Tor
