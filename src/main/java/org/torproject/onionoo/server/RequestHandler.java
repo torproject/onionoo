@@ -603,12 +603,10 @@ public class RequestHandler {
         uniqueBridges.add(bridge);
       }
     }
-    if (this.order != null) {
-      Comparator<SummaryDocument> comparator
-          = new SummaryDocumentComparator(this.order);
-      Collections.sort(uniqueRelays, comparator);
-      Collections.sort(uniqueBridges, comparator);
-    }
+    Comparator<SummaryDocument> comparator
+        = new SummaryDocumentComparator(this.order);
+    Collections.sort(uniqueRelays, comparator);
+    Collections.sort(uniqueBridges, comparator);
     this.orderedRelays.addAll(uniqueRelays);
     this.orderedBridges.addAll(uniqueBridges);
   }

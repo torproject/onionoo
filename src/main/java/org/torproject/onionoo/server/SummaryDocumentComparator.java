@@ -13,7 +13,8 @@ public class SummaryDocumentComparator implements Comparator<SummaryDocument> {
 
   /** Comparator is initialized with the order parameters. */
   public SummaryDocumentComparator(String ... orderParameters) {
-    this.orderParameters = orderParameters;
+    this.orderParameters
+        = null == orderParameters ? new String[]{} : orderParameters;
   }
 
   @Override
@@ -44,6 +45,9 @@ public class SummaryDocumentComparator implements Comparator<SummaryDocument> {
       if (result != 0) {
         break;
       }
+    }
+    if (0 == result) {
+      result = o1.getFingerprint().compareTo(o2.getFingerprint());
     }
     return result;
   }

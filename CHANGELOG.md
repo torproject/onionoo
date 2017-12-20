@@ -3,6 +3,11 @@
  * Medium changes
    - Stop omitting "n" in summary docs for "Unnamed" relays/bridges.
 
+ * Minor changes
+   - Make responses deterministic by always sorting results by
+     fingerprint, either if no specific order was requested or to
+     break ties after ordering results as requested.
+
 
 # Changes in version 5.0-1.10.1 - 2018-02-07
 
