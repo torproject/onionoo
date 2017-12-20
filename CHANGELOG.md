@@ -1,3 +1,10 @@
+# Changes in version 5.0-1.9.0 - 2017-12-20
+
+ * Medium changes
+   - Remove the $ from fingerprints in fields "alleged_family",
+     "effective_family", and "indirect_family".
+
+
 # Changes in version 4.4-1.8.0 - 2017-11-28
 
  * Medium changes
