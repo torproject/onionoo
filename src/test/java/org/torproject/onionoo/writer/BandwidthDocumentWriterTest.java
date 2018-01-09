@@ -12,8 +12,7 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.GraphHistory;
-import org.torproject.onionoo.updater.DescriptorSourceFactory;
-import org.torproject.onionoo.updater.DummyDescriptorSource;
+import org.torproject.onionoo.docs.NodeStatus;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,14 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class BandwidthDocumentWriterTest {
-
-  private DummyDescriptorSource descriptorSource;
-
-  @Before
-  public void createDummyDescriptorSource() {
-    this.descriptorSource = new DummyDescriptorSource();
-    DescriptorSourceFactory.setDescriptorSource(this.descriptorSource);
-  }
 
   private DummyDocumentStore documentStore;
 
@@ -41,7 +32,7 @@ public class BandwidthDocumentWriterTest {
 
   @Test
   public void testIgnoreFuture() {
-    BandwidthStatus status = new BandwidthStatus();
+    String ibibUnc0Fingerprint = "7C0AA4E3B73E407E9F5FEB1912F8BE26D8AA124D";
     String future = new SimpleDateFormat("yyyy")
         .format(new Date(System.currentTimeMillis()
             + DateTimeHelper.ROUGHLY_ONE_YEAR));
@@ -66,13 +57,17 @@ public class BandwidthDocumentWriterTest {
         + "r " + future + "-08-06 17:31:45 " + future + "-08-06 21:31:45 0\n"
         + "r " + future + "-08-06 21:31:45 " + future + "-08-07 01:31:45 0\n"
         + "r " + future + "-08-07 01:31:45 " + future + "-08-07 05:31:45 0\n";
-
+    NodeStatus nodeStatus = new NodeStatus(ibibUnc0Fingerprint);
+    nodeStatus.setLastSeenMillis(DateTimeHelper.parse(
+        yesterday + " 12:00:00"));
+    this.documentStore.addDocument(nodeStatus, ibibUnc0Fingerprint);
+    BandwidthStatus status = new BandwidthStatus();
     status.setFromDocumentString(documentString);
-    String ibibUnc0Fingerprint = "7C0AA4E3B73E407E9F5FEB1912F8BE26D8AA124D";
     this.documentStore.addDocument(status, ibibUnc0Fingerprint);
     BandwidthDocumentWriter writer = new BandwidthDocumentWriter();
-    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
+    assertEquals(1, this.documentStore.getPerformedListOperations());
+    assertEquals(3, this.documentStore.getPerformedRetrieveOperations());
     assertEquals(1, this.documentStore.getPerformedStoreOperations());
     BandwidthDocument document = this.documentStore.getDocument(
         BandwidthDocument.class, ibibUnc0Fingerprint);

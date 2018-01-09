@@ -5,21 +5,19 @@ package org.torproject.onionoo.writer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.GraphHistory;
+import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.UptimeStatus;
 import org.torproject.onionoo.updater.DescriptorSourceFactory;
-import org.torproject.onionoo.updater.DummyDescriptorSource;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,14 +25,6 @@ public class UptimeDocumentWriterTest {
 
   private static final long TEST_TIME = DateTimeHelper.parse(
       "2014-03-23 12:00:00");
-
-  private DummyDescriptorSource descriptorSource;
-
-  @Before
-  public void createDummyDescriptorSource() {
-    this.descriptorSource = new DummyDescriptorSource();
-    DescriptorSourceFactory.setDescriptorSource(this.descriptorSource);
-  }
 
   private DummyDocumentStore documentStore;
 
@@ -44,21 +34,9 @@ public class UptimeDocumentWriterTest {
     DocumentStoreFactory.setDocumentStore(this.documentStore);
   }
 
-  private void setTime(UptimeDocumentWriter udw) {
-    try {
-      Field nowField = udw.getClass()
-          .getDeclaredField("now");
-      nowField.setAccessible(true);
-      nowField.set(udw, TEST_TIME);
-    } catch (Exception ex) {
-      fail("Cannot manipulate test-time.  Failing all.");
-    }
-  }
-
   @Test
   public void testNoStatuses() {
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     writer.writeDocuments();
     assertEquals("Without providing any data, nothing should be written "
         + "to disk.", 0,
@@ -72,6 +50,9 @@ public class UptimeDocumentWriterTest {
 
   private void addStatusOneWeekSample(String allRelaysUptime,
       String gabelmooUptime) {
+    NodeStatus nodeStatus = new NodeStatus(GABELMOO_FINGERPRINT);
+    nodeStatus.setLastSeenMillis(TEST_TIME);
+    this.documentStore.addDocument(nodeStatus, GABELMOO_FINGERPRINT);
     UptimeStatus status = new UptimeStatus();
     status.setFromDocumentString(allRelaysUptime);
     this.documentStore.addDocument(status, ALL_RELAYS_FINGERPRINT);
@@ -131,7 +112,6 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-11 1\n",
         "r 2014-03-23-11 1\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
@@ -147,7 +127,6 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-10 2\n",
         "r 2014-03-23-10 2\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
@@ -163,7 +142,6 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-09 1\nr 2014-03-23-11 1\n",
         "r 2014-03-23-09 1\nr 2014-03-23-11 1\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
@@ -179,7 +157,6 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-09 3\n",
         "r 2014-03-23-09 1\nr 2014-03-23-11 1\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
@@ -196,7 +173,6 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-23-09 3\n",
         "r 2014-03-23-09 2\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
@@ -210,36 +186,32 @@ public class UptimeDocumentWriterTest {
 
   @Test
   public void testOneWeekUptime() {
-    this.addStatusOneWeekSample("r 2014-03-16-12 168\n",
-        "r 2014-03-16-12 168\n");
+    this.addStatusOneWeekSample("r 2014-03-16-13 168\n",
+        "r 2014-03-16-13 168\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneWeekGraph(document, 1, "2014-03-16 12:30:00",
-        "2014-03-23 11:30:00", 168, null);
+    this.assertOneWeekGraph(document, 1, "2014-03-16 13:30:00",
+        "2014-03-23 12:30:00", 168, null);
   }
 
   @Test
   public void testOneWeekOneHourUptime() {
-    this.addStatusOneWeekSample("r 2014-03-16-11 169\n",
-        "r 2014-03-16-11 169\n");
+    this.addStatusOneWeekSample("r 2014-03-16-12 169\n",
+        "r 2014-03-16-12 169\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneWeekGraph(document, 2, "2014-03-16 12:30:00",
-        "2014-03-23 11:30:00", 168, null);
-    this.assertOneMonthGraph(document, 2, "2014-03-16 10:00:00",
-        "2014-03-23 10:00:00", 43, null);
+    this.assertOneWeekGraph(document, 1, "2014-03-16 13:30:00",
+        "2014-03-23 12:30:00", 168, null);
   }
 
   @Test
@@ -247,7 +219,6 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-16-08 8\n",
         "r 2014-03-16-11 5\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,
@@ -263,7 +234,6 @@ public class UptimeDocumentWriterTest {
     this.addStatusOneWeekSample("r 2014-03-16-08 8\n",
         "r 2014-03-16-10 1\nr 2014-03-16-12 1\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
-    setTime(writer);
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
     assertEquals("Should write exactly one document.", 1,

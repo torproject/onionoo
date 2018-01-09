@@ -1,3 +1,10 @@
+# Changes in version ??
+
+ * Medium changes
+   - Make writing of bandwidth, clients, uptime, and weights documents
+     independent of system time.
+
+
 # Changes in version 5.0-1.9.0 - 2017-12-20
 
  * Medium changes

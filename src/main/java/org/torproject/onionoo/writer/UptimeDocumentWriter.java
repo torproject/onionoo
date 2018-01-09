@@ -7,6 +7,7 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
+import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.UptimeHistory;
@@ -32,11 +33,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
 
   private DocumentStore documentStore;
 
-  private long now;
-
   public UptimeDocumentWriter() {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = System.currentTimeMillis();
   }
 
   @Override
@@ -63,9 +61,11 @@ public class UptimeDocumentWriter implements DocumentWriter {
 
   private void updateDocument(String fingerprint,
       UptimeStatus knownStatuses) {
+    NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
+        true, fingerprint);
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true, fingerprint);
-    if (uptimeStatus != null) {
+    if (null != nodeStatus && null != uptimeStatus) {
       boolean relay = uptimeStatus.getBridgeHistory().isEmpty();
       SortedSet<UptimeHistory> history = relay
           ? uptimeStatus.getRelayHistory()
@@ -73,8 +73,9 @@ public class UptimeDocumentWriter implements DocumentWriter {
       SortedSet<UptimeHistory> knownStatusesHistory = relay
           ? knownStatuses.getRelayHistory()
           : knownStatuses.getBridgeHistory();
+      long lastSeenMillis = nodeStatus.getLastSeenMillis();
       UptimeDocument uptimeDocument = this.compileUptimeDocument(relay,
-          fingerprint, history, knownStatusesHistory);
+          fingerprint, history, knownStatusesHistory, lastSeenMillis);
       this.documentStore.store(uptimeDocument, fingerprint);
       this.writtenDocuments++;
     }
@@ -103,7 +104,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
 
   private UptimeDocument compileUptimeDocument(boolean relay,
       String fingerprint, SortedSet<UptimeHistory> history,
-      SortedSet<UptimeHistory> knownStatuses) {
+      SortedSet<UptimeHistory> knownStatuses, long lastSeenMillis) {
     UptimeDocument uptimeDocument = new UptimeDocument();
     uptimeDocument.setFingerprint(fingerprint);
     Map<String, GraphHistory> uptime = new LinkedHashMap<>();
@@ -111,7 +112,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
         < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
       GraphHistory graphHistory = this.compileUptimeHistory(
-          graphIntervalIndex, relay, history, knownStatuses, null);
+          graphIntervalIndex, relay, history, knownStatuses, lastSeenMillis,
+          null);
       if (graphHistory != null) {
         uptime.put(graphName, graphHistory);
       }
@@ -130,7 +132,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
           < this.graphIntervals.length; graphIntervalIndex++) {
         String graphName = this.graphNames[graphIntervalIndex];
         GraphHistory graphHistory = this.compileUptimeHistory(
-            graphIntervalIndex, relay, history, knownStatuses, flag);
+            graphIntervalIndex, relay, history, knownStatuses, lastSeenMillis,
+            flag);
         if (graphHistory != null) {
           graphsForFlags.put(graphName, graphHistory);
         }
@@ -147,15 +150,18 @@ public class UptimeDocumentWriter implements DocumentWriter {
 
   private GraphHistory compileUptimeHistory(int graphIntervalIndex,
       boolean relay, SortedSet<UptimeHistory> history,
-      SortedSet<UptimeHistory> knownStatuses, String flag) {
+      SortedSet<UptimeHistory> knownStatuses, long lastSeenMillis,
+      String flag) {
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
     int dataPointIntervalHours = (int) (dataPointInterval
         / DateTimeHelper.ONE_HOUR);
     List<Integer> uptimeDataPoints = new ArrayList<>();
-    long intervalStartMillis = ((this.now - graphInterval)
+    long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
         / dataPointInterval) * dataPointInterval;
+    long graphStartMillis = graphEndMillis - graphInterval;
+    long intervalStartMillis = graphStartMillis;
     int uptimeHours = 0;
     long firstStatusStartMillis = -1L;
     for (UptimeHistory hist : history) {
@@ -171,6 +177,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
           * hist.getUptimeHours();
       if (histEndMillis < intervalStartMillis) {
         continue;
+      } else if (histEndMillis > graphEndMillis) {
+        histEndMillis = graphEndMillis;
       }
       while (hist.getStartMillis() >= intervalStartMillis
           + dataPointInterval) {
@@ -197,10 +205,12 @@ public class UptimeDocumentWriter implements DocumentWriter {
     }
     uptimeDataPoints.add(uptimeHours);
     List<Integer> statusDataPoints = new ArrayList<>();
-    intervalStartMillis = ((this.now - graphInterval)
-        / dataPointInterval) * dataPointInterval;
+    intervalStartMillis = graphStartMillis;
     int statusHours = -1;
     for (UptimeHistory hist : knownStatuses) {
+      if (hist.getStartMillis() >= graphEndMillis) {
+        break;
+      }
       if (hist.isRelay() != relay
           || (flag != null && (hist.getFlags() == null
           || !hist.getFlags().contains(flag)))) {
@@ -210,6 +220,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
           * hist.getUptimeHours();
       if (histEndMillis < intervalStartMillis) {
         continue;
+      } else if (histEndMillis > graphEndMillis) {
+        histEndMillis = graphEndMillis;
       }
       while (hist.getStartMillis() >= intervalStartMillis
           + dataPointInterval) {
@@ -271,11 +283,11 @@ public class UptimeDocumentWriter implements DocumentWriter {
       /* Not a single non-negative value in the data points. */
       return null;
     }
-    long firstDataPointMillis = (((this.now - graphInterval)
-        / dataPointInterval) + firstNonNullIndex)
+    long firstDataPointMillis = graphStartMillis + firstNonNullIndex
         * dataPointInterval + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis
-        >= this.now - graphIntervals[graphIntervalIndex - 1]) {
+    if (graphIntervalIndex > 0 && firstDataPointMillis >=
+        ((lastSeenMillis + DateTimeHelper.ONE_HOUR) / dataPointInterval)
+        * dataPointInterval - graphIntervals[graphIntervalIndex - 1]) {
       /* Skip uptime history object, because it doesn't contain
        * anything new that wasn't already contained in the last
        * uptime history object(s). */

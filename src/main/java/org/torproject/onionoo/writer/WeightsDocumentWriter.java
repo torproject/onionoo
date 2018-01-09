@@ -7,6 +7,7 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
+import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.docs.WeightsDocument;
 import org.torproject.onionoo.docs.WeightsStatus;
@@ -28,11 +29,8 @@ public class WeightsDocumentWriter implements DocumentWriter {
 
   private DocumentStore documentStore;
 
-  private long now;
-
   public WeightsDocumentWriter() {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = System.currentTimeMillis();
   }
 
   @Override
@@ -44,14 +42,20 @@ public class WeightsDocumentWriter implements DocumentWriter {
     SortedSet<String> updateWeightsDocuments = this.documentStore.list(
         WeightsStatus.class, updatedMillis);
     for (String fingerprint : updateWeightsDocuments) {
+      NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
+          true, fingerprint);
+      if (null == nodeStatus) {
+        continue;
+      }
       WeightsStatus weightsStatus = this.documentStore.retrieve(
           WeightsStatus.class, true, fingerprint);
       if (weightsStatus == null) {
         continue;
       }
       SortedMap<long[], double[]> history = weightsStatus.getHistory();
+      long lastSeenMillis = nodeStatus.getLastSeenMillis();
       WeightsDocument weightsDocument = this.compileWeightsDocument(
-          fingerprint, history);
+          fingerprint, history, lastSeenMillis);
       this.documentStore.store(weightsDocument, fingerprint);
     }
     log.info("Wrote weights document files");
@@ -79,30 +83,31 @@ public class WeightsDocumentWriter implements DocumentWriter {
       DateTimeHelper.TEN_DAYS };
 
   private WeightsDocument compileWeightsDocument(String fingerprint,
-      SortedMap<long[], double[]> history) {
+      SortedMap<long[], double[]> history, long lastSeenMillis) {
     WeightsDocument weightsDocument = new WeightsDocument();
     weightsDocument.setFingerprint(fingerprint);
     weightsDocument.setConsensusWeightFraction(
-        this.compileGraphType(history, 1));
+        this.compileGraphType(history, lastSeenMillis, 1));
     weightsDocument.setGuardProbability(
-        this.compileGraphType(history, 2));
+        this.compileGraphType(history, lastSeenMillis, 2));
     weightsDocument.setMiddleProbability(
-        this.compileGraphType(history, 3));
+        this.compileGraphType(history, lastSeenMillis, 3));
     weightsDocument.setExitProbability(
-        this.compileGraphType(history, 4));
+        this.compileGraphType(history, lastSeenMillis, 4));
     weightsDocument.setConsensusWeight(
-        this.compileGraphType(history, 6));
+        this.compileGraphType(history, lastSeenMillis, 6));
     return weightsDocument;
   }
 
   private Map<String, GraphHistory> compileGraphType(
-      SortedMap<long[], double[]> history, int graphTypeIndex) {
+      SortedMap<long[], double[]> history, long lastSeenMillis,
+      int graphTypeIndex) {
     Map<String, GraphHistory> graphs = new LinkedHashMap<>();
     for (int graphIntervalIndex = 0; graphIntervalIndex
         < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
       GraphHistory graphHistory = this.compileWeightsHistory(
-          graphTypeIndex, graphIntervalIndex, history);
+          graphTypeIndex, graphIntervalIndex, history, lastSeenMillis);
       if (graphHistory != null) {
         graphs.put(graphName, graphHistory);
       }
@@ -111,13 +116,16 @@ public class WeightsDocumentWriter implements DocumentWriter {
   }
 
   private GraphHistory compileWeightsHistory(int graphTypeIndex,
-      int graphIntervalIndex, SortedMap<long[], double[]> history) {
+      int graphIntervalIndex, SortedMap<long[], double[]> history,
+      long lastSeenMillis) {
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
     List<Double> dataPoints = new ArrayList<>();
-    long intervalStartMillis = ((this.now - graphInterval)
+    long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
         / dataPointInterval) * dataPointInterval;
+    long graphStartMillis = graphEndMillis - graphInterval;
+    long intervalStartMillis = graphStartMillis;
     long totalMillis = 0L;
     double totalWeightTimesMillis = 0.0;
     for (Map.Entry<long[], double[]> e : history.entrySet()) {
@@ -126,6 +134,8 @@ public class WeightsDocumentWriter implements DocumentWriter {
       double weight = e.getValue()[graphTypeIndex];
       if (endMillis < intervalStartMillis) {
         continue;
+      } else if (endMillis > graphEndMillis) {
+        break;
       }
       while ((intervalStartMillis / dataPointInterval)
           != (endMillis / dataPointInterval)) {
@@ -163,11 +173,11 @@ public class WeightsDocumentWriter implements DocumentWriter {
       /* Not a single non-negative value in the data points. */
       return null;
     }
-    long firstDataPointMillis = (((this.now - graphInterval)
-        / dataPointInterval) + firstNonNullIndex) * dataPointInterval
-        + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis
-        >= this.now - graphIntervals[graphIntervalIndex - 1]) {
+    long firstDataPointMillis = graphStartMillis + firstNonNullIndex
+        * dataPointInterval + dataPointInterval / 2L;
+    if (graphIntervalIndex > 0 && firstDataPointMillis >=
+        ((lastSeenMillis + DateTimeHelper.ONE_HOUR) / dataPointInterval)
+        * dataPointInterval - graphIntervals[graphIntervalIndex - 1]) {
       /* Skip weights history object, because it doesn't contain
        * anything new that wasn't already contained in the last
        * weights history object(s). */

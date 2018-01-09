@@ -10,6 +10,7 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
+import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.FormattingUtils;
 
@@ -52,11 +53,8 @@ public class ClientsDocumentWriter implements DocumentWriter {
 
   private DocumentStore documentStore;
 
-  private long now;
-
   public ClientsDocumentWriter() {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = System.currentTimeMillis();
   }
 
   private int writtenDocuments = 0;
@@ -70,6 +68,11 @@ public class ClientsDocumentWriter implements DocumentWriter {
     SortedSet<String> updateDocuments = this.documentStore.list(
         ClientsStatus.class, updatedMillis);
     for (String hashedFingerprint : updateDocuments) {
+      NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
+          true, hashedFingerprint);
+      if (null == nodeStatus) {
+        continue;
+      }
       ClientsStatus clientsStatus = this.documentStore.retrieve(
           ClientsStatus.class, true, hashedFingerprint);
       if (clientsStatus == null) {
@@ -77,7 +80,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       }
       SortedSet<ClientsHistory> history = clientsStatus.getHistory();
       ClientsDocument clientsDocument = this.compileClientsDocument(
-          hashedFingerprint, history);
+          hashedFingerprint, nodeStatus, history);
       this.documentStore.store(clientsDocument, hashedFingerprint);
       this.writtenDocuments++;
     }
@@ -106,7 +109,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       DateTimeHelper.TEN_DAYS };
 
   private ClientsDocument compileClientsDocument(String hashedFingerprint,
-      SortedSet<ClientsHistory> history) {
+      NodeStatus nodeStatus, SortedSet<ClientsHistory> history) {
     ClientsDocument clientsDocument = new ClientsDocument();
     clientsDocument.setFingerprint(hashedFingerprint);
     Map<String, GraphHistory> averageClients = new LinkedHashMap<>();
@@ -114,7 +117,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
         < this.graphIntervals.length; graphIntervalIndex++) {
       String graphName = this.graphNames[graphIntervalIndex];
       GraphHistory graphHistory = this.compileClientsHistory(
-          graphIntervalIndex, history);
+          graphIntervalIndex, history, nodeStatus.getLastSeenMillis());
       if (graphHistory != null) {
         averageClients.put(graphName, graphHistory);
       }
@@ -124,18 +127,23 @@ public class ClientsDocumentWriter implements DocumentWriter {
   }
 
   private GraphHistory compileClientsHistory(
-      int graphIntervalIndex, SortedSet<ClientsHistory> history) {
+      int graphIntervalIndex, SortedSet<ClientsHistory> history,
+      long lastSeenMillis) {
     long graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
     List<Double> dataPoints = new ArrayList<>();
-    long intervalStartMillis = ((this.now - graphInterval)
+    long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
         / dataPointInterval) * dataPointInterval;
+    long graphStartMillis = graphEndMillis - graphInterval;
+    long intervalStartMillis = graphStartMillis;
     long millis = 0L;
     double responses = 0.0;
     for (ClientsHistory hist : history) {
       if (hist.getEndMillis() < intervalStartMillis) {
         continue;
+      } else if (hist.getEndMillis() > graphEndMillis) {
+        break;
       }
       while ((intervalStartMillis / dataPointInterval)
           != (hist.getEndMillis() / dataPointInterval)) {
@@ -172,11 +180,11 @@ public class ClientsDocumentWriter implements DocumentWriter {
       /* Not a single non-negative value in the data points. */
       return null;
     }
-    long firstDataPointMillis = (((this.now - graphInterval)
-        / dataPointInterval) + firstNonNullIndex) * dataPointInterval
-        + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis
-        >= this.now - graphIntervals[graphIntervalIndex - 1]) {
+    long firstDataPointMillis = graphStartMillis + firstNonNullIndex
+        * dataPointInterval + dataPointInterval / 2L;
+    if (graphIntervalIndex > 0 && firstDataPointMillis >=
+        ((lastSeenMillis + DateTimeHelper.ONE_HOUR) / dataPointInterval)
+        * dataPointInterval - graphIntervals[graphIntervalIndex - 1]) {
       /* Skip clients history object, because it doesn't contain
        * anything new that wasn't already contained in the last
        * clients history object(s). */

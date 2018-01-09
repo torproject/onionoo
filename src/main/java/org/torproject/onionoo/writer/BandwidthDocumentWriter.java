@@ -9,6 +9,7 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
+import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 
 import org.slf4j.Logger;
@@ -28,11 +29,8 @@ public class BandwidthDocumentWriter implements DocumentWriter {
 
   private DocumentStore documentStore;
 
-  private long now;
-
   public BandwidthDocumentWriter() {
     this.documentStore = DocumentStoreFactory.getDocumentStore();
-    this.now = System.currentTimeMillis();
   }
 
   @Override
@@ -44,13 +42,18 @@ public class BandwidthDocumentWriter implements DocumentWriter {
     SortedSet<String> updateBandwidthDocuments = this.documentStore.list(
         BandwidthStatus.class, updatedMillis);
     for (String fingerprint : updateBandwidthDocuments) {
+      NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
+          true, fingerprint);
+      if (null == nodeStatus) {
+        continue;
+      }
       BandwidthStatus bandwidthStatus = this.documentStore.retrieve(
           BandwidthStatus.class, true, fingerprint);
       if (bandwidthStatus == null) {
         continue;
       }
       BandwidthDocument bandwidthDocument = this.compileBandwidthDocument(
-          fingerprint, bandwidthStatus);
+          fingerprint, nodeStatus, bandwidthStatus);
       this.documentStore.store(bandwidthDocument, fingerprint);
     }
     log.info("Wrote bandwidth document files");
@@ -58,13 +61,13 @@ public class BandwidthDocumentWriter implements DocumentWriter {
 
 
   private BandwidthDocument compileBandwidthDocument(String fingerprint,
-      BandwidthStatus bandwidthStatus) {
+      NodeStatus nodeStatus, BandwidthStatus bandwidthStatus) {
     BandwidthDocument bandwidthDocument = new BandwidthDocument();
     bandwidthDocument.setFingerprint(fingerprint);
     bandwidthDocument.setWriteHistory(this.compileGraphType(
-        bandwidthStatus.getWriteHistory()));
+        nodeStatus.getLastSeenMillis(), bandwidthStatus.getWriteHistory()));
     bandwidthDocument.setReadHistory(this.compileGraphType(
-        bandwidthStatus.getReadHistory()));
+        nodeStatus.getLastSeenMillis(), bandwidthStatus.getReadHistory()));
     return bandwidthDocument;
   }
 
@@ -92,7 +95,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
-  private Map<String, GraphHistory> compileGraphType(
+  private Map<String, GraphHistory> compileGraphType(long lastSeenMillis,
       SortedMap<Long, long[]> history) {
     Map<String, GraphHistory> graphs = new LinkedHashMap<>();
     for (int i = 0; i < this.graphIntervals.length; i++) {
@@ -100,19 +103,20 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       long graphInterval = this.graphIntervals[i];
       long dataPointInterval = this.dataPointIntervals[i];
       List<Long> dataPoints = new ArrayList<>();
-      long intervalStartMillis = ((this.now - graphInterval)
+      long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
           / dataPointInterval) * dataPointInterval;
+      long graphStartMillis = graphEndMillis - graphInterval;
+      long intervalStartMillis = graphStartMillis;
       long totalMillis = 0L;
       long totalBandwidth = 0L;
       for (long[] v : history.values()) {
         long endMillis = v[1];
         if (endMillis < intervalStartMillis) {
           continue;
-        }
-        long startMillis = v[0];
-        if (startMillis > this.now) {
+        } else if (endMillis > graphEndMillis) {
           break;
         }
+        long startMillis = v[0];
         if (endMillis - startMillis > dataPointInterval) {
           /* This history interval is too long for this graph's data point
            * interval.  Maybe the next graph will contain it, but not this
@@ -153,11 +157,11 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       if (firstNonNullIndex < 0) {
         continue;
       }
-      long firstDataPointMillis = (((this.now - graphInterval)
-          / dataPointInterval) + firstNonNullIndex) * dataPointInterval
-          + dataPointInterval / 2L;
-      if (i > 0 && !graphs.isEmpty()
-          && firstDataPointMillis >= this.now - graphIntervals[i - 1]) {
+      long firstDataPointMillis = graphStartMillis + firstNonNullIndex
+          * dataPointInterval + dataPointInterval / 2L;
+      if (i > 0 && !graphs.isEmpty() && firstDataPointMillis >=
+          ((lastSeenMillis + DateTimeHelper.ONE_HOUR) / dataPointInterval)
+          * dataPointInterval - graphIntervals[i - 1]) {
         /* Skip bandwidth history object, because it doesn't contain
          * anything new that wasn't already contained in the last
          * bandwidth history object(s).  Unless we did not include any of
