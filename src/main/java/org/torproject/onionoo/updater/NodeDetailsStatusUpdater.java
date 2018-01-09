@@ -1,4 +1,4 @@
-/* Copyright 2011--2017 The Tor Project
+/* Copyright 2011--2018 The Tor Project
  * See LICENSE for licensing information */
 
 package org.torproject.onionoo.updater;
