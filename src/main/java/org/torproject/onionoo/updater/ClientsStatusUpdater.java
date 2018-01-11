@@ -10,6 +10,7 @@ import org.torproject.onionoo.docs.ClientsStatus;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.util.FormattingUtils;
 
 import java.util.Map;
@@ -158,7 +159,11 @@ public class ClientsStatusUpdater implements DescriptorListener,
       }
       clientsStatus.addToHistory(e.getValue());
       if (clientsStatus.isDirty()) {
-        clientsStatus.compressHistory();
+        NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
+            true, hashedFingerprint);
+        if (null != nodeStatus) {
+          clientsStatus.compressHistory(nodeStatus.getLastSeenMillis());
+        }
         this.documentStore.store(clientsStatus, hashedFingerprint);
         clientsStatus.clearDirty();
       }

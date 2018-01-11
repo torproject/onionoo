@@ -108,16 +108,13 @@ public class BandwidthStatus extends Document {
     }
   }
 
-  public void compressHistory() {
-    this.compressHistory(System.currentTimeMillis());
+  public void compressHistory(long lastSeenMillis) {
+    this.compressHistory(this.writeHistory, lastSeenMillis);
+    this.compressHistory(this.readHistory, lastSeenMillis);
   }
 
-  public void compressHistory(long now) {
-    this.compressHistory(this.writeHistory, now);
-    this.compressHistory(this.readHistory, now);
-  }
-
-  private void compressHistory(SortedMap<Long, long[]> history, long now) {
+  private void compressHistory(SortedMap<Long, long[]> history,
+      long lastSeenMillis) {
     SortedMap<Long, long[]> uncompressedHistory = new TreeMap<>(history);
     history.clear();
     long lastStartMillis = 0L;
@@ -129,17 +126,17 @@ public class BandwidthStatus extends Document {
       long endMillis = v[1];
       long bandwidth = v[2];
       long intervalLengthMillis;
-      if (now - endMillis <= DateTimeHelper.THREE_DAYS) {
+      if (lastSeenMillis - endMillis <= DateTimeHelper.THREE_DAYS) {
         intervalLengthMillis = DateTimeHelper.FIFTEEN_MINUTES;
-      } else if (now - endMillis <= DateTimeHelper.ONE_WEEK) {
+      } else if (lastSeenMillis - endMillis <= DateTimeHelper.ONE_WEEK) {
         intervalLengthMillis = DateTimeHelper.ONE_HOUR;
-      } else if (now - endMillis
+      } else if (lastSeenMillis - endMillis
           <= DateTimeHelper.ROUGHLY_ONE_MONTH) {
         intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
-      } else if (now - endMillis
+      } else if (lastSeenMillis - endMillis
           <= DateTimeHelper.ROUGHLY_THREE_MONTHS) {
         intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
-      } else if (now - endMillis
+      } else if (lastSeenMillis - endMillis
           <= DateTimeHelper.ROUGHLY_ONE_YEAR) {
         intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {

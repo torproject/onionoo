@@ -125,7 +125,7 @@ public class WeightsStatus extends Document {
 
   /** Compresses the history of weights objects by merging adjacent
    * intervals, depending on how far back in the past they lie. */
-  public void compressHistory() {
+  public void compressHistory(long lastSeenMillis) {
     SortedMap<long[], double[]> uncompressedHistory =
         new TreeMap<>(histComparator);
     uncompressedHistory.putAll(this.history);
@@ -135,21 +135,20 @@ public class WeightsStatus extends Document {
     double[] lastWeights = null;
     String lastMonthString = "1970-01";
     int lastMissingValues = -1;
-    long now = System.currentTimeMillis();
     for (Map.Entry<long[], double[]> e : uncompressedHistory.entrySet()) {
       long startMillis = e.getKey()[0];
       long endMillis = e.getKey()[1];
       double[] weights = e.getValue();
       long intervalLengthMillis;
-      if (now - endMillis <= DateTimeHelper.ONE_WEEK) {
+      if (lastSeenMillis - endMillis <= DateTimeHelper.ONE_WEEK) {
         intervalLengthMillis = DateTimeHelper.ONE_HOUR;
-      } else if (now - endMillis
+      } else if (lastSeenMillis - endMillis
           <= DateTimeHelper.ROUGHLY_ONE_MONTH) {
         intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
-      } else if (now - endMillis
+      } else if (lastSeenMillis - endMillis
           <= DateTimeHelper.ROUGHLY_THREE_MONTHS) {
         intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
-      } else if (now - endMillis
+      } else if (lastSeenMillis - endMillis
           <= DateTimeHelper.ROUGHLY_ONE_YEAR) {
         intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {

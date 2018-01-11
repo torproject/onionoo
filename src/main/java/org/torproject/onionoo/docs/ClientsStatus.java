@@ -69,18 +69,17 @@ public class ClientsStatus extends Document {
 
   /** Compresses the history of clients objects by merging adjacent
    * intervals, depending on how far back in the past they lie. */
-  public void compressHistory() {
+  public void compressHistory(long lastSeenMillis) {
     SortedSet<ClientsHistory> uncompressedHistory = new TreeSet<>(this.history);
     history.clear();
     ClientsHistory lastResponses = null;
     String lastMonthString = "1970-01";
-    long now = System.currentTimeMillis();
     for (ClientsHistory responses : uncompressedHistory) {
       long intervalLengthMillis;
-      if (now - responses.getEndMillis()
+      if (lastSeenMillis - responses.getEndMillis()
           <= DateTimeHelper.ROUGHLY_THREE_MONTHS) {
         intervalLengthMillis = DateTimeHelper.ONE_DAY;
-      } else if (now - responses.getEndMillis()
+      } else if (lastSeenMillis - responses.getEndMillis()
           <= DateTimeHelper.ROUGHLY_ONE_YEAR) {
         intervalLengthMillis = DateTimeHelper.TWO_DAYS;
       } else {

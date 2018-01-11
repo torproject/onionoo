@@ -8,6 +8,7 @@ import org.torproject.descriptor.NetworkStatusEntry;
 import org.torproject.descriptor.RelayNetworkStatusConsensus;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.WeightsStatus;
 
 import java.util.Arrays;
@@ -76,7 +77,11 @@ public class WeightsStatusUpdater implements DescriptorListener,
       weightsStatus.addToHistory(validAfterMillis, freshUntilMillis,
           weights);
       if (weightsStatus.isDirty()) {
-        weightsStatus.compressHistory();
+        NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
+            true, fingerprint);
+        if (null != nodeStatus) {
+          weightsStatus.compressHistory(nodeStatus.getLastSeenMillis());
+        }
         this.documentStore.store(weightsStatus, fingerprint);
         weightsStatus.clearDirty();
       }

@@ -38,16 +38,16 @@ public class WeightsStatusTest {
     WeightsStatus ws = new WeightsStatus();
     SortedMap<long[], double[]> history = ws.getHistory();
     assertTrue("actually: " + mapToString(history), history.isEmpty());
-    long now = System.currentTimeMillis();
+    long lastSeenMillis = 1515670935476L;
     long hourMillis = 60L * 60L * 1000L;
     for (long j = 1L; j < 10L; j++) { // add arbitrary data
-      ws.addToHistory(now - j * hourMillis - hourMillis,
-          now - j * hourMillis,
+      ws.addToHistory(lastSeenMillis - j * hourMillis - hourMillis,
+          lastSeenMillis - j * hourMillis,
           new double[]{ 1.0 * j, 2.0 * j, 1.0 * j, 2.0 * j, 1.0 * j,
               2.0 * j, Double.NaN});
       assertEquals("have: " + mapToString(history), (int) j, history.size());
     }
-    ws.compressHistory();
+    ws.compressHistory(lastSeenMillis);
     assertEquals("history map: " + mapToString(history), 9, history.size());
     assertFalse("document shouldn't contain NaN: " + ws.toDocumentString(),
         ws.toDocumentString().contains("NaN"));
@@ -67,7 +67,7 @@ public class WeightsStatusTest {
               2.0 * j, j * 0.5});
       assertEquals("have: " + mapToString(history), (int) j, history.size());
     }
-    ws.compressHistory();
+    ws.compressHistory(1515670935476L);
     assertEquals("history map: " + mapToString(history), 1, history.size());
     assertFalse("document shouldn't contain NaN: " + ws.toDocumentString(),
         ws.toDocumentString().contains("NaN"));
@@ -101,7 +101,7 @@ public class WeightsStatusTest {
     }
     assertEquals("history: ", correctHistory, mapToString(ws.getHistory()));
     assertEquals(correctLines.length, ws.getHistory().size());
-    ws.compressHistory();
+    ws.compressHistory(1515670935476L);
     assertEquals("found: " + mapToString(ws.getHistory()), 1,
         ws.getHistory().size());
     assertEquals("[1431032400000, 1431043200000] : [-1.0, 1.78279826E-4, "
@@ -128,7 +128,7 @@ public class WeightsStatusTest {
       assertEquals("document string: ", exp, ws.toDocumentString());
     }
     assertEquals(correctLines.length, ws.getHistory().size());
-    ws.compressHistory();
+    ws.compressHistory(1515670935476L);
     assertEquals("found: " + mapToString(ws.getHistory()), 3,
         ws.getHistory().size());
   }

@@ -8,6 +8,7 @@ import org.torproject.descriptor.ExtraInfoDescriptor;
 import org.torproject.onionoo.docs.BandwidthStatus;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
+import org.torproject.onionoo.docs.NodeStatus;
 
 public class BandwidthStatusUpdater implements DescriptorListener,
     StatusUpdater {
@@ -58,7 +59,11 @@ public class BandwidthStatusUpdater implements DescriptorListener,
       bandwidthStatus.addToReadHistory(descriptor.getReadHistory());
     }
     if (bandwidthStatus.isDirty()) {
-      bandwidthStatus.compressHistory();
+      NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
+          true, fingerprint);
+      if (null != nodeStatus) {
+        bandwidthStatus.compressHistory(nodeStatus.getLastSeenMillis());
+      }
       this.documentStore.store(bandwidthStatus, fingerprint);
       bandwidthStatus.clearDirty();
     }
