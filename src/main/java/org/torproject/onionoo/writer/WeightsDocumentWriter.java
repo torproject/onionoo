@@ -15,6 +15,9 @@ import org.torproject.onionoo.docs.WeightsStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,12 +71,12 @@ public class WeightsDocumentWriter implements DocumentWriter {
       "1_year",
       "5_years" };
 
-  private long[] graphIntervals = new long[] {
-      DateTimeHelper.ONE_WEEK,
-      DateTimeHelper.ROUGHLY_ONE_MONTH,
-      DateTimeHelper.ROUGHLY_THREE_MONTHS,
-      DateTimeHelper.ROUGHLY_ONE_YEAR,
-      DateTimeHelper.ROUGHLY_FIVE_YEARS };
+  private Period[] graphIntervals = new Period[] {
+      Period.ofWeeks(1),
+      Period.ofMonths(1),
+      Period.ofMonths(3),
+      Period.ofYears(1),
+      Period.ofYears(5) };
 
   private long[] dataPointIntervals = new long[] {
       DateTimeHelper.ONE_HOUR,
@@ -118,13 +121,16 @@ public class WeightsDocumentWriter implements DocumentWriter {
   private GraphHistory compileWeightsHistory(int graphTypeIndex,
       int graphIntervalIndex, SortedMap<long[], double[]> history,
       long lastSeenMillis) {
-    long graphInterval = this.graphIntervals[graphIntervalIndex];
+    Period graphInterval = this.graphIntervals[graphIntervalIndex];
     long dataPointInterval =
         this.dataPointIntervals[graphIntervalIndex];
     List<Double> dataPoints = new ArrayList<>();
     long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
         / dataPointInterval) * dataPointInterval;
-    long graphStartMillis = graphEndMillis - graphInterval;
+    long graphStartMillis = LocalDateTime
+        .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
+        .minus(graphInterval)
+        .toEpochSecond(ZoneOffset.UTC) * 1000L;
     long intervalStartMillis = graphStartMillis;
     long totalMillis = 0L;
     double totalWeightTimesMillis = 0.0;
@@ -175,9 +181,10 @@ public class WeightsDocumentWriter implements DocumentWriter {
     }
     long firstDataPointMillis = graphStartMillis + firstNonNullIndex
         * dataPointInterval + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis >=
-        ((lastSeenMillis + DateTimeHelper.ONE_HOUR) / dataPointInterval)
-        * dataPointInterval - graphIntervals[graphIntervalIndex - 1]) {
+    if (graphIntervalIndex > 0 && firstDataPointMillis >= LocalDateTime
+        .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
+        .minus(graphIntervals[graphIntervalIndex - 1])
+        .toEpochSecond(ZoneOffset.UTC) * 1000L) {
       /* Skip weights history object, because it doesn't contain
        * anything new that wasn't already contained in the last
        * weights history object(s). */
