@@ -77,6 +77,12 @@ public class UptimeDocumentWriterTest {
         (int) (FOUR_HOURS / ONE_SECOND), count, values);
   }
 
+  private void assertFiveYearGraph(UptimeDocument document, int graphs,
+      String first, String last, int count, List<Integer> values) {
+    this.assertGraph(document, graphs, "5_years", first, last,
+        (int) (DateTimeHelper.TEN_DAYS / ONE_SECOND), count, values);
+  }
+
   private void assertGraph(UptimeDocument document, int graphs,
       String graphName, String first, String last, int interval,
       int count, List<Integer> values) {
@@ -93,7 +99,7 @@ public class UptimeDocumentWriterTest {
         (int) history.getInterval());
     assertEquals("Factor should be 1.0 / 999.0.", 1.0 / 999.0,
         (double) history.getFactor(), 0.01);
-    assertEquals("There should be one data point per hour.", count,
+    assertEquals("There should be " + count + " data points.", count,
         (int) history.getCount());
     assertEquals("Count should be the same as the number of values.",
         count, history.getValues().size());
@@ -243,6 +249,42 @@ public class UptimeDocumentWriterTest {
     this.assertOneMonthGraph(document, 2, "2014-03-16 10:00:00",
         "2014-03-16 14:00:00", 2,
         Arrays.asList(new Integer[] { 499, 249 }));
+  }
+
+  @Test
+  public void testFiveYearsLessThan20Percent() {
+    /* This relay was running for exactly 11 days and 23 hours over 2 years ago.
+     * This time period exactly matches 100% of a data point interval of 10 days
+     * plus a tiny bit less than 20% of the next data point interval. */
+    this.addStatusOneWeekSample("r 2012-03-05-00 287\n",
+        "r 2012-03-05-00 287\n");
+    UptimeDocumentWriter writer = new UptimeDocumentWriter();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
+    writer.writeDocuments();
+    assertEquals("Should write exactly one document.", 1,
+        this.documentStore.getPerformedStoreOperations());
+    UptimeDocument document = this.documentStore.getDocument(
+        UptimeDocument.class, GABELMOO_FINGERPRINT);
+    assertEquals("Should not contain any graph.", 0,
+        document.getUptime().size());
+  }
+
+  @Test
+  public void testFiveYearsAtLeast20Percent() {
+    /* This relay was running for exactly 12 days over 2 years ago. This time
+     * period exactly matches 100% of a data point interval of 10 days plus 20%
+     * of the next data point interval. */
+    this.addStatusOneWeekSample("r 2012-03-05-00 288\n",
+        "r 2012-03-05-00 288\n");
+    UptimeDocumentWriter writer = new UptimeDocumentWriter();
+    DescriptorSourceFactory.getDescriptorSource().readDescriptors();
+    writer.writeDocuments();
+    assertEquals("Should write exactly one document.", 1,
+        this.documentStore.getPerformedStoreOperations());
+    UptimeDocument document = this.documentStore.getDocument(
+        UptimeDocument.class, GABELMOO_FINGERPRINT);
+    this.assertFiveYearGraph(document, 1, "2012-03-10 00:00:00",
+        "2012-03-20 00:00:00", 2, Arrays.asList(new Integer[] { 999, 999 }));
   }
 }
 

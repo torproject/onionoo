@@ -225,8 +225,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
       }
       while (hist.getStartMillis() >= intervalStartMillis
           + dataPointInterval) {
-        statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
-            ? statusHours : -1);
+        statusDataPoints.add(statusHours * 5 < dataPointIntervalHours
+            ? -1 : statusHours);
         statusHours = -1;
         intervalStartMillis += dataPointInterval;
       }
@@ -238,8 +238,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
             - Math.max(Math.max(hist.getStartMillis(),
             firstStatusStartMillis), intervalStartMillis))
             / DateTimeHelper.ONE_HOUR);
-        statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
-            ? statusHours : -1);
+        statusDataPoints.add(statusHours * 5 < dataPointIntervalHours
+            ? -1 : statusHours);
         statusHours = -1;
         intervalStartMillis += dataPointInterval;
       }
@@ -251,8 +251,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
           intervalStartMillis)) / DateTimeHelper.ONE_HOUR);
     }
     if (statusHours > 0) {
-      statusDataPoints.add(statusHours * 5 > dataPointIntervalHours
-          ? statusHours : -1);
+      statusDataPoints.add(statusHours * 5 < dataPointIntervalHours
+          ? -1 : statusHours);
     }
     List<Double> dataPoints = new ArrayList<>();
     for (int dataPointIndex = 0; dataPointIndex < statusDataPoints.size();
