@@ -140,13 +140,13 @@ public class ClientsDocumentWriter implements DocumentWriter {
     long millis = 0L;
     double responses = 0.0;
     for (ClientsHistory hist : history) {
-      if (hist.getEndMillis() < intervalStartMillis) {
+      if (hist.getEndMillis() <= intervalStartMillis) {
         continue;
       } else if (hist.getEndMillis() > graphEndMillis) {
         break;
       }
       while ((intervalStartMillis / dataPointInterval)
-          != (hist.getEndMillis() / dataPointInterval)) {
+          != ((hist.getEndMillis() - 1L) / dataPointInterval)) {
         dataPoints.add(millis * 2L < dataPointInterval
             ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)
             / (((double) millis) * 10.0));

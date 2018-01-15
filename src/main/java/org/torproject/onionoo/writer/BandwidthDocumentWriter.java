@@ -111,7 +111,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       long totalBandwidth = 0L;
       for (long[] v : history.values()) {
         long endMillis = v[1];
-        if (endMillis < intervalStartMillis) {
+        if (endMillis <= intervalStartMillis) {
           continue;
         } else if (endMillis > graphEndMillis) {
           break;
@@ -124,7 +124,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
           continue;
         }
         while ((intervalStartMillis / dataPointInterval)
-            != (endMillis / dataPointInterval)) {
+            != ((endMillis - 1L) / dataPointInterval)) {
           dataPoints.add(totalMillis * 5L < dataPointInterval
               ? -1L : (totalBandwidth * DateTimeHelper.ONE_SECOND)
               / totalMillis);

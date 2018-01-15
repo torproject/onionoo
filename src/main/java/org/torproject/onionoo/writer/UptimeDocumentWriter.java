@@ -175,7 +175,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
       }
       long histEndMillis = hist.getStartMillis() + DateTimeHelper.ONE_HOUR
           * hist.getUptimeHours();
-      if (histEndMillis < intervalStartMillis) {
+      if (histEndMillis <= intervalStartMillis) {
         continue;
       } else if (histEndMillis > graphEndMillis) {
         histEndMillis = graphEndMillis;
@@ -218,7 +218,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
       }
       long histEndMillis = hist.getStartMillis() + DateTimeHelper.ONE_HOUR
           * hist.getUptimeHours();
-      if (histEndMillis < intervalStartMillis) {
+      if (histEndMillis <= intervalStartMillis) {
         continue;
       } else if (histEndMillis > graphEndMillis) {
         histEndMillis = graphEndMillis;

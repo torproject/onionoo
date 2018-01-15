@@ -132,13 +132,13 @@ public class WeightsDocumentWriter implements DocumentWriter {
       long startMillis = e.getKey()[0];
       long endMillis = e.getKey()[1];
       double weight = e.getValue()[graphTypeIndex];
-      if (endMillis < intervalStartMillis) {
+      if (endMillis <= intervalStartMillis) {
         continue;
       } else if (endMillis > graphEndMillis) {
         break;
       }
       while ((intervalStartMillis / dataPointInterval)
-          != (endMillis / dataPointInterval)) {
+          != ((endMillis - 1L) / dataPointInterval)) {
         dataPoints.add(totalMillis * 5L < dataPointInterval
             ? -1.0 : totalWeightTimesMillis / (double) totalMillis);
         totalWeightTimesMillis = 0.0;
