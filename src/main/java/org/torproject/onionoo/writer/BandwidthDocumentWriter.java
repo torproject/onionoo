@@ -15,12 +15,7 @@ import org.torproject.onionoo.docs.UpdateStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
 import java.time.Period;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -100,114 +95,17 @@ public class BandwidthDocumentWriter implements DocumentWriter {
 
   private Map<String, GraphHistory> compileGraphType(long lastSeenMillis,
       SortedMap<Long, long[]> history) {
-    Map<String, GraphHistory> graphs = new LinkedHashMap<>();
+    GraphHistoryCompiler ghc = new GraphHistoryCompiler(
+        lastSeenMillis + DateTimeHelper.ONE_HOUR);
     for (int i = 0; i < this.graphIntervals.length; i++) {
-      String graphName = this.graphNames[i];
-      Period graphInterval = this.graphIntervals[i];
-      long dataPointInterval = this.dataPointIntervals[i];
-      List<Long> dataPoints = new ArrayList<>();
-      long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
-          / dataPointInterval) * dataPointInterval;
-      long graphStartMillis = LocalDateTime
-          .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-          .minus(graphInterval)
-          .toEpochSecond(ZoneOffset.UTC) * 1000L;
-      long intervalStartMillis = graphStartMillis;
-      long totalMillis = 0L;
-      long totalBandwidth = 0L;
-      for (long[] v : history.values()) {
-        long endMillis = v[1];
-        if (endMillis <= intervalStartMillis) {
-          continue;
-        } else if (endMillis > graphEndMillis) {
-          break;
-        }
-        long startMillis = v[0];
-        if (endMillis - startMillis > dataPointInterval) {
-          /* This history interval is too long for this graph's data point
-           * interval.  Maybe the next graph will contain it, but not this
-           * one. */
-          continue;
-        }
-        while ((intervalStartMillis / dataPointInterval)
-            != ((endMillis - 1L) / dataPointInterval)) {
-          dataPoints.add(totalMillis * 5L < dataPointInterval
-              ? -1L : (totalBandwidth * DateTimeHelper.ONE_SECOND)
-              / totalMillis);
-          totalBandwidth = 0L;
-          totalMillis = 0L;
-          intervalStartMillis += dataPointInterval;
-        }
-        long bandwidth = v[2];
-        totalBandwidth += bandwidth;
-        totalMillis += (endMillis - startMillis);
-      }
-      dataPoints.add(totalMillis * 5L < dataPointInterval
-          ? -1L : (totalBandwidth * DateTimeHelper.ONE_SECOND)
-          / totalMillis);
-      long maxValue = 1L;
-      int firstNonNullIndex = -1;
-      int lastNonNullIndex = -1;
-      for (int j = 0; j < dataPoints.size(); j++) {
-        long dataPoint = dataPoints.get(j);
-        if (dataPoint >= 0L) {
-          if (firstNonNullIndex < 0) {
-            firstNonNullIndex = j;
-          }
-          lastNonNullIndex = j;
-          if (dataPoint > maxValue) {
-            maxValue = dataPoint;
-          }
-        }
-      }
-      if (firstNonNullIndex < 0) {
-        continue;
-      }
-      long firstDataPointMillis = graphStartMillis + firstNonNullIndex
-          * dataPointInterval + dataPointInterval / 2L;
-      if (i > 0 && !graphs.isEmpty() && firstDataPointMillis >= LocalDateTime
-          .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-          .minus(graphIntervals[i - 1])
-          .toEpochSecond(ZoneOffset.UTC) * 1000L) {
-
-        /* Skip bandwidth history object, because it doesn't contain
-         * anything new that wasn't already contained in the last
-         * bandwidth history object(s).  Unless we did not include any of
-         * the previous bandwidth history objects for other reasons, in
-         * which case we should include this one. */
-        continue;
-      }
-      long lastDataPointMillis = firstDataPointMillis
-          + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
-      double factor = ((double) maxValue) / 999.0;
-      int count = lastNonNullIndex - firstNonNullIndex + 1;
-      GraphHistory graphHistory = new GraphHistory();
-      graphHistory.setFirst(firstDataPointMillis);
-      graphHistory.setLast(lastDataPointMillis);
-      graphHistory.setInterval((int) (dataPointInterval
-          / DateTimeHelper.ONE_SECOND));
-      graphHistory.setFactor(factor);
-      graphHistory.setCount(count);
-      int previousNonNullIndex = -2;
-      boolean foundTwoAdjacentDataPoints = false;
-      List<Integer> values = new ArrayList<>();
-      for (int j = firstNonNullIndex; j <= lastNonNullIndex; j++) {
-        long dataPoint = dataPoints.get(j);
-        if (dataPoint >= 0L) {
-          if (j - previousNonNullIndex == 1) {
-            foundTwoAdjacentDataPoints = true;
-          }
-          previousNonNullIndex = j;
-        }
-        values.add(dataPoint < 0L ? null
-            : (int) ((dataPoint * 999L) / maxValue));
-      }
-      graphHistory.setValues(values);
-      if (foundTwoAdjacentDataPoints) {
-        graphs.put(graphName, graphHistory);
-      }
+      ghc.addGraphType(this.graphNames[i], this.graphIntervals[i],
+          this.dataPointIntervals[i]);
     }
-    return graphs;
+    for (long[] v : history.values()) {
+      ghc.addHistoryEntry(v[0], v[1],
+          (double) (v[2] * DateTimeHelper.ONE_SECOND));
+    }
+    return ghc.compileGraphHistories();
   }
 
   @Override

@@ -17,12 +17,8 @@ import org.torproject.onionoo.util.FormattingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
 import java.time.Period;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -110,18 +106,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
       SortedSet<UptimeHistory> knownStatuses, long lastSeenMillis) {
     UptimeDocument uptimeDocument = new UptimeDocument();
     uptimeDocument.setFingerprint(fingerprint);
-    Map<String, GraphHistory> uptime = new LinkedHashMap<>();
-    for (int graphIntervalIndex = 0; graphIntervalIndex
-        < this.graphIntervals.length; graphIntervalIndex++) {
-      String graphName = this.graphNames[graphIntervalIndex];
-      GraphHistory graphHistory = this.compileUptimeHistory(
-          graphIntervalIndex, relay, history, knownStatuses, lastSeenMillis,
-          null);
-      if (graphHistory != null) {
-        uptime.put(graphName, graphHistory);
-      }
-    }
-    uptimeDocument.setUptime(uptime);
+    uptimeDocument.setUptime(this.compileUptimeHistory(relay, history,
+        knownStatuses, lastSeenMillis, null));
     SortedMap<String, Map<String, GraphHistory>> flags = new TreeMap<>();
     SortedSet<String> allFlags = new TreeSet<>();
     for (UptimeHistory hist : history) {
@@ -130,17 +116,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
       }
     }
     for (String flag : allFlags) {
-      Map<String, GraphHistory> graphsForFlags = new LinkedHashMap<>();
-      for (int graphIntervalIndex = 0; graphIntervalIndex
-          < this.graphIntervals.length; graphIntervalIndex++) {
-        String graphName = this.graphNames[graphIntervalIndex];
-        GraphHistory graphHistory = this.compileUptimeHistory(
-            graphIntervalIndex, relay, history, knownStatuses, lastSeenMillis,
-            flag);
-        if (graphHistory != null) {
-          graphsForFlags.put(graphName, graphHistory);
-        }
-      }
+      Map<String, GraphHistory> graphsForFlags = this.compileUptimeHistory(
+          relay, history, knownStatuses, lastSeenMillis, flag);
       if (!graphsForFlags.isEmpty()) {
         flags.put(flag, graphsForFlags);
       }
@@ -151,187 +128,116 @@ public class UptimeDocumentWriter implements DocumentWriter {
     return uptimeDocument;
   }
 
-  private GraphHistory compileUptimeHistory(int graphIntervalIndex,
-      boolean relay, SortedSet<UptimeHistory> history,
-      SortedSet<UptimeHistory> knownStatuses, long lastSeenMillis,
-      String flag) {
-    Period graphInterval = this.graphIntervals[graphIntervalIndex];
-    long dataPointInterval =
-        this.dataPointIntervals[graphIntervalIndex];
-    int dataPointIntervalHours = (int) (dataPointInterval
-        / DateTimeHelper.ONE_HOUR);
-    List<Integer> uptimeDataPoints = new ArrayList<>();
-    long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
-        / dataPointInterval) * dataPointInterval;
-    long graphStartMillis = LocalDateTime
-        .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-        .minus(graphInterval)
-        .toEpochSecond(ZoneOffset.UTC) * 1000L;
-    long intervalStartMillis = graphStartMillis;
-    int uptimeHours = 0;
-    long firstStatusStartMillis = -1L;
-    for (UptimeHistory hist : history) {
-      if (hist.isRelay() != relay
-          || (flag != null && (hist.getFlags() == null
-          || !hist.getFlags().contains(flag)))) {
+  private Map<String, GraphHistory> compileUptimeHistory(boolean relay,
+      SortedSet<UptimeHistory> history, SortedSet<UptimeHistory> knownStatuses,
+      long lastSeenMillis, String flag) {
+
+    /* Extracting history entries for compiling GraphHistory objects is a bit
+     * harder than for the other document types. The reason is that we have to
+     * combine (A) uptime history of all relays/bridges and (B) uptime history
+     * of the relay/bridge that we're writing the document for. We're going to
+     * refer to A and B below, to simplify descriptions a bit. */
+
+    /* If there are either no A entries or no B entries, we can't compile
+     * graphs. */
+    if (history.isEmpty() || knownStatuses.isEmpty()) {
+      return null;
+    }
+
+    /* Initialize the graph history compiler, and tell it that history entries
+     * are divisible. This is different from the other history writers. */
+    GraphHistoryCompiler ghc = new GraphHistoryCompiler(
+        lastSeenMillis + DateTimeHelper.ONE_HOUR);
+    for (int i = 0; i < this.graphIntervals.length; i++) {
+      ghc.addGraphType(this.graphNames[i], this.graphIntervals[i],
+          this.dataPointIntervals[i]);
+    }
+    ghc.setDivisible(true);
+
+    /* The general idea for extracting history entries and passing them to the
+     * graph history compiler is to iterate over A entries one by one and keep
+     * an Iterator for B entries to move forward as "time" proceeds. */
+    Iterator<UptimeHistory> historyIterator = history.iterator();
+    UptimeHistory hist;
+    do {
+      hist = historyIterator.hasNext() ? historyIterator.next() : null;
+    } while (null != hist && (hist.isRelay() != relay
+        || (null != flag && (null == hist.getFlags()
+        || !hist.getFlags().contains(flag)))));
+
+    /* If there is not at least one B entry, we can't compile graphs. */
+    if (null == hist) {
+      return null;
+    }
+
+    for (UptimeHistory statuses : knownStatuses) {
+
+      /* If this A entry contains uptime information that we're not interested
+       * in, skip it. */
+      if (statuses.isRelay() != relay
+          || (null != flag && (null == statuses.getFlags()
+          || !statuses.getFlags().contains(flag)))) {
         continue;
       }
-      if (firstStatusStartMillis < 0L) {
-        firstStatusStartMillis = hist.getStartMillis();
-      }
-      long histEndMillis = hist.getStartMillis() + DateTimeHelper.ONE_HOUR
-          * hist.getUptimeHours();
-      if (histEndMillis <= intervalStartMillis) {
-        continue;
-      } else if (histEndMillis > graphEndMillis) {
-        histEndMillis = graphEndMillis;
-      }
-      while (hist.getStartMillis() >= intervalStartMillis
-          + dataPointInterval) {
-        if (firstStatusStartMillis < intervalStartMillis
-            + dataPointInterval) {
-          uptimeDataPoints.add(uptimeHours);
+
+      /* The "current" time is the time that we're currently considering as part
+       * of the A entry. It starts out as the interval start, but as we may
+       * consider multiple B entries, it may proceed. The loop ends when
+       * "current" time has reached the end of the considered A entry. */
+      long currentTimeMillis = statuses.getStartMillis();
+      do {
+        if (null == hist) {
+
+          /* There is no B entry left, which means that the relay/bridge was
+           * offline from "current" time to the end of the A entry. */
+          ghc.addHistoryEntry(currentTimeMillis, statuses.getEndMillis(),0.0);
+          currentTimeMillis = statuses.getEndMillis();
+        } else if (statuses.getEndMillis() <= hist.getStartMillis()) {
+
+          /* This A entry ends before the B entry starts. If there was an
+           * earlier B entry, count this time as offline time. */
+          if (history.first().getStartMillis() <= currentTimeMillis) {
+            ghc.addHistoryEntry(currentTimeMillis, statuses.getEndMillis(),
+                0.0);
+          }
+          currentTimeMillis = statuses.getEndMillis();
         } else {
-          uptimeDataPoints.add(-1);
+
+          /* A and B entries overlap. First, if there's time between "current"
+           * time and the time when B starts, possibly count that as offline
+           * time, but only if the relay was around earlier. */
+          if (currentTimeMillis < hist.getStartMillis()) {
+            if (history.first().getStartMillis() <= currentTimeMillis) {
+              ghc.addHistoryEntry(currentTimeMillis, hist.getStartMillis(),
+                  0.0);
+            }
+            currentTimeMillis = hist.getStartMillis();
+          }
+
+          /* Now handle the actually overlapping part. First determine when the
+           * overlap ends, then add a history entry with the number of uptime
+           * milliseconds as value. */
+          long overlapEndMillis = Math.min(statuses.getEndMillis(),
+              hist.getEndMillis());
+          ghc.addHistoryEntry(currentTimeMillis, overlapEndMillis,
+              overlapEndMillis - currentTimeMillis);
+          currentTimeMillis = overlapEndMillis;
+
+          /* If A ends after B, move on to the next B entry. */
+          if (statuses.getEndMillis() >= hist.getEndMillis()) {
+            do {
+              hist = historyIterator.hasNext() ? historyIterator.next() : null;
+            } while (null != hist && (hist.isRelay() != relay
+                || (null != flag && (null == hist.getFlags()
+                || !hist.getFlags().contains(flag)))));
+          }
         }
-        uptimeHours = 0;
-        intervalStartMillis += dataPointInterval;
-      }
-      while (histEndMillis >= intervalStartMillis + dataPointInterval) {
-        uptimeHours += (int) ((intervalStartMillis + dataPointInterval
-            - Math.max(hist.getStartMillis(), intervalStartMillis))
-            / DateTimeHelper.ONE_HOUR);
-        uptimeDataPoints.add(uptimeHours);
-        uptimeHours = 0;
-        intervalStartMillis += dataPointInterval;
-      }
-      uptimeHours += (int) ((histEndMillis - Math.max(
-          hist.getStartMillis(), intervalStartMillis))
-          / DateTimeHelper.ONE_HOUR);
+      } while (currentTimeMillis < statuses.getEndMillis());
     }
-    uptimeDataPoints.add(uptimeHours);
-    List<Integer> statusDataPoints = new ArrayList<>();
-    intervalStartMillis = graphStartMillis;
-    int statusHours = -1;
-    for (UptimeHistory hist : knownStatuses) {
-      if (hist.getStartMillis() >= graphEndMillis) {
-        break;
-      }
-      if (hist.isRelay() != relay
-          || (flag != null && (hist.getFlags() == null
-          || !hist.getFlags().contains(flag)))) {
-        continue;
-      }
-      long histEndMillis = hist.getStartMillis() + DateTimeHelper.ONE_HOUR
-          * hist.getUptimeHours();
-      if (histEndMillis <= intervalStartMillis) {
-        continue;
-      } else if (histEndMillis > graphEndMillis) {
-        histEndMillis = graphEndMillis;
-      }
-      while (hist.getStartMillis() >= intervalStartMillis
-          + dataPointInterval) {
-        statusDataPoints.add(statusHours * 5 < dataPointIntervalHours
-            ? -1 : statusHours);
-        statusHours = -1;
-        intervalStartMillis += dataPointInterval;
-      }
-      while (histEndMillis >= intervalStartMillis + dataPointInterval) {
-        if (statusHours < 0) {
-          statusHours = 0;
-        }
-        statusHours += (int) ((intervalStartMillis + dataPointInterval
-            - Math.max(Math.max(hist.getStartMillis(),
-            firstStatusStartMillis), intervalStartMillis))
-            / DateTimeHelper.ONE_HOUR);
-        statusDataPoints.add(statusHours * 5 < dataPointIntervalHours
-            ? -1 : statusHours);
-        statusHours = -1;
-        intervalStartMillis += dataPointInterval;
-      }
-      if (statusHours < 0) {
-        statusHours = 0;
-      }
-      statusHours += (int) ((histEndMillis - Math.max(Math.max(
-          hist.getStartMillis(), firstStatusStartMillis),
-          intervalStartMillis)) / DateTimeHelper.ONE_HOUR);
-    }
-    if (statusHours > 0) {
-      statusDataPoints.add(statusHours * 5 < dataPointIntervalHours
-          ? -1 : statusHours);
-    }
-    List<Double> dataPoints = new ArrayList<>();
-    for (int dataPointIndex = 0; dataPointIndex < statusDataPoints.size();
-        dataPointIndex++) {
-      if (dataPointIndex >= uptimeDataPoints.size()) {
-        dataPoints.add(0.0);
-      } else if (uptimeDataPoints.get(dataPointIndex) >= 0
-          && statusDataPoints.get(dataPointIndex) > 0) {
-        dataPoints.add(((double) uptimeDataPoints.get(dataPointIndex))
-            / ((double) statusDataPoints.get(dataPointIndex)));
-      } else {
-        dataPoints.add(-1.0);
-      }
-    }
-    int firstNonNullIndex = -1;
-    int lastNonNullIndex = -1;
-    for (int dataPointIndex = 0; dataPointIndex < dataPoints.size();
-        dataPointIndex++) {
-      double dataPoint = dataPoints.get(dataPointIndex);
-      if (dataPoint >= 0.0) {
-        if (firstNonNullIndex < 0) {
-          firstNonNullIndex = dataPointIndex;
-        }
-        lastNonNullIndex = dataPointIndex;
-      }
-    }
-    if (firstNonNullIndex < 0) {
-      /* Not a single non-negative value in the data points. */
-      return null;
-    }
-    long firstDataPointMillis = graphStartMillis + firstNonNullIndex
-        * dataPointInterval + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis >= LocalDateTime
-        .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-        .minus(graphIntervals[graphIntervalIndex - 1])
-        .toEpochSecond(ZoneOffset.UTC) * 1000L) {
-      /* Skip uptime history object, because it doesn't contain
-       * anything new that wasn't already contained in the last
-       * uptime history object(s). */
-      return null;
-    }
-    long lastDataPointMillis = firstDataPointMillis
-        + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
-    int count = lastNonNullIndex - firstNonNullIndex + 1;
-    GraphHistory graphHistory = new GraphHistory();
-    graphHistory.setFirst(firstDataPointMillis);
-    graphHistory.setLast(lastDataPointMillis);
-    graphHistory.setInterval((int) (dataPointInterval
-        / DateTimeHelper.ONE_SECOND));
-    graphHistory.setFactor(1.0 / 999.0);
-    graphHistory.setCount(count);
-    int previousNonNullIndex = -2;
-    boolean foundTwoAdjacentDataPoints = false;
-    List<Integer> values = new ArrayList<>();
-    for (int dataPointIndex = firstNonNullIndex; dataPointIndex
-        <= lastNonNullIndex; dataPointIndex++) {
-      double dataPoint = dataPoints.get(dataPointIndex);
-      if (dataPoint >= 0.0) {
-        if (dataPointIndex - previousNonNullIndex == 1) {
-          foundTwoAdjacentDataPoints = true;
-        }
-        previousNonNullIndex = dataPointIndex;
-      }
-      values.add(dataPoint < -0.5 ? null : ((int) (dataPoint * 999.0)));
-    }
-    graphHistory.setValues(values);
-    if (foundTwoAdjacentDataPoints) {
-      return graphHistory;
-    } else {
-      /* There are no two adjacent values in the data points that are
-       * required to draw a line graph. */
-      return null;
-    }
+
+    /* Now that the graph history compiler knows all relevant history, ask it to
+     * compile graphs for us, and return them. */
+    return ghc.compileGraphHistories();
   }
 
   @Override

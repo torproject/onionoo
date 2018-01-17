@@ -9,7 +9,6 @@ import org.torproject.onionoo.docs.ClientsStatus;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.docs.GraphHistory;
 import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.FormattingUtils;
@@ -17,13 +16,7 @@ import org.torproject.onionoo.util.FormattingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
 import java.time.Period;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 
 /*
@@ -115,122 +108,19 @@ public class ClientsDocumentWriter implements DocumentWriter {
       NodeStatus nodeStatus, SortedSet<ClientsHistory> history) {
     ClientsDocument clientsDocument = new ClientsDocument();
     clientsDocument.setFingerprint(hashedFingerprint);
-    Map<String, GraphHistory> averageClients = new LinkedHashMap<>();
-    for (int graphIntervalIndex = 0; graphIntervalIndex
-        < this.graphIntervals.length; graphIntervalIndex++) {
-      String graphName = this.graphNames[graphIntervalIndex];
-      GraphHistory graphHistory = this.compileClientsHistory(
-          graphIntervalIndex, history, nodeStatus.getLastSeenMillis());
-      if (graphHistory != null) {
-        averageClients.put(graphName, graphHistory);
-      }
+    GraphHistoryCompiler ghc = new GraphHistoryCompiler(
+        nodeStatus.getLastSeenMillis() + DateTimeHelper.ONE_HOUR);
+    ghc.setThreshold(2L);
+    for (int i = 0; i < this.graphIntervals.length; i++) {
+      ghc.addGraphType(this.graphNames[i], this.graphIntervals[i],
+          this.dataPointIntervals[i]);
     }
-    clientsDocument.setAverageClients(averageClients);
-    return clientsDocument;
-  }
-
-  private GraphHistory compileClientsHistory(
-      int graphIntervalIndex, SortedSet<ClientsHistory> history,
-      long lastSeenMillis) {
-    Period graphInterval = this.graphIntervals[graphIntervalIndex];
-    long dataPointInterval =
-        this.dataPointIntervals[graphIntervalIndex];
-    List<Double> dataPoints = new ArrayList<>();
-    long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
-        / dataPointInterval) * dataPointInterval;
-    long graphStartMillis = LocalDateTime
-        .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-        .minus(graphInterval)
-        .toEpochSecond(ZoneOffset.UTC) * 1000L;
-    long intervalStartMillis = graphStartMillis;
-    long millis = 0L;
-    double responses = 0.0;
     for (ClientsHistory hist : history) {
-      if (hist.getEndMillis() <= intervalStartMillis) {
-        continue;
-      } else if (hist.getEndMillis() > graphEndMillis) {
-        break;
-      }
-      while ((intervalStartMillis / dataPointInterval)
-          != ((hist.getEndMillis() - 1L) / dataPointInterval)) {
-        dataPoints.add(millis * 2L < dataPointInterval
-            ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)
-            / (((double) millis) * 10.0));
-        responses = 0.0;
-        millis = 0L;
-        intervalStartMillis += dataPointInterval;
-      }
-      responses += hist.getTotalResponses();
-      millis += (hist.getEndMillis() - hist.getStartMillis());
+      ghc.addHistoryEntry(hist.getStartMillis(), hist.getEndMillis(),
+          hist.getTotalResponses() * ((double) DateTimeHelper.ONE_DAY) / 10.0);
     }
-    dataPoints.add(millis * 2L < dataPointInterval
-        ? -1.0 : responses * ((double) DateTimeHelper.ONE_DAY)
-        / (((double) millis) * 10.0));
-    double maxValue = 0.0;
-    int firstNonNullIndex = -1;
-    int lastNonNullIndex = -1;
-    for (int dataPointIndex = 0; dataPointIndex < dataPoints.size();
-        dataPointIndex++) {
-      double dataPoint = dataPoints.get(dataPointIndex);
-      if (dataPoint >= 0.0) {
-        if (firstNonNullIndex < 0) {
-          firstNonNullIndex = dataPointIndex;
-        }
-        lastNonNullIndex = dataPointIndex;
-        if (dataPoint > maxValue) {
-          maxValue = dataPoint;
-        }
-      }
-    }
-    if (firstNonNullIndex < 0) {
-      /* Not a single non-negative value in the data points. */
-      return null;
-    }
-    long firstDataPointMillis = graphStartMillis + firstNonNullIndex
-        * dataPointInterval + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis >= LocalDateTime
-        .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-        .minus(graphIntervals[graphIntervalIndex - 1])
-        .toEpochSecond(ZoneOffset.UTC) * 1000L) {
-      /* Skip clients history object, because it doesn't contain
-       * anything new that wasn't already contained in the last
-       * clients history object(s). */
-      return null;
-    }
-    long lastDataPointMillis = firstDataPointMillis
-        + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
-    double factor = ((double) maxValue) / 999.0;
-    int count = lastNonNullIndex - firstNonNullIndex + 1;
-    GraphHistory graphHistory = new GraphHistory();
-    graphHistory.setFirst(firstDataPointMillis);
-    graphHistory.setLast(lastDataPointMillis);
-    graphHistory.setInterval((int) (dataPointInterval
-        / DateTimeHelper.ONE_SECOND));
-    graphHistory.setFactor(factor);
-    graphHistory.setCount(count);
-    int previousNonNullIndex = -2;
-    boolean foundTwoAdjacentDataPoints = false;
-    List<Integer> values = new ArrayList<>();
-    for (int dataPointIndex = firstNonNullIndex; dataPointIndex
-        <= lastNonNullIndex; dataPointIndex++) {
-      double dataPoint = dataPoints.get(dataPointIndex);
-      if (dataPoint >= 0.0) {
-        if (dataPointIndex - previousNonNullIndex == 1) {
-          foundTwoAdjacentDataPoints = true;
-        }
-        previousNonNullIndex = dataPointIndex;
-      }
-      values.add(dataPoint < 0.0 ? null :
-          (int) ((dataPoint * 999.0) / maxValue));
-    }
-    graphHistory.setValues(values);
-    if (foundTwoAdjacentDataPoints) {
-      return graphHistory;
-    } else {
-      /* There are no two adjacent values in the data points that are
-       * required to draw a line graph. */
-      return null;
-    }
+    clientsDocument.setAverageClients(ghc.compileGraphHistories());
+    return clientsDocument;
   }
 
   @Override

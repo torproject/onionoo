@@ -248,7 +248,7 @@ public class UptimeDocumentWriterTest {
         UptimeDocument.class, GABELMOO_FINGERPRINT);
     this.assertOneMonthGraph(document, 2, "2014-03-16 10:00:00",
         "2014-03-16 14:00:00", 2,
-        Arrays.asList(new Integer[] { 499, 249 }));
+        Arrays.asList(new Integer[] { 999, 499 }));
   }
 
   @Test
@@ -256,8 +256,8 @@ public class UptimeDocumentWriterTest {
     /* This relay was running for exactly 11 days and 23 hours over 2 years ago.
      * This time period exactly matches 100% of a data point interval of 10 days
      * plus a tiny bit less than 20% of the next data point interval. */
-    this.addStatusOneWeekSample("r 2012-03-05-00 287\n",
-        "r 2012-03-05-00 287\n");
+    this.addStatusOneWeekSample("r 2012-03-01-00 287\n",
+        "r 2012-03-01-00 287\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
@@ -274,8 +274,8 @@ public class UptimeDocumentWriterTest {
     /* This relay was running for exactly 12 days over 2 years ago. This time
      * period exactly matches 100% of a data point interval of 10 days plus 20%
      * of the next data point interval. */
-    this.addStatusOneWeekSample("r 2012-03-05-00 288\n",
-        "r 2012-03-05-00 288\n");
+    this.addStatusOneWeekSample("r 2012-03-01-00 288\n",
+        "r 2012-03-01-00 288\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments();
@@ -283,8 +283,8 @@ public class UptimeDocumentWriterTest {
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertFiveYearGraph(document, 1, "2012-03-10 00:00:00",
-        "2012-03-20 00:00:00", 2, Arrays.asList(new Integer[] { 999, 999 }));
+    this.assertFiveYearGraph(document, 1, "2012-03-06 00:00:00",
+        "2012-03-16 00:00:00", 2, Arrays.asList(new Integer[] { 999, 999 }));
   }
 }
 

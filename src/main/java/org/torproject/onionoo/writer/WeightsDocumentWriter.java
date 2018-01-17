@@ -15,12 +15,7 @@ import org.torproject.onionoo.docs.WeightsStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
 import java.time.Period;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -105,125 +100,22 @@ public class WeightsDocumentWriter implements DocumentWriter {
   private Map<String, GraphHistory> compileGraphType(
       SortedMap<long[], double[]> history, long lastSeenMillis,
       int graphTypeIndex) {
-    Map<String, GraphHistory> graphs = new LinkedHashMap<>();
-    for (int graphIntervalIndex = 0; graphIntervalIndex
-        < this.graphIntervals.length; graphIntervalIndex++) {
-      String graphName = this.graphNames[graphIntervalIndex];
-      GraphHistory graphHistory = this.compileWeightsHistory(
-          graphTypeIndex, graphIntervalIndex, history, lastSeenMillis);
-      if (graphHistory != null) {
-        graphs.put(graphName, graphHistory);
-      }
+    GraphHistoryCompiler ghc = new GraphHistoryCompiler(
+        lastSeenMillis + DateTimeHelper.ONE_HOUR);
+    for (int i = 0; i < this.graphIntervals.length; i++) {
+      ghc.addGraphType(this.graphNames[i], this.graphIntervals[i],
+          this.dataPointIntervals[i]);
     }
-    return graphs;
-  }
-
-  private GraphHistory compileWeightsHistory(int graphTypeIndex,
-      int graphIntervalIndex, SortedMap<long[], double[]> history,
-      long lastSeenMillis) {
-    Period graphInterval = this.graphIntervals[graphIntervalIndex];
-    long dataPointInterval =
-        this.dataPointIntervals[graphIntervalIndex];
-    List<Double> dataPoints = new ArrayList<>();
-    long graphEndMillis = ((lastSeenMillis + DateTimeHelper.ONE_HOUR)
-        / dataPointInterval) * dataPointInterval;
-    long graphStartMillis = LocalDateTime
-        .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-        .minus(graphInterval)
-        .toEpochSecond(ZoneOffset.UTC) * 1000L;
-    long intervalStartMillis = graphStartMillis;
-    long totalMillis = 0L;
-    double totalWeightTimesMillis = 0.0;
     for (Map.Entry<long[], double[]> e : history.entrySet()) {
       long startMillis = e.getKey()[0];
       long endMillis = e.getKey()[1];
       double weight = e.getValue()[graphTypeIndex];
-      if (endMillis <= intervalStartMillis) {
-        continue;
-      } else if (endMillis > graphEndMillis) {
-        break;
-      }
-      while ((intervalStartMillis / dataPointInterval)
-          != ((endMillis - 1L) / dataPointInterval)) {
-        dataPoints.add(totalMillis * 5L < dataPointInterval
-            ? -1.0 : totalWeightTimesMillis / (double) totalMillis);
-        totalWeightTimesMillis = 0.0;
-        totalMillis = 0L;
-        intervalStartMillis += dataPointInterval;
-      }
       if (weight >= 0.0) {
-        totalWeightTimesMillis += weight
-            * ((double) (endMillis - startMillis));
-        totalMillis += (endMillis - startMillis);
+        ghc.addHistoryEntry(startMillis, endMillis,
+            weight * ((double) (endMillis - startMillis)));
       }
     }
-    dataPoints.add(totalMillis * 5L < dataPointInterval
-        ? -1.0 : totalWeightTimesMillis / (double) totalMillis);
-    double maxValue = 0.0;
-    int firstNonNullIndex = -1;
-    int lastNonNullIndex = -1;
-    for (int dataPointIndex = 0; dataPointIndex < dataPoints.size();
-        dataPointIndex++) {
-      double dataPoint = dataPoints.get(dataPointIndex);
-      if (dataPoint >= 0.0) {
-        if (firstNonNullIndex < 0) {
-          firstNonNullIndex = dataPointIndex;
-        }
-        lastNonNullIndex = dataPointIndex;
-        if (dataPoint > maxValue) {
-          maxValue = dataPoint;
-        }
-      }
-    }
-    if (firstNonNullIndex < 0) {
-      /* Not a single non-negative value in the data points. */
-      return null;
-    }
-    long firstDataPointMillis = graphStartMillis + firstNonNullIndex
-        * dataPointInterval + dataPointInterval / 2L;
-    if (graphIntervalIndex > 0 && firstDataPointMillis >= LocalDateTime
-        .ofEpochSecond(graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-        .minus(graphIntervals[graphIntervalIndex - 1])
-        .toEpochSecond(ZoneOffset.UTC) * 1000L) {
-      /* Skip weights history object, because it doesn't contain
-       * anything new that wasn't already contained in the last
-       * weights history object(s). */
-      return null;
-    }
-    long lastDataPointMillis = firstDataPointMillis
-        + (lastNonNullIndex - firstNonNullIndex) * dataPointInterval;
-    double factor = ((double) maxValue) / 999.0;
-    int count = lastNonNullIndex - firstNonNullIndex + 1;
-    GraphHistory graphHistory = new GraphHistory();
-    graphHistory.setFirst(firstDataPointMillis);
-    graphHistory.setLast(lastDataPointMillis);
-    graphHistory.setInterval((int) (dataPointInterval
-        / DateTimeHelper.ONE_SECOND));
-    graphHistory.setFactor(factor);
-    graphHistory.setCount(count);
-    int previousNonNullIndex = -2;
-    boolean foundTwoAdjacentDataPoints = false;
-    List<Integer> values = new ArrayList<>();
-    for (int dataPointIndex = firstNonNullIndex; dataPointIndex
-        <= lastNonNullIndex; dataPointIndex++) {
-      double dataPoint = dataPoints.get(dataPointIndex);
-      if (dataPoint >= 0.0) {
-        if (dataPointIndex - previousNonNullIndex == 1) {
-          foundTwoAdjacentDataPoints = true;
-        }
-        previousNonNullIndex = dataPointIndex;
-      }
-      values.add(dataPoint < 0.0 ? null :
-          (int) ((dataPoint * 999.0) / maxValue));
-    }
-    graphHistory.setValues(values);
-    if (foundTwoAdjacentDataPoints) {
-      return graphHistory;
-    } else {
-      /* There are no two adjacent values in the data points that are
-       * required to draw a line graph. */
-      return null;
-    }
+    return ghc.compileGraphHistories();
   }
 
   @Override

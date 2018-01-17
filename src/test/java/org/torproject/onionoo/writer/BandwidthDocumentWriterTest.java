@@ -74,9 +74,9 @@ public class BandwidthDocumentWriterTest {
     assertEquals(1, document.getReadHistory().size());
     assertTrue(document.getReadHistory().containsKey("1_month"));
     GraphHistory history = document.getReadHistory().get("1_month");
-    assertEquals(DateTimeHelper.parse(dayBeforeYesterday + " 14:00:00"),
+    assertEquals(DateTimeHelper.parse(dayBeforeYesterday + " 10:00:00"),
         history.getFirst());
-    assertEquals(DateTimeHelper.parse(yesterday + " 02:00:00"),
+    assertEquals(DateTimeHelper.parse(dayBeforeYesterday + " 22:00:00"),
         history.getLast());
     assertEquals(DateTimeHelper.FOUR_HOURS / DateTimeHelper.ONE_SECOND,
         (int) history.getInterval());

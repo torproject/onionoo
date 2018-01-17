@@ -32,6 +32,10 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     return this.uptimeHours;
   }
 
+  public long getEndMillis() {
+    return this.startMillis + DateTimeHelper.ONE_HOUR * this.uptimeHours;
+  }
+
   private SortedSet<String> flags;
 
   public SortedSet<String> getFlags() {
