@@ -3,6 +3,9 @@
 
 package org.torproject.onionoo.server;
 
+import static org.torproject.onionoo.docs.DateTimeHelper.ONE_DAY;
+import static org.torproject.onionoo.docs.DateTimeHelper.ONE_MINUTE;
+
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
@@ -96,10 +99,6 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       this.nodeIndexerThread.start();
     }
   }
-
-  private static final long ONE_MINUTE = 60L * 1000L;
-
-  private static final long ONE_DAY = 24L * 60L * ONE_MINUTE;
 
   @Override
   public void run() {
