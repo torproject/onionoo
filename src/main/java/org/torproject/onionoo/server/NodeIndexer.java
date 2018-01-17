@@ -125,6 +125,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     indexerThread.interrupt();
   }
 
+  /* specialTime is only used for testing, see ResourceServletTest */
   private long specialTime = -1L;
 
   private void indexNodeStatuses() {
