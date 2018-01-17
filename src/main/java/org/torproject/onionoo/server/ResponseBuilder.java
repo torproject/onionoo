@@ -113,8 +113,8 @@ public class ResponseBuilder {
   }
 
   public void buildResponse(PrintWriter pw) {
-    writeRelays(orderedRelays, pw);
-    writeBridges(orderedBridges, pw);
+    writeRelays(this.orderedRelays, pw);
+    writeBridges(this.orderedBridges, pw);
   }
 
   private int charsWritten = 0;
