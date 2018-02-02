@@ -83,7 +83,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       DateTimeHelper.FIFTEEN_MINUTES,
       DateTimeHelper.ONE_HOUR,
       DateTimeHelper.FOUR_HOURS,
-      DateTimeHelper.TWELVE_HOURS,
+      DateTimeHelper.ONE_DAY,
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
