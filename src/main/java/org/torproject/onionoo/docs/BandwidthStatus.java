@@ -134,8 +134,8 @@ public class BandwidthStatus extends Document {
           <= DateTimeHelper.ROUGHLY_ONE_MONTH) {
         intervalLengthMillis = DateTimeHelper.FOUR_HOURS;
       } else if (lastSeenMillis - endMillis
-          <= DateTimeHelper.ROUGHLY_THREE_MONTHS) {
-        intervalLengthMillis = DateTimeHelper.TWELVE_HOURS;
+          <= DateTimeHelper.ROUGHLY_SIX_MONTHS) {
+        intervalLengthMillis = DateTimeHelper.ONE_DAY;
       } else if (lastSeenMillis - endMillis
           <= DateTimeHelper.ROUGHLY_ONE_YEAR) {
         intervalLengthMillis = DateTimeHelper.TWO_DAYS;

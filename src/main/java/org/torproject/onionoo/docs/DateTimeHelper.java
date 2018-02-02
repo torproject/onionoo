@@ -57,6 +57,8 @@ public class DateTimeHelper {
 
   public static final long ROUGHLY_THREE_MONTHS = 92L * ONE_DAY;
 
+  public static final long ROUGHLY_SIX_MONTHS = 183L * ONE_DAY;
+
   public static final long ROUGHLY_ONE_YEAR = 366L * ONE_DAY;
 
   public static final long ROUGHLY_FIVE_YEARS = 5L * ROUGHLY_ONE_YEAR;

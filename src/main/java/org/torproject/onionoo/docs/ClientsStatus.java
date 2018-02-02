@@ -77,7 +77,7 @@ public class ClientsStatus extends Document {
     for (ClientsHistory responses : uncompressedHistory) {
       long intervalLengthMillis;
       if (lastSeenMillis - responses.getEndMillis()
-          <= DateTimeHelper.ROUGHLY_THREE_MONTHS) {
+          <= DateTimeHelper.ROUGHLY_SIX_MONTHS) {
         intervalLengthMillis = DateTimeHelper.ONE_DAY;
       } else if (lastSeenMillis - responses.getEndMillis()
           <= DateTimeHelper.ROUGHLY_ONE_YEAR) {
