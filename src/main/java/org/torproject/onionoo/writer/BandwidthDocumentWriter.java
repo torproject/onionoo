@@ -9,7 +9,6 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
-import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
   }
 
   @Override
-  public void writeDocuments() {
+  public void writeDocuments(long lastSeenMillis) {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
     long updatedMillis = updateStatus != null
@@ -40,18 +39,13 @@ public class BandwidthDocumentWriter implements DocumentWriter {
     SortedSet<String> updateBandwidthDocuments = this.documentStore.list(
         BandwidthStatus.class, updatedMillis);
     for (String fingerprint : updateBandwidthDocuments) {
-      NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
-          true, fingerprint);
-      if (null == nodeStatus) {
-        continue;
-      }
       BandwidthStatus bandwidthStatus = this.documentStore.retrieve(
           BandwidthStatus.class, true, fingerprint);
       if (bandwidthStatus == null) {
         continue;
       }
       BandwidthDocument bandwidthDocument = this.compileBandwidthDocument(
-          fingerprint, nodeStatus, bandwidthStatus);
+          fingerprint, lastSeenMillis, bandwidthStatus);
       this.documentStore.store(bandwidthDocument, fingerprint);
     }
     log.info("Wrote bandwidth document files");
@@ -59,13 +53,13 @@ public class BandwidthDocumentWriter implements DocumentWriter {
 
 
   private BandwidthDocument compileBandwidthDocument(String fingerprint,
-      NodeStatus nodeStatus, BandwidthStatus bandwidthStatus) {
+      long lastSeenMillis, BandwidthStatus bandwidthStatus) {
     BandwidthDocument bandwidthDocument = new BandwidthDocument();
     bandwidthDocument.setFingerprint(fingerprint);
-    bandwidthDocument.setWriteHistory(this.compileGraphType(
-        nodeStatus.getLastSeenMillis(), bandwidthStatus.getWriteHistory()));
-    bandwidthDocument.setReadHistory(this.compileGraphType(
-        nodeStatus.getLastSeenMillis(), bandwidthStatus.getReadHistory()));
+    bandwidthDocument.setWriteHistory(this.compileGraphType(lastSeenMillis,
+        bandwidthStatus.getWriteHistory()));
+    bandwidthDocument.setReadHistory(this.compileGraphType(lastSeenMillis,
+        bandwidthStatus.getReadHistory()));
     return bandwidthDocument;
   }
 

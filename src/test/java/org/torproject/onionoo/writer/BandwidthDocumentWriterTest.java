@@ -12,7 +12,6 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.GraphHistory;
-import org.torproject.onionoo.docs.NodeStatus;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,17 +56,13 @@ public class BandwidthDocumentWriterTest {
         + "r " + future + "-08-06 17:31:45 " + future + "-08-06 21:31:45 0\n"
         + "r " + future + "-08-06 21:31:45 " + future + "-08-07 01:31:45 0\n"
         + "r " + future + "-08-07 01:31:45 " + future + "-08-07 05:31:45 0\n";
-    NodeStatus nodeStatus = new NodeStatus(ibibUnc0Fingerprint);
-    nodeStatus.setLastSeenMillis(DateTimeHelper.parse(
-        yesterday + " 12:00:00"));
-    this.documentStore.addDocument(nodeStatus, ibibUnc0Fingerprint);
     BandwidthStatus status = new BandwidthStatus();
     status.setFromDocumentString(documentString);
     this.documentStore.addDocument(status, ibibUnc0Fingerprint);
     BandwidthDocumentWriter writer = new BandwidthDocumentWriter();
-    writer.writeDocuments();
+    writer.writeDocuments(DateTimeHelper.parse(yesterday + " 12:00:00"));
     assertEquals(1, this.documentStore.getPerformedListOperations());
-    assertEquals(3, this.documentStore.getPerformedRetrieveOperations());
+    assertEquals(2, this.documentStore.getPerformedRetrieveOperations());
     assertEquals(1, this.documentStore.getPerformedStoreOperations());
     BandwidthDocument document = this.documentStore.getDocument(
         BandwidthDocument.class, ibibUnc0Fingerprint);

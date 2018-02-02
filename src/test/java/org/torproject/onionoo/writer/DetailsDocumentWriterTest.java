@@ -28,7 +28,7 @@ public class DetailsDocumentWriterTest {
   @Test
   public void testNoDetailsStatuses() {
     DetailsDocumentWriter writer = new DetailsDocumentWriter();
-    writer.writeDocuments();
+    writer.writeDocuments(-1L);
     assertEquals("Without statuses, no documents should be written.", 0,
         this.documentStore.getPerformedStoreOperations());
   }
@@ -48,7 +48,7 @@ public class DetailsDocumentWriterTest {
         GABELMOO_OR_ADDRESS)));
     this.documentStore.addDocument(status, GABELMOO_FINGERPRINT);
     DetailsDocumentWriter writer = new DetailsDocumentWriter();
-    writer.writeDocuments();
+    writer.writeDocuments(-1L);
     assertEquals("One document should be written.", 1,
         this.documentStore.getPerformedStoreOperations());
     DetailsDocument document = this.documentStore.getDocument(
@@ -67,7 +67,7 @@ public class DetailsDocumentWriterTest {
         GABELMOO_OR_ADDRESS)));
     this.documentStore.addDocument(status, GABELMOO_FINGERPRINT);
     DetailsDocumentWriter writer = new DetailsDocumentWriter();
-    writer.writeDocuments();
+    writer.writeDocuments(-1L);
     assertEquals("One document should be written.", 1,
         this.documentStore.getPerformedStoreOperations());
     DetailsDocument document = this.documentStore.getDocument(
@@ -85,7 +85,7 @@ public class DetailsDocumentWriterTest {
     status.setAdvertisedOrAddresses(Arrays.asList(GABELMOO_OR_ADDRESS));
     this.documentStore.addDocument(status, GABELMOO_FINGERPRINT);
     DetailsDocumentWriter writer = new DetailsDocumentWriter();
-    writer.writeDocuments();
+    writer.writeDocuments(-1L);
     assertEquals("One document should be written.", 1,
         this.documentStore.getPerformedStoreOperations());
     DetailsDocument document = this.documentStore.getDocument(

@@ -9,7 +9,6 @@ import org.torproject.onionoo.docs.ClientsStatus;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
-import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.util.FormattingUtils;
 
@@ -56,7 +55,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
   private int writtenDocuments = 0;
 
   @Override
-  public void writeDocuments() {
+  public void writeDocuments(long lastSeenMillis) {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
     long updatedMillis = updateStatus != null
@@ -64,11 +63,6 @@ public class ClientsDocumentWriter implements DocumentWriter {
     SortedSet<String> updateDocuments = this.documentStore.list(
         ClientsStatus.class, updatedMillis);
     for (String hashedFingerprint : updateDocuments) {
-      NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
-          true, hashedFingerprint);
-      if (null == nodeStatus) {
-        continue;
-      }
       ClientsStatus clientsStatus = this.documentStore.retrieve(
           ClientsStatus.class, true, hashedFingerprint);
       if (clientsStatus == null) {
@@ -76,7 +70,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       }
       SortedSet<ClientsHistory> history = clientsStatus.getHistory();
       ClientsDocument clientsDocument = this.compileClientsDocument(
-          hashedFingerprint, nodeStatus, history);
+          hashedFingerprint, lastSeenMillis, history);
       this.documentStore.store(clientsDocument, hashedFingerprint);
       this.writtenDocuments++;
     }
@@ -105,11 +99,11 @@ public class ClientsDocumentWriter implements DocumentWriter {
       DateTimeHelper.TEN_DAYS };
 
   private ClientsDocument compileClientsDocument(String hashedFingerprint,
-      NodeStatus nodeStatus, SortedSet<ClientsHistory> history) {
+      long lastSeenMillis, SortedSet<ClientsHistory> history) {
     ClientsDocument clientsDocument = new ClientsDocument();
     clientsDocument.setFingerprint(hashedFingerprint);
-    GraphHistoryCompiler ghc = new GraphHistoryCompiler(
-        nodeStatus.getLastSeenMillis() + DateTimeHelper.ONE_HOUR);
+    GraphHistoryCompiler ghc = new GraphHistoryCompiler(lastSeenMillis
+        + DateTimeHelper.ONE_HOUR);
     ghc.setThreshold(2L);
     for (int i = 0; i < this.graphIntervals.length; i++) {
       ghc.addGraphType(this.graphNames[i], this.graphIntervals[i],

@@ -32,7 +32,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
   }
 
   @Override
-  public void writeDocuments() {
+  public void writeDocuments(long lastSeenMillis) {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
     long updatedMillis = updateStatus != null

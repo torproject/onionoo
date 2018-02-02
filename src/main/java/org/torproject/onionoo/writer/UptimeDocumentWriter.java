@@ -7,7 +7,6 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
-import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.UptimeHistory;
@@ -37,7 +36,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
   }
 
   @Override
-  public void writeDocuments() {
+  public void writeDocuments(long lastSeenMillis) {
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true);
     if (uptimeStatus == null) {
@@ -51,20 +50,18 @@ public class UptimeDocumentWriter implements DocumentWriter {
     SortedSet<String> updatedUptimeStatuses = this.documentStore.list(
         UptimeStatus.class, updatedMillis);
     for (String fingerprint : updatedUptimeStatuses) {
-      this.updateDocument(fingerprint, uptimeStatus);
+      this.updateDocument(fingerprint, lastSeenMillis, uptimeStatus);
     }
     log.info("Wrote uptime document files");
   }
 
   private int writtenDocuments = 0;
 
-  private void updateDocument(String fingerprint,
+  private void updateDocument(String fingerprint, long lastSeenMillis,
       UptimeStatus knownStatuses) {
-    NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
-        true, fingerprint);
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true, fingerprint);
-    if (null != nodeStatus && null != uptimeStatus) {
+    if (null != uptimeStatus) {
       boolean relay = uptimeStatus.getBridgeHistory().isEmpty();
       SortedSet<UptimeHistory> history = relay
           ? uptimeStatus.getRelayHistory()
@@ -72,7 +69,6 @@ public class UptimeDocumentWriter implements DocumentWriter {
       SortedSet<UptimeHistory> knownStatusesHistory = relay
           ? knownStatuses.getRelayHistory()
           : knownStatuses.getBridgeHistory();
-      long lastSeenMillis = nodeStatus.getLastSeenMillis();
       UptimeDocument uptimeDocument = this.compileUptimeDocument(relay,
           fingerprint, history, knownStatusesHistory, lastSeenMillis);
       this.documentStore.store(uptimeDocument, fingerprint);

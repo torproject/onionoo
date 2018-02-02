@@ -7,7 +7,6 @@ import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.GraphHistory;
-import org.torproject.onionoo.docs.NodeStatus;
 import org.torproject.onionoo.docs.UpdateStatus;
 import org.torproject.onionoo.docs.WeightsDocument;
 import org.torproject.onionoo.docs.WeightsStatus;
@@ -32,7 +31,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
   }
 
   @Override
-  public void writeDocuments() {
+  public void writeDocuments(long lastSeenMillis) {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
     long updatedMillis = updateStatus != null
@@ -40,18 +39,12 @@ public class WeightsDocumentWriter implements DocumentWriter {
     SortedSet<String> updateWeightsDocuments = this.documentStore.list(
         WeightsStatus.class, updatedMillis);
     for (String fingerprint : updateWeightsDocuments) {
-      NodeStatus nodeStatus = this.documentStore.retrieve(NodeStatus.class,
-          true, fingerprint);
-      if (null == nodeStatus) {
-        continue;
-      }
       WeightsStatus weightsStatus = this.documentStore.retrieve(
           WeightsStatus.class, true, fingerprint);
       if (weightsStatus == null) {
         continue;
       }
       SortedMap<long[], double[]> history = weightsStatus.getHistory();
-      long lastSeenMillis = nodeStatus.getLastSeenMillis();
       WeightsDocument weightsDocument = this.compileWeightsDocument(
           fingerprint, history, lastSeenMillis);
       this.documentStore.store(weightsDocument, fingerprint);
