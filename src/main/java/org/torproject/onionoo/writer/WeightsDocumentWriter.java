@@ -69,7 +69,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
   private long[] dataPointIntervals = new long[] {
       DateTimeHelper.ONE_HOUR,
       DateTimeHelper.FOUR_HOURS,
-      DateTimeHelper.TWELVE_HOURS,
+      DateTimeHelper.ONE_DAY,
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
