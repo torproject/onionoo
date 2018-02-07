@@ -1,8 +1,15 @@
+# Changes in version 5.0-1.10.1 - 2018-02-07
+
+ * Medium changes
+   - Change 3 month weights graph to 24 hours detail.
+
+
 # Changes in version 5.0-1.10.0 - 2018-02-07
 
  * Medium changes
    - Make writing of bandwidth, clients, uptime, and weights documents
      independent of system time.
+   - Change 3 month bandwidth graph to 24 hours detail.
 
 
 # Changes in version 5.0-1.9.0 - 2017-12-20
