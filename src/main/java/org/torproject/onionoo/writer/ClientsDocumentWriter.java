@@ -55,7 +55,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
   private int writtenDocuments = 0;
 
   @Override
-  public void writeDocuments(long lastSeenMillis) {
+  public void writeDocuments(long mostRecentStatusMillis) {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
     long updatedMillis = updateStatus != null
@@ -70,7 +70,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       }
       SortedSet<ClientsHistory> history = clientsStatus.getHistory();
       ClientsDocument clientsDocument = this.compileClientsDocument(
-          hashedFingerprint, lastSeenMillis, history);
+          hashedFingerprint, mostRecentStatusMillis, history);
       this.documentStore.store(clientsDocument, hashedFingerprint);
       this.writtenDocuments++;
     }
@@ -99,10 +99,10 @@ public class ClientsDocumentWriter implements DocumentWriter {
       DateTimeHelper.TEN_DAYS };
 
   private ClientsDocument compileClientsDocument(String hashedFingerprint,
-      long lastSeenMillis, SortedSet<ClientsHistory> history) {
+      long mostRecentStatusMillis, SortedSet<ClientsHistory> history) {
     ClientsDocument clientsDocument = new ClientsDocument();
     clientsDocument.setFingerprint(hashedFingerprint);
-    GraphHistoryCompiler ghc = new GraphHistoryCompiler(lastSeenMillis
+    GraphHistoryCompiler ghc = new GraphHistoryCompiler(mostRecentStatusMillis
         + DateTimeHelper.ONE_HOUR);
     ghc.setThreshold(2L);
     for (int i = 0; i < this.graphIntervals.length; i++) {

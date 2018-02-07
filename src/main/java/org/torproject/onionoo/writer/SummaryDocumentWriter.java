@@ -33,7 +33,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
   private int deletedDocuments = 0;
 
   @Override
-  public void writeDocuments(long lastSeenAllRelaysAndBridgesMillis) {
+  public void writeDocuments(long mostRecentStatusMillis) {
     long relaysLastValidAfterMillis = -1L;
     long bridgesLastPublishedMillis = -1L;
     for (String fingerprint : this.documentStore.list(NodeStatus.class)) {

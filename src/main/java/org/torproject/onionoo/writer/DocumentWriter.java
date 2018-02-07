@@ -5,7 +5,7 @@ package org.torproject.onionoo.writer;
 
 public interface DocumentWriter {
 
-  public abstract void writeDocuments(long lastSeenMillis);
+  public abstract void writeDocuments(long mostRecentStatusMillis);
 
   public abstract String getStatsString();
 }

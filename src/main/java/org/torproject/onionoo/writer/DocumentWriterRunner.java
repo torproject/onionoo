@@ -32,22 +32,23 @@ public class DocumentWriterRunner {
 
   /** Lets each configured document writer write its documents. */
   public void writeDocuments() {
-    long lastSeenMillis = retrieveLastSeenMillis();
+    long mostRecentStatusMillis = retrieveMostRecentStatusMillis();
     for (DocumentWriter dw : this.documentWriters) {
       log.debug("Writing " + dw.getClass().getSimpleName());
-      dw.writeDocuments(lastSeenMillis);
+      dw.writeDocuments(mostRecentStatusMillis);
     }
   }
 
-  private long retrieveLastSeenMillis() {
+  private long retrieveMostRecentStatusMillis() {
     DocumentStore documentStore = DocumentStoreFactory.getDocumentStore();
-    long lastSeenMillis = -1L;
+    long mostRecentStatusMillis = -1L;
     for (String fingerprint : documentStore.list(NodeStatus.class)) {
       NodeStatus nodeStatus = documentStore.retrieve(
           NodeStatus.class, true, fingerprint);
-      lastSeenMillis = Math.max(lastSeenMillis, nodeStatus.getLastSeenMillis());
+      mostRecentStatusMillis = Math.max(mostRecentStatusMillis,
+          nodeStatus.getLastSeenMillis());
     }
-    return lastSeenMillis;
+    return mostRecentStatusMillis;
   }
 
   /** Logs statistics of all configured document writers. */

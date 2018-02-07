@@ -31,7 +31,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
   }
 
   @Override
-  public void writeDocuments(long lastSeenMillis) {
+  public void writeDocuments(long mostRecentStatusMillis) {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
     long updatedMillis = updateStatus != null
@@ -46,7 +46,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
       }
       SortedMap<long[], double[]> history = weightsStatus.getHistory();
       WeightsDocument weightsDocument = this.compileWeightsDocument(
-          fingerprint, history, lastSeenMillis);
+          fingerprint, history, mostRecentStatusMillis);
       this.documentStore.store(weightsDocument, fingerprint);
     }
     log.info("Wrote weights document files");
@@ -74,27 +74,27 @@ public class WeightsDocumentWriter implements DocumentWriter {
       DateTimeHelper.TEN_DAYS };
 
   private WeightsDocument compileWeightsDocument(String fingerprint,
-      SortedMap<long[], double[]> history, long lastSeenMillis) {
+      SortedMap<long[], double[]> history, long mostRecentStatusMillis) {
     WeightsDocument weightsDocument = new WeightsDocument();
     weightsDocument.setFingerprint(fingerprint);
     weightsDocument.setConsensusWeightFraction(
-        this.compileGraphType(history, lastSeenMillis, 1));
+        this.compileGraphType(history, mostRecentStatusMillis, 1));
     weightsDocument.setGuardProbability(
-        this.compileGraphType(history, lastSeenMillis, 2));
+        this.compileGraphType(history, mostRecentStatusMillis, 2));
     weightsDocument.setMiddleProbability(
-        this.compileGraphType(history, lastSeenMillis, 3));
+        this.compileGraphType(history, mostRecentStatusMillis, 3));
     weightsDocument.setExitProbability(
-        this.compileGraphType(history, lastSeenMillis, 4));
+        this.compileGraphType(history, mostRecentStatusMillis, 4));
     weightsDocument.setConsensusWeight(
-        this.compileGraphType(history, lastSeenMillis, 6));
+        this.compileGraphType(history, mostRecentStatusMillis, 6));
     return weightsDocument;
   }
 
   private Map<String, GraphHistory> compileGraphType(
-      SortedMap<long[], double[]> history, long lastSeenMillis,
+      SortedMap<long[], double[]> history, long mostRecentStatusMillis,
       int graphTypeIndex) {
     GraphHistoryCompiler ghc = new GraphHistoryCompiler(
-        lastSeenMillis + DateTimeHelper.ONE_HOUR);
+        mostRecentStatusMillis + DateTimeHelper.ONE_HOUR);
     for (int i = 0; i < this.graphIntervals.length; i++) {
       ghc.addGraphType(this.graphNames[i], this.graphIntervals[i],
           this.dataPointIntervals[i]);

@@ -31,7 +31,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
   }
 
   @Override
-  public void writeDocuments(long lastSeenMillis) {
+  public void writeDocuments(long mostRecentStatusMillis) {
     UpdateStatus updateStatus = this.documentStore.retrieve(
         UpdateStatus.class, true);
     long updatedMillis = updateStatus != null
@@ -45,7 +45,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
         continue;
       }
       BandwidthDocument bandwidthDocument = this.compileBandwidthDocument(
-          fingerprint, lastSeenMillis, bandwidthStatus);
+          fingerprint, mostRecentStatusMillis, bandwidthStatus);
       this.documentStore.store(bandwidthDocument, fingerprint);
     }
     log.info("Wrote bandwidth document files");
@@ -53,13 +53,13 @@ public class BandwidthDocumentWriter implements DocumentWriter {
 
 
   private BandwidthDocument compileBandwidthDocument(String fingerprint,
-      long lastSeenMillis, BandwidthStatus bandwidthStatus) {
+      long mostRecentStatusMillis, BandwidthStatus bandwidthStatus) {
     BandwidthDocument bandwidthDocument = new BandwidthDocument();
     bandwidthDocument.setFingerprint(fingerprint);
-    bandwidthDocument.setWriteHistory(this.compileGraphType(lastSeenMillis,
-        bandwidthStatus.getWriteHistory()));
-    bandwidthDocument.setReadHistory(this.compileGraphType(lastSeenMillis,
-        bandwidthStatus.getReadHistory()));
+    bandwidthDocument.setWriteHistory(this.compileGraphType(
+        mostRecentStatusMillis, bandwidthStatus.getWriteHistory()));
+    bandwidthDocument.setReadHistory(this.compileGraphType(
+        mostRecentStatusMillis, bandwidthStatus.getReadHistory()));
     return bandwidthDocument;
   }
 
@@ -87,10 +87,10 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
-  private Map<String, GraphHistory> compileGraphType(long lastSeenMillis,
-      SortedMap<Long, long[]> history) {
+  private Map<String, GraphHistory> compileGraphType(
+      long mostRecentStatusMillis, SortedMap<Long, long[]> history) {
     GraphHistoryCompiler ghc = new GraphHistoryCompiler(
-        lastSeenMillis + DateTimeHelper.ONE_HOUR);
+        mostRecentStatusMillis + DateTimeHelper.ONE_HOUR);
     for (int i = 0; i < this.graphIntervals.length; i++) {
       ghc.addGraphType(this.graphNames[i], this.graphIntervals[i],
           this.dataPointIntervals[i]);

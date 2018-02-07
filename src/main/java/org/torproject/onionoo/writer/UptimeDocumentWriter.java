@@ -36,7 +36,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
   }
 
   @Override
-  public void writeDocuments(long lastSeenMillis) {
+  public void writeDocuments(long mostRecentStatusMillis) {
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true);
     if (uptimeStatus == null) {
@@ -50,14 +50,14 @@ public class UptimeDocumentWriter implements DocumentWriter {
     SortedSet<String> updatedUptimeStatuses = this.documentStore.list(
         UptimeStatus.class, updatedMillis);
     for (String fingerprint : updatedUptimeStatuses) {
-      this.updateDocument(fingerprint, lastSeenMillis, uptimeStatus);
+      this.updateDocument(fingerprint, mostRecentStatusMillis, uptimeStatus);
     }
     log.info("Wrote uptime document files");
   }
 
   private int writtenDocuments = 0;
 
-  private void updateDocument(String fingerprint, long lastSeenMillis,
+  private void updateDocument(String fingerprint, long mostRecentStatusMillis,
       UptimeStatus knownStatuses) {
     UptimeStatus uptimeStatus = this.documentStore.retrieve(
         UptimeStatus.class, true, fingerprint);
@@ -70,7 +70,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
           ? knownStatuses.getRelayHistory()
           : knownStatuses.getBridgeHistory();
       UptimeDocument uptimeDocument = this.compileUptimeDocument(relay,
-          fingerprint, history, knownStatusesHistory, lastSeenMillis);
+          fingerprint, history, knownStatusesHistory, mostRecentStatusMillis);
       this.documentStore.store(uptimeDocument, fingerprint);
       this.writtenDocuments++;
     }
@@ -99,11 +99,11 @@ public class UptimeDocumentWriter implements DocumentWriter {
 
   private UptimeDocument compileUptimeDocument(boolean relay,
       String fingerprint, SortedSet<UptimeHistory> history,
-      SortedSet<UptimeHistory> knownStatuses, long lastSeenMillis) {
+      SortedSet<UptimeHistory> knownStatuses, long mostRecentStatusMillis) {
     UptimeDocument uptimeDocument = new UptimeDocument();
     uptimeDocument.setFingerprint(fingerprint);
     uptimeDocument.setUptime(this.compileUptimeHistory(relay, history,
-        knownStatuses, lastSeenMillis, null));
+        knownStatuses, mostRecentStatusMillis, null));
     SortedMap<String, Map<String, GraphHistory>> flags = new TreeMap<>();
     SortedSet<String> allFlags = new TreeSet<>();
     for (UptimeHistory hist : history) {
@@ -113,7 +113,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
     }
     for (String flag : allFlags) {
       Map<String, GraphHistory> graphsForFlags = this.compileUptimeHistory(
-          relay, history, knownStatuses, lastSeenMillis, flag);
+          relay, history, knownStatuses, mostRecentStatusMillis, flag);
       if (!graphsForFlags.isEmpty()) {
         flags.put(flag, graphsForFlags);
       }
@@ -126,7 +126,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
 
   private Map<String, GraphHistory> compileUptimeHistory(boolean relay,
       SortedSet<UptimeHistory> history, SortedSet<UptimeHistory> knownStatuses,
-      long lastSeenMillis, String flag) {
+      long mostRecentStatusMillis, String flag) {
 
     /* Extracting history entries for compiling GraphHistory objects is a bit
      * harder than for the other document types. The reason is that we have to
@@ -143,7 +143,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
     /* Initialize the graph history compiler, and tell it that history entries
      * are divisible. This is different from the other history writers. */
     GraphHistoryCompiler ghc = new GraphHistoryCompiler(
-        lastSeenMillis + DateTimeHelper.ONE_HOUR);
+        mostRecentStatusMillis + DateTimeHelper.ONE_HOUR);
     for (int i = 0; i < this.graphIntervals.length; i++) {
       ghc.addGraphType(this.graphNames[i], this.graphIntervals[i],
           this.dataPointIntervals[i]);
