@@ -210,8 +210,7 @@ public class ResponseBuilder {
   }
 
   private String writeRelaySummaryLine(SummaryDocument entry) {
-    String nickname = !entry.getNickname().equals("Unnamed")
-        ? entry.getNickname() : null;
+    String nickname = entry.getNickname();
     String fingerprint = entry.getFingerprint();
     String running = entry.isRunning() ? "true" : "false";
     List<String> addresses = entry.getAddresses();
@@ -221,19 +220,16 @@ public class ResponseBuilder {
       addressesBuilder.append((written++ > 0 ? "," : "") + "\""
           + address.toLowerCase() + "\"");
     }
-    return String.format("{%s\"f\":\"%s\",\"a\":[%s],\"r\":%s}",
-        (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
-        fingerprint, addressesBuilder.toString(), running);
+    return String.format("{\"n\":\"%s\",\"f\":\"%s\",\"a\":[%s],\"r\":%s}",
+        nickname, fingerprint, addressesBuilder.toString(), running);
   }
 
   private String writeBridgeSummaryLine(SummaryDocument entry) {
-    String nickname = !entry.getNickname().equals("Unnamed")
-        ? entry.getNickname() : null;
+    String nickname = entry.getNickname();
     String hashedFingerprint = entry.getFingerprint();
     String running = entry.isRunning() ? "true" : "false";
-    return String.format("{%s\"h\":\"%s\",\"r\":%s}",
-         (nickname == null ? "" : "\"n\":\"" + nickname + "\","),
-         hashedFingerprint, running);
+    return String.format("{\"n\":\"%s\",\"h\":\"%s\",\"r\":%s}",
+        nickname, hashedFingerprint, running);
   }
 
   private String writeDetailsLines(SummaryDocument entry) {

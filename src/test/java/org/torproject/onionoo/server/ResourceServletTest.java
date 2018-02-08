@@ -1419,7 +1419,7 @@ public class ResourceServletTest {
         "/summary?order=" + OrderParameterValues.FIRST_SEEN_ASC + ","
         + OrderParameterValues.CONSENSUS_WEIGHT_ASC, 3,
         new String[] { "TimMayTribute", "Ferrari458", "TorkaZ" }, 3,
-        new String[] { "gummy", null, "ec2bridgercc7f31fe" });
+        new String[] { "gummy", "Unnamed", "ec2bridgercc7f31fe" });
   }
 
   @Test(timeout = 100)
@@ -1428,7 +1428,7 @@ public class ResourceServletTest {
         + OrderParameterValues.FIRST_SEEN_DES + ","
         + OrderParameterValues.CONSENSUS_WEIGHT_ASC, 3,
         new String[] { "TorkaZ", "TimMayTribute", "Ferrari458" }, 3,
-        new String[] { "ec2bridgercc7f31fe", null, "gummy" });
+        new String[] { "ec2bridgercc7f31fe", "Unnamed", "gummy" });
   }
 
   @Test(timeout = 100)
