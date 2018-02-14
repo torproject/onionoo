@@ -19,6 +19,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class NodeStatus extends Document {
 
@@ -54,33 +55,31 @@ public class NodeStatus extends Document {
 
   private String[] declaredFamily;
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public void setDeclaredFamily(SortedSet<String> declaredFamily) {
-    this.declaredFamily = collectionToStringArray(declaredFamily);
+    SortedSet<String> declaredFamilyIncludingSelf
+        = new TreeSet<>(declaredFamily);
+    declaredFamilyIncludingSelf.add(this.fingerprint);
+    this.declaredFamily = collectionToStringArray(declaredFamilyIncludingSelf);
   }
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public SortedSet<String> getDeclaredFamily() {
-    return stringArrayToSortedSet(this.declaredFamily);
+    SortedSet<String> declaredFamilyIncludingSelf =
+        stringArrayToSortedSet(this.declaredFamily);
+    declaredFamilyIncludingSelf.add(this.fingerprint);
+    return declaredFamilyIncludingSelf;
   }
 
   private static String[] collectionToStringArray(
       Collection<String> collection) {
-    String[] stringArray = null;
-    if (collection != null && !collection.isEmpty()) {
-      stringArray = new String[collection.size()];
-      int index = 0;
-      for (String string : collection) {
-        stringArray[index++] = string;
-      }
-    }
-    return stringArray;
+    return (null == collection || collection.isEmpty()) ? null
+        : collection.toArray(new String[collection.size()]);
   }
 
   private SortedSet<String> stringArrayToSortedSet(String[] stringArray) {
-    SortedSet<String> sortedSet = new TreeSet<>();
-    if (stringArray != null) {
-      sortedSet.addAll(Arrays.asList(stringArray));
-    }
-    return sortedSet;
+    return stringArray == null ? new TreeSet<>() : Arrays.stream(stringArray)
+        .collect(Collectors.toCollection(TreeSet::new));
   }
 
   /* From network status entries: */

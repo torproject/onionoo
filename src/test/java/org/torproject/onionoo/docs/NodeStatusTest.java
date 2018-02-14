@@ -53,36 +53,37 @@ public class NodeStatusTest {
   private static final String D = "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
   private static final String E = "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE";
   private static final String F = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+  private static final String G = "F2044413DAC2E02E3D6BCF4735A19BCA1DE97281";
   private static final String NICK = "nickname";
 
   @Test
   public void testFamiliesEmpty() {
     assertFamiliesCanBeDeSerialized(
-        new String[] {}, new String[] {}, new String[] {});
+        new String[] { G }, new String[] {}, new String[] {});
   }
 
   @Test
   public void testFamiliesOneNotMutual() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { A }, new String[] {}, new String[] {});
+        new String[] { A, G }, new String[] {}, new String[] {});
   }
 
   @Test
   public void testFamiliesTwoNotMutual() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { A, B }, new String[] {}, new String[] {});
+        new String[] { A, B, G }, new String[] {}, new String[] {});
   }
 
   @Test
   public void testFamiliesOneNotMutualOneMutual() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { A, B }, new String[] { B }, new String[] { B });
+        new String[] { A, B, G }, new String[] { B }, new String[] { B });
   }
 
   @Test
   public void testFamiliesOneMutualOneIndirect() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { A }, new String[] { A }, new String[] { A, B });
+        new String[] { A, G }, new String[] { A }, new String[] { A, B });
   }
 
   @Test
@@ -92,26 +93,26 @@ public class NodeStatusTest {
      * with this relay.  It's a valid case, because B can be in a mutual
      * family relationship with A. */
     assertFamiliesCanBeDeSerialized(
-        new String[] { A, B }, new String[] { A }, new String[] { A, B});
+        new String[] { A, B, G }, new String[] { A }, new String[] { A, B});
   }
 
   @Test
   public void testFamiliesOneNotMutualOneMutualOneIndirect() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { A, B }, new String[] { B }, new String[] { B, C});
+        new String[] { A, B, G }, new String[] { B }, new String[] { B, C});
   }
 
   @Test
   public void testFamiliesTwoNotMutualTwoMutualTwoIndirect() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { A, B, C, D }, new String[] { C, D },
+        new String[] { A, B, C, D, G }, new String[] { C, D },
         new String[] { C, D, E, F });
   }
 
   @Test
   public void testFamiliesNickname() {
     assertFamiliesCanBeDeSerialized(
-        new String[] { NICK }, new String[] {}, new String[] {});
+        new String[] { NICK, G }, new String[] {}, new String[] {});
   }
 
   private static final String KI_LAST_SEEN_1970_NODE_STATUS =
