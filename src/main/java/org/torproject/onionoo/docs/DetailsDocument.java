@@ -356,6 +356,16 @@ public class DetailsDocument extends Document {
     return this.version;
   }
 
+  private String version_status;
+
+  public void setVersionStatus(String versionStatus) {
+    this.version_status = versionStatus;
+  }
+
+  public String getVersionStatus() {
+    return this.version_status;
+  }
+
   private SortedSet<String> alleged_family;
 
   public void setAllegedFamily(SortedSet<String> allegedFamily) {

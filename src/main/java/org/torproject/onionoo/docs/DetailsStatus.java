@@ -550,5 +550,15 @@ public class DetailsStatus extends Document {
   public String getVersion() {
     return this.version;
   }
+
+  private String version_status;
+
+  public void setVersionStatus(String versionStatus) {
+    this.version_status = versionStatus;
+  }
+
+  public String getVersionStatus() {
+    return this.version_status;
+  }
 }
 

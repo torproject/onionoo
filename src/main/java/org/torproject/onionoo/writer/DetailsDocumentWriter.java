@@ -162,6 +162,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
       detailsDocument.setUnreachableOrAddresses(unreachableOrAddresses);
     }
     detailsDocument.setVersion(detailsStatus.getVersion());
+    detailsDocument.setVersionStatus(detailsStatus.getVersionStatus());
     this.documentStore.store(detailsDocument, fingerprint);
   }
 

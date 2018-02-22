@@ -339,6 +339,8 @@ public class ResponseBuilder {
                 detailsDocument.getUnreachableOrAddresses());
           } else if (field.equals("version")) {
             dd.setVersion(detailsDocument.getVersion());
+          } else if (field.equals("version_status")) {
+            dd.setVersionStatus(detailsDocument.getVersionStatus());
           }
         }
         /* Don't escape HTML characters, like < and >, contained in

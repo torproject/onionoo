@@ -1,5 +1,8 @@
 # Changes in version 5.1-1.12.0 - 2018-??-??
 
+ * Medium changes
+   - Add version_status field to details documents.
+
  * Minor changes
    - Don't attempt to un-escape character sequences in contact lines
      (like "\uk") that only happen to start like escaped utf-8 characters

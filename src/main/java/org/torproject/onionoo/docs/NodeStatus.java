@@ -3,6 +3,8 @@
 
 package org.torproject.onionoo.docs;
 
+import org.torproject.onionoo.updater.TorVersionStatus;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -330,6 +332,16 @@ public class NodeStatus extends Document {
     return this.version;
   }
 
+  private TorVersionStatus versionStatus;
+
+  public void setVersionStatus(TorVersionStatus versionStatus) {
+    this.versionStatus = versionStatus;
+  }
+
+  public TorVersionStatus getVersionStatus() {
+    return this.versionStatus;
+  }
+
   /* From exit lists: */
 
   private SortedSet<String> exitAddresses;
@@ -572,6 +584,9 @@ public class NodeStatus extends Document {
       if (parts.length >= 25 && !parts[24].isEmpty()) {
         nodeStatus.setHostName(parts[24]);
       }
+      if (parts.length >= 26) {
+        nodeStatus.setVersionStatus(TorVersionStatus.ofAbbreviation(parts[25]));
+      }
       return nodeStatus;
     } catch (NumberFormatException e) {
       log.error("Number format exception while parsing node "
@@ -640,6 +655,8 @@ public class NodeStatus extends Document {
         .append((this.getVersion() != null ? this.getVersion() : ""));
     sb.append("\t")
         .append((this.getHostName() != null ? this.getHostName() : ""));
+    sb.append("\t").append(null != this.getVersionStatus()
+        ? this.getVersionStatus().getAbbreviation() : "");
     return sb.toString();
   }
 }

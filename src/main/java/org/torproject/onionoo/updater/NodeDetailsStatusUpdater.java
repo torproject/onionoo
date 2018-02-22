@@ -22,10 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -89,7 +87,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
 
   private SortedMap<String, Integer> lastBandwidthWeights = null;
 
-  private Set<String> lastRecommendedServerVersions = null;
+  private SortedSet<TorVersion> lastRecommendedServerVersions = null;
 
   private int relayConsensusesProcessed = 0;
 
@@ -306,8 +304,15 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     this.relayConsensusesProcessed++;
     if (this.relaysLastValidAfterMillis == validAfterMillis) {
       this.lastBandwidthWeights = consensus.getBandwidthWeights();
-      this.lastRecommendedServerVersions
-          = new HashSet<>(consensus.getRecommendedServerVersions());
+      this.lastRecommendedServerVersions = new TreeSet<>();
+      for (String recommendedServerVersion :
+          consensus.getRecommendedServerVersions()) {
+        TorVersion recommendedTorServerVersion
+            = TorVersion.of(recommendedServerVersion);
+        if (null != recommendedTorServerVersion) {
+          this.lastRecommendedServerVersions.add(recommendedTorServerVersion);
+        }
+      }
     }
   }
 
@@ -798,8 +803,13 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
        * the recommended_version field accordingly. */
       if (null != this.lastRecommendedServerVersions
           && null != nodeStatus.getVersion()) {
+        TorVersion torVersion = TorVersion.of(nodeStatus.getVersion());
         nodeStatus.setRecommendedVersion(this.lastRecommendedServerVersions
-            .contains(nodeStatus.getVersion()));
+            .contains(torVersion));
+        nodeStatus.setVersionStatus(null != torVersion
+            ? torVersion.determineVersionStatus(
+                this.lastRecommendedServerVersions)
+            : TorVersionStatus.UNRECOMMENDED);
       }
 
       Map<String, Long> exitAddresses = new HashMap<>();
@@ -909,6 +919,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       detailsStatus.setLastChangedOrAddressOrPort(
           nodeStatus.getLastChangedOrAddressOrPort());
       detailsStatus.setVersion(nodeStatus.getVersion());
+      detailsStatus.setVersionStatus(nodeStatus.getVersionStatus().toString());
 
       this.documentStore.store(detailsStatus, fingerprint);
       this.documentStore.store(nodeStatus, fingerprint);
