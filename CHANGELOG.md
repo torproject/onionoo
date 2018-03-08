@@ -1,3 +1,9 @@
+# Changes in version 5.1-1.??.? - 2018-??-??
+
+ * Medium changes
+   - Stop omitting "n" in summary docs for "Unnamed" relays/bridges.
+
+
 # Changes in version 5.0-1.10.1 - 2018-02-07
 
  * Medium changes

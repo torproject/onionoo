@@ -8,7 +8,7 @@
 
   <property name="javadoc-title" value="Onionoo API Documentation"/>
   <property name="implementation-title" value="Onionoo" />
-  <property name="onionoo.protocol.version" value="5.0"/>
+  <property name="onionoo.protocol.version" value="5.1"/>
   <property name="release.version"
             value="${onionoo.protocol.version}-1.10.1-dev"/>
   <property name="metricslibversion" value="2.1.1"/>
