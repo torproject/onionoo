@@ -1,4 +1,4 @@
-# Changes in version 5.1-1.??.? - 2018-??-??
+# Changes in version 5.1-1.11.0 - 2018-03-14
 
  * Medium changes
    - Stop omitting "n" in summary docs for "Unnamed" relays/bridges.
@@ -8,6 +8,7 @@
    - Make responses deterministic by always sorting results by
      fingerprint, either if no specific order was requested or to
      break ties after ordering results as requested.
+   - Announce next major protocol version update on April 14, 2018.
 
 
 # Changes in version 5.0-1.10.1 - 2018-02-07
