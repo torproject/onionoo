@@ -2,6 +2,7 @@
 
  * Medium changes
    - Stop omitting "n" in summary docs for "Unnamed" relays/bridges.
+   - Always add a relay to its own "effective_family".
 
  * Minor changes
    - Make responses deterministic by always sorting results by
