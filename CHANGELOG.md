@@ -1,3 +1,11 @@
+# Changes in version 5.1-1.12.0 - 2018-??-??
+
+ * Minor changes
+   - Don't attempt to un-escape character sequences in contact lines
+     (like "\uk") that only happen to start like escaped utf-8 characters
+     (like "\u0055").
+
+
 # Changes in version 5.1-1.11.0 - 2018-03-14
 
  * Medium changes

@@ -12,11 +12,10 @@ import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
 import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.WeightsDocument;
+import org.torproject.onionoo.util.FormattingUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import org.apache.commons.lang3.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -348,7 +347,7 @@ public class ResponseBuilder {
         /* Whenever we provide Gson with a string containing an escaped
          * non-ASCII character like \u00F2, it escapes the \ to \\, which
          * we need to undo before including the string in a response. */
-        return StringUtils.replace(gson.toJson(dd), "\\\\u", "\\u");
+        return FormattingUtils.replaceValidUtf(gson.toJson(dd));
       } else {
         // TODO We should probably log that we didn't find a details
         // document that we expected to exist.

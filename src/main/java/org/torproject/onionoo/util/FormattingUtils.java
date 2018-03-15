@@ -3,7 +3,17 @@
 
 package org.torproject.onionoo.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/** Static helper methods for string processing etc. */
 public class FormattingUtils {
+
+  private static Logger log = LoggerFactory.getLogger(
+      FormattingUtils.class);
 
   private FormattingUtils() {
   }
@@ -35,5 +45,29 @@ public class FormattingUtils {
   public static String formatDecimalNumber(long decimalNumber) {
     return String.format("%,d", decimalNumber);
   }
+
+  private static Pattern escapePattern = Pattern.compile(
+       "(\\\\{4}u[0-9a-fA-F]{4})");
+
+  /** De-escape only valid UTF and leave anything else escaped. */
+  public static String replaceValidUtf(String text) {
+    if (null == text || text.isEmpty()) {
+      return text;
+    }
+    try {
+      StringBuffer sb = new StringBuffer();
+      Matcher mat = escapePattern.matcher(text);
+      while (mat.find()) {
+        String unescaped = mat.group(1);
+        mat.appendReplacement(sb, unescaped);
+      }
+      mat.appendTail(sb);
+      return sb.toString();
+    } catch (Throwable ex) {
+      log.debug("Couldn't process input '{}'.", text, ex);
+      return text;
+    }
+  }
+
 }
 

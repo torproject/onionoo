@@ -1,0 +1,16 @@
+
+
+abc
+abc
+\\\\u
+\\\\u
+Haha/\\\\@/\\\\live/\\\\./\\\\co/\\\\./\\\uk
+Haha/\\\\@/\\\\live/\\\\./\\\\co/\\\\./\\\uk
+\\\\u20ac
+\\u20ac
+\\\\u0024
+\\u0024
+some \\\\u20ac other string \\\\u0024 to unescape
+some \\u20ac other string \\u0024 to unescape
+abcd efg\\\\u0024xyz\\\\uxxxx
+abcd efg\\u0024xyz\\\\uxxxx

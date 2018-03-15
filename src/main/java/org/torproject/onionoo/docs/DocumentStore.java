@@ -9,7 +9,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -318,8 +317,7 @@ public class DocumentStore {
        * objects are escaped JSON, e.g., \u00F2.  When Gson serlializes
        * this string, it escapes the \ to \\, hence writes \\u00F2.  We
        * need to undo this and change \\u00F2 back to \u00F2. */
-      documentString = StringUtils.replace(gson.toJson(document),
-          "\\\\u", "\\u");
+      documentString = FormattingUtils.replaceValidUtf(gson.toJson(document));
       /* Existing details statuses don't contain opening and closing curly
        * brackets, so we should remove them from new details statuses,
        * too. */
