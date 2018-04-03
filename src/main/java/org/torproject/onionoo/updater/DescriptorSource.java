@@ -25,32 +25,54 @@ public class DescriptorSource {
 
   private final File inDir = new File("in");
 
-  private final File inRecentDir = new File(inDir, "recent");
+  private final String[] collecTorHosts = new String[] {
+      "collector.torproject.org", "collector2.torproject.org" };
+
+  private File[] inCollecTorHostDirs;
+
+  private File[] inCollecTorHostRecentDirs;
+
+  private List<DescriptorQueue> recentDescriptorQueues;
 
   private final File inArchiveDir = new File(inDir, "archive");
 
   private final File statusDir = new File("status");
 
-  private List<DescriptorQueue> descriptorQueues;
-
   private DescriptorQueue archiveDescriptorQueue;
 
   /** Instantiates a new descriptor source. */
   public DescriptorSource() {
-    this.descriptorQueues = new ArrayList<>();
+    this.inCollecTorHostDirs = new File[this.collecTorHosts.length];
+    this.inCollecTorHostRecentDirs = new File[this.collecTorHosts.length];
+    for (int collecTorHostIndex = 0;
+         collecTorHostIndex < this.collecTorHosts.length;
+         collecTorHostIndex++) {
+      this.inCollecTorHostDirs[collecTorHostIndex]
+          = new File(this.statusDir, this.collecTorHosts[collecTorHostIndex]);
+      this.inCollecTorHostRecentDirs[collecTorHostIndex]
+          = new File(this.inCollecTorHostDirs[collecTorHostIndex], "recent");
+    }
+    this.recentDescriptorQueues = new ArrayList<>();
     this.descriptorListeners = new HashMap<>();
   }
 
-  private DescriptorQueue getDescriptorQueue(
+  private List<DescriptorQueue> getDescriptorQueues(
       DescriptorType descriptorType,
       DescriptorHistory descriptorHistory) {
-    DescriptorQueue descriptorQueue = new DescriptorQueue(
-        this.inRecentDir, descriptorType, this.statusDir);
-    if (descriptorHistory != null) {
-      descriptorQueue.readHistoryFile(descriptorHistory);
+    List<DescriptorQueue> descriptorQueues = new ArrayList<>();
+    for (int collecTorHostIndex = 0;
+         collecTorHostIndex < this.collecTorHosts.length;
+         collecTorHostIndex++) {
+      DescriptorQueue descriptorQueue = new DescriptorQueue(
+          this.inCollecTorHostRecentDirs[collecTorHostIndex], descriptorType,
+          this.inCollecTorHostDirs[collecTorHostIndex]);
+      if (descriptorHistory != null) {
+        descriptorQueue.readHistoryFile(descriptorHistory);
+      }
+      descriptorQueues.add(descriptorQueue);
     }
-    this.descriptorQueues.add(descriptorQueue);
-    return descriptorQueue;
+    this.recentDescriptorQueues.addAll(descriptorQueues);
+    return descriptorQueues;
   }
 
   private Map<DescriptorType, Set<DescriptorListener>>
@@ -68,14 +90,24 @@ public class DescriptorSource {
 
   /** Downloads descriptors from CollecTor. */
   public void downloadDescriptors() {
-    List<String> remoteDirectories = new ArrayList<>();
+    List<String> remoteDirectoriesList = new ArrayList<>();
     for (DescriptorType descriptorType : DescriptorType.values()) {
-      remoteDirectories.add("/recent/" + descriptorType.getDir());
+      remoteDirectoriesList.add("/recent/" + descriptorType.getDir());
     }
-    DescriptorCollector dc = org.torproject.descriptor.DescriptorSourceFactory
-        .createDescriptorCollector();
-    dc.collectDescriptors("https://collector.torproject.org",
-        remoteDirectories.toArray(new String[0]), 0L, inDir, true);
+    for (int collecTorHostIndex = 0;
+         collecTorHostIndex < this.collecTorHosts.length;
+         collecTorHostIndex++) {
+      String collecTorBaseUrl = "https://"
+          + this.collecTorHosts[collecTorHostIndex];
+      String[] remoteDirectories = remoteDirectoriesList.toArray(new String[0]);
+      long minLastModified = 0L;
+      File localDirectory = this.inCollecTorHostDirs[collecTorHostIndex];
+      boolean deleteExtraneousLocalFiles = true;
+      DescriptorCollector dc = org.torproject.descriptor.DescriptorSourceFactory
+          .createDescriptorCollector();
+      dc.collectDescriptors(collecTorBaseUrl, remoteDirectories,
+          minLastModified, localDirectory, deleteExtraneousLocalFiles);
+    }
   }
 
   /** Reads archived and recent descriptors from disk and feeds them into
@@ -113,12 +145,13 @@ public class DescriptorSource {
     }
     Set<DescriptorListener> descriptorListeners =
         this.descriptorListeners.get(descriptorType);
-    DescriptorQueue descriptorQueue = this.getDescriptorQueue(
-        descriptorType, descriptorHistory);
-    Descriptor descriptor;
-    while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
-      for (DescriptorListener descriptorListener : descriptorListeners) {
-        descriptorListener.processDescriptor(descriptor, relay);
+    for (DescriptorQueue descriptorQueue
+        : this.getDescriptorQueues(descriptorType, descriptorHistory)) {
+      Descriptor descriptor;
+      while ((descriptor = descriptorQueue.nextDescriptor()) != null) {
+        for (DescriptorListener descriptorListener : descriptorListeners) {
+          descriptorListener.processDescriptor(descriptor, relay);
+        }
       }
     }
     log.info("Read recent/{}.", descriptorType.getDir());
@@ -185,7 +218,7 @@ public class DescriptorSource {
   /** Writes parse histories for recent descriptors to disk. */
   public void writeHistoryFiles() {
     log.debug("Writing parse histories for recent descriptors...");
-    for (DescriptorQueue descriptorQueue : this.descriptorQueues) {
+    for (DescriptorQueue descriptorQueue : this.recentDescriptorQueues) {
       descriptorQueue.writeHistoryFile();
     }
   }
@@ -194,13 +227,13 @@ public class DescriptorSource {
    * descriptors during the current execution. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    ").append(this.descriptorQueues.size())
+    sb.append("    ").append(this.recentDescriptorQueues.size())
       .append(" descriptor ").append("queues created for recent descriptors\n");
     int historySizeBefore = 0;
     int historySizeAfter = 0;
     long descriptors = 0L;
     long bytes = 0L;
-    for (DescriptorQueue descriptorQueue : this.descriptorQueues) {
+    for (DescriptorQueue descriptorQueue : this.recentDescriptorQueues) {
       historySizeBefore += descriptorQueue.getHistorySizeBefore();
       historySizeAfter += descriptorQueue.getHistorySizeAfter();
       descriptors += descriptorQueue.getReturnedDescriptors();

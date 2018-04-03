@@ -2,6 +2,7 @@
 
  * Medium changes
    - Add version_status field to details documents.
+   - Fetch descriptors from both CollecTor instances.
 
  * Minor changes
    - Don't attempt to un-escape character sequences in contact lines
