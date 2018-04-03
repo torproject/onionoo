@@ -833,11 +833,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         }
       }
       detailsStatus.setExitAddresses(exitAddresses);
-      SortedSet<String> exitAddressesWithoutOrAddresses =
-          new TreeSet<>(exitAddresses.keySet());
-      exitAddressesWithoutOrAddresses.removeAll(
-          nodeStatus.getOrAddresses());
-      nodeStatus.setExitAddresses(exitAddressesWithoutOrAddresses);
+      nodeStatus.setExitAddresses(new TreeSet<>(exitAddresses.keySet()));
 
       detailsStatus.setAllegedFamily(nodeStatus.getAllegedFamily());
       detailsStatus.setEffectiveFamily(nodeStatus.getEffectiveFamily());

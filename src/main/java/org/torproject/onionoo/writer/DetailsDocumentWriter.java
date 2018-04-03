@@ -143,12 +143,9 @@ public class DetailsDocumentWriter implements DocumentWriter {
         detailsStatus.getExitPolicyV6Summary());
     detailsDocument.setHibernating(detailsStatus.getHibernating());
     if (detailsStatus.getExitAddresses() != null) {
-      SortedSet<String> exitAddressesWithoutOrAddresses =
-          new TreeSet<>(detailsStatus.getExitAddresses().keySet());
-      exitAddressesWithoutOrAddresses.removeAll(
-          detailsStatus.getOrAddresses());
-      detailsDocument.setExitAddresses(new ArrayList<>(
-          exitAddressesWithoutOrAddresses));
+      List<String> exitAddresses = new ArrayList<>(new TreeSet<>(
+          detailsStatus.getExitAddresses().keySet()));
+      detailsDocument.setExitAddresses(exitAddresses);
     }
     detailsDocument.setMeasured(detailsStatus.getMeasured());
     List<String> unreachableOrAddresses = new ArrayList<>();

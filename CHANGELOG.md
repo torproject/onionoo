@@ -1,5 +1,9 @@
 # Changes in version 6.0-1.13.0 - 2018-04-??
 
+ * Medium changes
+   - Change the "exit_addresses" field to not exclude current OR
+     addresses anymore.
+
  * Minor changes
    - Turn valid utf-8 escape sequences into utf-8 characters.
 
