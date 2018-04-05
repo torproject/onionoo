@@ -1,4 +1,4 @@
-# Changes in version 5.1-1.12.0 - 2018-??-??
+# Changes in version 5.2-1.12.0 - 2018-04-06
 
  * Medium changes
    - Add version_status field to details documents.
