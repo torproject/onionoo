@@ -194,6 +194,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setPlatform(detailsStatus.getPlatform());
     detailsDocument.setTransports(detailsStatus.getTransports());
     detailsDocument.setVersion(detailsStatus.getVersion());
+    detailsDocument.setVersionStatus(detailsStatus.getVersionStatus());
     this.documentStore.store(detailsDocument, fingerprint);
   }
 

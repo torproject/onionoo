@@ -919,7 +919,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       detailsStatus.setLastChangedOrAddressOrPort(
           nodeStatus.getLastChangedOrAddressOrPort());
       detailsStatus.setVersion(nodeStatus.getVersion());
-      detailsStatus.setVersionStatus(nodeStatus.getVersionStatus().toString());
+      if (null != nodeStatus.getVersionStatus()) {
+        detailsStatus.setVersionStatus(nodeStatus.getVersionStatus()
+            .toString());
+      }
 
       this.documentStore.store(detailsStatus, fingerprint);
       this.documentStore.store(nodeStatus, fingerprint);
