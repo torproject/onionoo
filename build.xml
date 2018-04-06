@@ -74,7 +74,7 @@
   </patternset>
 
   <target name="war"
-          depends="compile,gitrev">
+          depends="jar">
     <war destfile="${dist}/${warfile}"
          webxml="${resources}/web.xml"
          basedir="${classes}">
