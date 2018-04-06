@@ -3,6 +3,8 @@
 
 package org.torproject.onionoo.util;
 
+import static org.apache.commons.lang3.StringEscapeUtils.unescapeJava;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +60,8 @@ public class FormattingUtils {
       StringBuffer sb = new StringBuffer();
       Matcher mat = escapePattern.matcher(text);
       while (mat.find()) {
-        String unescaped = mat.group(1);
-        mat.appendReplacement(sb, unescaped);
+        String unescaped = mat.group(1).substring(1);
+        mat.appendReplacement(sb, unescapeJava(unescaped));
       }
       mat.appendTail(sb);
       return sb.toString();

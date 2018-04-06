@@ -2,15 +2,21 @@
 
 abc
 abc
-\\\\u
-\\\\u
+\\\\u00bb \\\\u \\\\u00ab
+» \\\\u «
 Haha/\\\\@/\\\\live/\\\\./\\\\co/\\\\./\\\uk
 Haha/\\\\@/\\\\live/\\\\./\\\\co/\\\\./\\\uk
-\\\\u20ac
-\\u20ac
-\\\\u0024
-\\u0024
-some \\\\u20ac other string \\\\u0024 to unescape
-some \\u20ac other string \\u0024 to unescape
-abcd efg\\\\u0024xyz\\\\uxxxx
-abcd efg\\u0024xyz\\\\uxxxx
+Euro \\\\u20ac
+Euro €
+Dollar \\\\u0024
+Dollar $
+Pound \\\\u00a3
+Pound £
+Yen \\\\u00a5
+Yen ¥
+\\\\u00a1some \\\\u00dE other string \\\\u00e7 to unescape!
+¡some Þ other string ç to unescape!
+abcd efg cent \\\\u00a2xyz\\\\uxxxx
+abcd efg cent ¢xyz\\\\uxxxx
+Telef\\\\u00F4nica
+Telefônica

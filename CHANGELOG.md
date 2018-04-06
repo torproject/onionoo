@@ -1,3 +1,9 @@
+# Changes in version 6.0-1.13.0 - 2018-04-??
+
+ * Minor changes
+   - Turn valid utf-8 escape sequences into utf-8 characters.
+
+
 # Changes in version 5.2-1.12.0 - 2018-04-06
 
  * Medium changes
