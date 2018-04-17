@@ -1,4 +1,4 @@
-# Changes in version 6.0-1.13.0 - 2018-04-??
+# Changes in version 6.0-1.13.0 - 2018-04-17
 
  * Medium changes
    - Change the "exit_addresses" field to not exclude current OR
