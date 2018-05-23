@@ -3,8 +3,8 @@
 
 package org.torproject.onionoo.docs;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -20,8 +20,7 @@ import java.util.regex.Pattern;
 
 public class SummaryDocument extends Document {
 
-  @Expose
-  @SerializedName("t")
+  @JsonProperty("t")
   private boolean isRelay;
 
   public void setRelay(boolean isRelay) {
@@ -32,8 +31,7 @@ public class SummaryDocument extends Document {
     return this.isRelay;
   }
 
-  @Expose
-  @SerializedName("f")
+  @JsonProperty("f")
   private String fingerprint;
 
   /** Sets the fingerprint to the given 40 hex characters and clears
@@ -57,6 +55,7 @@ public class SummaryDocument extends Document {
     return this.fingerprint;
   }
 
+  @JsonIgnore
   private transient String hashedFingerprint = null;
 
   /** Returns the SHA1-hashed fingerprint, or <code>null</code> if no
@@ -73,6 +72,7 @@ public class SummaryDocument extends Document {
     return this.hashedFingerprint;
   }
 
+  @JsonIgnore
   private transient String base64Fingerprint = null;
 
   /** Returns the base64-encoded fingerprint, or <code>null</code> if no
@@ -89,6 +89,7 @@ public class SummaryDocument extends Document {
     return this.base64Fingerprint;
   }
 
+  @JsonIgnore
   private transient String[] fingerprintSortedHexBlocks = null;
 
   /** Returns a sorted array containing blocks of 4 upper-case hex
@@ -109,8 +110,7 @@ public class SummaryDocument extends Document {
     return this.fingerprintSortedHexBlocks;
   }
 
-  @Expose
-  @SerializedName("n")
+  @JsonProperty("n")
   private String nickname;
 
   @SuppressWarnings("checkstyle:javadocmethod")
@@ -126,8 +126,7 @@ public class SummaryDocument extends Document {
     return this.nickname == null ? "Unnamed" : this.nickname;
   }
 
-  @Expose
-  @SerializedName("ad")
+  @JsonProperty("ad")
   private String[] addresses;
 
   public void setAddresses(List<String> addresses) {
@@ -169,8 +168,7 @@ public class SummaryDocument extends Document {
     return sortedSet;
   }
 
-  @Expose
-  @SerializedName("cc")
+  @JsonProperty("cc")
   private String countryCode;
 
   public void setCountryCode(String countryCode) {
@@ -181,8 +179,7 @@ public class SummaryDocument extends Document {
     return this.countryCode;
   }
 
-  @Expose
-  @SerializedName("as")
+  @JsonProperty("as")
   private String asNumber;
 
   public void setAsNumber(String asNumber) {
@@ -193,8 +190,7 @@ public class SummaryDocument extends Document {
     return this.asNumber;
   }
 
-  @Expose
-  @SerializedName("fs")
+  @JsonProperty("fs")
   private String firstSeenMillis;
 
   public void setFirstSeenMillis(long firstSeenMillis) {
@@ -205,8 +201,7 @@ public class SummaryDocument extends Document {
     return DateTimeHelper.parse(this.firstSeenMillis);
   }
 
-  @Expose
-  @SerializedName("ls")
+  @JsonProperty("ls")
   private String lastSeenMillis;
 
   public void setLastSeenMillis(long lastSeenMillis) {
@@ -217,8 +212,7 @@ public class SummaryDocument extends Document {
     return DateTimeHelper.parse(this.lastSeenMillis);
   }
 
-  @Expose
-  @SerializedName("rf")
+  @JsonProperty("rf")
   private String[] relayFlags;
 
   public void setRelayFlags(SortedSet<String> relayFlags) {
@@ -229,8 +223,7 @@ public class SummaryDocument extends Document {
     return this.stringArrayToSortedSet(this.relayFlags);
   }
 
-  @Expose
-  @SerializedName("cw")
+  @JsonProperty("cw")
   private long consensusWeight;
 
   public void setConsensusWeight(long consensusWeight) {
@@ -241,8 +234,7 @@ public class SummaryDocument extends Document {
     return this.consensusWeight;
   }
 
-  @Expose
-  @SerializedName("r")
+  @JsonProperty("r")
   private boolean running;
 
   public void setRunning(boolean isRunning) {
@@ -253,8 +245,7 @@ public class SummaryDocument extends Document {
     return this.running;
   }
 
-  @Expose
-  @SerializedName("c")
+  @JsonProperty("c")
   private String contact;
 
   @SuppressWarnings("checkstyle:javadocmethod")
@@ -273,8 +264,7 @@ public class SummaryDocument extends Document {
   /* This attribute can go away once all Onionoo services had their hourly
    * updater write effective families to summary documents at least once.
    * Remove this code after September 8, 2015. */
-  @Expose
-  @SerializedName("ff")
+  @JsonProperty("ff")
   private String[] familyFingerprints;
 
   public void setFamilyFingerprints(
@@ -286,8 +276,7 @@ public class SummaryDocument extends Document {
     return this.stringArrayToSortedSet(this.familyFingerprints);
   }
 
-  @Expose
-  @SerializedName("ef")
+  @JsonProperty("ef")
   private String[] effectiveFamily;
 
   public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
@@ -298,8 +287,7 @@ public class SummaryDocument extends Document {
     return this.stringArrayToSortedSet(this.effectiveFamily);
   }
 
-  @Expose
-  @SerializedName("v")
+  @JsonProperty("v")
   private String version;
 
   public void setVersion(String version) {
@@ -310,8 +298,7 @@ public class SummaryDocument extends Document {
     return this.version;
   }
 
-  @Expose
-  @SerializedName("h")
+  @JsonProperty("h")
   private String hostName;
 
   public void setHostName(String hostName) {
@@ -322,8 +309,7 @@ public class SummaryDocument extends Document {
     return this.hostName;
   }
 
-  @Expose
-  @SerializedName("rv")
+  @JsonProperty("rv")
   private Boolean recommendedVersion;
 
   public void setRecommendedVersion(Boolean recommendedVersion) {
@@ -332,6 +318,11 @@ public class SummaryDocument extends Document {
 
   public Boolean getRecommendedVersion() {
     return this.recommendedVersion;
+  }
+
+  /** Instantiate an empty summary document. */
+  public SummaryDocument() {
+    /* empty */
   }
 
   /* The familyFingerprints parameter can go away after September 8, 2015.

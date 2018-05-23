@@ -5,9 +5,12 @@ package org.torproject.onionoo.docs;
 
 import org.torproject.onionoo.util.FormattingUtils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +43,12 @@ public class DocumentStore {
 
   private static Logger log = LoggerFactory.getLogger(
       DocumentStore.class);
+
+  private static ObjectMapper objectMapper = new ObjectMapper()
+      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+      .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+      .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
   private final File statusDir = new File("status");
 
@@ -162,12 +171,11 @@ public class DocumentStore {
         String line = null;
         try (BufferedReader br = new BufferedReader(new FileReader(
             summaryFile))) {
-          Gson gson = new Gson();
           while ((line = br.readLine()) != null) {
             if (line.length() == 0) {
               continue;
             }
-            SummaryDocument summaryDocument = gson.fromJson(line,
+            SummaryDocument summaryDocument = objectMapper.readValue(line,
                 SummaryDocument.class);
             if (summaryDocument != null) {
               parsedSummaryDocuments.put(summaryDocument.getFingerprint(),
@@ -178,11 +186,8 @@ public class DocumentStore {
           this.listedFiles += parsedSummaryDocuments.size();
           this.listOperations++;
         } catch (IOException e) {
-          log.error("Could not read file '"
-              + summaryFile.getAbsolutePath() + "'.", e);
-        } catch (JsonParseException e) {
-          log.error("Could not parse summary document '" + line
-              + "' in file '" + summaryFile.getAbsolutePath() + "'.", e);
+          log.error("Could not parse summary document '{}' from file '{}'.",
+              line, summaryFile.getAbsolutePath(), e);
         }
       }
     }
@@ -303,13 +308,15 @@ public class DocumentStore {
         || document instanceof WeightsDocument
         || document instanceof ClientsDocument
         || document instanceof UptimeDocument) {
-      Gson gson = new Gson();
-      documentString = gson.toJson(document);
+      try {
+        documentString = objectMapper.writeValueAsString(document);
+      } catch (JsonProcessingException e) {
+        log.error("Serializing failed for type {}.",
+            document.getClass().getName(), e);
+        return false;
+      }
     } else if (document instanceof DetailsStatus
         || document instanceof DetailsDocument) {
-      /* Don't escape HTML characters, like < and >, contained in
-       * strings. */
-      Gson gson = new GsonBuilder().disableHtmlEscaping().create();
       /* We must ensure that details files only contain ASCII characters
        * and no UTF-8 characters.  While UTF-8 characters are perfectly
        * valid in JSON, this would break compatibility with existing files
@@ -317,7 +324,14 @@ public class DocumentStore {
        * objects are escaped JSON, e.g., \u00F2.  When Gson serlializes
        * this string, it escapes the \ to \\, hence writes \\u00F2.  We
        * need to undo this and change \\u00F2 back to \u00F2. */
-      documentString = FormattingUtils.replaceValidUtf(gson.toJson(document));
+      try {
+        documentString = FormattingUtils.replaceValidUtf(
+            objectMapper.writeValueAsString(document));
+      } catch (JsonProcessingException e) {
+        log.error("Serializing failed for type {}.",
+            document.getClass().getName(), e);
+        return false;
+      }
       /* Existing details statuses don't contain opening and closing curly
        * brackets, so we should remove them from new details statuses,
        * too. */
@@ -536,9 +550,8 @@ public class DocumentStore {
   private <T extends Document> T retrieveParsedDocumentFile(
       Class<T> documentType, String documentString) {
     T result = null;
-    Gson gson = new Gson();
     try {
-      result = gson.fromJson(documentString, documentType);
+      result = objectMapper.readValue(documentString, documentType);
     } catch (Throwable e) {
       /* Handle below. */
       log.error(documentString);
@@ -777,10 +790,14 @@ public class DocumentStore {
       return;
     }
     StringBuilder sb = new StringBuilder();
-    Gson gson = new Gson();
     for (SummaryDocument summaryDocument :
         this.cachedSummaryDocuments.values()) {
-      String line = gson.toJson(summaryDocument);
+      String line = null;
+      try {
+        line = objectMapper.writeValueAsString(summaryDocument);
+      } catch (JsonProcessingException e) {
+        line = null;
+      }
       if (line != null) {
         sb.append(line + "\n");
       } else {

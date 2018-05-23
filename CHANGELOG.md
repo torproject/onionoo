@@ -1,3 +1,9 @@
+# Changes in version 6.0-1.??.? - 2018-05-??
+
+ * Medium changes
+   - Replace Gson with Jackson.
+
+
 # Changes in version 6.0-1.13.0 - 2018-04-17
 
  * Medium changes

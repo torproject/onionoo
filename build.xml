@@ -11,7 +11,7 @@
   <property name="onionoo.protocol.version" value="6.0"/>
   <property name="release.version"
             value="${onionoo.protocol.version}-1.13.0-dev"/>
-  <property name="metricslibversion" value="2.2.0"/>
+  <property name="metricslibversion" value="2.4.0"/>
   <property name="jetty.version" value="-9.2.21.v20170120" />
   <property name="warfile"
             value="onionoo-${release.version}.war"/>
@@ -47,7 +47,9 @@
     <include name="commons-codec-1.10.jar"/>
     <include name="commons-compress-1.13.jar"/>
     <include name="commons-lang3-3.5.jar"/>
-    <include name="gson-2.4.jar"/>
+    <include name="jackson-annotations-2.8.6.jar"/>
+    <include name="jackson-core-2.8.6.jar"/>
+    <include name="jackson-databind-2.8.6.jar"/>
     <include name="logback-classic-1.1.9.jar"/>
     <include name="logback-core-1.1.9.jar"/>
     <include name="slf4j-api-1.7.22.jar"/>

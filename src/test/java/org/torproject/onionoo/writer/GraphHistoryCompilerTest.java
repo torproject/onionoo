@@ -9,7 +9,11 @@ import static org.junit.Assert.assertNotNull;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.GraphHistory;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +21,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import java.io.IOException;
 import java.time.Period;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +29,12 @@ import java.util.Map;
 
 @RunWith(Parameterized.class)
 public class GraphHistoryCompilerTest {
+
+  private static ObjectMapper objectMapper = new ObjectMapper()
+      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+      .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+      .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
   /** Provide test data. */
   @Parameters
@@ -156,7 +167,7 @@ public class GraphHistoryCompilerTest {
       DateTimeHelper.TEN_DAYS };
 
   @Test
-  public void test() {
+  public void test() throws IOException {
     GraphHistoryCompiler ghc = new GraphHistoryCompiler(DateTimeHelper.parse(
         "2018-01-01 00:00:00"));
     ghc.setDivisible(this.divisible);
@@ -172,7 +183,7 @@ public class GraphHistoryCompilerTest {
     Map<String, GraphHistory> compiledGraphHistories =
         ghc.compileGraphHistories();
     String message = this.testDescription + "; "
-        + new Gson().toJson(compiledGraphHistories);
+        + objectMapper.writeValueAsString(compiledGraphHistories);
     assertEquals(message, this.expectedGraphs, compiledGraphHistories.size());
     if (null != this.expectedGraphName) {
       GraphHistory gh = compiledGraphHistories.get(this.expectedGraphName);

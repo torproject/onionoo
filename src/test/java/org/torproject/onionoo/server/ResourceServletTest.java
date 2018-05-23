@@ -13,7 +13,11 @@ import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.UpdateStatus;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +39,12 @@ import java.util.TreeSet;
  * which tests ResponseBuilder and a much shorter ResourceServletTest
  * which tests servlet specifics. */
 public class ResourceServletTest {
+
+  private static ObjectMapper objectMapper = new ObjectMapper()
+      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+      .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+      .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
   private SortedMap<String, org.torproject.onionoo.docs.SummaryDocument> relays;
   private SortedMap<String, org.torproject.onionoo.docs.SummaryDocument>
@@ -263,11 +273,10 @@ public class ResourceServletTest {
     rs.doGet(this.request, this.response, TEST_TIME);
   }
 
-  private void parseResponse() {
+  private void parseResponse() throws IOException {
     this.responseString = this.response.getWrittenContent();
     if (this.responseString != null) {
-      Gson gson = new Gson();
-      this.summaryDocument = gson.fromJson(this.responseString,
+      this.summaryDocument = objectMapper.readValue(this.responseString,
           SummaryDocument.class);
     }
   }
@@ -344,6 +353,9 @@ public class ResourceServletTest {
 
   @SuppressWarnings("MemberName")
   private static class SummaryDocument {
+    private String version;
+    private String next_major_version_scheduled;
+    private String build_revision;
     private String relays_published;
     private int relays_skipped;
     private int relays_truncated;

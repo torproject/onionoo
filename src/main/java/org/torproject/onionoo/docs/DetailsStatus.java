@@ -34,12 +34,12 @@ public class DetailsStatus extends Document {
   private String desc_published;
 
   public void setDescPublished(Long descPublished) {
-    this.desc_published = DateTimeHelper.format(descPublished);
+    this.desc_published = null == descPublished ? null
+        : DateTimeHelper.format(descPublished);
   }
 
   public Long getDescPublished() {
-    return this.desc_published == null ? null :
-        DateTimeHelper.parse(this.desc_published);
+    return DateTimeHelper.parse(this.desc_published);
   }
 
   private String last_restarted;

@@ -14,8 +14,12 @@ import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.WeightsDocument;
 import org.torproject.onionoo.util.FormattingUtils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +34,12 @@ public class ResponseBuilder {
 
   private static final Logger logger =
       LoggerFactory.getLogger(ResponseBuilder.class);
+
+  private static ObjectMapper objectMapper = new ObjectMapper()
+      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+      .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+      .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
   private DocumentStore documentStore;
   private String buildRevision;
@@ -343,13 +353,15 @@ public class ResponseBuilder {
             dd.setVersionStatus(detailsDocument.getVersionStatus());
           }
         }
-        /* Don't escape HTML characters, like < and >, contained in
-         * strings. */
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        /* Whenever we provide Gson with a string containing an escaped
+        /* Whenever we provide Jackson with a string containing an escaped
          * non-ASCII character like \u00F2, it escapes the \ to \\, which
          * we need to undo before including the string in a response. */
-        return FormattingUtils.replaceValidUtf(gson.toJson(dd));
+        try {
+          return FormattingUtils.replaceValidUtf(
+              objectMapper.writeValueAsString(dd));
+        } catch (JsonProcessingException e) {
+          return "";
+        }
       } else {
         // TODO We should probably log that we didn't find a details
         // document that we expected to exist.
