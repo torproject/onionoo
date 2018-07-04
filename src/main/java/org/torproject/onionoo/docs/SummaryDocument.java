@@ -309,6 +309,28 @@ public class SummaryDocument extends Document {
     return this.hostName;
   }
 
+  @JsonProperty("vh")
+  private List<String> verifiedHostNames;
+
+  public void setVerifiedHostNames(List<String> verifiedHostNames) {
+    this.verifiedHostNames = verifiedHostNames;
+  }
+
+  public List<String> getVerifiedHostNames() {
+    return this.verifiedHostNames;
+  }
+
+  @JsonProperty("uh")
+  private List<String> unverifiedHostNames;
+
+  public void setUnverifiedHostNames(List<String> unverifiedHostNames) {
+    this.unverifiedHostNames = unverifiedHostNames;
+  }
+
+  public List<String> getUnverifiedHostNames() {
+    return this.unverifiedHostNames;
+  }
+
   @JsonProperty("rv")
   private Boolean recommendedVersion;
 
@@ -334,6 +356,7 @@ public class SummaryDocument extends Document {
       String countryCode, long firstSeenMillis, String asNumber,
       String contact, SortedSet<String> familyFingerprints,
       SortedSet<String> effectiveFamily, String version, String hostName,
+      List<String> verifiedHostNames, List<String> unverifiedHostNames,
       Boolean recommendedVersion) {
     this.setRelay(isRelay);
     this.setNickname(nickname);
@@ -351,6 +374,8 @@ public class SummaryDocument extends Document {
     this.setEffectiveFamily(effectiveFamily);
     this.setVersion(version);
     this.setHostName(hostName);
+    this.setVerifiedHostNames(verifiedHostNames);
+    this.setUnverifiedHostNames(unverifiedHostNames);
     this.setRecommendedVersion(recommendedVersion);
   }
 }

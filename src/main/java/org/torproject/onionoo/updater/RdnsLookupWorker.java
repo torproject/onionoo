@@ -3,6 +3,8 @@
 
 package org.torproject.onionoo.updater;
 
+import java.util.List;
+
 class RdnsLookupWorker extends Thread {
 
   private final ReverseDomainNameResolver reverseDomainNameResolver;
@@ -38,10 +40,26 @@ class RdnsLookupWorker extends Thread {
         /* Getting interrupted should be the default case. */
       }
       String hostName = request.getHostName();
-      if (hostName != null) {
+      if (null != hostName) {
         synchronized (this.reverseDomainNameResolver.rdnsLookupResults) {
           this.reverseDomainNameResolver.rdnsLookupResults.put(
               rdnsLookupJob, hostName);
+        }
+      }
+      List<String> verifiedHostNames = request.getVerifiedHostNames();
+      if (null != verifiedHostNames && !verifiedHostNames.isEmpty()) {
+        synchronized (this.reverseDomainNameResolver
+            .rdnsVerifiedLookupResults) {
+          this.reverseDomainNameResolver.rdnsVerifiedLookupResults.put(
+              rdnsLookupJob, verifiedHostNames);
+        }
+      }
+      List<String> unverifiedHostNames = request.getUnverifiedHostNames();
+      if (null != unverifiedHostNames && !unverifiedHostNames.isEmpty()) {
+        synchronized (this.reverseDomainNameResolver
+            .rdnsUnverifiedLookupResults) {
+          this.reverseDomainNameResolver.rdnsUnverifiedLookupResults.put(
+              rdnsLookupJob, unverifiedHostNames);
         }
       }
       long lookupMillis = request.getLookupMillis();

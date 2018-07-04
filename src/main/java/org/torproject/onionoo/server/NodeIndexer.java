@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -266,8 +268,16 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByVersion.get(version).add(fingerprint);
         newRelaysByVersion.get(version).add(hashedFingerprint);
       }
-      String hostName = entry.getHostName();
-      if (null != hostName) {
+      List<String> allHostNames = new ArrayList<>();
+      List<String> verifiedHostNames = entry.getVerifiedHostNames();
+      if (null != verifiedHostNames) {
+        allHostNames.addAll(verifiedHostNames);
+      }
+      List<String> unverifiedHostNames = entry.getUnverifiedHostNames();
+      if (null != unverifiedHostNames) {
+        allHostNames.addAll(unverifiedHostNames);
+      }
+      for (String hostName : allHostNames) {
         String hostNameLowerCase = hostName.toLowerCase();
         if (!newRelaysByHostName.containsKey(hostNameLowerCase)) {
           newRelaysByHostName.put(hostNameLowerCase, new HashSet<>());

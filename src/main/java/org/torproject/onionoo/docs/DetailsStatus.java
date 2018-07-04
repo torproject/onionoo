@@ -5,6 +5,7 @@ package org.torproject.onionoo.docs;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -529,6 +530,74 @@ public class DetailsStatus extends Document {
 
   public String getHostName() {
     return unescapeJson(this.host_name);
+  }
+
+  private List<String> verified_host_names;
+
+  /**
+   * Creates a copy of the list with each string escaped for JSON compatibility
+   * and sets this as the verified host names, unless the argument was null in
+   * which case the verified host names are just set to null.
+   */
+  public void setVerifiedHostNames(List<String> verifiedHostNames) {
+    if (null == verifiedHostNames) {
+      this.verified_host_names = null;
+      return;
+    }
+    this.verified_host_names = new ArrayList<>();
+    for (String hostName : verifiedHostNames) {
+      this.verified_host_names.add(escapeJson(hostName));
+    }
+  }
+
+  /**
+   * Creates a copy of the list with each string having its escaping for JSON
+   * compatibility reversed and returns the copy, unless the held reference was
+   * null in which case null is returned.
+   */
+  public List<String> getVerifiedHostNames() {
+    if (null == this.verified_host_names) {
+      return null;
+    }
+    List<String> verifiedHostNames = new ArrayList<>();
+    for (String escapedHostName : this.verified_host_names) {
+      verifiedHostNames.add(unescapeJson(escapedHostName));
+    }
+    return verifiedHostNames;
+  }
+
+  private List<String> unverified_host_names;
+
+  /**
+   * Creates a copy of the list with each string escaped for JSON compatibility
+   * and sets this as the unverified host names, unless the argument was null in
+   * which case the unverified host names are just set to null.
+   */
+  public void setUnverifiedHostNames(List<String> unverifiedHostNames) {
+    if (null == unverifiedHostNames) {
+      this.unverified_host_names = null;
+      return;
+    }
+    this.unverified_host_names = new ArrayList<>();
+    for (String hostName : unverifiedHostNames) {
+      this.unverified_host_names.add(escapeJson(hostName));
+    }
+  }
+
+  /**
+   * Creates a copy of the list with each string having its escaping for JSON
+   * compatibility reversed and returns the copy, unless the held reference was
+   * null in which case null is returned.
+   */
+  public List<String> getUnverifiedHostNames() {
+    if (null == this.unverified_host_names) {
+      return null;
+    }
+    List<String> unverifiedHostNames = new ArrayList<>();
+    for (String escapedHostName : this.unverified_host_names) {
+      unverifiedHostNames.add(unescapeJson(escapedHostName));
+    }
+    return unverifiedHostNames;
   }
 
   private List<String> advertised_or_addresses;

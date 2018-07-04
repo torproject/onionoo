@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -386,6 +387,26 @@ public class NodeStatus extends Document {
 
   public String getHostName() {
     return this.hostName;
+  }
+
+  private List<String> verifiedHostNames;
+
+  public void setVerifiedHostNames(List<String> verifiedHostNames) {
+    this.verifiedHostNames = verifiedHostNames;
+  }
+
+  public List<String> getVerifiedHostNames() {
+    return this.verifiedHostNames;
+  }
+
+  private List<String> unverifiedHostNames;
+
+  public void setUnverifiedHostNames(List<String> unverifiedHostNames) {
+    this.unverifiedHostNames = unverifiedHostNames;
+  }
+
+  public List<String> getUnverifiedHostNames() {
+    return this.unverifiedHostNames;
   }
 
   private long lastRdnsLookup = -1L;

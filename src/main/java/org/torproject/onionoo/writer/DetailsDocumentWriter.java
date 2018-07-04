@@ -76,6 +76,10 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setConsensusWeight(
         detailsStatus.getConsensusWeight());
     detailsDocument.setHostName(detailsStatus.getHostName());
+    detailsDocument.setVerifiedHostNames(
+        detailsStatus.getVerifiedHostNames());
+    detailsDocument.setUnverifiedHostNames(
+        detailsStatus.getUnverifiedHostNames());
     String defaultPolicy = detailsStatus.getDefaultPolicy();
     String portList = detailsStatus.getPortList();
     if (defaultPolicy != null && (defaultPolicy.equals("accept")

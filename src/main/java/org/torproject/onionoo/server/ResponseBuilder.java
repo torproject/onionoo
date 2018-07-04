@@ -295,6 +295,10 @@ public class ResponseBuilder {
             dd.setConsensusWeight(detailsDocument.getConsensusWeight());
           } else if (field.equals("host_name")) {
             dd.setHostName(detailsDocument.getHostName());
+          } else if (field.equals("verified_host_names")) {
+            dd.setVerifiedHostNames(detailsDocument.getVerifiedHostNames());
+          } else if (field.equals("unverified_host_names")) {
+            dd.setUnverifiedHostNames(detailsDocument.getUnverifiedHostNames());
           } else if (field.equals("last_restarted")) {
             dd.setLastRestarted(detailsDocument.getLastRestarted());
           } else if (field.equals("bandwidth_rate")) {

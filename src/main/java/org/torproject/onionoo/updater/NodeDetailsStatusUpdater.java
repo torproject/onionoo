@@ -757,6 +757,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   private long startedRdnsLookups = -1L;
 
   private SortedMap<String, String> rdnsLookupResults = new TreeMap<>();
+  private SortedMap<String, List<String>> rdnsVerifiedLookupResults =
+      new TreeMap<>();
+  private SortedMap<String, List<String>> rdnsUnverifiedLookupResults =
+      new TreeMap<>();
 
   private void finishReverseDomainNameLookups() {
     this.reverseDomainNameResolver.finishReverseDomainNameLookups();
@@ -764,11 +768,28 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         this.reverseDomainNameResolver.getLookupStartMillis();
     Map<String, String> lookupResults =
         this.reverseDomainNameResolver.getLookupResults();
+    Map<String, List<String>> verifiedLookupResults =
+        this.reverseDomainNameResolver.getVerifiedLookupResults();
+    Map<String, List<String>> unverifiedLookupResults =
+        this.reverseDomainNameResolver.getUnverifiedLookupResults();
     for (String fingerprint : this.currentRelays) {
       NodeStatus nodeStatus = this.knownNodes.get(fingerprint);
       String hostName = lookupResults.get(nodeStatus.getAddress());
-      if (hostName != null) {
+      List<String> verifiedHostNames =
+              verifiedLookupResults.get(nodeStatus.getAddress());
+      List<String> unverifiedHostNames =
+              unverifiedLookupResults.get(nodeStatus.getAddress());
+      if (null != hostName) {
         this.rdnsLookupResults.put(fingerprint, hostName);
+      } else {
+        /* Maintains bug compatibility with previous implementation */
+        this.rdnsLookupResults.put(fingerprint, nodeStatus.getAddress());
+      }
+      if (null != verifiedHostNames && !verifiedHostNames.isEmpty()) {
+        this.rdnsVerifiedLookupResults.put(fingerprint, verifiedHostNames);
+      }
+      if (null != unverifiedHostNames && !unverifiedHostNames.isEmpty()) {
+        this.rdnsUnverifiedLookupResults.put(fingerprint, unverifiedHostNames);
       }
     }
   }
@@ -875,6 +896,22 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         String hostName = this.rdnsLookupResults.get(fingerprint);
         detailsStatus.setHostName(hostName);
         nodeStatus.setHostName(hostName);
+        nodeStatus.setLastRdnsLookup(this.startedRdnsLookups);
+      }
+
+      if (this.rdnsVerifiedLookupResults.containsKey(fingerprint)) {
+        List<String> verifiedHostNames =
+            this.rdnsVerifiedLookupResults.get(fingerprint);
+        detailsStatus.setVerifiedHostNames(verifiedHostNames);
+        nodeStatus.setVerifiedHostNames(verifiedHostNames);
+        nodeStatus.setLastRdnsLookup(this.startedRdnsLookups);
+      }
+
+      if (this.rdnsUnverifiedLookupResults.containsKey(fingerprint)) {
+        List<String> unverifiedHostNames =
+            this.rdnsUnverifiedLookupResults.get(fingerprint);
+        detailsStatus.setUnverifiedHostNames(unverifiedHostNames);
+        nodeStatus.setUnverifiedHostNames(unverifiedHostNames);
         nodeStatus.setLastRdnsLookup(this.startedRdnsLookups);
       }
 
