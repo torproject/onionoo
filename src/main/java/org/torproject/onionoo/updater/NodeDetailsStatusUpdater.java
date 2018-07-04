@@ -628,7 +628,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       boolean isExit = nodeStatus.getRelayFlags().contains("Exit")
           && !nodeStatus.getRelayFlags().contains("BadExit");
       boolean isGuard = nodeStatus.getRelayFlags().contains("Guard");
-      double consensusWeight = (double) nodeStatus.getConsensusWeight();
+      double consensusWeight = nodeStatus.getConsensusWeight();
       consensusWeights.put(fingerprint, consensusWeight);
       totalConsensusWeight += consensusWeight;
       if (consensusContainsBandwidthWeights) {
