@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-@SuppressWarnings("checkstyle:membername")
 public class DetailsDocument extends Document {
 
   /* We must ensure that details files only contain ASCII characters
@@ -49,77 +48,77 @@ public class DetailsDocument extends Document {
     return this.fingerprint;
   }
 
-  private String hashed_fingerprint;
+  private String hashedFingerprint;
 
   public void setHashedFingerprint(String hashedFingerprint) {
-    this.hashed_fingerprint = hashedFingerprint;
+    this.hashedFingerprint = hashedFingerprint;
   }
 
   public String getHashedFingerprint() {
-    return this.hashed_fingerprint;
+    return this.hashedFingerprint;
   }
 
-  private List<String> or_addresses;
+  private List<String> orAddresses;
 
   public void setOrAddresses(List<String> orAddresses) {
-    this.or_addresses = orAddresses;
+    this.orAddresses = orAddresses;
   }
 
   public List<String> getOrAddresses() {
-    return this.or_addresses;
+    return this.orAddresses;
   }
 
-  private List<String> exit_addresses;
+  private List<String> exitAddresses;
 
   public void setExitAddresses(List<String> exitAddresses) {
-    this.exit_addresses = !exitAddresses.isEmpty() ? exitAddresses : null;
+    this.exitAddresses = !exitAddresses.isEmpty() ? exitAddresses : null;
   }
 
   public List<String> getExitAddresses() {
-    return this.exit_addresses == null ? new ArrayList<String>()
-        : this.exit_addresses;
+    return this.exitAddresses == null ? new ArrayList<String>()
+        : this.exitAddresses;
   }
 
-  private String dir_address;
+  private String dirAddress;
 
   public void setDirAddress(String dirAddress) {
-    this.dir_address = dirAddress;
+    this.dirAddress = dirAddress;
   }
 
   public String getDirAddress() {
-    return this.dir_address;
+    return this.dirAddress;
   }
 
-  private String last_seen;
+  private String lastSeen;
 
   public void setLastSeen(long lastSeen) {
-    this.last_seen = DateTimeHelper.format(lastSeen);
+    this.lastSeen = DateTimeHelper.format(lastSeen);
   }
 
   public long getLastSeen() {
-    return DateTimeHelper.parse(this.last_seen);
+    return DateTimeHelper.parse(this.lastSeen);
   }
 
-  private String last_changed_address_or_port;
+  private String lastChangedAddressOrPort;
 
   public void setLastChangedAddressOrPort(
       long lastChangedAddressOrPort) {
-    this.last_changed_address_or_port = DateTimeHelper.format(
+    this.lastChangedAddressOrPort = DateTimeHelper.format(
         lastChangedAddressOrPort);
   }
 
   public long getLastChangedAddressOrPort() {
-    return DateTimeHelper.parse(this.last_changed_address_or_port);
+    return DateTimeHelper.parse(this.lastChangedAddressOrPort);
   }
 
-  private String first_seen;
+  private String firstSeen;
 
   public void setFirstSeen(long firstSeen) {
-    this.first_seen = DateTimeHelper.format(firstSeen);
+    this.firstSeen = DateTimeHelper.format(firstSeen);
   }
 
   public long getFirstSeen() {
-    return DateTimeHelper.parse(this.first_seen);
+    return DateTimeHelper.parse(this.firstSeen);
   }
 
   private Boolean running;
@@ -152,34 +151,34 @@ public class DetailsDocument extends Document {
     return this.country;
   }
 
-  private String country_name;
+  private String countryName;
 
   public void setCountryName(String countryName) {
-    this.country_name = escapeJson(countryName);
+    this.countryName = escapeJson(countryName);
   }
 
   public String getCountryName() {
-    return unescapeJson(this.country_name);
+    return unescapeJson(this.countryName);
   }
 
-  private String region_name;
+  private String regionName;
 
   public void setRegionName(String regionName) {
-    this.region_name = escapeJson(regionName);
+    this.regionName = escapeJson(regionName);
   }
 
   public String getRegionName() {
-    return unescapeJson(this.region_name);
+    return unescapeJson(this.regionName);
   }
 
-  private String city_name;
+  private String cityName;
 
   public void setCityName(String cityName) {
-    this.city_name = escapeJson(cityName);
+    this.cityName = escapeJson(cityName);
   }
 
   public String getCityName() {
-    return unescapeJson(this.city_name);
+    return unescapeJson(this.cityName);
   }
 
   private Float latitude;
@@ -202,47 +201,47 @@ public class DetailsDocument extends Document {
     return this.longitude;
   }
 
-  private String as_number;
+  private String asNumber;
 
   public void setAsNumber(String asNumber) {
-    this.as_number = escapeJson(asNumber);
+    this.asNumber = escapeJson(asNumber);
   }
 
   public String getAsNumber() {
-    return unescapeJson(this.as_number);
+    return unescapeJson(this.asNumber);
   }
 
-  private String as_name;
+  private String asName;
 
   public void setAsName(String asName) {
-    this.as_name = escapeJson(asName);
+    this.asName = escapeJson(asName);
   }
 
   public String getAsName() {
-    return unescapeJson(this.as_name);
+    return unescapeJson(this.asName);
   }
 
-  private Long consensus_weight;
+  private Long consensusWeight;
 
   public void setConsensusWeight(Long consensusWeight) {
-    this.consensus_weight = consensusWeight;
+    this.consensusWeight = consensusWeight;
   }
 
   public Long getConsensusWeight() {
-    return this.consensus_weight;
+    return this.consensusWeight;
   }
 
-  private String host_name;
+  private String hostName;
 
   public void setHostName(String hostName) {
-    this.host_name = escapeJson(hostName);
+    this.hostName = escapeJson(hostName);
   }
 
   public String getHostName() {
-    return unescapeJson(this.host_name);
+    return unescapeJson(this.hostName);
   }
 
-  private List<String> verified_host_names;
+  private List<String> verifiedHostNames;
 
   /**
    * Creates a copy of the list with each string escaped for JSON compatibility
@@ -251,12 +250,12 @@ public class DetailsDocument extends Document {
    */
   public void setVerifiedHostNames(List<String> verifiedHostNames) {
     if (null == verifiedHostNames) {
-      this.verified_host_names = null;
+      this.verifiedHostNames = null;
       return;
     }
-    this.verified_host_names = new ArrayList<>();
+    this.verifiedHostNames = new ArrayList<>();
     for (String hostName : verifiedHostNames) {
-      this.verified_host_names.add(escapeJson(hostName));
+      this.verifiedHostNames.add(escapeJson(hostName));
     }
   }
 
@@ -266,17 +265,17 @@ public class DetailsDocument extends Document {
    * null in which case null is returned.
    */
   public List<String> getVerifiedHostNames() {
-    if (null == this.verified_host_names) {
+    if (null == this.verifiedHostNames) {
       return null;
     }
     List<String> verifiedHostNames = new ArrayList<>();
-    for (String escapedHostName : this.verified_host_names) {
+    for (String escapedHostName : this.verifiedHostNames) {
       verifiedHostNames.add(unescapeJson(escapedHostName));
     }
     return verifiedHostNames;
   }
 
-  private List<String> unverified_host_names;
+  private List<String> unverifiedHostNames;
 
   /**
    * Creates a copy of the list with each string escaped for JSON compatibility
@@ -285,12 +284,12 @@ public class DetailsDocument extends Document {
    */
   public void setUnverifiedHostNames(List<String> unverifiedHostNames) {
     if (null == unverifiedHostNames) {
-      this.unverified_host_names = null;
+      this.unverifiedHostNames = null;
       return;
     }
-    this.unverified_host_names = new ArrayList<>();
+    this.unverifiedHostNames = new ArrayList<>();
     for (String hostName : unverifiedHostNames) {
-      this.unverified_host_names.add(escapeJson(hostName));
+      this.unverifiedHostNames.add(escapeJson(hostName));
     }
   }
 
@@ -300,98 +299,98 @@ public class DetailsDocument extends Document {
    * null in which case null is returned.
    */
   public List<String> getUnverifiedHostNames() {
-    if (null == this.unverified_host_names) {
+    if (null == this.unverifiedHostNames) {
       return null;
     }
     List<String> unverifiedHostNames = new ArrayList<>();
-    for (String escapedHostName : this.unverified_host_names) {
+    for (String escapedHostName : this.unverifiedHostNames) {
       unverifiedHostNames.add(unescapeJson(escapedHostName));
     }
     return unverifiedHostNames;
   }
 
-  private String last_restarted;
+  private String lastRestarted;
 
   public void setLastRestarted(Long lastRestarted) {
-    this.last_restarted = (lastRestarted == null ? null
+    this.lastRestarted = (lastRestarted == null ? null
         : DateTimeHelper.format(lastRestarted));
   }
 
   public Long getLastRestarted() {
-    return this.last_restarted == null ? null :
-        DateTimeHelper.parse(this.last_restarted);
+    return this.lastRestarted == null ? null :
+        DateTimeHelper.parse(this.lastRestarted);
   }
 
-  private Integer bandwidth_rate;
+  private Integer bandwidthRate;
 
   public void setBandwidthRate(Integer bandwidthRate) {
-    this.bandwidth_rate = bandwidthRate;
+    this.bandwidthRate = bandwidthRate;
   }
 
   public Integer getBandwidthRate() {
-    return this.bandwidth_rate;
+    return this.bandwidthRate;
   }
 
-  private Integer bandwidth_burst;
+  private Integer bandwidthBurst;
 
   public void setBandwidthBurst(Integer bandwidthBurst) {
-    this.bandwidth_burst = bandwidthBurst;
+    this.bandwidthBurst = bandwidthBurst;
   }
 
   public Integer getBandwidthBurst() {
-    return this.bandwidth_burst;
+    return this.bandwidthBurst;
   }
 
-  private Integer observed_bandwidth;
+  private Integer observedBandwidth;
 
   public void setObservedBandwidth(Integer observedBandwidth) {
-    this.observed_bandwidth = observedBandwidth;
+    this.observedBandwidth = observedBandwidth;
   }
 
   public Integer getObservedBandwidth() {
-    return this.observed_bandwidth;
+    return this.observedBandwidth;
   }
 
-  private Integer advertised_bandwidth;
+  private Integer advertisedBandwidth;
 
   public void setAdvertisedBandwidth(Integer advertisedBandwidth) {
-    this.advertised_bandwidth = advertisedBandwidth;
+    this.advertisedBandwidth = advertisedBandwidth;
   }
 
   public Integer getAdvertisedBandwidth() {
-    return this.advertised_bandwidth;
+    return this.advertisedBandwidth;
   }
 
-  private List<String> exit_policy;
+  private List<String> exitPolicy;
 
   public void setExitPolicy(List<String> exitPolicy) {
-    this.exit_policy = exitPolicy;
+    this.exitPolicy = exitPolicy;
   }
 
   public List<String> getExitPolicy() {
-    return this.exit_policy;
+    return this.exitPolicy;
   }
 
-  private Map<String, List<String>> exit_policy_summary;
+  private Map<String, List<String>> exitPolicySummary;
 
   public void setExitPolicySummary(
       Map<String, List<String>> exitPolicySummary) {
-    this.exit_policy_summary = exitPolicySummary;
+    this.exitPolicySummary = exitPolicySummary;
   }
 
   public Map<String, List<String>> getExitPolicySummary() {
-    return this.exit_policy_summary;
+    return this.exitPolicySummary;
   }
 
-  private Map<String, List<String>> exit_policy_v6_summary;
+  private Map<String, List<String>> exitPolicyV6Summary;
 
   public void setExitPolicyV6Summary(
       Map<String, List<String>> exitPolicyV6Summary) {
-    this.exit_policy_v6_summary = exitPolicyV6Summary;
+    this.exitPolicyV6Summary = exitPolicyV6Summary;
   }
 
   public Map<String, List<String>> getExitPolicyV6Summary() {
-    return this.exit_policy_v6_summary;
+    return this.exitPolicyV6Summary;
   }
 
   private String contact;
@@ -424,111 +423,111 @@ public class DetailsDocument extends Document {
     return this.version;
   }
 
-  private String version_status;
+  private String versionStatus;
 
   public void setVersionStatus(String versionStatus) {
-    this.version_status = versionStatus;
+    this.versionStatus = versionStatus;
   }
 
   public String getVersionStatus() {
-    return this.version_status;
+    return this.versionStatus;
   }
 
-  private SortedSet<String> alleged_family;
+  private SortedSet<String> allegedFamily;
 
   public void setAllegedFamily(SortedSet<String> allegedFamily) {
-    this.alleged_family = allegedFamily;
+    this.allegedFamily = allegedFamily;
   }
 
   public SortedSet<String> getAllegedFamily() {
-    return this.alleged_family;
+    return this.allegedFamily;
   }
 
-  private SortedSet<String> effective_family;
+  private SortedSet<String> effectiveFamily;
 
   public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
-    this.effective_family = effectiveFamily;
+    this.effectiveFamily = effectiveFamily;
   }
 
   public SortedSet<String> getEffectiveFamily() {
-    return this.effective_family;
+    return this.effectiveFamily;
   }
 
-  private SortedSet<String> indirect_family;
+  private SortedSet<String> indirectFamily;
 
   public void setIndirectFamily(SortedSet<String> indirectFamily) {
-    this.indirect_family = indirectFamily;
+    this.indirectFamily = indirectFamily;
   }
 
   public SortedSet<String> getIndirectFamily() {
-    return this.indirect_family;
+    return this.indirectFamily;
   }
 
-  private Float consensus_weight_fraction;
+  private Float consensusWeightFraction;
 
   /** Sets the consensus weight fraction to the given value, but only if
    * that value is neither null nor negative. */
   public void setConsensusWeightFraction(Float consensusWeightFraction) {
     if (consensusWeightFraction == null
         || consensusWeightFraction >= 0.0) {
-      this.consensus_weight_fraction = consensusWeightFraction;
+      this.consensusWeightFraction = consensusWeightFraction;
     }
   }
 
   public Float getConsensusWeightFraction() {
-    return this.consensus_weight_fraction;
+    return this.consensusWeightFraction;
   }
 
-  private Float guard_probability;
+  private Float guardProbability;
 
   /** Sets the guard probability to the given value, but only if that
    * value is neither null nor negative. */
   public void setGuardProbability(Float guardProbability) {
     if (guardProbability == null || guardProbability >= 0.0) {
-      this.guard_probability = guardProbability;
+      this.guardProbability = guardProbability;
     }
   }
 
   public Float getGuardProbability() {
-    return this.guard_probability;
+    return this.guardProbability;
   }
 
-  private Float middle_probability;
+  private Float middleProbability;
 
   /** Sets the middle probability to the given value, but only if that
    * value is neither null nor negative. */
   public void setMiddleProbability(Float middleProbability) {
     if (middleProbability == null || middleProbability >= 0.0) {
-      this.middle_probability = middleProbability;
+      this.middleProbability = middleProbability;
     }
   }
 
   public Float getMiddleProbability() {
-    return this.middle_probability;
+    return this.middleProbability;
   }
 
-  private Float exit_probability;
+  private Float exitProbability;
 
   /** Sets the exit probability to the given value, but only if that
    * value is neither null nor negative. */
   public void setExitProbability(Float exitProbability) {
     if (exitProbability == null || exitProbability >= 0.0) {
-      this.exit_probability = exitProbability;
+      this.exitProbability = exitProbability;
     }
   }
 
   public Float getExitProbability() {
-    return this.exit_probability;
+    return this.exitProbability;
   }
 
-  private Boolean recommended_version;
+  private Boolean recommendedVersion;
 
   public void setRecommendedVersion(Boolean recommendedVersion) {
-    this.recommended_version = recommendedVersion;
+    this.recommendedVersion = recommendedVersion;
   }
 
   public Boolean getRecommendedVersion() {
-    return this.recommended_version;
+    return this.recommendedVersion;
   }
 
   private Boolean hibernating;
@@ -562,14 +561,14 @@ public class DetailsDocument extends Document {
     return this.measured;
   }
 
-  private List<String> unreachable_or_addresses;
+  private List<String> unreachableOrAddresses;
 
   public void setUnreachableOrAddresses(List<String> unreachableOrAddresses) {
-    this.unreachable_or_addresses = unreachableOrAddresses;
+    this.unreachableOrAddresses = unreachableOrAddresses;
   }
 
   public List<String> getUnreachableOrAddresses() {
-    return this.unreachable_or_addresses;
+    return this.unreachableOrAddresses;
   }
 }
 

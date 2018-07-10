@@ -5,7 +5,6 @@ package org.torproject.onionoo.docs;
 
 import java.util.Map;
 
-@SuppressWarnings("checkstyle:membername")
 public class ClientsDocument extends Document {
 
   @SuppressWarnings("unused")
@@ -16,11 +15,11 @@ public class ClientsDocument extends Document {
   }
 
   @SuppressWarnings("unused")
-  private Map<String, GraphHistory> average_clients;
+  private Map<String, GraphHistory> averageClients;
 
   public void setAverageClients(
       Map<String, GraphHistory> averageClients) {
-    this.average_clients = averageClients;
+    this.averageClients = averageClients;
   }
 }
 

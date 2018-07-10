@@ -6,7 +6,6 @@ package org.torproject.onionoo.docs;
 import java.util.Map;
 import java.util.SortedMap;
 
-@SuppressWarnings("checkstyle:membername")
 public class UptimeDocument extends Document {
 
   @SuppressWarnings("unused")

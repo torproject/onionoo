@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-@SuppressWarnings("checkstyle:membername")
 public class DetailsStatus extends Document {
 
   /* We must ensure that details files only contain ASCII characters
@@ -32,77 +31,77 @@ public class DetailsStatus extends Document {
 
   /* From most recently published server descriptor: */
 
-  private String desc_published;
+  private String descPublished;
 
   public void setDescPublished(Long descPublished) {
-    this.desc_published = null == descPublished ? null
+    this.descPublished = null == descPublished ? null
         : DateTimeHelper.format(descPublished);
   }
 
   public Long getDescPublished() {
-    return DateTimeHelper.parse(this.desc_published);
+    return DateTimeHelper.parse(this.descPublished);
   }
 
-  private String last_restarted;
+  private String lastRestarted;
 
   public void setLastRestarted(Long lastRestarted) {
-    this.last_restarted = null == lastRestarted ? null
+    this.lastRestarted = null == lastRestarted ? null
         : DateTimeHelper.format(lastRestarted);
   }
 
   public Long getLastRestarted() {
-    return this.last_restarted == null ? null :
-        DateTimeHelper.parse(this.last_restarted);
+    return this.lastRestarted == null ? null :
+        DateTimeHelper.parse(this.lastRestarted);
   }
 
-  private Integer bandwidth_rate;
+  private Integer bandwidthRate;
 
   public void setBandwidthRate(Integer bandwidthRate) {
-    this.bandwidth_rate = bandwidthRate;
+    this.bandwidthRate = bandwidthRate;
   }
 
   public Integer getBandwidthRate() {
-    return this.bandwidth_rate;
+    return this.bandwidthRate;
   }
 
-  private Integer bandwidth_burst;
+  private Integer bandwidthBurst;
 
   public void setBandwidthBurst(Integer bandwidthBurst) {
-    this.bandwidth_burst = bandwidthBurst;
+    this.bandwidthBurst = bandwidthBurst;
   }
 
   public Integer getBandwidthBurst() {
-    return this.bandwidth_burst;
+    return this.bandwidthBurst;
   }
 
-  private Integer observed_bandwidth;
+  private Integer observedBandwidth;
 
   public void setObservedBandwidth(Integer observedBandwidth) {
-    this.observed_bandwidth = observedBandwidth;
+    this.observedBandwidth = observedBandwidth;
   }
 
   public Integer getObservedBandwidth() {
-    return this.observed_bandwidth;
+    return this.observedBandwidth;
   }
 
-  private Integer advertised_bandwidth;
+  private Integer advertisedBandwidth;
 
   public void setAdvertisedBandwidth(Integer advertisedBandwidth) {
-    this.advertised_bandwidth = advertisedBandwidth;
+    this.advertisedBandwidth = advertisedBandwidth;
   }
 
   public Integer getAdvertisedBandwidth() {
-    return this.advertised_bandwidth;
+    return this.advertisedBandwidth;
   }
 
-  private List<String> exit_policy;
+  private List<String> exitPolicy;
 
   public void setExitPolicy(List<String> exitPolicy) {
-    this.exit_policy = exitPolicy;
+    this.exitPolicy = exitPolicy;
   }
 
   public List<String> getExitPolicy() {
-    return this.exit_policy;
+    return this.exitPolicy;
   }
 
   private String contact;
@@ -125,45 +124,45 @@ public class DetailsStatus extends Document {
     return unescapeJson(this.platform);
   }
 
-  private SortedSet<String> alleged_family;
+  private SortedSet<String> allegedFamily;
 
   public void setAllegedFamily(SortedSet<String> allegedFamily) {
-    this.alleged_family = allegedFamily;
+    this.allegedFamily = allegedFamily;
   }
 
   public SortedSet<String> getAllegedFamily() {
-    return this.alleged_family;
+    return this.allegedFamily;
   }
 
-  private SortedSet<String> effective_family;
+  private SortedSet<String> effectiveFamily;
 
   public void setEffectiveFamily(SortedSet<String> effectiveFamily) {
-    this.effective_family = effectiveFamily;
+    this.effectiveFamily = effectiveFamily;
   }
 
   public SortedSet<String> getEffectiveFamily() {
-    return this.effective_family;
+    return this.effectiveFamily;
   }
 
-  private SortedSet<String> indirect_family;
+  private SortedSet<String> indirectFamily;
 
   public void setIndirectFamily(SortedSet<String> indirectFamily) {
-    this.indirect_family = indirectFamily;
+    this.indirectFamily = indirectFamily;
   }
 
   public SortedSet<String> getIndirectFamily() {
-    return this.indirect_family;
+    return this.indirectFamily;
   }
 
-  private Map<String, List<String>> exit_policy_v6_summary;
+  private Map<String, List<String>> exitPolicyV6Summary;
 
   public void setExitPolicyV6Summary(
       Map<String, List<String>> exitPolicyV6Summary) {
-    this.exit_policy_v6_summary = exitPolicyV6Summary;
+    this.exitPolicyV6Summary = exitPolicyV6Summary;
   }
 
   public Map<String, List<String>> getExitPolicyV6Summary() {
-    return this.exit_policy_v6_summary;
+    return this.exitPolicyV6Summary;
   }
 
   private Boolean hibernating;
@@ -178,14 +177,14 @@ public class DetailsStatus extends Document {
 
   /* From most recently published extra-info descriptor: */
 
-  private Long extra_info_desc_published;
+  private Long extraInfoDescPublished;
 
   public void setExtraInfoDescPublished(Long extraInfoDescPublished) {
-    this.extra_info_desc_published = extraInfoDescPublished;
+    this.extraInfoDescPublished = extraInfoDescPublished;
   }
 
   public Long getExtraInfoDescPublished() {
-    return this.extra_info_desc_published;
+    return this.extraInfoDescPublished;
   }
 
   private List<String> transports;
@@ -201,14 +200,14 @@ public class DetailsStatus extends Document {
 
   /* From network status entries: */
 
-  private boolean is_relay;
+  private boolean isRelay;
 
   public void setRelay(boolean isRelay) {
-    this.is_relay = isRelay;
+    this.isRelay = isRelay;
   }
 
   public boolean isRelay() {
-    return this.is_relay;
+    return this.isRelay;
   }
 
   private boolean running;
@@ -241,16 +240,16 @@ public class DetailsStatus extends Document {
     return this.address;
   }
 
-  private SortedSet<String> or_addresses_and_ports;
+  private SortedSet<String> orAddressesAndPorts;
 
   public void setOrAddressesAndPorts(
       SortedSet<String> orAddressesAndPorts) {
-    this.or_addresses_and_ports = orAddressesAndPorts;
+    this.orAddressesAndPorts = orAddressesAndPorts;
   }
 
   public SortedSet<String> getOrAddressesAndPorts() {
-    return this.or_addresses_and_ports == null ? new TreeSet<String>() :
-        this.or_addresses_and_ports;
+    return this.orAddressesAndPorts == null ? new TreeSet<String>() :
+        this.orAddressesAndPorts;
   }
 
   /** Returns all addresses used for the onion-routing protocol which
@@ -261,8 +260,8 @@ public class DetailsStatus extends Document {
     if (this.address != null) {
       orAddresses.add(this.address);
     }
-    if (this.or_addresses_and_ports != null) {
-      for (String orAddressAndPort : this.or_addresses_and_ports) {
+    if (this.orAddressesAndPorts != null) {
+      for (String orAddressAndPort : this.orAddressesAndPorts) {
         if (orAddressAndPort.contains(":")) {
           String orAddress = orAddressAndPort.substring(0,
               orAddressAndPort.lastIndexOf(':'));
@@ -273,105 +272,105 @@ public class DetailsStatus extends Document {
     return orAddresses;
   }
 
-  private long first_seen_millis;
+  private long firstSeenMillis;
 
   public void setFirstSeenMillis(long firstSeenMillis) {
-    this.first_seen_millis = firstSeenMillis;
+    this.firstSeenMillis = firstSeenMillis;
   }
 
   public long getFirstSeenMillis() {
-    return this.first_seen_millis;
+    return this.firstSeenMillis;
   }
 
-  private long last_seen_millis;
+  private long lastSeenMillis;
 
   public void setLastSeenMillis(long lastSeenMillis) {
-    this.last_seen_millis = lastSeenMillis;
+    this.lastSeenMillis = lastSeenMillis;
   }
 
   public long getLastSeenMillis() {
-    return this.last_seen_millis;
+    return this.lastSeenMillis;
   }
 
-  private int or_port;
+  private int orPort;
 
   public void setOrPort(int orPort) {
-    this.or_port = orPort;
+    this.orPort = orPort;
   }
 
   public int getOrPort() {
-    return this.or_port;
+    return this.orPort;
   }
 
-  private int dir_port;
+  private int dirPort;
 
   public void setDirPort(int dirPort) {
-    this.dir_port = dirPort;
+    this.dirPort = dirPort;
   }
 
   public int getDirPort() {
-    return this.dir_port;
+    return this.dirPort;
   }
 
-  private SortedSet<String> relay_flags;
+  private SortedSet<String> relayFlags;
 
   public void setRelayFlags(SortedSet<String> relayFlags) {
-    this.relay_flags = relayFlags;
+    this.relayFlags = relayFlags;
   }
 
   public SortedSet<String> getRelayFlags() {
-    return this.relay_flags;
+    return this.relayFlags;
   }
 
-  private long consensus_weight;
+  private long consensusWeight;
 
   public void setConsensusWeight(long consensusWeight) {
-    this.consensus_weight = consensusWeight;
+    this.consensusWeight = consensusWeight;
   }
 
   public long getConsensusWeight() {
-    return this.consensus_weight;
+    return this.consensusWeight;
   }
 
-  private String default_policy;
+  private String defaultPolicy;
 
   public void setDefaultPolicy(String defaultPolicy) {
-    this.default_policy = defaultPolicy;
+    this.defaultPolicy = defaultPolicy;
   }
 
   public String getDefaultPolicy() {
-    return this.default_policy;
+    return this.defaultPolicy;
   }
 
-  private String port_list;
+  private String portList;
 
   public void setPortList(String portList) {
-    this.port_list = portList;
+    this.portList = portList;
   }
 
   public String getPortList() {
-    return this.port_list;
+    return this.portList;
   }
 
-  private long last_changed_or_address_or_port;
+  private long lastChangedOrAddressOrPort;
 
   public void setLastChangedOrAddressOrPort(
       long lastChangedOrAddressOrPort) {
-    this.last_changed_or_address_or_port = lastChangedOrAddressOrPort;
+    this.lastChangedOrAddressOrPort = lastChangedOrAddressOrPort;
   }
 
   public long getLastChangedOrAddressOrPort() {
-    return this.last_changed_or_address_or_port;
+    return this.lastChangedOrAddressOrPort;
   }
 
-  private Boolean recommended_version;
+  private Boolean recommendedVersion;
 
   public void setRecommendedVersion(Boolean recommendedVersion) {
-    this.recommended_version = recommendedVersion;
+    this.recommendedVersion = recommendedVersion;
   }
 
   public Boolean getRecommendedVersion() {
-    return this.recommended_version;
+    return this.recommendedVersion;
   }
 
   private Boolean measured;
@@ -386,56 +385,56 @@ public class DetailsStatus extends Document {
 
   /* From exit lists: */
 
-  private Map<String, Long> exit_addresses;
+  private Map<String, Long> exitAddresses;
 
   public void setExitAddresses(Map<String, Long> exitAddresses) {
-    this.exit_addresses = exitAddresses;
+    this.exitAddresses = exitAddresses;
   }
 
   public Map<String, Long> getExitAddresses() {
-    return this.exit_addresses;
+    return this.exitAddresses;
   }
 
   /* Calculated path-selection probabilities: */
 
-  private Float consensus_weight_fraction;
+  private Float consensusWeightFraction;
 
   public void setConsensusWeightFraction(Float consensusWeightFraction) {
-    this.consensus_weight_fraction = consensusWeightFraction;
+    this.consensusWeightFraction = consensusWeightFraction;
   }
 
   public Float getConsensusWeightFraction() {
-    return this.consensus_weight_fraction;
+    return this.consensusWeightFraction;
   }
 
-  private Float guard_probability;
+  private Float guardProbability;
 
   public void setGuardProbability(Float guardProbability) {
-    this.guard_probability = guardProbability;
+    this.guardProbability = guardProbability;
   }
 
   public Float getGuardProbability() {
-    return this.guard_probability;
+    return this.guardProbability;
   }
 
-  private Float middle_probability;
+  private Float middleProbability;
 
   public void setMiddleProbability(Float middleProbability) {
-    this.middle_probability = middleProbability;
+    this.middleProbability = middleProbability;
   }
 
   public Float getMiddleProbability() {
-    return this.middle_probability;
+    return this.middleProbability;
   }
 
-  private Float exit_probability;
+  private Float exitProbability;
 
   public void setExitProbability(Float exitProbability) {
-    this.exit_probability = exitProbability;
+    this.exitProbability = exitProbability;
   }
 
   public Float getExitProbability() {
-    return this.exit_probability;
+    return this.exitProbability;
   }
 
   /* GeoIP lookup results: */
@@ -460,79 +459,79 @@ public class DetailsStatus extends Document {
     return this.longitude;
   }
 
-  private String country_code;
+  private String countryCode;
 
   public void setCountryCode(String countryCode) {
-    this.country_code = countryCode;
+    this.countryCode = countryCode;
   }
 
   public String getCountryCode() {
-    return this.country_code;
+    return this.countryCode;
   }
 
-  private String country_name;
+  private String countryName;
 
   public void setCountryName(String countryName) {
-    this.country_name = escapeJson(countryName);
+    this.countryName = escapeJson(countryName);
   }
 
   public String getCountryName() {
-    return unescapeJson(this.country_name);
+    return unescapeJson(this.countryName);
   }
 
-  private String region_name;
+  private String regionName;
 
   public void setRegionName(String regionName) {
-    this.region_name = escapeJson(regionName);
+    this.regionName = escapeJson(regionName);
   }
 
   public String getRegionName() {
-    return unescapeJson(this.region_name);
+    return unescapeJson(this.regionName);
   }
 
-  private String city_name;
+  private String cityName;
 
   public void setCityName(String cityName) {
-    this.city_name = escapeJson(cityName);
+    this.cityName = escapeJson(cityName);
   }
 
   public String getCityName() {
-    return unescapeJson(this.city_name);
+    return unescapeJson(this.cityName);
   }
 
-  private String as_name;
+  private String asName;
 
   public void setAsName(String asName) {
-    this.as_name = escapeJson(asName);
+    this.asName = escapeJson(asName);
   }
 
   public String getAsName() {
-    return unescapeJson(this.as_name);
+    return unescapeJson(this.asName);
   }
 
-  private String as_number;
+  private String asNumber;
 
   public void setAsNumber(String asNumber) {
-    this.as_number = escapeJson(asNumber);
+    this.asNumber = escapeJson(asNumber);
   }
 
   public String getAsNumber() {
-    return unescapeJson(this.as_number);
+    return unescapeJson(this.asNumber);
   }
 
   /* Reverse DNS lookup result: */
 
-  private String host_name;
+  private String hostName;
 
   public void setHostName(String hostName) {
-    this.host_name = escapeJson(hostName);
+    this.hostName = escapeJson(hostName);
   }
 
   public String getHostName() {
-    return unescapeJson(this.host_name);
+    return unescapeJson(this.hostName);
   }
 
-  private List<String> verified_host_names;
+  private List<String> verifiedHostNames;
 
   /**
    * Creates a copy of the list with each string escaped for JSON compatibility
@@ -541,12 +540,12 @@ public class DetailsStatus extends Document {
    */
   public void setVerifiedHostNames(List<String> verifiedHostNames) {
     if (null == verifiedHostNames) {
-      this.verified_host_names = null;
+      this.verifiedHostNames = null;
       return;
     }
-    this.verified_host_names = new ArrayList<>();
+    this.verifiedHostNames = new ArrayList<>();
     for (String hostName : verifiedHostNames) {
-      this.verified_host_names.add(escapeJson(hostName));
+      this.verifiedHostNames.add(escapeJson(hostName));
     }
   }
 
@@ -556,17 +555,17 @@ public class DetailsStatus extends Document {
    * null in which case null is returned.
    */
   public List<String> getVerifiedHostNames() {
-    if (null == this.verified_host_names) {
+    if (null == this.verifiedHostNames) {
       return null;
     }
     List<String> verifiedHostNames = new ArrayList<>();
-    for (String escapedHostName : this.verified_host_names) {
+    for (String escapedHostName : this.verifiedHostNames) {
       verifiedHostNames.add(unescapeJson(escapedHostName));
     }
     return verifiedHostNames;
   }
 
-  private List<String> unverified_host_names;
+  private List<String> unverifiedHostNames;
 
   /**
    * Creates a copy of the list with each string escaped for JSON compatibility
@@ -575,12 +574,12 @@ public class DetailsStatus extends Document {
    */
   public void setUnverifiedHostNames(List<String> unverifiedHostNames) {
     if (null == unverifiedHostNames) {
-      this.unverified_host_names = null;
+      this.unverifiedHostNames = null;
       return;
     }
-    this.unverified_host_names = new ArrayList<>();
+    this.unverifiedHostNames = new ArrayList<>();
     for (String hostName : unverifiedHostNames) {
-      this.unverified_host_names.add(escapeJson(hostName));
+      this.unverifiedHostNames.add(escapeJson(hostName));
     }
   }
 
@@ -590,24 +589,24 @@ public class DetailsStatus extends Document {
    * null in which case null is returned.
    */
   public List<String> getUnverifiedHostNames() {
-    if (null == this.unverified_host_names) {
+    if (null == this.unverifiedHostNames) {
       return null;
     }
     List<String> unverifiedHostNames = new ArrayList<>();
-    for (String escapedHostName : this.unverified_host_names) {
+    for (String escapedHostName : this.unverifiedHostNames) {
       unverifiedHostNames.add(unescapeJson(escapedHostName));
     }
     return unverifiedHostNames;
   }
 
-  private List<String> advertised_or_addresses;
+  private List<String> advertisedOrAddresses;
 
   public void setAdvertisedOrAddresses(List<String> advertisedOrAddresses) {
-    this.advertised_or_addresses = advertisedOrAddresses;
+    this.advertisedOrAddresses = advertisedOrAddresses;
   }
 
   public List<String> getAdvertisedOrAddresses() {
-    return this.advertised_or_addresses;
+    return this.advertisedOrAddresses;
   }
 
   private String version;
@@ -620,14 +619,14 @@ public class DetailsStatus extends Document {
     return this.version;
   }
 
-  private String version_status;
+  private String versionStatus;
 
   public void setVersionStatus(String versionStatus) {
-    this.version_status = versionStatus;
+    this.versionStatus = versionStatus;
   }
 
   public String getVersionStatus() {
-    return this.version_status;
+    return this.versionStatus;
   }
 }
 

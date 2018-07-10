@@ -5,7 +5,6 @@ package org.torproject.onionoo.docs;
 
 import java.util.Map;
 
-@SuppressWarnings("checkstyle:membername")
 public class BandwidthDocument extends Document {
 
   @SuppressWarnings("unused")
@@ -15,24 +14,24 @@ public class BandwidthDocument extends Document {
     this.fingerprint = fingerprint;
   }
 
-  private Map<String, GraphHistory> write_history;
+  private Map<String, GraphHistory> writeHistory;
 
   public void setWriteHistory(Map<String, GraphHistory> writeHistory) {
-    this.write_history = writeHistory;
+    this.writeHistory = writeHistory;
   }
 
   public Map<String, GraphHistory> getWriteHistory() {
-    return this.write_history;
+    return this.writeHistory;
   }
 
-  private Map<String, GraphHistory> read_history;
+  private Map<String, GraphHistory> readHistory;
 
   public void setReadHistory(Map<String, GraphHistory> readHistory) {
-    this.read_history = readHistory;
+    this.readHistory = readHistory;
   }
 
   public Map<String, GraphHistory> getReadHistory() {
-    return this.read_history;
+    return this.readHistory;
   }
 }
 

@@ -5,7 +5,6 @@ package org.torproject.onionoo.docs;
 
 import java.util.Map;
 
-@SuppressWarnings("checkstyle:membername")
 public class WeightsDocument extends Document {
 
   @SuppressWarnings("unused")
@@ -16,43 +15,43 @@ public class WeightsDocument extends Document {
   }
 
   @SuppressWarnings("unused")
-  private Map<String, GraphHistory> consensus_weight_fraction;
+  private Map<String, GraphHistory> consensusWeightFraction;
 
   public void setConsensusWeightFraction(
       Map<String, GraphHistory> consensusWeightFraction) {
-    this.consensus_weight_fraction = consensusWeightFraction;
+    this.consensusWeightFraction = consensusWeightFraction;
   }
 
   @SuppressWarnings("unused")
-  private Map<String, GraphHistory> guard_probability;
+  private Map<String, GraphHistory> guardProbability;
 
   public void setGuardProbability(
       Map<String, GraphHistory> guardProbability) {
-    this.guard_probability = guardProbability;
+    this.guardProbability = guardProbability;
   }
 
   @SuppressWarnings("unused")
-  private Map<String, GraphHistory> middle_probability;
+  private Map<String, GraphHistory> middleProbability;
 
   public void setMiddleProbability(
       Map<String, GraphHistory> middleProbability) {
-    this.middle_probability = middleProbability;
+    this.middleProbability = middleProbability;
   }
 
   @SuppressWarnings("unused")
-  private Map<String, GraphHistory> exit_probability;
+  private Map<String, GraphHistory> exitProbability;
 
   public void setExitProbability(
       Map<String, GraphHistory> exitProbability) {
-    this.exit_probability = exitProbability;
+    this.exitProbability = exitProbability;
   }
 
   @SuppressWarnings("unused")
-  private Map<String, GraphHistory> consensus_weight;
+  private Map<String, GraphHistory> consensusWeight;
 
   public void setConsensusWeight(
       Map<String, GraphHistory> consensusWeight) {
-    this.consensus_weight = consensusWeight;
+    this.consensusWeight = consensusWeight;
   }
 }
 
