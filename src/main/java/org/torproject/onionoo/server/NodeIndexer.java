@@ -198,23 +198,36 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           .toUpperCase();
       newRelayFingerprintSummaryLines.put(fingerprint, entry);
       newRelayFingerprintSummaryLines.put(hashedFingerprint, entry);
-      if (entry.getCountryCode() != null) {
-        String countryCode = entry.getCountryCode();
-        if (!newRelaysByCountryCode.containsKey(countryCode)) {
-          newRelaysByCountryCode.put(countryCode,
-              new HashSet<String>());
-        }
-        newRelaysByCountryCode.get(countryCode).add(fingerprint);
-        newRelaysByCountryCode.get(countryCode).add(hashedFingerprint);
+      String countryCode;
+      if (null != entry.getCountryCode()) {
+        countryCode = entry.getCountryCode();
+      } else {
+        /* The country code xz will never be assigned for use with ISO 3166-1
+         * and is "user-assigned". Fun fact: UN/LOCODE assigns XZ to represent
+         * installations in international waters. */
+        countryCode = "xz";
       }
-      if (entry.getAsNumber() != null) {
-        String asNumber = entry.getAsNumber();
-        if (!newRelaysByAsNumber.containsKey(asNumber)) {
-          newRelaysByAsNumber.put(asNumber, new HashSet<String>());
-        }
-        newRelaysByAsNumber.get(asNumber).add(fingerprint);
-        newRelaysByAsNumber.get(asNumber).add(hashedFingerprint);
+      if (!newRelaysByCountryCode.containsKey(countryCode)) {
+        newRelaysByCountryCode.put(countryCode,
+            new HashSet<String>());
       }
+      newRelaysByCountryCode.get(countryCode).add(fingerprint);
+      newRelaysByCountryCode.get(countryCode).add(hashedFingerprint);
+      String asNumber;
+      if (null != entry.getAsNumber()) {
+        asNumber = entry.getAsNumber();
+      } else {
+        /* Autonomous system number 0 is reserved by RFC6707, to be used for
+         * networks that are not routed. The use of this number should be,
+         * and in the majority of cases probably is, filtered and so it
+         * shouldn't appear in any lookup databases. */
+        asNumber = "AS0";
+      }
+      if (!newRelaysByAsNumber.containsKey(asNumber)) {
+        newRelaysByAsNumber.put(asNumber, new HashSet<String>());
+      }
+      newRelaysByAsNumber.get(asNumber).add(fingerprint);
+      newRelaysByAsNumber.get(asNumber).add(hashedFingerprint);
       for (String flag : entry.getRelayFlags()) {
         String flagLowerCase = flag.toLowerCase();
         if (!newRelaysByFlag.containsKey(flagLowerCase)) {
