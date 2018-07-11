@@ -5,12 +5,8 @@ package org.torproject.onionoo.docs;
 
 import org.torproject.onionoo.util.FormattingUtils;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +40,7 @@ public class DocumentStore {
   private static Logger log = LoggerFactory.getLogger(
       DocumentStore.class);
 
-  private static ObjectMapper objectMapper = new ObjectMapper()
-      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-      .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-      .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+  private static ObjectMapper objectMapper = new ObjectMapper();
 
   private final File statusDir = new File("status");
 

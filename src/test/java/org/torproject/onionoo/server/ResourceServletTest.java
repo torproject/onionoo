@@ -14,10 +14,7 @@ import org.torproject.onionoo.docs.DummyDocumentStore;
 import org.torproject.onionoo.docs.UpdateStatus;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,11 +36,7 @@ import java.util.TreeSet;
  * which tests servlet specifics. */
 public class ResourceServletTest {
 
-  private static ObjectMapper objectMapper = new ObjectMapper()
-      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-      .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-      .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+  private static ObjectMapper objectMapper = new ObjectMapper();
 
   private SortedMap<String, org.torproject.onionoo.docs.SummaryDocument> relays;
   private SortedMap<String, org.torproject.onionoo.docs.SummaryDocument>
@@ -357,6 +350,7 @@ public class ResourceServletTest {
   }
 
   @SuppressWarnings("MemberName")
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   private static class SummaryDocument {
     private String version;
     private String next_major_version_scheduled;
@@ -372,6 +366,7 @@ public class ResourceServletTest {
   }
 
   @SuppressWarnings("MemberName")
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   private static class RelaySummary {
     private String n;
     private String f;
@@ -380,6 +375,7 @@ public class ResourceServletTest {
   }
 
   @SuppressWarnings("MemberName")
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   private static class BridgeSummary {
     private String n;
     private String h;

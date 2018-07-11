@@ -14,12 +14,8 @@ import org.torproject.onionoo.docs.UptimeDocument;
 import org.torproject.onionoo.docs.WeightsDocument;
 import org.torproject.onionoo.util.FormattingUtils;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +31,7 @@ public class ResponseBuilder {
   private static final Logger logger =
       LoggerFactory.getLogger(ResponseBuilder.class);
 
-  private static ObjectMapper objectMapper = new ObjectMapper()
-      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-      .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-      .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+  private static ObjectMapper objectMapper = new ObjectMapper();
 
   private DocumentStore documentStore;
   private String buildRevision;

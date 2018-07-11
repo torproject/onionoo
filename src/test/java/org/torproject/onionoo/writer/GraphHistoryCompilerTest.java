@@ -9,11 +9,7 @@ import static org.junit.Assert.assertNotNull;
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.GraphHistory;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,11 +26,7 @@ import java.util.Map;
 @RunWith(Parameterized.class)
 public class GraphHistoryCompilerTest {
 
-  private static ObjectMapper objectMapper = new ObjectMapper()
-      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-      .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-      .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+  private static ObjectMapper objectMapper = new ObjectMapper();
 
   /** Provide test data. */
   @Parameters
