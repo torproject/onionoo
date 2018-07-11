@@ -7,6 +7,8 @@
  * Minor changes
    - Index relays with no known country code or autonomous system
      number using the special values "xz" and "AS0" respectively.
+   - Avoid running into an IllegalStateException when CollecTor is
+     missing a whole descriptor directory.
 
 
 # Changes in version 6.0-1.14.0 - 2018-05-29

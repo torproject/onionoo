@@ -108,6 +108,11 @@ class DescriptorQueue {
     if (this.historyFile == null) {
       return;
     }
+    if (null == this.descriptors) {
+      log.debug("Not writing history file {}, because we did not read a single "
+          + "descriptor from {}.", this.historyFile, this.directory);
+      return;
+    }
     SortedMap<String, Long> excludedAndParsedFiles = new TreeMap<>();
     excludedAndParsedFiles.putAll(
         this.descriptorReader.getExcludedFiles());
