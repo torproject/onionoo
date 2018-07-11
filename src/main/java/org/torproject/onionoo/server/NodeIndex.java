@@ -190,6 +190,28 @@ class NodeIndex {
     return this.bridgesByVersion;
   }
 
+  private Map<String, Set<String>> relaysByOperatingSystem;
+
+  public void setRelaysByOperatingSystem(
+      Map<String, Set<String>> relaysByOperatingSystem) {
+    this.relaysByOperatingSystem = relaysByOperatingSystem;
+  }
+
+  public Map<String, Set<String>> getRelaysByOperatingSystem() {
+    return this.relaysByOperatingSystem;
+  }
+
+  private Map<String, Set<String>> bridgesByOperatingSystem;
+
+  public void setBridgesByOperatingSystem(
+      Map<String, Set<String>> bridgesByOperatingSystem) {
+    this.bridgesByOperatingSystem = bridgesByOperatingSystem;
+  }
+
+  public Map<String, Set<String>> getBridgesByOperatingSystem() {
+    return this.bridgesByOperatingSystem;
+  }
+
   private Map<String, Set<String>> relaysByHostName;
 
   public void setRelaysByHostName(Map<String, Set<String>> relaysByHostName) {

@@ -3,6 +3,7 @@
  * Medium changes
    - Provide more accurate DNS results in "verified_host_names" and
      "unverified_host_names".
+   - Allow filtering by operating system using the new "os" parameter.
 
  * Minor changes
    - Index relays with no known country code or autonomous system

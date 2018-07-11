@@ -157,6 +157,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     Map<String, Set<String>> newRelaysByFamily = new HashMap<>();
     Map<String, Set<String>> newRelaysByVersion = new HashMap<>();
     Map<String, Set<String>> newBridgesByVersion = new HashMap<>();
+    Map<String, Set<String>> newRelaysByOperatingSystem = new HashMap<>();
+    Map<String, Set<String>> newBridgesByOperatingSystem = new HashMap<>();
     Map<String, Set<String>> newRelaysByHostName = new HashMap<>();
     Map<Boolean, Set<String>> newRelaysByRecommendedVersion = new HashMap<>();
     newRelaysByRecommendedVersion.put(true, new HashSet<>());
@@ -281,6 +283,14 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByVersion.get(version).add(fingerprint);
         newRelaysByVersion.get(version).add(hashedFingerprint);
       }
+      String operatingSystem = entry.getOperatingSystem();
+      if (null != operatingSystem) {
+        if (!newRelaysByOperatingSystem.containsKey(operatingSystem)) {
+          newRelaysByOperatingSystem.put(operatingSystem, new HashSet<>());
+        }
+        newRelaysByOperatingSystem.get(operatingSystem).add(fingerprint);
+        newRelaysByOperatingSystem.get(operatingSystem).add(hashedFingerprint);
+      }
       List<String> allHostNames = new ArrayList<>();
       List<String> verifiedHostNames = entry.getVerifiedHostNames();
       if (null != verifiedHostNames) {
@@ -367,6 +377,16 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newBridgesByVersion.get(version).add(hashedFingerprint);
         newBridgesByVersion.get(version).add(hashedHashedFingerprint);
       }
+      String operatingSystem = entry.getOperatingSystem();
+      if (null != operatingSystem) {
+        if (!newBridgesByOperatingSystem.containsKey(operatingSystem)) {
+          newBridgesByOperatingSystem.put(operatingSystem, new HashSet<>());
+        }
+        newBridgesByOperatingSystem.get(operatingSystem)
+            .add(hashedFingerprint);
+        newBridgesByOperatingSystem.get(operatingSystem)
+            .add(hashedHashedFingerprint);
+      }
       Boolean recommendedVersion = entry.getRecommendedVersion();
       if (null != recommendedVersion) {
         newBridgesByRecommendedVersion.get(recommendedVersion).add(
@@ -394,6 +414,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     newNodeIndex.setBridgesPublishedMillis(bridgesLastPublishedMillis);
     newNodeIndex.setRelaysByVersion(newRelaysByVersion);
     newNodeIndex.setBridgesByVersion(newBridgesByVersion);
+    newNodeIndex.setRelaysByOperatingSystem(newRelaysByOperatingSystem);
+    newNodeIndex.setBridgesByOperatingSystem(newBridgesByOperatingSystem);
     newNodeIndex.setRelaysByHostName(newRelaysByHostName);
     newNodeIndex.setRelaysByRecommendedVersion(newRelaysByRecommendedVersion);
     newNodeIndex.setBridgesByRecommendedVersion(newBridgesByRecommendedVersion);

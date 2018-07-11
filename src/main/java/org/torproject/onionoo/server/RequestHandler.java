@@ -97,6 +97,12 @@ public class RequestHandler {
     this.version = version;
   }
 
+  private String operatingSystem;
+
+  public void setOperatingSystem(String operatingSystem) {
+    this.operatingSystem = operatingSystem;
+  }
+
   private String hostName;
 
   public void setHostName(String hostName) {
@@ -177,6 +183,7 @@ public class RequestHandler {
     this.filterByContact();
     this.filterByFamily();
     this.filterByVersion();
+    this.filterByOperatingSystem();
     this.filterByHostName();
     this.filterByRecommendedVersion();
     this.order();
@@ -552,6 +559,29 @@ public class RequestHandler {
     for (Map.Entry<String, Set<String>> e
         : this.nodeIndex.getBridgesByVersion().entrySet()) {
       if (e.getKey().startsWith(this.version)) {
+        keepBridges.addAll(e.getValue());
+      }
+    }
+    this.filteredBridges.keySet().retainAll(keepBridges);
+  }
+
+  private void filterByOperatingSystem() {
+    if (null == this.operatingSystem) {
+      /* Not filtering by operating system. */
+      return;
+    }
+    Set<String> keepRelays = new HashSet<>();
+    for (Map.Entry<String, Set<String>> e
+        : this.nodeIndex.getRelaysByOperatingSystem().entrySet()) {
+      if (e.getKey().startsWith(this.operatingSystem)) {
+        keepRelays.addAll(e.getValue());
+      }
+    }
+    this.filteredRelays.keySet().retainAll(keepRelays);
+    Set<String> keepBridges = new HashSet<>();
+    for (Map.Entry<String, Set<String>> e
+        : this.nodeIndex.getBridgesByOperatingSystem().entrySet()) {
+      if (e.getKey().startsWith(this.operatingSystem)) {
         keepBridges.addAll(e.getValue());
       }
     }

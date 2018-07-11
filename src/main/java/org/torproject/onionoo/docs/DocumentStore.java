@@ -448,6 +448,7 @@ public class DocumentStore {
     SortedSet<String> relayFlags = new TreeSet<>();
     SortedSet<String> family = null;
     String version = null;
+    String operatingSystem = null;
     long lastSeenMillis = -1L;
     long consensusWeight = -1L;
     long firstSeenMillis = -1L;
@@ -458,8 +459,8 @@ public class DocumentStore {
     SummaryDocument summaryDocument = new SummaryDocument(isRelay,
         nickname, fingerprint, addresses, lastSeenMillis, running,
         relayFlags, consensusWeight, countryCode, firstSeenMillis,
-        asNumber, contact, family, family, version, hostName,
-        verifiedHostNames, unverifiedHostNames,
+        asNumber, contact, family, family, version, operatingSystem,
+        hostName, verifiedHostNames, unverifiedHostNames,
         recommendedVersion);
     return summaryDocument;
   }

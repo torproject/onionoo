@@ -92,6 +92,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
       SortedSet<String> effectiveFamily = nodeStatus.getEffectiveFamily();
       String nickname = nodeStatus.getNickname();
       String version = nodeStatus.getVersion();
+      String operatingSystem = nodeStatus.getOperatingSystem();
       String hostName = nodeStatus.getHostName();
       List<String> verifiedHostNames = nodeStatus.getVerifiedHostNames();
       List<String> unverifiedHostNames = nodeStatus.getUnverifiedHostNames();
@@ -100,8 +101,8 @@ public class SummaryDocumentWriter implements DocumentWriter {
           nickname, fingerprint, addresses, lastSeenMillis, running,
           relayFlags, consensusWeight, countryCode, firstSeenMillis,
           asNumber, contact, declaredFamily, effectiveFamily, version,
-          hostName, verifiedHostNames, unverifiedHostNames,
-          recommendedVersion);
+          operatingSystem, hostName, verifiedHostNames,
+          unverifiedHostNames, recommendedVersion);
       if (this.documentStore.store(summaryDocument, fingerprint)) {
         this.writtenDocuments++;
       }

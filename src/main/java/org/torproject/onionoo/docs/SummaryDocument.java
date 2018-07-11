@@ -298,6 +298,17 @@ public class SummaryDocument extends Document {
     return this.version;
   }
 
+  @JsonProperty("o")
+  private String operatingSystem;
+
+  public void setOperatingSystem(String operatingSystem) {
+    this.operatingSystem = operatingSystem;
+  }
+
+  public String getOperatingSystem() {
+    return this.operatingSystem;
+  }
+
   @JsonProperty("h")
   private String hostName;
 
@@ -355,9 +366,9 @@ public class SummaryDocument extends Document {
       boolean running, SortedSet<String> relayFlags, long consensusWeight,
       String countryCode, long firstSeenMillis, String asNumber,
       String contact, SortedSet<String> familyFingerprints,
-      SortedSet<String> effectiveFamily, String version, String hostName,
-      List<String> verifiedHostNames, List<String> unverifiedHostNames,
-      Boolean recommendedVersion) {
+      SortedSet<String> effectiveFamily, String version, String operatingSystem,
+      String hostName, List<String> verifiedHostNames,
+      List<String> unverifiedHostNames, Boolean recommendedVersion) {
     this.setRelay(isRelay);
     this.setNickname(nickname);
     this.setFingerprint(fingerprint);
@@ -373,6 +384,7 @@ public class SummaryDocument extends Document {
     this.setFamilyFingerprints(familyFingerprints);
     this.setEffectiveFamily(effectiveFamily);
     this.setVersion(version);
+    this.setOperatingSystem(operatingSystem);
     this.setHostName(hostName);
     this.setVerifiedHostNames(verifiedHostNames);
     this.setUnverifiedHostNames(unverifiedHostNames);

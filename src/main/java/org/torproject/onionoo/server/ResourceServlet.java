@@ -69,7 +69,7 @@ public class ResourceServlet extends HttpServlet {
       Arrays.asList("type", "running", "search", "lookup", "fingerprint",
           "country", "as", "flag", "first_seen_days", "last_seen_days",
           "contact", "order", "limit", "offset", "fields", "family", "version",
-          "host_name", "recommended_version"));
+          "os", "host_name", "recommended_version"));
 
   private static Set<String> illegalSearchQualifiers =
       new HashSet<>(Arrays.asList(("search,fingerprint,order,limit,"
@@ -292,6 +292,15 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       rh.setVersion(versionParameter);
+    }
+    if (parameterMap.containsKey("os")) {
+      String osParameter = this.parseOperatingSystemParameter(
+              parameterMap.get("os"));
+      if (null == osParameter) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      rh.setOperatingSystem(osParameter);
     }
     if (parameterMap.containsKey("host_name")) {
       String hostNameParameter = this.parseHostNameParameter(
@@ -605,6 +614,16 @@ public class ResourceServlet extends HttpServlet {
       return null;
     }
     return parameter;
+  }
+
+  private String parseOperatingSystemParameter(String parameter) {
+    for (char c : parameter.toCharArray()) {
+      if (c < 32 || c >= 127) {
+        /* Only accept printable ASCII. */
+        return null;
+      }
+    }
+    return parameter.toLowerCase();
   }
 
   private static Pattern hostNameParameterPattern =

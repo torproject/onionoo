@@ -343,6 +343,16 @@ public class NodeStatus extends Document {
     return this.versionStatus;
   }
 
+  private String operatingSystem;
+
+  public void setOperatingSystem(String operatingSystem) {
+    this.operatingSystem = operatingSystem;
+  }
+
+  public String getOperatingSystem() {
+    return this.operatingSystem;
+  }
+
   /* From exit lists: */
 
   private SortedSet<String> exitAddresses;

@@ -807,6 +807,12 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       }
 
       nodeStatus.setContact(detailsStatus.getContact());
+      if (null != detailsStatus.getPlatform()) {
+        String[] platformParts = detailsStatus.getPlatform().split(" on ");
+        if (platformParts.length > 1) {
+          nodeStatus.setOperatingSystem(platformParts[1].toLowerCase());
+        }
+      }
 
       /* Extract tor software version for bridges from their "platform" line.
        * (We already know this for relays from "v" lines in the consensus.) */
