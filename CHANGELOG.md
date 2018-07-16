@@ -1,4 +1,4 @@
-# Changes in version 6.?-1.??.0 - 2018-??-??
+# Changes in version 6.1-1.15.0 - 2018-07-16
 
  * Medium changes
    - Provide more accurate DNS results in "verified_host_names" and
