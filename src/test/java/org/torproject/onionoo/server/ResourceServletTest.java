@@ -1042,6 +1042,20 @@ public class ResourceServletTest {
   }
 
   @Test(timeout = 100)
+  public void testLookupTwoFingerprints() {
+    this.assertSummaryDocument(
+        "/summary?lookup=000C5F55BD4814B917CC474BD537F1A3B33CCE2A,"
+        + "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756", 1,
+        new String[] { "TorkaZ" }, 1,   new String[] { "gummy" });
+  }
+
+  @Test(timeout = 100)
+  public void testLookupFingerprintTrailingComma() {
+    this.assertErrorStatusCode(
+        "/summary?lookup=000C5F55BD4814B917CC474BD537F1A3B33CCE2A,", 400);
+  }
+
+  @Test(timeout = 100)
   public void testFingerprintRelayFingerprint() {
     this.assertSummaryDocument(
         "/summary?fingerprint=000C5F55BD4814B917CC474BD537F1A3B33CCE2A",

@@ -54,9 +54,9 @@ public class RequestHandler {
     System.arraycopy(search, 0, this.search, 0, search.length);
   }
 
-  private String lookup;
+  private String[] lookup;
 
-  public void setLookup(String lookup) {
+  public void setLookup(String[] lookup) {
     this.lookup = lookup;
   }
 
@@ -340,17 +340,20 @@ public class RequestHandler {
       /* Not filtering by looking up relay or bridge. */
       return;
     }
-    String fingerprint = this.lookup;
-    SummaryDocument relayLine = this.filteredRelays.get(fingerprint);
-    this.filteredRelays.clear();
-    if (relayLine != null) {
-      this.filteredRelays.put(fingerprint, relayLine);
+    Map<String, SummaryDocument> matchingRelays = new HashMap<>();
+    for (String fingerprint : this.lookup) {
+      if (this.filteredRelays.containsKey(fingerprint)) {
+        matchingRelays.put(fingerprint, this.filteredRelays.get(fingerprint));
+      }
     }
-    SummaryDocument bridgeLine = this.filteredBridges.get(fingerprint);
-    this.filteredBridges.clear();
-    if (bridgeLine != null) {
-      this.filteredBridges.put(fingerprint, bridgeLine);
+    this.filteredRelays = matchingRelays;
+    Map<String, SummaryDocument> matchingBridges = new HashMap<>();
+    for (String fingerprint : this.lookup) {
+      if (this.filteredBridges.containsKey(fingerprint)) {
+        matchingBridges.put(fingerprint, this.filteredBridges.get(fingerprint));
+      }
     }
+    this.filteredBridges = matchingBridges;
   }
 
   private void filterByFingerprint() {

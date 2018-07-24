@@ -211,24 +211,22 @@ public class ResourceServlet extends HttpServlet {
       rh.setRunning(runningRequested ? "true" : "false");
     }
     if (parameterMap.containsKey("lookup")) {
-      String lookupParameter = this.parseFingerprintParameter(
+      String[] lookupParameter = this.parseFingerprintParameter(
           parameterMap.get("lookup"));
       if (lookupParameter == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      String fingerprint = lookupParameter.toUpperCase();
-      rh.setLookup(fingerprint);
+      rh.setLookup(lookupParameter);
     }
     if (parameterMap.containsKey("fingerprint")) {
-      String fingerprintParameter = this.parseFingerprintParameter(
+      String[] fingerprintParameter = this.parseFingerprintParameter(
           parameterMap.get("fingerprint"));
-      if (fingerprintParameter == null) {
+      if (null == fingerprintParameter || 1 != fingerprintParameter.length) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      String fingerprint = fingerprintParameter.toUpperCase();
-      rh.setFingerprint(fingerprint);
+      rh.setFingerprint(fingerprintParameter[0]);
     }
     if (parameterMap.containsKey("country")) {
       String countryCodeParameter = this.parseCountryCodeParameter(
@@ -360,14 +358,13 @@ public class ResourceServlet extends HttpServlet {
       rh.setLimit(limitParameter);
     }
     if (parameterMap.containsKey("family")) {
-      String familyParameter = this.parseFingerprintParameter(
+      String[] familyParameter = this.parseFingerprintParameter(
           parameterMap.get("family"));
-      if (familyParameter == null) {
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+      if (null == familyParameter || 1 != familyParameter.length) {
+          response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-      String family = familyParameter.toUpperCase();
-      rh.setFamily(family);
+      rh.setFamily(familyParameter[0]);
     }
     rh.handleRequest();
     long parsedRequestMillis = System.currentTimeMillis();
@@ -473,18 +470,14 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern fingerprintParameterPattern =
-      Pattern.compile("^[0-9a-zA-Z]{1,40}$");
+      Pattern.compile("((^|,)[0-9a-zA-Z]{40})+$");
 
-  private String parseFingerprintParameter(String parameter) {
+  private String[] parseFingerprintParameter(String parameter) {
     if (!fingerprintParameterPattern.matcher(parameter).matches()) {
       /* Fingerprint contains non-hex character(s). */
       return null;
     }
-    if (parameter.length() != 40) {
-      /* Only full fingerprints are accepted. */
-      return null;
-    }
-    return parameter;
+    return parameter.toUpperCase().split(",");
   }
 
   private static Pattern countryCodeParameterPattern =

@@ -1,3 +1,11 @@
+# Changes in version 6.2-1.16.0 - 2018-07-??
+
+ * Medium changes
+   - Support a comma-separated list of fingerprints in the lookup
+     parameter to allow for URLs that specify a list of relays or
+     bridges.
+
+
 # Changes in version 6.1-1.15.0 - 2018-07-16
 
  * Medium changes
