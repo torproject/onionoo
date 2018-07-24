@@ -492,6 +492,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
               nodeStatus.getDefaultPolicy());
           updatedNodeStatus.setPortList(nodeStatus.getPortList());
           updatedNodeStatus.setAsNumber(nodeStatus.getAsNumber());
+          updatedNodeStatus.setAsName(nodeStatus.getAsName());
           updatedNodeStatus.setRecommendedVersion(
               nodeStatus.getRecommendedVersion());
           updatedNodeStatus.setVersion(nodeStatus.getVersion());
@@ -879,6 +880,9 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         detailsStatus.setAsName(lookupResult.getAsName());
         nodeStatus.setCountryCode(lookupResult.getCountryCode());
         nodeStatus.setAsNumber(lookupResult.getAsNumber());
+        if (null != lookupResult.getAsName()) {
+          nodeStatus.setAsName(lookupResult.getAsName().toLowerCase());
+        }
       }
 
       if (this.consensusWeightFractions.containsKey(fingerprint)) {

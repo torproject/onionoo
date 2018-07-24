@@ -415,6 +415,7 @@ public class DocumentStore {
     List<String> addresses = new ArrayList<>();
     String countryCode = null;
     String asNumber = null;
+    String asName = null;
     String contact = null;
     for (String orAddressAndPort : detailsDocument.getOrAddresses()) {
       if (!orAddressAndPort.contains(":")) {
@@ -451,7 +452,7 @@ public class DocumentStore {
     SummaryDocument summaryDocument = new SummaryDocument(isRelay,
         nickname, fingerprint, addresses, lastSeenMillis, running,
         relayFlags, consensusWeight, countryCode, firstSeenMillis,
-        asNumber, contact, family, family, version, operatingSystem,
+        asNumber, asName, contact, family, family, version, operatingSystem,
         hostName, verifiedHostNames, unverifiedHostNames,
         recommendedVersion);
     return summaryDocument;

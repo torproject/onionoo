@@ -387,6 +387,16 @@ public class NodeStatus extends Document {
     return this.asNumber;
   }
 
+  private String asName;
+
+  public void setAsName(String asName) {
+    this.asName = asName;
+  }
+
+  public String getAsName() {
+    return this.asName;
+  }
+
   /* Reverse DNS lookup result */
 
   private String hostName;
@@ -618,6 +628,9 @@ public class NodeStatus extends Document {
       if (parts.length >= 26) {
         nodeStatus.setVersionStatus(TorVersionStatus.ofAbbreviation(parts[25]));
       }
+      if (parts.length >= 27) {
+        nodeStatus.setAsName(parts[26]);
+      }
       return nodeStatus;
     } catch (NumberFormatException e) {
       log.error("Number format exception while parsing node "
@@ -688,6 +701,7 @@ public class NodeStatus extends Document {
         .append((this.getHostName() != null ? this.getHostName() : ""));
     sb.append("\t").append(null != this.getVersionStatus()
         ? this.getVersionStatus().getAbbreviation() : "");
+    sb.append("\t").append((this.asName != null ? this.asName : ""));
     return sb.toString();
   }
 }

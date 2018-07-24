@@ -35,6 +35,7 @@ public class SummaryDocumentComparatorTest {
         false, new TreeSet<>(Arrays.asList(new String[] { "Running",
             "Valid" })), 20L, "de",
         DateTimeHelper.parse("2013-04-18 05:00:00"), "AS8767",
+        "m-net telekommunikations gmbh",
         "torkaz <klaus dot zufall at gmx dot de> "
         + "<fb-token:np5_g_83jmf=>", new TreeSet<>(Arrays.asList(
         new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC",

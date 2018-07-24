@@ -140,6 +140,7 @@ public class ResourceServletTest {
         false, new TreeSet<>(Arrays.asList(new String[] { "Running",
             "Valid" })), 20L, "de",
         DateTimeHelper.parse("2013-04-18 05:00:00"), "AS8767",
+        "m-net telekommunikations gmbh",
         "torkaz <klaus dot zufall at gmx dot de> "
         + "<fb-token:np5_g_83jmf=>", new TreeSet<>(Arrays.asList(
         new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC",
@@ -159,7 +160,8 @@ public class ResourceServletTest {
         DateTimeHelper.parse("2013-04-24 12:00:00"), true,
         new TreeSet<>(Arrays.asList(new String[] { "Fast", "Named",
             "Running", "V2Dir", "Valid" })), 1140L, "us",
-        DateTimeHelper.parse("2013-04-16 18:00:00"), "AS7922", null,
+        DateTimeHelper.parse("2013-04-16 18:00:00"), "AS7922",
+        "comcast cable communications, llc", null,
         new TreeSet<String>(Arrays.asList(new String[] {
             "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })),
         new TreeSet<>(Arrays.asList(new String[] {
@@ -178,6 +180,7 @@ public class ResourceServletTest {
         new TreeSet<>(Arrays.asList(new String[] { "Fast",
             "Running", "Unnamed", "V2Dir", "Valid" })), 63L, "a1",
         DateTimeHelper.parse("2013-04-16 18:00:00"), "AS6830",
+        "liberty global operations b.v.",
         "1024d/51e2a1c7 \"steven j. murdoch\" "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>",
         new TreeSet<String>(), new TreeSet<String>(), "0.2.3.24-rc-dev",
@@ -191,7 +194,7 @@ public class ResourceServletTest {
         Arrays.asList(new String[] { "10.199.7.176" }),
         DateTimeHelper.parse("2013-04-21 18:07:03"), false,
         new TreeSet<>(Arrays.asList(new String[] { "Valid" })), -1L,
-        null, DateTimeHelper.parse("2013-04-20 15:37:04"), null, null,
+        null, DateTimeHelper.parse("2013-04-20 15:37:04"), null, null, null,
         null, null, "0.2.2.39", null, null, null, null, true);
     this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
         bridgeec2bridgercc7f31fe);
@@ -201,7 +204,7 @@ public class ResourceServletTest {
         new String[] { "10.0.52.84" }),
         DateTimeHelper.parse("2013-04-20 17:37:04"), false,
         new TreeSet<>(Arrays.asList(new String[] { "Valid" })), -1L,
-        null, DateTimeHelper.parse("2013-04-14 07:07:05"), null, null,
+        null, DateTimeHelper.parse("2013-04-14 07:07:05"), null, null, null,
         null, null, null, null, null, null, null, null);
     this.bridges.put("0002D9BDBBC230BD9C78FF502A16E0033EF87E0C",
         bridgeUnnamed);
@@ -212,7 +215,7 @@ public class ResourceServletTest {
         DateTimeHelper.parse("2013-04-24 01:07:04"), true,
         new TreeSet<>(Arrays.asList(new String[] { "Running",
             "Valid" })), -1L, null,
-        DateTimeHelper.parse("2013-01-16 21:07:04"), null, null, null,
+        DateTimeHelper.parse("2013-01-16 21:07:04"), null, null, null, null,
         null, "0.2.4.4-alpha-dev", "windows 7", null, null, null, false);
     this.bridges.put("1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756",
         bridgegummy);
@@ -1168,6 +1171,30 @@ public class ResourceServletTest {
   public void testAsAsSpace8767() {
     this.assertErrorStatusCode(
         "/summary?as=AS 8767", 400);
+  }
+
+  @Test(timeout = 100)
+  public void testAsNameComcast() {
+    this.assertSummaryDocument("/summary?as_name=Comcast", 1, null, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testAsNameComcastCable() {
+    this.assertSummaryDocument("/summary?as_name=Comcast Cable",
+        1, null, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testAsNameCableComcast() {
+    this.assertSummaryDocument("/summary?as_name=Cable Comcast",
+        1, null, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testAsNameMit() {
+    this.assertSummaryDocument(
+        "/summary?as_name=Massachusetts Institute of Technology",
+        0, null, 0, null);
   }
 
   @Test(timeout = 100)

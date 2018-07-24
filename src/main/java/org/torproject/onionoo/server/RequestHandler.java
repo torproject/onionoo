@@ -78,6 +78,12 @@ public class RequestHandler {
     this.as = as;
   }
 
+  private String[] asName;
+
+  public void setAsName(String[] asName) {
+    this.asName = asName;
+  }
+
   private String flag;
 
   public void setFlag(String flag) {
@@ -177,6 +183,7 @@ public class RequestHandler {
     this.filterByFingerprint();
     this.filterByCountryCode();
     this.filterByAsNumber();
+    this.filterByAsName();
     this.filterByFlag();
     this.filterNodesByFirstSeenDays();
     this.filterNodesByLastSeenDays();
@@ -423,6 +430,28 @@ public class RequestHandler {
       for (String fingerprint : removeRelays) {
         this.filteredRelays.remove(fingerprint);
       }
+    }
+    this.filteredBridges.clear();
+  }
+
+  private void filterByAsName() {
+    if (this.asName == null) {
+      /* Not filtering by AS name. */
+      return;
+    }
+    Set<String> removeRelays = new HashSet<>();
+    for (Map.Entry<String, Set<String>> e :
+        this.nodeIndex.getRelaysByAsName().entrySet()) {
+      String asName = e.getKey();
+      for (String asNamePart : this.asName) {
+        if (asName == null || !asName.contains(asNamePart.toLowerCase())) {
+          removeRelays.addAll(e.getValue());
+          break;
+        }
+      }
+    }
+    for (String fingerprint : removeRelays) {
+      this.filteredRelays.remove(fingerprint);
     }
     this.filteredBridges.clear();
   }

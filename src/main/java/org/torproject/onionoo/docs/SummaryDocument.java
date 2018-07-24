@@ -190,6 +190,17 @@ public class SummaryDocument extends Document {
     return this.asNumber;
   }
 
+  @JsonProperty("an")
+  private String asName;
+
+  public void setAsName(String asName) {
+    this.asName = asName;
+  }
+
+  public String getAsName() {
+    return this.asName;
+  }
+
   @JsonProperty("fs")
   private String firstSeenMillis;
 
@@ -364,7 +375,7 @@ public class SummaryDocument extends Document {
   public SummaryDocument(boolean isRelay, String nickname,
       String fingerprint, List<String> addresses, long lastSeenMillis,
       boolean running, SortedSet<String> relayFlags, long consensusWeight,
-      String countryCode, long firstSeenMillis, String asNumber,
+      String countryCode, long firstSeenMillis, String asNumber, String asName,
       String contact, SortedSet<String> familyFingerprints,
       SortedSet<String> effectiveFamily, String version, String operatingSystem,
       String hostName, List<String> verifiedHostNames,
@@ -380,6 +391,7 @@ public class SummaryDocument extends Document {
     this.setCountryCode(countryCode);
     this.setFirstSeenMillis(firstSeenMillis);
     this.setAsNumber(asNumber);
+    this.setAsName(asName);
     this.setContact(contact);
     this.setFamilyFingerprints(familyFingerprints);
     this.setEffectiveFamily(effectiveFamily);

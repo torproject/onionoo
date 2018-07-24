@@ -151,6 +151,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         new HashMap<>();
     Map<String, Set<String>> newRelaysByCountryCode = new HashMap<>();
     Map<String, Set<String>> newRelaysByAsNumber = new HashMap<>();
+    Map<String, Set<String>> newRelaysByAsName = new HashMap<>();
     Map<String, Set<String>> newRelaysByFlag = new HashMap<>();
     Map<String, Set<String>> newBridgesByFlag = new HashMap<>();
     Map<String, Set<String>> newRelaysByContact = new HashMap<>();
@@ -230,6 +231,12 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       }
       newRelaysByAsNumber.get(asNumber).add(fingerprint);
       newRelaysByAsNumber.get(asNumber).add(hashedFingerprint);
+      String asName = entry.getAsName();
+      if (!newRelaysByAsName.containsKey(asName)) {
+        newRelaysByAsName.put(asName, new HashSet<>());
+      }
+      newRelaysByAsName.get(asName).add(fingerprint);
+      newRelaysByAsName.get(asName).add(hashedFingerprint);
       for (String flag : entry.getRelayFlags()) {
         String flagLowerCase = flag.toLowerCase();
         if (!newRelaysByFlag.containsKey(flagLowerCase)) {
@@ -402,6 +409,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newBridgeFingerprintSummaryLines);
     newNodeIndex.setRelaysByCountryCode(newRelaysByCountryCode);
     newNodeIndex.setRelaysByAsNumber(newRelaysByAsNumber);
+    newNodeIndex.setRelaysByAsName(newRelaysByAsName);
     newNodeIndex.setRelaysByFlag(newRelaysByFlag);
     newNodeIndex.setBridgesByFlag(newBridgesByFlag);
     newNodeIndex.setRelaysByContact(newRelaysByContact);

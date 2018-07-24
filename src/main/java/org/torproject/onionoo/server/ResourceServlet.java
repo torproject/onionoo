@@ -67,9 +67,9 @@ public class ResourceServlet extends HttpServlet {
 
   private static Set<String> knownParameters = new HashSet<>(
       Arrays.asList("type", "running", "search", "lookup", "fingerprint",
-          "country", "as", "flag", "first_seen_days", "last_seen_days",
-          "contact", "order", "limit", "offset", "fields", "family", "version",
-          "os", "host_name", "recommended_version"));
+          "country", "as", "as_name", "flag", "first_seen_days",
+          "last_seen_days", "contact", "order", "limit", "offset", "fields",
+          "family", "version", "os", "host_name", "recommended_version"));
 
   private static Set<String> illegalSearchQualifiers =
       new HashSet<>(Arrays.asList(("search,fingerprint,order,limit,"
@@ -245,6 +245,15 @@ public class ResourceServlet extends HttpServlet {
         return;
       }
       rh.setAs(asNumberParameter);
+    }
+    if (parameterMap.containsKey("as_name")) {
+      String[] asNameParameter = this.parseAsNameParameter(
+          parameterMap.get("as_name"));
+      if (null == asNameParameter) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      rh.setAsName(asNameParameter);
     }
     if (parameterMap.containsKey("flag")) {
       String flagParameter = this.parseFlagParameter(
@@ -501,6 +510,16 @@ public class ResourceServlet extends HttpServlet {
       return null;
     }
     return parameter;
+  }
+
+  private String[] parseAsNameParameter(String parameter) {
+    for (char c : parameter.toCharArray()) {
+      if (c < 32 || c >= 127) {
+        /* Only accept printable ASCII. */
+        return null;
+      }
+    }
+    return parameter.toLowerCase().split(" ");
   }
 
   private static Pattern flagPattern =
