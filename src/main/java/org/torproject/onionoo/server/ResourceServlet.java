@@ -238,7 +238,7 @@ public class ResourceServlet extends HttpServlet {
       rh.setCountry(countryCodeParameter);
     }
     if (parameterMap.containsKey("as")) {
-      String asNumberParameter = this.parseAsNumberParameter(
+      String[] asNumberParameter = this.parseAsNumberParameter(
           parameterMap.get("as"));
       if (asNumberParameter == null) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -502,14 +502,20 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern asNumberParameterPattern =
-      Pattern.compile("^[asAS]{0,2}[0-9]{1,10}$");
+      Pattern.compile("((^|,)([aA][sS])?[1-9][0-9]{0,9})+$");
 
-  private String parseAsNumberParameter(String parameter) {
+  private String[] parseAsNumberParameter(String parameter) {
     if (!asNumberParameterPattern.matcher(parameter).matches()) {
       /* AS number contains illegal character(s). */
       return null;
     }
-    return parameter;
+    String[] parameterParts = parameter.toUpperCase().split(",");
+    String[] parsedParameter = new String[parameterParts.length];
+    for (int i = 0; i < parameterParts.length; i++) {
+      parsedParameter[i] = (!parameterParts[i].startsWith("AS") ? "AS" : "")
+          + parameterParts[i];
+    }
+    return parsedParameter;
   }
 
   private String[] parseAsNameParameter(String parameter) {

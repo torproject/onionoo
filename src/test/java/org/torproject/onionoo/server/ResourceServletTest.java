@@ -1174,6 +1174,12 @@ public class ResourceServletTest {
   }
 
   @Test(timeout = 100)
+  public void testAs8767Or7922() {
+    this.assertSummaryDocument("/summary?as=8767,7922", 2,
+        new String[] { "TorkaZ", "Ferrari458" }, 0, null);
+  }
+
+  @Test(timeout = 100)
   public void testAsNameComcast() {
     this.assertSummaryDocument("/summary?as_name=Comcast", 1, null, 0, null);
   }
