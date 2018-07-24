@@ -279,6 +279,8 @@ public class ResponseBuilder {
             dd.setLatitude(detailsDocument.getLatitude());
           } else if (field.equals("longitude")) {
             dd.setLongitude(detailsDocument.getLongitude());
+          } else if (field.equals("as")) {
+            dd.setAs(detailsDocument.getAs());
           } else if (field.equals("as_number")) {
             dd.setAsNumber(detailsDocument.getAsNumber());
           } else if (field.equals("as_name")) {

@@ -201,12 +201,31 @@ public class DetailsDocument extends Document {
     return this.longitude;
   }
 
+  private String as;
+
+  @Deprecated
   private String asNumber;
 
+  public void setAs(String as) {
+    this.as = escapeJson(as);
+  }
+
+  @Deprecated
   public void setAsNumber(String asNumber) {
     this.asNumber = escapeJson(asNumber);
   }
 
+  @Deprecated
+  public void setAsAndAsNumber(String asNumber) {
+    this.as = escapeJson(asNumber);
+    this.asNumber = escapeJson(asNumber);
+  }
+
+  public String getAs() {
+    return unescapeJson(this.as);
+  }
+
+  @Deprecated
   public String getAsNumber() {
     return unescapeJson(this.asNumber);
   }

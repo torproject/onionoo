@@ -4,6 +4,8 @@
    - Support a comma-separated list of fingerprints in the lookup
      parameter to allow for URLs that specify a list of relays or
      bridges.
+   - Add "as" field as a copy of the "as_number" field in preparation
+     of removing the "as_number" field in the future.
 
 
 # Changes in version 6.1-1.15.0 - 2018-07-16
