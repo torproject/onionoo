@@ -4,6 +4,7 @@
 package org.torproject.onionoo.server;
 
 import org.torproject.onionoo.docs.SummaryDocument;
+import org.torproject.onionoo.updater.TorVersion;
 
 import java.text.SimpleDateFormat;
 import java.util.Map;
@@ -180,23 +181,24 @@ class NodeIndex {
     return bridgesByLastSeenDays;
   }
 
-  private Map<String, Set<String>> relaysByVersion;
+  private Map<TorVersion, Set<String>> relaysByVersion;
 
-  public void setRelaysByVersion(Map<String, Set<String>> relaysByVersion) {
+  public void setRelaysByVersion(Map<TorVersion, Set<String>> relaysByVersion) {
     this.relaysByVersion = relaysByVersion;
   }
 
-  public Map<String, Set<String>> getRelaysByVersion() {
+  public Map<TorVersion, Set<String>> getRelaysByVersion() {
     return this.relaysByVersion;
   }
 
-  private Map<String, Set<String>> bridgesByVersion;
+  private Map<TorVersion, Set<String>> bridgesByVersion;
 
-  public void setBridgesByVersion(Map<String, Set<String>> bridgesByVersion) {
+  public void setBridgesByVersion(Map<TorVersion,
+      Set<String>> bridgesByVersion) {
     this.bridgesByVersion = bridgesByVersion;
   }
 
-  public Map<String, Set<String>> getBridgesByVersion() {
+  public Map<TorVersion, Set<String>> getBridgesByVersion() {
     return this.bridgesByVersion;
   }
 

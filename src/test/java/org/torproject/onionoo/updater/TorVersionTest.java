@@ -89,7 +89,15 @@ public class TorVersionTest {
           { "0.2.5.16", "0.2.5.17", false, false, -1 },
           { "0.3.3.1-alpha", "0.3.3.1-alpha", true, true, 0 },
           { "0.1.2.3", "00.01.02.03", true, true, 0 },
-          { "0.1.2.3-alpha", "00.01.02.03-aallpphhaa", false, false, 1 }
+          { "0.1.2.3-alpha", "00.01.02.03-aallpphhaa", false, false, 1 },
+          { "0", "0.1.2.3", false, false, -1 },
+          { "0.", "0.1.2.3", false, false, -1 },
+          { "0.1", "0.1.2.3", false, false, -1 },
+          { "0.1.", "0.1.2.3", false, false, -1 },
+          { "0.1.2", "0.1.2.3", false, false, -1 },
+          { "0.1.2.", "0.1.2.3", false, false, -1 },
+          { "0.2", "0.1.2.3", false, false, 1 },
+
       });
     }
 

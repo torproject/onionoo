@@ -6,6 +6,7 @@ package org.torproject.onionoo.server;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
+import org.torproject.onionoo.updater.TorVersion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,9 +97,9 @@ public class RequestHandler {
     System.arraycopy(contact, 0, this.contact, 0, contact.length);
   }
 
-  private String version;
+  private List<TorVersion[]> version;
 
-  public void setVersion(String version) {
+  public void setVersion(List<TorVersion[]> version) {
     this.version = version;
   }
 
@@ -572,18 +573,30 @@ public class RequestHandler {
       return;
     }
     Set<String> keepRelays = new HashSet<>();
-    for (Map.Entry<String, Set<String>> e
+    for (Map.Entry<TorVersion, Set<String>> e
         : this.nodeIndex.getRelaysByVersion().entrySet()) {
-      if (e.getKey().startsWith(this.version)) {
-        keepRelays.addAll(e.getValue());
+      for (TorVersion[] versionRange : this.version) {
+        if ((null == versionRange[0]
+            || e.getKey().compareTo(versionRange[0]) >= 0)
+            && (null == versionRange[1]
+            || e.getKey().compareTo(versionRange[1]) <= 0
+            || e.getKey().matchingPrefix(versionRange[1]))) {
+          keepRelays.addAll(e.getValue());
+        }
       }
     }
     this.filteredRelays.keySet().retainAll(keepRelays);
     Set<String> keepBridges = new HashSet<>();
-    for (Map.Entry<String, Set<String>> e
+    for (Map.Entry<TorVersion, Set<String>> e
         : this.nodeIndex.getBridgesByVersion().entrySet()) {
-      if (e.getKey().startsWith(this.version)) {
-        keepBridges.addAll(e.getValue());
+      for (TorVersion[] versionRange : this.version) {
+        if ((null == versionRange[0]
+            || e.getKey().compareTo(versionRange[0]) >= 0)
+            && (null == versionRange[1]
+            || e.getKey().compareTo(versionRange[1]) <= 0
+            || e.getKey().matchingPrefix(versionRange[1]))) {
+          keepBridges.addAll(e.getValue());
+        }
       }
     }
     this.filteredBridges.keySet().retainAll(keepBridges);

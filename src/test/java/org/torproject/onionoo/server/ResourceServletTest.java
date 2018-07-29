@@ -293,19 +293,19 @@ public class ResourceServletTest {
     this.runTest(request);
     assertNotNull("Summary document is null, status code is "
         + this.response.errorStatusCode, this.summaryDocument);
-    assertEquals(expectedRelaysNumber,
+    assertEquals("Unexpected number of relays.", expectedRelaysNumber,
         this.summaryDocument.relays.length);
     if (expectedRelaysNicknames != null) {
       for (int i = 0; i < expectedRelaysNumber; i++) {
-        assertEquals(expectedRelaysNicknames[i],
+        assertEquals("Unexpected relay nickname.", expectedRelaysNicknames[i],
             this.summaryDocument.relays[i].n);
       }
     }
-    assertEquals(expectedBridgesNumber,
+    assertEquals("Unexpected number of bridges.", expectedBridgesNumber,
         this.summaryDocument.bridges.length);
     if (expectedBridgesNicknames != null) {
       for (int i = 0; i < expectedBridgesNumber; i++) {
-        assertEquals(expectedBridgesNicknames[i],
+        assertEquals("Unexpected bridge nickname.", expectedBridgesNicknames[i],
             this.summaryDocument.bridges[i].n);
       }
     }
@@ -1684,8 +1684,7 @@ public class ResourceServletTest {
 
   @Test
   public void testVersionBlaBlaBla() {
-    this.assertSummaryDocument("/summary?version=bla-bla-bla", 0, null, 0,
-        null);
+    this.assertErrorStatusCode("/summary?version=bla-bla-bla", 400);
   }
 
   @Test
@@ -1705,8 +1704,9 @@ public class ResourceServletTest {
 
   @Test
   public void testVersion0232() {
-    /* This is correct when comparing strings. */
-    this.assertSummaryDocument("/summary?version=0.2.3.2", 2, null, 0, null);
+    /* This is only correct when comparing strings, not when comparing parsed
+     * version numbers. */
+    this.assertSummaryDocument("/summary?version=0.2.3.2", 0, null, 0, null);
   }
 
   @Test
@@ -1716,9 +1716,74 @@ public class ResourceServletTest {
   }
 
   @Test
-  public void testVersionStart() {
-    /* This is also correct when comparing strings. */
+  public void testVersionStar() {
     this.assertErrorStatusCode("/summary?version=*", 400);
+  }
+
+  @Test
+  public void testVersionRangeTo() {
+    this.assertSummaryDocument("/summary?version=..0.2.3.24", 1, null, 1, null);
+  }
+
+  @Test
+  public void testVersionRangeFrom() {
+    this.assertSummaryDocument("/summary?version=0.2.3.25..", 1, null, 1, null);
+  }
+
+  @Test
+  public void testVersionRangeFromTo() {
+    this.assertSummaryDocument("/summary?version=0.2.3.24..0.2.3.25", 2, null,
+        0, null);
+  }
+
+  @Test
+  public void testVersionRangeFromToExchanged() {
+    this.assertErrorStatusCode("/summary?version=0.2.3.25..0.2.3.24", 400);
+  }
+
+  @Test
+  public void testVersionTwoSingles() {
+    this.assertSummaryDocument("/summary?version=0.2.2.39,0.2.3.24", 1, null, 1,
+        null);
+  }
+
+  @Test
+  public void testVersionTwoOtherSingles() {
+    this.assertSummaryDocument("/summary?version=0.2.2.39,0.2.4.4", 0, null, 2,
+        null);
+  }
+
+  @Test
+  public void testVersionSingleAndRange() {
+    this.assertSummaryDocument("/summary?version=0.2.2.39,0.2.4..", 0, null, 2,
+        null);
+  }
+
+  @Test
+  public void testVersion0AndLater() {
+    this.assertSummaryDocument("/summary?version=0..", 2, null, 2, null);
+  }
+
+  @Test
+  public void testVersionJustTwoDots() {
+    /* Need at least a start or an end. */
+    this.assertErrorStatusCode("/summary?version=..", 400);
+  }
+
+  @Test
+  public void testVersion0ThreeDots() {
+    /* Parses as "all versions starting at 0.". */
+    this.assertSummaryDocument("/summary?version=0...", 2, null, 2, null);
+  }
+
+  @Test
+  public void testVersion0FourDots() {
+    this.assertErrorStatusCode("/summary?version=0....", 400);
+  }
+
+  @Test
+  public void testVersion1AndEarlier() {
+    this.assertSummaryDocument("/summary?version=..1", 2, null, 2, null);
   }
 
   @Test(timeout = 100)

@@ -10,6 +10,7 @@ import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
 import org.torproject.onionoo.docs.UpdateStatus;
+import org.torproject.onionoo.updater.TorVersion;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,8 +156,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     Map<String, Set<String>> newBridgesByFlag = new HashMap<>();
     Map<String, Set<String>> newRelaysByContact = new HashMap<>();
     Map<String, Set<String>> newRelaysByFamily = new HashMap<>();
-    Map<String, Set<String>> newRelaysByVersion = new HashMap<>();
-    Map<String, Set<String>> newBridgesByVersion = new HashMap<>();
+    Map<TorVersion, Set<String>> newRelaysByVersion = new HashMap<>();
+    Map<TorVersion, Set<String>> newBridgesByVersion = new HashMap<>();
     Map<String, Set<String>> newRelaysByOperatingSystem = new HashMap<>();
     Map<String, Set<String>> newBridgesByOperatingSystem = new HashMap<>();
     Map<String, Set<String>> newRelaysByHostName = new HashMap<>();
@@ -264,7 +265,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       newRelaysByContact.putIfAbsent(contact, new HashSet<>());
       newRelaysByContact.get(contact).add(fingerprint);
       newRelaysByContact.get(contact).add(hashedFingerprint);
-      String version = entry.getVersion();
+      TorVersion version = TorVersion.of(entry.getVersion());
       if (null != version) {
         newRelaysByVersion.putIfAbsent(version, new HashSet<>());
         newRelaysByVersion.get(version).add(fingerprint);
@@ -346,7 +347,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           hashedFingerprint);
       newBridgesByLastSeenDays.get(daysSinceLastSeen).add(
           hashedHashedFingerprint);
-      String version = entry.getVersion();
+      TorVersion version = TorVersion.of(entry.getVersion());
       if (null != version) {
         newBridgesByVersion.putIfAbsent(version, new HashSet<>());
         newBridgesByVersion.get(version).add(hashedFingerprint);

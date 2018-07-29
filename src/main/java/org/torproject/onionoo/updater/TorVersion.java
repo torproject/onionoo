@@ -3,7 +3,9 @@
 
 package org.torproject.onionoo.updater;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -15,15 +17,9 @@ import java.util.SortedSet;
  */
 public class TorVersion implements Comparable<TorVersion> {
 
-  private int majorVersion;
-
-  private int minorVersion;
-
-  private int microVersion;
+  private List<Integer> versionNumbers = new ArrayList<>();
 
   private String releaseSeries;
-
-  private Integer patchLevel = null;
 
   private String statusTag = null;
 
@@ -41,21 +37,32 @@ public class TorVersion implements Comparable<TorVersion> {
     }
     if (!knownVersions.containsKey(versionString)) {
       TorVersion result = new TorVersion();
-      String[] components = versionString.split("-")[0].split("\\.");
+      boolean isValid = true;
       try {
-        result.majorVersion = Integer.parseInt(components[0]);
-        result.minorVersion = Integer.parseInt(components[1]);
-        result.microVersion = Integer.parseInt(components[2]);
-        result.releaseSeries = String.format("%d.%d.%d",
-            result.majorVersion, result.minorVersion, result.microVersion);
-        if (components.length == 4) {
-          result.patchLevel = Integer.parseInt(components[3]);
-          if (versionString.contains("-")) {
-            result.statusTag = versionString.split("-", 2)[1].split(" ")[0];
+        String[] components = versionString.split("-")[0].split("\\.", -1);
+        for (int position = 0; position < 4 && position < components.length;
+             position++) {
+          if (!components[position].isEmpty()) {
+            result.versionNumbers.add(Integer.parseInt(components[position]));
+          } else if (0 == position || position < components.length - 1) {
+            /* Version cannot start with a blank, nor can it contain a blank in
+             * between two dots. */
+            isValid = false;
           }
+        }
+        if (result.versionNumbers.size() >= 3) {
+          result.releaseSeries = String.format("%d.%d.%d",
+              result.versionNumbers.get(0), result.versionNumbers.get(1),
+              result.versionNumbers.get(2));
+        }
+        if (versionString.contains("-")) {
+          result.statusTag = versionString.split("-", 2)[1].split(" ")[0];
         }
       } catch (ArrayIndexOutOfBoundsException
           | NumberFormatException exception) {
+        isValid = false;
+      }
+      if (!isValid) {
         result = null;
       }
       knownVersions.put(versionString, result);
@@ -69,27 +76,15 @@ public class TorVersion implements Comparable<TorVersion> {
       throw new NullPointerException();
     }
     int result;
-    if ((result = Integer.compare(this.majorVersion,
-        other.majorVersion)) != 0) {
-      return result;
+    for (int position = 0; position < this.versionNumbers.size()
+        && position < other.versionNumbers.size(); position++) {
+      if ((result = Integer.compare(this.versionNumbers.get(position),
+          other.versionNumbers.get(position))) != 0) {
+        return result;
+      }
     }
-    if ((result = Integer.compare(this.minorVersion,
-        other.minorVersion)) != 0) {
-      return result;
-    }
-    if ((result = Integer.compare(this.microVersion,
-        other.microVersion)) != 0) {
-      return result;
-    }
-    if (null == this.patchLevel && null == other.patchLevel) {
-      return 0;
-    } else if (null == patchLevel) {
-      return -1;
-    } else if (null == other.patchLevel) {
-      return 1;
-    } else if ((result = Integer.compare(this.patchLevel,
-        other.patchLevel)) != 0) {
-      return result;
+    if (this.versionNumbers.size() != other.versionNumbers.size()) {
+      return this.versionNumbers.size() < other.versionNumbers.size() ? -1 : 1;
     }
     if (null == this.statusTag && null == other.statusTag) {
       return 0;
@@ -108,20 +103,64 @@ public class TorVersion implements Comparable<TorVersion> {
         && this.compareTo((TorVersion) other) == 0;
   }
 
+  /** Return whether prefixes of this version and another version match.
+   *
+   * <p>Two versions A and B have the same prefix if A starts with B, B starts
+   * with A, or A and B are the same.</p>
+   */
+  public boolean matchingPrefix(TorVersion other) {
+    if (null == other) {
+      throw new NullPointerException();
+    }
+    for (int position = 0; position < this.versionNumbers.size()
+        && position < other.versionNumbers.size(); position++) {
+      if ((Integer.compare(this.versionNumbers.get(position),
+          other.versionNumbers.get(position))) != 0) {
+        return false;
+      }
+    }
+    if (null != this.statusTag && null != other.statusTag) {
+      return this.statusTag.equals(other.statusTag);
+    }
+    return true;
+  }
+
   @Override
   public int hashCode() {
-    return 2 * Integer.hashCode(this.majorVersion)
-        + 3 * Integer.hashCode(this.minorVersion)
-        + 5 * Integer.hashCode(this.microVersion)
-        + 7 * (null == this.patchLevel ? 0 : this.patchLevel)
-        + 11 * (null == this.statusTag ? 0 : this.statusTag.hashCode());
+    int result = 0;
+    for (int position = 0; position < this.versionNumbers.size(); position++) {
+      result += (2 * position + 1)
+          * Integer.hashCode(this.versionNumbers.get(position));
+    }
+    if (null != this.statusTag) {
+      result += 11 * this.statusTag.hashCode();
+    }
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (int position = 0; position < this.versionNumbers.size(); position++) {
+      if (position > 0) {
+        sb.append('.');
+      }
+      sb.append(this.versionNumbers.get(position));
+    }
+    if (null != this.statusTag) {
+      sb.append('-').append(this.statusTag);
+    }
+    return sb.toString();
   }
 
   /** Determine the version status of this tor version in the context of the
    * given recommended tor versions. */
   public TorVersionStatus determineVersionStatus(
       SortedSet<TorVersion> recommendedVersions) {
-    if (recommendedVersions.contains(this)) {
+    if (null == this.releaseSeries) {
+      /* Only consider full versions, not partial versions. */
+      return TorVersionStatus.UNRECOMMENDED;
+    } else if (recommendedVersions.contains(this)) {
       return TorVersionStatus.RECOMMENDED;
     } else if (this.compareTo(recommendedVersions.last()) > 0) {
       return TorVersionStatus.EXPERIMENTAL;

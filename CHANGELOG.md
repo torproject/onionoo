@@ -1,3 +1,9 @@
+# Changes in version 7.0-1.18.0 - 2018-09-??
+
+ * Medium changes
+   - Extend "version" parameter to support lists and ranges.
+
+
 # Changes in version 6.2-1.17.1 - 2018-08-17
 
  * Minor changes

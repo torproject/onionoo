@@ -3,6 +3,8 @@
 
 package org.torproject.onionoo.server;
 
+import org.torproject.onionoo.updater.TorVersion;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -292,7 +294,7 @@ public class ResourceServlet extends HttpServlet {
       rh.setContact(contactParts);
     }
     if (parameterMap.containsKey("version")) {
-      String versionParameter = this.parseVersionParameter(
+      List<TorVersion[]> versionParameter = this.parseVersionParameter(
           parameterMap.get("version"));
       if (null == versionParameter) {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -630,14 +632,35 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern versionParameterPattern =
-      Pattern.compile("^[0-9a-zA-Z.-]+$");
+      Pattern.compile("^[0-9a-zA-Z,.-]+$");
 
-  private String parseVersionParameter(String parameter) {
+  private List<TorVersion[]> parseVersionParameter(String parameter) {
     if (!versionParameterPattern.matcher(parameter).matches()) {
       /* Version contains illegal character(s). */
       return null;
     }
-    return parameter;
+    List<TorVersion[]> result = new ArrayList<>();
+    for (String listElement : parameter.split(",")) {
+      TorVersion fromVersion;
+      TorVersion toVersion;
+      if (listElement.contains("..")) {
+        fromVersion = TorVersion.of(
+            listElement.substring(0, listElement.lastIndexOf("..")));
+        toVersion = TorVersion.of(
+            listElement.substring(listElement.lastIndexOf("..") + 2));
+      } else {
+        fromVersion = toVersion = TorVersion.of(listElement);
+      }
+      if (null == fromVersion && null == toVersion) {
+        return null;
+      }
+      if (null != fromVersion && null != toVersion
+          && fromVersion.compareTo(toVersion) > 0) {
+        return null;
+      }
+      result.add(new TorVersion[] { fromVersion, toVersion });
+    }
+    return result;
   }
 
   private String parseOperatingSystemParameter(String parameter) {
