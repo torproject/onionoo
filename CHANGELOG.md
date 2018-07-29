@@ -10,6 +10,10 @@
    - Support a comma-separated list of AS numbers in the "as"
      parameter.
 
+ * Minor changes
+   - Extend internal statistics to log less frequently requested
+     resources and parameter combinations without counts.
+
 
 # Changes in version 6.1-1.15.0 - 2018-07-16
 

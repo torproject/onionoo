@@ -43,17 +43,20 @@ class MostFrequentString {
     StringBuilder sb = new StringBuilder();
     int stringsToAdd = 3;
     int written = 0;
+    SortedSet<String> remainingStrings = new TreeSet<>();
     for (Map.Entry<Integer, SortedSet<String>> e :
         sortedFrequencies.entrySet()) {
       for (String string : e.getValue()) {
         if (stringsToAdd-- > 0) {
           sb.append((written++ > 0 ? ", " : "") + string + " ("
               + e.getKey() + ")");
+        } else {
+          remainingStrings.add(string);
         }
       }
-      if (stringsToAdd == 0) {
-        break;
-      }
+    }
+    for (String string : remainingStrings) {
+      sb.append(", ").append(string);
     }
     return sb.toString();
   }
