@@ -370,7 +370,7 @@ public class ResourceServlet extends HttpServlet {
       String[] familyParameter = this.parseFingerprintParameter(
           parameterMap.get("family"));
       if (null == familyParameter || 1 != familyParameter.length) {
-          response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
       rh.setFamily(familyParameter[0]);
