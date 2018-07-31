@@ -3,7 +3,6 @@
 
 package org.torproject.onionoo.updater;
 
-import org.torproject.onionoo.util.DomainNameSystem;
 import org.torproject.onionoo.util.FormattingUtils;
 
 import java.util.ArrayList;
@@ -23,9 +22,7 @@ public class ReverseDomainNameResolver {
   private static final long RDNS_LOOKUP_MAX_AGE_MILLIS =
       12L * 60L * 60L * 1000L;
 
-  private static final int RDNS_LOOKUP_WORKERS_NUM = 5;
-
-  private DomainNameSystem domainNameSystem;
+  private static final int RDNS_LOOKUP_WORKERS_NUM = 30;
 
   private Map<String, Long> addressLastLookupTimes;
 
@@ -50,7 +47,6 @@ public class ReverseDomainNameResolver {
   /** Starts reverse domain name lookups in one or more background
    * threads and returns immediately. */
   public void startReverseDomainNameLookups() {
-    this.domainNameSystem = new DomainNameSystem();
     this.startedRdnsLookups = System.currentTimeMillis();
     this.rdnsLookupJobs = new HashSet<>();
     for (Map.Entry<String, Long> e :
@@ -111,10 +107,6 @@ public class ReverseDomainNameResolver {
    * lookups have been started. */
   public long getLookupStartMillis() {
     return this.startedRdnsLookups;
-  }
-
-  public DomainNameSystem getDomainNameSystemInstance() {
-    return this.domainNameSystem;
   }
 
   /** Returns a string with the number of performed reverse domain name

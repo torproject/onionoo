@@ -30,7 +30,7 @@ class RdnsLookupWorker extends Thread {
         break;
       }
       RdnsLookupRequest request = new RdnsLookupRequest(
-          this.reverseDomainNameResolver, this, rdnsLookupJob);
+          this, rdnsLookupJob);
       request.setDaemon(true);
       request.start();
       try {

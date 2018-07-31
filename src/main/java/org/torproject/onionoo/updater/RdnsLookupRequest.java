@@ -3,18 +3,21 @@
 
 package org.torproject.onionoo.updater;
 
-import org.torproject.onionoo.util.DomainNameSystem;
-
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 
 class RdnsLookupRequest extends Thread {
-
-  private ReverseDomainNameResolver reverseDomainNameResolver;
-
-  private DomainNameSystem domainNameSystem;
 
   private RdnsLookupWorker parent;
 
@@ -29,11 +32,7 @@ class RdnsLookupRequest extends Thread {
   private long lookupCompletedMillis = -1L;
 
   public RdnsLookupRequest(
-      ReverseDomainNameResolver reverseDomainNameResolver,
       RdnsLookupWorker parent, String address) {
-    this.reverseDomainNameResolver = reverseDomainNameResolver;
-    this.domainNameSystem =
-            this.reverseDomainNameResolver.getDomainNameSystemInstance();
     this.parent = parent;
     this.address = address;
   }
@@ -51,11 +50,11 @@ class RdnsLookupRequest extends Thread {
                         + "." + bytes[2] + "." + bytes[1] + "." + bytes[0]
                         + ".in-addr.arpa";
         String[] reverseDnsRecords =
-            this.domainNameSystem.getRecords(reverseDnsDomain, "PTR");
+            this.getRecords(reverseDnsDomain, "PTR");
         for (String reverseDnsRecord : reverseDnsRecords) {
           boolean verified = false;
           String[] forwardDnsRecords =
-              this.domainNameSystem.getRecords(reverseDnsRecord, "A");
+              this.getRecords(reverseDnsRecord, "A");
           for (String forwardDnsRecord : forwardDnsRecords) {
             if (forwardDnsRecord.equals(this.address)) {
               verified = true;
@@ -81,6 +80,31 @@ class RdnsLookupRequest extends Thread {
     }
     this.lookupCompletedMillis = System.currentTimeMillis();
     this.parent.interrupt();
+  }
+
+  /**
+   * Returns all the values of DNS resource records found for a given host name
+   * and type.
+   */
+  public String[] getRecords(String hostName, String type)
+          throws NamingException {
+    Hashtable<String, String> envProps = new Hashtable<>();
+    envProps.put(Context.INITIAL_CONTEXT_FACTORY,
+        "com.sun.jndi.dns.DnsContextFactory");
+    final DirContext dnsContext = new InitialDirContext(envProps);
+    Set<String> results = new TreeSet<String>();
+    Attributes dnsEntries =
+        dnsContext.getAttributes(hostName, new String[] { type });
+    if (dnsEntries != null) {
+      Attribute dnsAttribute = dnsEntries.get(type);
+      if (dnsAttribute != null) {
+        NamingEnumeration<?> dnsEntryIterator = dnsEntries.get(type).getAll();
+        while (dnsEntryIterator.hasMoreElements()) {
+          results.add(dnsEntryIterator.next().toString());
+        }
+      }
+    }
+    return results.toArray(new String[results.size()]);
   }
 
   public synchronized String getHostName() {
