@@ -9,6 +9,8 @@
    - Add new "as_name" parameter to search relays by AS name.
    - Support a comma-separated list of AS numbers in the "as"
      parameter.
+   - Fix a thread-safety bug in the recently extended reverse DNS
+     lookup code.
 
  * Minor changes
    - Extend internal statistics to log less frequently requested
