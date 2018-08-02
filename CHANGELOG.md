@@ -15,6 +15,7 @@
  * Minor changes
    - Extend internal statistics to log less frequently requested
      resources and parameter combinations without counts.
+   - Provide a thin jar file without dependencies.
 
 
 # Changes in version 6.1-1.15.0 - 2018-07-16
