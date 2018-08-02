@@ -85,13 +85,23 @@ public class PerformanceMetricsTest {
   }
 
   @Test
-  public void testMostFrequentStringAbcd() {
+  public void testMostFrequentStringAbbbbccddddeee() {
     MostFrequentString mfs = new MostFrequentString();
     mfs.addString("A");
     mfs.addString("B");
+    mfs.addString("B");
+    mfs.addString("B");
+    mfs.addString("B");
+    mfs.addString("C");
     mfs.addString("C");
     mfs.addString("D");
-    assertEquals("A (1), B (1), C (1)", mfs.toString());
+    mfs.addString("D");
+    mfs.addString("D");
+    mfs.addString("D");
+    mfs.addString("E");
+    mfs.addString("E");
+    mfs.addString("E");
+    assertEquals("B (4), D (4), E (3), A, C", mfs.toString());
   }
 
   @Test
