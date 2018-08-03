@@ -1,4 +1,4 @@
-# Changes in version 6.2-1.16.0 - 2018-07-??
+# Changes in version 6.2-1.16.0 - 2018-08-03
 
  * Medium changes
    - Support a comma-separated list of fingerprints in the lookup

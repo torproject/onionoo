@@ -8,9 +8,9 @@
 
   <property name="javadoc-title" value="Onionoo API Documentation"/>
   <property name="implementation-title" value="Onionoo" />
-  <property name="onionoo.protocol.version" value="6.1"/>
+  <property name="onionoo.protocol.version" value="6.2"/>
   <property name="release.version"
-            value="${onionoo.protocol.version}-1.15.0-dev"/>
+            value="${onionoo.protocol.version}-1.16.0"/>
   <property name="metricslibversion" value="2.4.0"/>
   <property name="jetty.version" value="-9.2.21.v20170120" />
   <property name="warfile"
