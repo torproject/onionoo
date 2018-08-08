@@ -1,3 +1,9 @@
+# Changes in version 6.2-1.16.? - 2018-08-??
+
+ * Medium changes
+   - Fix JSON serialization of history objects.
+
+
 # Changes in version 6.2-1.16.0 - 2018-08-03
 
  * Medium changes

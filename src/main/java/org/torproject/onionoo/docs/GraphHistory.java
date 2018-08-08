@@ -3,8 +3,23 @@
 
 package org.torproject.onionoo.docs;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import java.util.List;
 
+/* Use snake_case for naming fields rather than camelCase. */
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+/* Exclude fields that are null or empty. */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+/* Only consider fields, no getters, setters, or constructors. */
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE,
+    fieldVisibility = JsonAutoDetect.Visibility.ANY,
+    getterVisibility = JsonAutoDetect.Visibility.NONE,
+    isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+    setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class GraphHistory {
 
   private String first;
