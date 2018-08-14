@@ -565,8 +565,7 @@ public class NodeStatus extends Document {
       if (!parts[14].equals("null")) {
         nodeStatus.setPortList(parts[14]);
       }
-      long firstSeenMillis = lastSeenMillis;
-      firstSeenMillis = DateTimeHelper.parse(parts[15] + " " + parts[16]);
+      long firstSeenMillis = DateTimeHelper.parse(parts[15] + " " + parts[16]);
       if (firstSeenMillis < 0L) {
         log.error("Parse exception while parsing node status "
             + "line '" + documentString + "'.  Skipping.");
