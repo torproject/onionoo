@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -409,23 +408,23 @@ public class NodeStatus extends Document {
     return this.hostName;
   }
 
-  private List<String> verifiedHostNames;
+  private SortedSet<String> verifiedHostNames;
 
-  public void setVerifiedHostNames(List<String> verifiedHostNames) {
+  public void setVerifiedHostNames(SortedSet<String> verifiedHostNames) {
     this.verifiedHostNames = verifiedHostNames;
   }
 
-  public List<String> getVerifiedHostNames() {
+  public SortedSet<String> getVerifiedHostNames() {
     return this.verifiedHostNames;
   }
 
-  private List<String> unverifiedHostNames;
+  private SortedSet<String> unverifiedHostNames;
 
-  public void setUnverifiedHostNames(List<String> unverifiedHostNames) {
+  public void setUnverifiedHostNames(SortedSet<String> unverifiedHostNames) {
     this.unverifiedHostNames = unverifiedHostNames;
   }
 
-  public List<String> getUnverifiedHostNames() {
+  public SortedSet<String> getUnverifiedHostNames() {
     return this.unverifiedHostNames;
   }
 
@@ -549,15 +548,7 @@ public class NodeStatus extends Document {
           Arrays.asList(parts[8].split(","))));
       nodeStatus.setConsensusWeight(Long.parseLong(parts[9]));
       nodeStatus.setCountryCode(parts[10]);
-      if (!parts[11].equals("")) {
-        /* This is a (possibly surprising) hack that is part of moving the
-         * host name field from node status to details status.  As part of
-         * that move we ignore all previously looked up host names trigger
-         * a new lookup by setting the last lookup time to 1969-12-31
-         * 23:59:59.999.  This hack may be removed after it has been run
-         * at least once. */
-        parts[12] = "-1";
-      }
+      /* parts[11] previously contained a hostname */
       nodeStatus.setLastRdnsLookup(Long.parseLong(parts[12]));
       if (!parts[13].equals("null")) {
         nodeStatus.setDefaultPolicy(parts[13]);
@@ -621,14 +612,25 @@ public class NodeStatus extends Document {
       if (parts.length >= 24 && !parts[23].isEmpty()) {
         nodeStatus.setVersion(parts[23]);
       }
-      if (parts.length >= 25 && !parts[24].isEmpty()) {
-        nodeStatus.setHostName(parts[24]);
-      }
+      /* parts[24] previously contained a hostname */
       if (parts.length >= 26) {
         nodeStatus.setVersionStatus(TorVersionStatus.ofAbbreviation(parts[25]));
       }
       if (parts.length >= 27) {
         nodeStatus.setAsName(parts[26]);
+      }
+      if (parts.length >= 28) {
+        SortedSet<String> verifiedHostNames = new TreeSet<>();
+        SortedSet<String> unverifiedHostNames = new TreeSet<>();
+        String[] groups = parts[27].split(":", -1);
+        if (groups[0].length() > 0) {
+          verifiedHostNames.addAll(Arrays.asList(groups[0].split(";")));
+        }
+        if (groups.length > 1 && groups[1].length() > 0) {
+          unverifiedHostNames.addAll(Arrays.asList(groups[1].split(";")));
+        }
+        nodeStatus.setVerifiedHostNames(verifiedHostNames);
+        nodeStatus.setUnverifiedHostNames(unverifiedHostNames);
       }
       return nodeStatus;
     } catch (NumberFormatException e) {
@@ -696,11 +698,14 @@ public class NodeStatus extends Document {
         .append(StringUtils.join(this.getIndirectFamily(), ";"));
     sb.append("\t")
         .append((this.getVersion() != null ? this.getVersion() : ""));
-    sb.append("\t")
-        .append((this.getHostName() != null ? this.getHostName() : ""));
+    sb.append("\t"); /* formerly used for storing host names */
     sb.append("\t").append(null != this.getVersionStatus()
         ? this.getVersionStatus().getAbbreviation() : "");
     sb.append("\t").append((this.asName != null ? this.asName : ""));
+    sb.append("\t").append(this.verifiedHostNames != null
+          ? StringUtils.join(this.getVerifiedHostNames(), ";") : "")
+        .append(":").append(this.unverifiedHostNames != null
+          ? StringUtils.join(this.getUnverifiedHostNames(), ";") : "");
     return sb.toString();
   }
 }

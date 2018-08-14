@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class DetailsDocument extends Document {
 
@@ -260,19 +261,19 @@ public class DetailsDocument extends Document {
     return unescapeJson(this.hostName);
   }
 
-  private List<String> verifiedHostNames;
+  private SortedSet<String> verifiedHostNames;
 
   /**
    * Creates a copy of the list with each string escaped for JSON compatibility
    * and sets this as the verified host names, unless the argument was null in
    * which case the verified host names are just set to null.
    */
-  public void setVerifiedHostNames(List<String> verifiedHostNames) {
+  public void setVerifiedHostNames(SortedSet<String> verifiedHostNames) {
     if (null == verifiedHostNames) {
       this.verifiedHostNames = null;
       return;
     }
-    this.verifiedHostNames = new ArrayList<>();
+    this.verifiedHostNames = new TreeSet<>();
     for (String hostName : verifiedHostNames) {
       this.verifiedHostNames.add(escapeJson(hostName));
     }
@@ -283,30 +284,30 @@ public class DetailsDocument extends Document {
    * compatibility reversed and returns the copy, unless the held reference was
    * null in which case null is returned.
    */
-  public List<String> getVerifiedHostNames() {
+  public SortedSet<String> getVerifiedHostNames() {
     if (null == this.verifiedHostNames) {
       return null;
     }
-    List<String> verifiedHostNames = new ArrayList<>();
+    SortedSet<String> verifiedHostNames = new TreeSet<>();
     for (String escapedHostName : this.verifiedHostNames) {
       verifiedHostNames.add(unescapeJson(escapedHostName));
     }
     return verifiedHostNames;
   }
 
-  private List<String> unverifiedHostNames;
+  private SortedSet<String> unverifiedHostNames;
 
   /**
    * Creates a copy of the list with each string escaped for JSON compatibility
    * and sets this as the unverified host names, unless the argument was null in
    * which case the unverified host names are just set to null.
    */
-  public void setUnverifiedHostNames(List<String> unverifiedHostNames) {
+  public void setUnverifiedHostNames(SortedSet<String> unverifiedHostNames) {
     if (null == unverifiedHostNames) {
       this.unverifiedHostNames = null;
       return;
     }
-    this.unverifiedHostNames = new ArrayList<>();
+    this.unverifiedHostNames = new TreeSet<>();
     for (String hostName : unverifiedHostNames) {
       this.unverifiedHostNames.add(escapeJson(hostName));
     }
@@ -317,11 +318,11 @@ public class DetailsDocument extends Document {
    * compatibility reversed and returns the copy, unless the held reference was
    * null in which case null is returned.
    */
-  public List<String> getUnverifiedHostNames() {
+  public SortedSet<String> getUnverifiedHostNames() {
     if (null == this.unverifiedHostNames) {
       return null;
     }
-    List<String> unverifiedHostNames = new ArrayList<>();
+    SortedSet<String> unverifiedHostNames = new TreeSet<>();
     for (String escapedHostName : this.unverifiedHostNames) {
       unverifiedHostNames.add(unescapeJson(escapedHostName));
     }

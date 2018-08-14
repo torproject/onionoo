@@ -15,15 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -298,12 +297,12 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByOperatingSystem.get(operatingSystem).add(fingerprint);
         newRelaysByOperatingSystem.get(operatingSystem).add(hashedFingerprint);
       }
-      List<String> allHostNames = new ArrayList<>();
-      List<String> verifiedHostNames = entry.getVerifiedHostNames();
+      SortedSet<String> allHostNames = new TreeSet<>();
+      SortedSet<String> verifiedHostNames = entry.getVerifiedHostNames();
       if (null != verifiedHostNames) {
         allHostNames.addAll(verifiedHostNames);
       }
-      List<String> unverifiedHostNames = entry.getUnverifiedHostNames();
+      SortedSet<String> unverifiedHostNames = entry.getUnverifiedHostNames();
       if (null != unverifiedHostNames) {
         allHostNames.addAll(unverifiedHostNames);
       }

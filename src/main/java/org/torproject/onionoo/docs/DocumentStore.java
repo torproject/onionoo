@@ -445,15 +445,14 @@ public class DocumentStore {
     long lastSeenMillis = -1L;
     long consensusWeight = -1L;
     long firstSeenMillis = -1L;
-    String hostName = null;
-    List<String> verifiedHostNames = null;
-    List<String> unverifiedHostNames = null;
+    SortedSet<String> verifiedHostNames = null;
+    SortedSet<String> unverifiedHostNames = null;
     Boolean recommendedVersion = null;
     SummaryDocument summaryDocument = new SummaryDocument(isRelay,
         nickname, fingerprint, addresses, lastSeenMillis, running,
         relayFlags, consensusWeight, countryCode, firstSeenMillis,
         asNumber, asName, contact, family, family, version, operatingSystem,
-        hostName, verifiedHostNames, unverifiedHostNames,
+        verifiedHostNames, unverifiedHostNames,
         recommendedVersion);
     return summaryDocument;
   }

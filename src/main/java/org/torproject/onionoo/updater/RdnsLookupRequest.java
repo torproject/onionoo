@@ -3,10 +3,9 @@
 
 package org.torproject.onionoo.updater;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.naming.Context;
@@ -23,9 +22,9 @@ class RdnsLookupRequest extends Thread {
 
   private String address;
 
-  private List<String> verifiedHostNames;
+  private SortedSet<String> verifiedHostNames;
 
-  private List<String> unverifiedHostNames;
+  private SortedSet<String> unverifiedHostNames;
 
   private long lookupStartedMillis = -1L;
 
@@ -41,8 +40,8 @@ class RdnsLookupRequest extends Thread {
   public void run() {
     this.lookupStartedMillis = System.currentTimeMillis();
     try {
-      final List<String> verifiedResults = new ArrayList<>();
-      final List<String> unverifiedResults = new ArrayList<>();
+      final SortedSet<String> verifiedResults = new TreeSet<>();
+      final SortedSet<String> unverifiedResults = new TreeSet<>();
       final String[] bytes = this.address.split("\\.");
       if (bytes.length == 4) {
         final String reverseDnsDomain =
@@ -107,20 +106,11 @@ class RdnsLookupRequest extends Thread {
     return results.toArray(new String[results.size()]);
   }
 
-  public synchronized String getHostName() {
-    List<String> verifiedHostNames = this.verifiedHostNames;
-    if (null != verifiedHostNames && !verifiedHostNames.isEmpty() ) {
-      return verifiedHostNames.get(0);
-    } else {
-      return null;
-    }
-  }
-
-  public synchronized List<String> getVerifiedHostNames() {
+  public synchronized SortedSet<String> getVerifiedHostNames() {
     return this.verifiedHostNames;
   }
 
-  public synchronized List<String> getUnverifiedHostNames() {
+  public synchronized SortedSet<String> getUnverifiedHostNames() {
     return this.unverifiedHostNames;
   }
 

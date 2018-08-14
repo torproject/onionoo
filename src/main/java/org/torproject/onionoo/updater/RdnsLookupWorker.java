@@ -3,7 +3,7 @@
 
 package org.torproject.onionoo.updater;
 
-import java.util.List;
+import java.util.SortedSet;
 
 class RdnsLookupWorker extends Thread {
 
@@ -39,14 +39,7 @@ class RdnsLookupWorker extends Thread {
       } catch (InterruptedException e) {
         /* Getting interrupted should be the default case. */
       }
-      String hostName = request.getHostName();
-      if (null != hostName) {
-        synchronized (this.reverseDomainNameResolver.rdnsLookupResults) {
-          this.reverseDomainNameResolver.rdnsLookupResults.put(
-              rdnsLookupJob, hostName);
-        }
-      }
-      List<String> verifiedHostNames = request.getVerifiedHostNames();
+      SortedSet<String> verifiedHostNames = request.getVerifiedHostNames();
       if (null != verifiedHostNames && !verifiedHostNames.isEmpty()) {
         synchronized (this.reverseDomainNameResolver
             .rdnsVerifiedLookupResults) {
@@ -54,7 +47,7 @@ class RdnsLookupWorker extends Thread {
               rdnsLookupJob, verifiedHostNames);
         }
       }
-      List<String> unverifiedHostNames = request.getUnverifiedHostNames();
+      SortedSet<String> unverifiedHostNames = request.getUnverifiedHostNames();
       if (null != unverifiedHostNames && !unverifiedHostNames.isEmpty()) {
         synchronized (this.reverseDomainNameResolver
             .rdnsUnverifiedLookupResults) {

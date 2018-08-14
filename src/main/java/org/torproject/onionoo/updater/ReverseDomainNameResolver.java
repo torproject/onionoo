@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 public class ReverseDomainNameResolver {
 
@@ -28,11 +29,9 @@ public class ReverseDomainNameResolver {
 
   Set<String> rdnsLookupJobs;
 
-  Map<String, String> rdnsLookupResults;
+  Map<String, SortedSet<String>> rdnsVerifiedLookupResults;
 
-  Map<String, List<String>> rdnsVerifiedLookupResults;
-
-  Map<String, List<String>> rdnsUnverifiedLookupResults;
+  Map<String, SortedSet<String>> rdnsUnverifiedLookupResults;
 
   List<Long> rdnsLookupMillis;
 
@@ -56,7 +55,6 @@ public class ReverseDomainNameResolver {
         this.rdnsLookupJobs.add(e.getKey());
       }
     }
-    this.rdnsLookupResults = new HashMap<>();
     this.rdnsVerifiedLookupResults = new HashMap<>();
     this.rdnsUnverifiedLookupResults = new HashMap<>();
     this.rdnsLookupMillis = new ArrayList<>();
@@ -82,22 +80,15 @@ public class ReverseDomainNameResolver {
     }
   }
 
-  /** Returns reverse domain name lookup results. */
-  public Map<String, String> getLookupResults() {
-    synchronized (this.rdnsLookupResults) {
-      return new HashMap<>(this.rdnsLookupResults);
-    }
-  }
-
   /** Returns reverse domain name verified lookup results. */
-  public Map<String, List<String>> getVerifiedLookupResults() {
+  public Map<String, SortedSet<String>> getVerifiedLookupResults() {
     synchronized (this.rdnsVerifiedLookupResults) {
       return new HashMap<>(this.rdnsVerifiedLookupResults);
     }
   }
 
   /** Returns reverse domain name unverified lookup results. */
-  public Map<String, List<String>> getUnverifiedLookupResults() {
+  public Map<String, SortedSet<String>> getUnverifiedLookupResults() {
     synchronized (this.rdnsUnverifiedLookupResults) {
       return new HashMap<>(this.rdnsUnverifiedLookupResults);
     }

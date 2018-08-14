@@ -332,24 +332,24 @@ public class SummaryDocument extends Document {
   }
 
   @JsonProperty("vh")
-  private List<String> verifiedHostNames;
+  private SortedSet<String> verifiedHostNames;
 
-  public void setVerifiedHostNames(List<String> verifiedHostNames) {
+  public void setVerifiedHostNames(SortedSet<String> verifiedHostNames) {
     this.verifiedHostNames = verifiedHostNames;
   }
 
-  public List<String> getVerifiedHostNames() {
+  public SortedSet<String> getVerifiedHostNames() {
     return this.verifiedHostNames;
   }
 
   @JsonProperty("uh")
-  private List<String> unverifiedHostNames;
+  private SortedSet<String> unverifiedHostNames;
 
-  public void setUnverifiedHostNames(List<String> unverifiedHostNames) {
+  public void setUnverifiedHostNames(SortedSet<String> unverifiedHostNames) {
     this.unverifiedHostNames = unverifiedHostNames;
   }
 
-  public List<String> getUnverifiedHostNames() {
+  public SortedSet<String> getUnverifiedHostNames() {
     return this.unverifiedHostNames;
   }
 
@@ -378,8 +378,8 @@ public class SummaryDocument extends Document {
       String countryCode, long firstSeenMillis, String asNumber, String asName,
       String contact, SortedSet<String> familyFingerprints,
       SortedSet<String> effectiveFamily, String version, String operatingSystem,
-      String hostName, List<String> verifiedHostNames,
-      List<String> unverifiedHostNames, Boolean recommendedVersion) {
+      SortedSet<String> verifiedHostNames,
+      SortedSet<String> unverifiedHostNames, Boolean recommendedVersion) {
     this.setRelay(isRelay);
     this.setNickname(nickname);
     this.setFingerprint(fingerprint);
@@ -397,7 +397,6 @@ public class SummaryDocument extends Document {
     this.setEffectiveFamily(effectiveFamily);
     this.setVersion(version);
     this.setOperatingSystem(operatingSystem);
-    this.setHostName(hostName);
     this.setVerifiedHostNames(verifiedHostNames);
     this.setUnverifiedHostNames(unverifiedHostNames);
     this.setRecommendedVersion(recommendedVersion);

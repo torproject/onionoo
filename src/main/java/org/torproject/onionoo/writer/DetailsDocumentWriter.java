@@ -75,7 +75,6 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setFlags(detailsStatus.getRelayFlags());
     detailsDocument.setConsensusWeight(
         detailsStatus.getConsensusWeight());
-    detailsDocument.setHostName(detailsStatus.getHostName());
     detailsDocument.setVerifiedHostNames(
         detailsStatus.getVerifiedHostNames());
     detailsDocument.setUnverifiedHostNames(
