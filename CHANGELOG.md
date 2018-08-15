@@ -1,3 +1,13 @@
+# Changes in version 6.2-1.17.0 - ????-??-??
+
+ * Medium changes
+   - The "host_name" field will no longer appear in details documents.
+   - Names in the "verified_host_names" and "unverified_host_names" fields
+     are written in a deterministic order.
+   - If a reverse domain name lookup results in either no names being found
+     or an error then the lookup will be repeated at the next updater run.
+
+
 # Changes in version 6.2-1.16.1 - 2018-08-13
 
  * Medium changes
