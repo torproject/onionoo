@@ -1,4 +1,4 @@
-# Changes in version 6.2-1.17.0 - ????-??-??
+# Changes in version 6.2-1.17.0 - 2018-08-16
 
  * Medium changes
    - The "host_name" field will no longer appear in details documents.
