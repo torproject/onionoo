@@ -1,18 +1,20 @@
-# Changes in version 6.2-1.17.1 - 2018-08-??
+# Changes in version 6.2-1.17.1 - 2018-08-17
 
  * Minor changes
-   - Parsing of the "as" parameter allows AS0 to be specified. It will now
-     strip leading zeros. Specifying an AS number larger than the maximum
-     possible with 32-bits will be treated as an error.
+   - Parsing of the "as" parameter allows AS0 to be specified. It will
+     now strip leading zeros. Specifying an AS number larger than the
+     maximum possible with 32-bits will be treated as an error.
+
 
 # Changes in version 6.2-1.17.0 - 2018-08-16
 
  * Medium changes
    - The "host_name" field will no longer appear in details documents.
-   - Names in the "verified_host_names" and "unverified_host_names" fields
-     are written in a deterministic order.
-   - If a reverse domain name lookup results in either no names being found
-     or an error then the lookup will be repeated at the next updater run.
+   - Names in the "verified_host_names" and "unverified_host_names"
+     fields are written in a deterministic order.
+   - If a reverse domain name lookup results in either no names being
+     found or an error then the lookup will be repeated at the next
+     updater run.
 
 
 # Changes in version 6.2-1.16.1 - 2018-08-13
@@ -79,8 +81,8 @@
 
  * Minor changes
    - Don't attempt to un-escape character sequences in contact lines
-     (like "\uk") that only happen to start like escaped utf-8 characters
-     (like "\u0055").
+     (like "\uk") that only happen to start like escaped utf-8
+     characters (like "\u0055").
 
 
 # Changes in version 5.1-1.11.0 - 2018-03-14
