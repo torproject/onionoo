@@ -1,3 +1,10 @@
+# Changes in version 6.2-1.17.1 - 2018-08-??
+
+ * Minor changes
+   - Parsing of the "as" parameter allows AS0 to be specified. It will now
+     strip leading zeros. Specifying an AS number larger than the maximum
+     possible with 32-bits will be treated as an error.
+
 # Changes in version 6.2-1.17.0 - 2018-08-16
 
  * Medium changes

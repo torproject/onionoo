@@ -502,7 +502,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern asNumberParameterPattern =
-      Pattern.compile("((^|,)([aA][sS])?[1-9][0-9]{0,9})+$");
+      Pattern.compile("((^|,)([aA][sS])?0*[0-9]{1,10})+$");
 
   private String[] parseAsNumberParameter(String parameter) {
     if (!asNumberParameterPattern.matcher(parameter).matches()) {
@@ -512,8 +512,14 @@ public class ResourceServlet extends HttpServlet {
     String[] parameterParts = parameter.toUpperCase().split(",");
     String[] parsedParameter = new String[parameterParts.length];
     for (int i = 0; i < parameterParts.length; i++) {
-      parsedParameter[i] = (!parameterParts[i].startsWith("AS") ? "AS" : "")
-          + parameterParts[i];
+      boolean asPrefix = parameterParts[i].startsWith("AS");
+      Long asNumber = Long.parseLong(asPrefix
+          ? parameterParts[i].substring(2) : parameterParts[i]);
+      if (asNumber > 4294967295L) {
+        /* AS number was too large */
+        return null;
+      }
+      parsedParameter[i] = "AS" + asNumber.toString();
     }
     return parsedParameter;
   }

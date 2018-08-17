@@ -178,7 +178,7 @@ public class ResourceServletTest {
         DateTimeHelper.parse("2013-04-22 20:00:00"), false,
         new TreeSet<>(Arrays.asList(new String[] { "Fast",
             "Running", "Unnamed", "V2Dir", "Valid" })), 63L, "a1",
-        DateTimeHelper.parse("2013-04-16 18:00:00"), "AS6830",
+        DateTimeHelper.parse("2013-04-16 18:00:00"), null,
         "liberty global operations b.v.",
         "1024d/51e2a1c7 \"steven j. murdoch\" "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>",
@@ -1167,6 +1167,12 @@ public class ResourceServletTest {
   }
 
   @Test(timeout = 100)
+  public void testAsas8767WithLeadingZeros() {
+    this.assertSummaryDocument(
+        "/summary?as=as008767", 1, new String[] { "TorkaZ" }, 0, null);
+  }
+
+  @Test(timeout = 100)
   public void testAsAsSpace8767() {
     this.assertErrorStatusCode(
         "/summary?as=AS 8767", 400);
@@ -1176,6 +1182,34 @@ public class ResourceServletTest {
   public void testAs8767Or7922() {
     this.assertSummaryDocument("/summary?as=8767,7922", 2,
         new String[] { "TorkaZ", "Ferrari458" }, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testAsUnknown() {
+    this.assertSummaryDocument("/summary?as=0", 1,
+        new String[] {"TimMayTribute"}, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testAsAsUnknown() {
+    this.assertSummaryDocument("/summary?as=as0", 1,
+        new String[] {"TimMayTribute"}, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testAsAsUnknownWithLeadingZeros() {
+    this.assertSummaryDocument("/summary?as=as0000", 1,
+        new String[] {"TimMayTribute"}, 0, null);
+  }
+
+  @Test(timeout = 100)
+  public void testAsTooLarge() {
+    this.assertErrorStatusCode("/summary?as=4294967296", 400);
+  }
+
+  @Test(timeout = 100)
+  public void testAsNegative() {
+    this.assertErrorStatusCode("/summary?as=-3", 400);
   }
 
   @Test(timeout = 100)
