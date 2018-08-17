@@ -6,7 +6,6 @@ package org.torproject.onionoo.server;
 import static org.junit.Assert.assertEquals;
 
 import org.torproject.onionoo.docs.DateTimeHelper;
-import org.torproject.onionoo.docs.DetailsDocumentFields;
 import org.torproject.onionoo.docs.SummaryDocument;
 
 import org.hamcrest.Matchers;
@@ -73,7 +72,7 @@ public class SummaryDocumentComparatorTest {
   public SummaryDocumentComparatorTest(String order, long[] vals) {
     for (int i = 0; i < sd.length; i++) {
       sd[i] = createSummaryDoc();
-      if (order.contains(DetailsDocumentFields.FIRST_SEEN)) {
+      if (order.contains("first_seen")) {
         sd[i].setFirstSeenMillis(vals[i]);
       } else {
         sd[i].setConsensusWeight(vals[i]);

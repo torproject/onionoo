@@ -6,7 +6,6 @@ package org.torproject.onionoo.server;
 import org.torproject.onionoo.docs.BandwidthDocument;
 import org.torproject.onionoo.docs.ClientsDocument;
 import org.torproject.onionoo.docs.DetailsDocument;
-import org.torproject.onionoo.docs.DetailsDocumentFields;
 import org.torproject.onionoo.docs.DocumentStore;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
 import org.torproject.onionoo.docs.SummaryDocument;
@@ -261,7 +260,7 @@ public class ResponseBuilder {
           } else if (field.equals("last_changed_address_or_port")) {
             dd.setLastChangedAddressOrPort(
                 detailsDocument.getLastChangedAddressOrPort());
-          } else if (field.equals(DetailsDocumentFields.FIRST_SEEN)) {
+          } else if (field.equals("first_seen")) {
             dd.setFirstSeen(detailsDocument.getFirstSeen());
           } else if (field.equals("running")) {
             dd.setRunning(detailsDocument.getRunning());
@@ -285,7 +284,7 @@ public class ResponseBuilder {
             dd.setAsNumber(detailsDocument.getAsNumber());
           } else if (field.equals("as_name")) {
             dd.setAsName(detailsDocument.getAsName());
-          } else if (field.equals(DetailsDocumentFields.CONSENSUS_WEIGHT)) {
+          } else if (field.equals("consensus_weight")) {
             dd.setConsensusWeight(detailsDocument.getConsensusWeight());
           } else if (field.equals("verified_host_names")) {
             dd.setVerifiedHostNames(detailsDocument.getVerifiedHostNames());
