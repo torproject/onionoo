@@ -5,8 +5,8 @@ package org.torproject.onionoo.updater;
 
 public interface StatusUpdater {
 
-  public abstract void updateStatuses();
+  void updateStatuses();
 
-  public abstract String getStatsString();
+  String getStatsString();
 }
 
