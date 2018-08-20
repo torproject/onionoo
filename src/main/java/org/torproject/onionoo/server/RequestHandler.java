@@ -9,7 +9,6 @@ import org.torproject.onionoo.docs.SummaryDocument;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -661,8 +660,8 @@ public class RequestHandler {
     }
     Comparator<SummaryDocument> comparator
         = new SummaryDocumentComparator(this.order);
-    Collections.sort(uniqueRelays, comparator);
-    Collections.sort(uniqueBridges, comparator);
+    uniqueRelays.sort(comparator);
+    uniqueBridges.sort(comparator);
     this.orderedRelays.addAll(uniqueRelays);
     this.orderedBridges.addAll(uniqueBridges);
   }
