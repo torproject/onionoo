@@ -38,6 +38,6 @@ public class FormattingUtilsTest {
 
   @Test
   public void testReplaceUtf() {
-    assertEquals(out, new String(FormattingUtils.replaceValidUtf(in)));
+    assertEquals(out, FormattingUtils.replaceValidUtf(in));
   }
 }
