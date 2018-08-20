@@ -88,8 +88,7 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     }
     SortedSet<String> flags = null;
     if (parts[0].equals("R")) {
-      flags = new TreeSet<>();
-      flags.addAll(Arrays.asList(parts).subList(3, parts.length));
+      flags = new TreeSet<>(Arrays.asList(parts).subList(3, parts.length));
     }
     return new UptimeHistory(relay, startMillis, uptimeHours, flags);
   }

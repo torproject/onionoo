@@ -52,8 +52,8 @@ public class DummyDescriptorSource extends DescriptorSource {
 
   @Override
   public void readDescriptors() {
-    Set<DescriptorType> descriptorTypes = new HashSet<>();
-    descriptorTypes.addAll(this.descriptorListeners.keySet());
+    Set<DescriptorType> descriptorTypes = new HashSet<>(
+        this.descriptorListeners.keySet());
     for (DescriptorType descriptorType : descriptorTypes) {
       boolean relay;
       switch (descriptorType) {
