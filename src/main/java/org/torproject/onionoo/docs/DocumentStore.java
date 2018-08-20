@@ -529,10 +529,7 @@ public class DocumentStore {
     try {
       result = documentType.newInstance();
       result.setFromDocumentString(documentString);
-    } catch (InstantiationException e) {
-      /* Handle below. */
-      log.error(e.getMessage(), e);
-    } catch (IllegalAccessException e) {
+    } catch (InstantiationException | IllegalAccessException e) {
       /* Handle below. */
       log.error(e.getMessage(), e);
     }
@@ -566,10 +563,7 @@ public class DocumentStore {
     try {
       result = documentType.newInstance();
       result.setDocumentString(documentString);
-    } catch (InstantiationException e) {
-      /* Handle below. */
-      log.error(e.getMessage(), e);
-    } catch (IllegalAccessException e) {
+    } catch (InstantiationException | IllegalAccessException e) {
       /* Handle below. */
       log.error(e.getMessage(), e);
     }
