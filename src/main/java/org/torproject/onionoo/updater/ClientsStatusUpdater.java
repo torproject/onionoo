@@ -116,7 +116,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
           responsesByTransport, responsesByVersion); 
       if (!this.newResponses.containsKey(hashedFingerprint)) {
         this.newResponses.put(hashedFingerprint,
-            new TreeSet<ClientsHistory>());
+            new TreeSet<>());
       }
       this.newResponses.get(hashedFingerprint).add(
           newResponseHistory);

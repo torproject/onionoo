@@ -32,7 +32,7 @@ public class DummyDescriptorSource extends DescriptorSource {
   private Set<Descriptor> getDescriptorsByType(
       DescriptorType descriptorType) {
     if (!this.descriptors.containsKey(descriptorType)) {
-      this.descriptors.put(descriptorType, new HashSet<Descriptor>());
+      this.descriptors.put(descriptorType, new HashSet<>());
     }
     return this.descriptors.get(descriptorType);
   }
@@ -45,7 +45,7 @@ public class DummyDescriptorSource extends DescriptorSource {
       DescriptorType descriptorType) {
     if (!this.descriptorListeners.containsKey(descriptorType)) {
       this.descriptorListeners.put(descriptorType,
-          new HashSet<DescriptorListener>());
+          new HashSet<>());
     }
     this.descriptorListeners.get(descriptorType).add(listener);
   }

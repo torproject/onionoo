@@ -211,7 +211,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       }
       if (!newRelaysByCountryCode.containsKey(countryCode)) {
         newRelaysByCountryCode.put(countryCode,
-            new HashSet<String>());
+            new HashSet<>());
       }
       newRelaysByCountryCode.get(countryCode).add(fingerprint);
       newRelaysByCountryCode.get(countryCode).add(hashedFingerprint);
@@ -226,7 +226,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         asNumber = "AS0";
       }
       if (!newRelaysByAsNumber.containsKey(asNumber)) {
-        newRelaysByAsNumber.put(asNumber, new HashSet<String>());
+        newRelaysByAsNumber.put(asNumber, new HashSet<>());
       }
       newRelaysByAsNumber.get(asNumber).add(fingerprint);
       newRelaysByAsNumber.get(asNumber).add(hashedFingerprint);
@@ -239,7 +239,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       for (String flag : entry.getRelayFlags()) {
         String flagLowerCase = flag.toLowerCase();
         if (!newRelaysByFlag.containsKey(flagLowerCase)) {
-          newRelaysByFlag.put(flagLowerCase, new HashSet<String>());
+          newRelaysByFlag.put(flagLowerCase, new HashSet<>());
         }
         newRelaysByFlag.get(flagLowerCase).add(fingerprint);
         newRelaysByFlag.get(flagLowerCase).add(hashedFingerprint);
@@ -260,7 +260,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           - entry.getFirstSeenMillis()) / ONE_DAY);
       if (!newRelaysByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
         newRelaysByFirstSeenDays.put(daysSinceFirstSeen,
-            new HashSet<String>());
+            new HashSet<>());
       }
       newRelaysByFirstSeenDays.get(daysSinceFirstSeen).add(fingerprint);
       newRelaysByFirstSeenDays.get(daysSinceFirstSeen).add(
@@ -270,21 +270,21 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           - entry.getLastSeenMillis()) / ONE_DAY);
       if (!newRelaysByLastSeenDays.containsKey(daysSinceLastSeen)) {
         newRelaysByLastSeenDays.put(daysSinceLastSeen,
-            new HashSet<String>());
+            new HashSet<>());
       }
       newRelaysByLastSeenDays.get(daysSinceLastSeen).add(fingerprint);
       newRelaysByLastSeenDays.get(daysSinceLastSeen).add(
           hashedFingerprint);
       String contact = entry.getContact();
       if (!newRelaysByContact.containsKey(contact)) {
-        newRelaysByContact.put(contact, new HashSet<String>());
+        newRelaysByContact.put(contact, new HashSet<>());
       }
       newRelaysByContact.get(contact).add(fingerprint);
       newRelaysByContact.get(contact).add(hashedFingerprint);
       String version = entry.getVersion();
       if (null != version) {
         if (!newRelaysByVersion.containsKey(version)) {
-          newRelaysByVersion.put(version, new HashSet<String>());
+          newRelaysByVersion.put(version, new HashSet<>());
         }
         newRelaysByVersion.get(version).add(fingerprint);
         newRelaysByVersion.get(version).add(hashedFingerprint);
@@ -347,7 +347,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
       for (String flag : entry.getRelayFlags()) {
         String flagLowerCase = flag.toLowerCase();
         if (!newBridgesByFlag.containsKey(flagLowerCase)) {
-          newBridgesByFlag.put(flagLowerCase, new HashSet<String>());
+          newBridgesByFlag.put(flagLowerCase, new HashSet<>());
         }
         newBridgesByFlag.get(flagLowerCase).add(hashedFingerprint);
         newBridgesByFlag.get(flagLowerCase).add(
@@ -358,7 +358,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           - entry.getFirstSeenMillis()) / ONE_DAY);
       if (!newBridgesByFirstSeenDays.containsKey(daysSinceFirstSeen)) {
         newBridgesByFirstSeenDays.put(daysSinceFirstSeen,
-            new HashSet<String>());
+            new HashSet<>());
       }
       newBridgesByFirstSeenDays.get(daysSinceFirstSeen).add(
           hashedFingerprint);
@@ -369,7 +369,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
           - entry.getLastSeenMillis()) / ONE_DAY);
       if (!newBridgesByLastSeenDays.containsKey(daysSinceLastSeen)) {
         newBridgesByLastSeenDays.put(daysSinceLastSeen,
-            new HashSet<String>());
+            new HashSet<>());
       }
       newBridgesByLastSeenDays.get(daysSinceLastSeen).add(
           hashedFingerprint);

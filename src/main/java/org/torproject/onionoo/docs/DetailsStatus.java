@@ -248,7 +248,7 @@ public class DetailsStatus extends Document {
   }
 
   public SortedSet<String> getOrAddressesAndPorts() {
-    return this.orAddressesAndPorts == null ? new TreeSet<String>() :
+    return this.orAddressesAndPorts == null ? new TreeSet<>() :
         this.orAddressesAndPorts;
   }
 

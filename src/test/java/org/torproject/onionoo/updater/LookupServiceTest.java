@@ -234,19 +234,19 @@ public class LookupServiceTest {
 
   @Test()
   public void testLookupNoBlocksLines() {
-    this.assertLookupResult(new ArrayList<String>(), null, null,
+    this.assertLookupResult(new ArrayList<>(), null, null,
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
 
   @Test()
   public void testLookupNoLocationLines() {
-    this.assertLookupResult(null, new ArrayList<String>(), null,
+    this.assertLookupResult(null, new ArrayList<>(), null,
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
 
   @Test()
   public void testLookupNoGeoipAsNum2Lines() {
-    this.assertLookupResult(null, null, new ArrayList<String>(),
+    this.assertLookupResult(null, null, new ArrayList<>(),
         "8.8.8.8", null, null, null, null, null, null, null, null);
   }
 

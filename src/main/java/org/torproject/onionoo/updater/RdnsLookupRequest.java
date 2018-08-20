@@ -91,7 +91,7 @@ class RdnsLookupRequest extends Thread {
     envProps.put(Context.INITIAL_CONTEXT_FACTORY,
         "com.sun.jndi.dns.DnsContextFactory");
     final DirContext dnsContext = new InitialDirContext(envProps);
-    Set<String> results = new TreeSet<String>();
+    Set<String> results = new TreeSet<>();
     Attributes dnsEntries =
         dnsContext.getAttributes(hostName, new String[] { type });
     if (dnsEntries != null) {

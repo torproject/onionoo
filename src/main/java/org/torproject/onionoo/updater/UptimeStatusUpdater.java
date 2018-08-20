@@ -105,7 +105,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
       String fingerprint = entry.getFingerprint();
       if (!this.newRunningRelays.containsKey(fingerprint)) {
         this.newRunningRelays.put(fingerprint,
-            new TreeMap<Long, Flags>());
+            new TreeMap<>());
       }
       this.newRunningRelays.get(fingerprint).put(dateHourMillis,
           new Flags(entry.getFlags()));
@@ -125,7 +125,7 @@ public class UptimeStatusUpdater implements DescriptorListener,
           / DateTimeHelper.ONE_HOUR) * DateTimeHelper.ONE_HOUR;
       for (String fingerprint : fingerprints) {
         if (!this.newRunningBridges.containsKey(fingerprint)) {
-          this.newRunningBridges.put(fingerprint, new TreeSet<Long>());
+          this.newRunningBridges.put(fingerprint, new TreeSet<>());
         }
         this.newRunningBridges.get(fingerprint).add(dateHourMillis);
       }

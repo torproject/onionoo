@@ -83,7 +83,7 @@ public class DescriptorSource {
       DescriptorType descriptorType) {
     if (!this.descriptorListeners.containsKey(descriptorType)) {
       this.descriptorListeners.put(descriptorType,
-          new HashSet<DescriptorListener>());
+          new HashSet<>());
     }
     this.descriptorListeners.get(descriptorType).add(listener);
   }

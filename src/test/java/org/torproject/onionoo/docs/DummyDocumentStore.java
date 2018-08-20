@@ -20,7 +20,7 @@ public class DummyDocumentStore extends DocumentStore {
   private <T extends Document> SortedMap<String, Document>
       getStoredDocumentsByClass(Class<T> documentType) {
     if (!this.storedDocuments.containsKey(documentType)) {
-      this.storedDocuments.put(documentType, new TreeMap<String, Document>());
+      this.storedDocuments.put(documentType, new TreeMap<>());
     }
     return this.storedDocuments.get(documentType);
   }

@@ -224,7 +224,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           continue;
         }
         if (!this.exitListEntries.containsKey(fingerprint)) {
-          this.exitListEntries.put(fingerprint, new HashMap<String, Long>());
+          this.exitListEntries.put(fingerprint, new HashMap<>());
         }
         String exitAddress = exitAddressScanMillis.getKey();
         if (!this.exitListEntries.get(fingerprint).containsKey(

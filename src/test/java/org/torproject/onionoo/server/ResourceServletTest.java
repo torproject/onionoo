@@ -56,7 +56,7 @@ public class ResourceServletTest {
       this.requestUri = requestUri;
       this.queryString = queryString;
       this.parameterMap = parameterMap == null
-          ? new HashMap<String, String[]>() : parameterMap;
+          ? new HashMap<>() : parameterMap;
     }
 
     @Override
@@ -162,8 +162,8 @@ public class ResourceServletTest {
             "Running", "V2Dir", "Valid" })), 1140L, "us",
         DateTimeHelper.parse("2013-04-16 18:00:00"), "AS7922",
         "comcast cable communications, llc", null,
-        new TreeSet<String>(Arrays.asList(new String[] {
-            "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })),
+            new TreeSet<>(Arrays.asList(new String[]{
+                "000C5F55BD4814B917CC474BD537F1A3B33CCE2A"})),
         new TreeSet<>(Arrays.asList(new String[] {
             "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })), null, null,
         new TreeSet<>(Arrays.asList(
@@ -182,7 +182,7 @@ public class ResourceServletTest {
         "liberty global operations b.v.",
         "1024d/51e2a1c7 \"steven j. murdoch\" "
         + "<tor+steven.murdoch@cl.cam.ac.uk> <fb-token:5sr_k_zs2wm=>",
-        new TreeSet<String>(), new TreeSet<String>(), "0.2.3.24-rc-dev",
+            new TreeSet<>(), new TreeSet<>(), "0.2.3.24-rc-dev",
         "windows xp", null, null, false);
     this.relays.put("0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B",
         relayTimMayTribute);
@@ -337,7 +337,7 @@ public class ResourceServletTest {
         String[] parameterParts = parameter.split("=");
         if (!parameterLists.containsKey(parameterParts[0])) {
           parameterLists.put(parameterParts[0],
-              new ArrayList<String>());
+              new ArrayList<>());
         }
         parameterLists.get(parameterParts[0]).add(parameterParts[1]);
       }

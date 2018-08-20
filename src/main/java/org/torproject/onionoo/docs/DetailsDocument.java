@@ -76,7 +76,7 @@ public class DetailsDocument extends Document {
   }
 
   public List<String> getExitAddresses() {
-    return this.exitAddresses == null ? new ArrayList<String>()
+    return this.exitAddresses == null ? new ArrayList<>()
         : this.exitAddresses;
   }
 
