@@ -120,27 +120,18 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setPlatform(detailsStatus.getPlatform());
     if (detailsStatus.getAllegedFamily() != null
         && !detailsStatus.getAllegedFamily().isEmpty()) {
-      SortedSet<String> allegedFamily = new TreeSet<>();
-      for (String familyMember : detailsStatus.getAllegedFamily()) {
-        allegedFamily.add(familyMember);
-      }
-      detailsDocument.setAllegedFamily(allegedFamily);
+      detailsDocument.setAllegedFamily(
+          new TreeSet<>(detailsStatus.getAllegedFamily()));
     }
     if (detailsStatus.getEffectiveFamily() != null
         && !detailsStatus.getEffectiveFamily().isEmpty()) {
-      SortedSet<String> effectiveFamily = new TreeSet<>();
-      for (String familyMember : detailsStatus.getEffectiveFamily()) {
-        effectiveFamily.add(familyMember);
-      }
-      detailsDocument.setEffectiveFamily(effectiveFamily);
+      detailsDocument.setEffectiveFamily(
+          new TreeSet<>(detailsStatus.getEffectiveFamily()));
     }
     if (detailsStatus.getIndirectFamily() != null
         && !detailsStatus.getIndirectFamily().isEmpty()) {
-      SortedSet<String> indirectFamily = new TreeSet<>();
-      for (String familyMember : detailsStatus.getIndirectFamily()) {
-        indirectFamily.add(familyMember);
-      }
-      detailsDocument.setIndirectFamily(indirectFamily);
+      detailsDocument.setIndirectFamily(
+          new TreeSet<>(detailsStatus.getIndirectFamily()));
     }
     detailsDocument.setExitPolicyV6Summary(
         detailsStatus.getExitPolicyV6Summary());
