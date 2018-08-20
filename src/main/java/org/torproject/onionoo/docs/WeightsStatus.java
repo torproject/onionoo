@@ -27,16 +27,14 @@ public class WeightsStatus extends Document {
     this.isDirty = false;
   }
 
-  private Comparator<long[]> histComparator = new Comparator<long[]>() {
-      public int compare(long[] first, long[] second) {
-        int relation = Long.compare(first[0], second[0]);
-        if (0 != relation) {
-          return relation;
-        } else {
-          return Long.compare(first[1], second[1]);
-        }
-      }
-    };
+  private Comparator<long[]> histComparator = (first, second) -> {
+    int relation = Long.compare(first[0], second[0]);
+    if (0 != relation) {
+      return relation;
+    } else {
+      return Long.compare(first[1], second[1]);
+    }
+  };
 
   private SortedMap<long[], double[]> history = new TreeMap<>(histComparator);
 
