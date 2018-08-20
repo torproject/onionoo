@@ -104,7 +104,7 @@ public class TorVersion implements Comparable<TorVersion> {
 
   @Override
   public boolean equals(Object other) {
-    return null != other && other instanceof TorVersion
+    return other instanceof TorVersion
         && this.compareTo((TorVersion) other) == 0;
   }
 
