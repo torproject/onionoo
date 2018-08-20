@@ -64,8 +64,7 @@ public class ResourceServletTest {
       return this.requestUri;
     }
 
-    @SuppressWarnings("rawtypes")
-    protected Map getParameterMap() {
+    protected Map<String, String[]> getParameterMap() {
       return this.parameterMap;
     }
 

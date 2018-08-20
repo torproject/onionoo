@@ -20,8 +20,7 @@ public class HttpServletRequestWrapper {
     return this.request.getRequestURI();
   }
 
-  @SuppressWarnings("rawtypes")
-  protected Map getParameterMap() {
+  protected Map<String, String[]> getParameterMap() {
     return this.request.getParameterMap();
   }
 

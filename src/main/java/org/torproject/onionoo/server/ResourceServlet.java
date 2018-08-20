@@ -133,10 +133,10 @@ public class ResourceServlet extends HttpServlet {
     /* Extract parameters either from the old-style URI or from request
      * parameters. */
     Map<String, String> parameterMap = new HashMap<>();
-    for (Object parameterKey : request.getParameterMap().keySet()) {
+    for (String parameterKey : request.getParameterMap().keySet()) {
       String[] parameterValues =
-          request.getParameterValues((String) parameterKey);
-      parameterMap.put((String) parameterKey, parameterValues[0]);
+          request.getParameterValues(parameterKey);
+      parameterMap.put(parameterKey, parameterValues[0]);
     }
 
     /* Make sure that the request doesn't contain any unknown
