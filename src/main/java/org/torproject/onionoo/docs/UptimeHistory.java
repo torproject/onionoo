@@ -6,6 +6,7 @@ package org.torproject.onionoo.docs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -88,9 +89,7 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     SortedSet<String> flags = null;
     if (parts[0].equals("R")) {
       flags = new TreeSet<>();
-      for (int i = 3; i < parts.length; i++) {
-        flags.add(parts[i]);
-      }
+      flags.addAll(Arrays.asList(parts).subList(3, parts.length));
     }
     return new UptimeHistory(relay, startMillis, uptimeHours, flags);
   }
