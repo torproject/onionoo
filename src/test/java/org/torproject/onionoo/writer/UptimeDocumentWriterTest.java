@@ -94,7 +94,7 @@ public class UptimeDocumentWriterTest {
     assertEquals("Interval should be " + interval + " seconds.", interval,
         (int) history.getInterval());
     assertEquals("Factor should be 1.0 / 999.0.", 1.0 / 999.0,
-        (double) history.getFactor(), 0.01);
+        history.getFactor(), 0.01);
     assertEquals("There should be " + count + " data points.", count,
         (int) history.getCount());
     assertEquals("Count should be the same as the number of values.",
