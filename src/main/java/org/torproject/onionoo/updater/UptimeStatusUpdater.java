@@ -182,15 +182,15 @@ public class UptimeStatusUpdater implements DescriptorListener,
   @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-            this.newRelayStatuses.size()) + " hours of relay uptimes "
-            + "processed\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        this.newBridgeStatuses.size()) + " hours of bridge uptimes "
-        + "processed\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        this.newRunningRelays.size() + this.newRunningBridges.size())
-        + " uptime status files updated\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        this.newRelayStatuses.size())).append(" hours of relay uptimes ")
+        .append("processed\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        this.newBridgeStatuses.size())).append(" hours of bridge uptimes ")
+        .append("processed\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        this.newRunningRelays.size() + this.newRunningBridges.size()))
+        .append(" uptime status files updated\n");
     return sb.toString();
   }
 }

@@ -98,12 +98,12 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(this.relay ? (this.flags == null ? "r" : "R") : "b");
-    sb.append(" " + DateTimeHelper.format(this.startMillis,
+    sb.append(" ").append(DateTimeHelper.format(this.startMillis,
         DateTimeHelper.DATEHOUR_NOSPACE_FORMAT));
-    sb.append(" " + String.format("%d", this.uptimeHours));
+    sb.append(" ").append(String.format("%d", this.uptimeHours));
     if (this.flags != null) {
       for (String flag : this.flags) {
-        sb.append(" " + flag);
+        sb.append(" ").append(flag);
       }
     }
     return sb.toString();

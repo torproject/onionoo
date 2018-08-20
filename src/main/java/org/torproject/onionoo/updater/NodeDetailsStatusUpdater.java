@@ -958,10 +958,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        relayConsensusesProcessed) + " relay consensuses processed\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        bridgeStatusesProcessed) + " bridge statuses processed\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        relayConsensusesProcessed)).append(" relay consensuses processed\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        bridgeStatusesProcessed)).append(" bridge statuses processed\n");
     return sb.toString();
   }
 }

@@ -120,8 +120,8 @@ public class ClientsDocumentWriter implements DocumentWriter {
   @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        this.writtenDocuments) + " clients document files updated\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        this.writtenDocuments)).append(" clients document files updated\n");
     return sb.toString();
   }
 }

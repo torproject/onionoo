@@ -737,7 +737,7 @@ public class DocumentStore {
     for (NodeStatus relay : cachedRelays.values()) {
       String line = relay.toString();
       if (line != null) {
-        sb.append(line + "\n");
+        sb.append(line).append("\n");
       } else {
         log.error("Could not serialize relay node status '"
             + relay.getFingerprint() + "'");
@@ -746,7 +746,7 @@ public class DocumentStore {
     for (NodeStatus bridge : cachedBridges.values()) {
       String line = bridge.toString();
       if (line != null) {
-        sb.append(line + "\n");
+        sb.append(line).append("\n");
       } else {
         log.error("Could not serialize bridge node status '"
             + bridge.getFingerprint() + "'");
@@ -789,7 +789,7 @@ public class DocumentStore {
         line = null;
       }
       if (line != null) {
-        sb.append(line + "\n");
+        sb.append(line).append("\n");
       } else {
         log.error("Could not serialize relay summary document '"
             + summaryDocument.getFingerprint() + "'");
@@ -823,20 +823,22 @@ public class DocumentStore {
   /** Returns a string with statistics on document storage operations. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + FormattingUtils.formatDecimalNumber(listOperations)
-        + " list operations performed\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(listedFiles)
-        + " files listed\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(storedFiles)
-        + " files stored\n");
-    sb.append("    " + FormattingUtils.formatBytes(storedBytes)
-        + " stored\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(retrievedFiles)
-        + " files retrieved\n");
-    sb.append("    " + FormattingUtils.formatBytes(retrievedBytes)
-        + " retrieved\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(removedFiles)
-        + " files removed\n");
+    sb.append("    ")
+        .append(FormattingUtils.formatDecimalNumber(listOperations))
+        .append(" list operations performed\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(listedFiles))
+        .append(" files listed\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(storedFiles))
+        .append(" files stored\n");
+    sb.append("    ").append(FormattingUtils.formatBytes(storedBytes))
+        .append(" stored\n");
+    sb.append("    ")
+        .append(FormattingUtils.formatDecimalNumber(retrievedFiles))
+        .append(" files retrieved\n");
+    sb.append("    ").append(FormattingUtils.formatBytes(retrievedBytes))
+        .append(" retrieved\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(removedFiles))
+        .append(" files removed\n");
     return sb.toString();
   }
 }

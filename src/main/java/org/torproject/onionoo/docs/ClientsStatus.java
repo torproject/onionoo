@@ -111,7 +111,7 @@ public class ClientsStatus extends Document {
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
     for (ClientsHistory interval : this.history) {
-      sb.append(interval.toString() + "\n");
+      sb.append(interval.toString()).append("\n");
     }
     return sb.toString();
   }

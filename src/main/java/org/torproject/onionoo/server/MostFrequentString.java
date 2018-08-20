@@ -48,8 +48,8 @@ class MostFrequentString {
         sortedFrequencies.entrySet()) {
       for (String string : e.getValue()) {
         if (stringsToAdd-- > 0) {
-          sb.append((written++ > 0 ? ", " : "") + string + " ("
-              + e.getKey() + ")");
+          sb.append(written++ > 0 ? ", " : "").append(string).append(" (")
+              .append(e.getKey()).append(")");
         } else {
           remainingStrings.add(string);
         }

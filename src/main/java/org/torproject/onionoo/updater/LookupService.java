@@ -366,10 +366,10 @@ public class LookupService {
    * resolved. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        addressesLookedUp) + " addresses looked up\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        addressesResolved) + " addresses resolved\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        addressesLookedUp)).append(" addresses looked up\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        addressesResolved)).append(" addresses resolved\n");
     return sb.toString();
   }
 }

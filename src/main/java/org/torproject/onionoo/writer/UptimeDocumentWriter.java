@@ -239,8 +239,8 @@ public class UptimeDocumentWriter implements DocumentWriter {
   @Override
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        this.writtenDocuments) + " uptime document files written\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        this.writtenDocuments)).append(" uptime document files written\n");
     return sb.toString();
   }
 }

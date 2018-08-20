@@ -27,9 +27,9 @@ class IntegerDistribution {
         seenValues += logValues[i];
         while (j < permilles.length
             && (seenValues * 1000 > totalValues * permilles[j])) {
-          sb.append((j > 0 ? ", " : "") + "." + permilles[j]
-              + (i < logValues.length - 1 ? "<" + (1L << i)
-              : ">=" + (1L << i - 1)));
+          sb.append(j > 0 ? ", " : "").append(".").append(permilles[j])
+              .append(i < logValues.length - 1 ? "<" + (1L << i)
+              : ">=" + (1L << i - 1));
           j++;
         }
         if (j == permilles.length) {
@@ -38,7 +38,8 @@ class IntegerDistribution {
       }
     } else {
       for (int j = 0; j < permilles.length; j++) {
-        sb.append((j > 0 ? ", " : "") + "." + permilles[j] + "<null");
+        sb.append(j > 0 ? ", " : "").append(".").append(permilles[j])
+            .append("<null");
       }
     }
     return sb.toString();

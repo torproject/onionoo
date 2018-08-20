@@ -217,8 +217,8 @@ public class ResponseBuilder {
     StringBuilder addressesBuilder = new StringBuilder();
     int written = 0;
     for (String address : addresses) {
-      addressesBuilder.append((written++ > 0 ? "," : "") + "\""
-          + address.toLowerCase() + "\"");
+      addressesBuilder.append(written++ > 0 ? "," : "").append("\"")
+          .append(address.toLowerCase()).append("\"");
     }
     return String.format("{\"n\":\"%s\",\"f\":\"%s\",\"a\":[%s],\"r\":%s}",
         nickname, fingerprint, addressesBuilder.toString(), running);

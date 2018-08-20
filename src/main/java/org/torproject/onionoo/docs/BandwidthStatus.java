@@ -171,14 +171,14 @@ public class BandwidthStatus extends Document {
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
     for (long[] v : writeHistory.values()) {
-      sb.append("w " + DateTimeHelper.format(v[0]) + " "
-          + DateTimeHelper.format(v[1]) + " " + String.valueOf(v[2])
-          + "\n");
+      sb.append("w ").append(DateTimeHelper.format(v[0])).append(" ")
+          .append(DateTimeHelper.format(v[1])).append(" ")
+          .append(String.valueOf(v[2])).append("\n");
     }
     for (long[] v : readHistory.values()) {
-      sb.append("r " + DateTimeHelper.format(v[0]) + " "
-          + DateTimeHelper.format(v[1]) + " " + String.valueOf(v[2])
-          + "\n");
+      sb.append("r ").append(DateTimeHelper.format(v[0])).append(" ")
+          .append(DateTimeHelper.format(v[1])).append(" ")
+          .append(String.valueOf(v[2])).append("\n");
     }
     return sb.toString();
   }

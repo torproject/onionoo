@@ -143,10 +143,10 @@ public class UptimeStatus extends Document {
   public String toDocumentString() {
     StringBuilder sb = new StringBuilder();
     for (UptimeHistory interval : this.relayHistory) {
-      sb.append(interval.toString() + "\n");
+      sb.append(interval.toString()).append("\n");
     }
     for (UptimeHistory interval : this.bridgeHistory) {
-      sb.append(interval.toString() + "\n");
+      sb.append(interval.toString()).append("\n");
     }
     return sb.toString();
   }

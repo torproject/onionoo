@@ -201,8 +201,8 @@ public class WeightsStatus extends Document {
     for (Map.Entry<long[], double[]> e : history.entrySet()) {
       long[] fresh = e.getKey();
       double[] weights = e.getValue();
-      sb.append(DateTimeHelper.format(fresh[0]) + " "
-          + DateTimeHelper.format(fresh[1]));
+      sb.append(DateTimeHelper.format(fresh[0])).append(" ")
+          .append(DateTimeHelper.format(fresh[1]));
       for (int i = 0; i < weights.length; i++) {
         sb.append(" ");
         if (i != 0 && i != 5 && !Double.valueOf(weights[i]).isNaN()) {

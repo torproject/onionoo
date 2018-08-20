@@ -104,23 +104,23 @@ public class ReverseDomainNameResolver {
    * lookups and some simple statistics on lookup time. */
   public String getStatsString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        rdnsLookupMillis.size()) + " lookups performed\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        rdnsVerifiedLookupResults.size()) + " verified results found\n");
-    sb.append("    " + FormattingUtils.formatDecimalNumber(
-        rdnsUnverifiedLookupResults.size())
-        + " unverified results found\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        rdnsLookupMillis.size())).append(" lookups performed\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        rdnsVerifiedLookupResults.size())).append(" verified results found\n");
+    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
+        rdnsUnverifiedLookupResults.size()))
+        .append(" unverified results found\n");
     if (!rdnsLookupMillis.isEmpty()) {
       Collections.sort(rdnsLookupMillis);
-      sb.append("    " + FormattingUtils.formatMillis(
-          rdnsLookupMillis.get(0)) + " minimum lookup time\n");
-      sb.append("    " + FormattingUtils.formatMillis(
-          rdnsLookupMillis.get(rdnsLookupMillis.size() / 2))
-          + " median lookup time\n");
-      sb.append("    " + FormattingUtils.formatMillis(
-          rdnsLookupMillis.get(rdnsLookupMillis.size() - 1))
-          + " maximum lookup time\n");
+      sb.append("    ").append(FormattingUtils.formatMillis(
+          rdnsLookupMillis.get(0))).append(" minimum lookup time\n");
+      sb.append("    ").append(FormattingUtils.formatMillis(
+          rdnsLookupMillis.get(rdnsLookupMillis.size() / 2)))
+          .append(" median lookup time\n");
+      sb.append("    ").append(FormattingUtils.formatMillis(
+          rdnsLookupMillis.get(rdnsLookupMillis.size() - 1)))
+          .append(" maximum lookup time\n");
     }
     return sb.toString();
   }

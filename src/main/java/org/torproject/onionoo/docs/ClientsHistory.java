@@ -142,8 +142,8 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(DateTimeHelper.format(startMillis));
-    sb.append(" " + DateTimeHelper.format(endMillis));
-    sb.append(" " + String.format("%.3f", this.totalResponses));
+    sb.append(" ").append(DateTimeHelper.format(endMillis));
+    sb.append(" ").append(String.format("%.3f", this.totalResponses));
     this.appendResponses(sb, this.responsesByCountry);
     this.appendResponses(sb, this.responsesByTransport);
     this.appendResponses(sb, this.responsesByVersion);
@@ -155,8 +155,8 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
     sb.append(" ");
     int written = 0;
     for (Map.Entry<String, Double> e : responses.entrySet()) {
-      sb.append((written++ > 0 ? "," : "") + e.getKey() + "="
-          + String.format("%.3f", e.getValue()));
+      sb.append(written++ > 0 ? "," : "").append(e.getKey()).append("=")
+          .append(String.format("%.3f", e.getValue()));
     }
   }
 
