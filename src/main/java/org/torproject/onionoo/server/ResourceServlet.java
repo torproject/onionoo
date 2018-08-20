@@ -51,7 +51,7 @@ public class ResourceServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request,
-      HttpServletResponse response) throws IOException, ServletException {
+      HttpServletResponse response) throws IOException {
     HttpServletRequestWrapper requestWrapper =
         new HttpServletRequestWrapper(request);
     HttpServletResponseWrapper responseWrapper =

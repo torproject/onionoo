@@ -33,7 +33,7 @@ public class NodeDetailsStatusUpdaterTest {
   }
 
   @Test
-  public void testExitReset() throws Exception {
+  public void testExitReset() {
     NodeDetailsStatusUpdater ndsu = new NodeDetailsStatusUpdater(null, null);
     DescriptorParser dp = DescriptorSourceFactory.createDescriptorParser();
     String descString = RELAY1 + PUB1 + RELAY2 + POLICY1 + RELAY3;

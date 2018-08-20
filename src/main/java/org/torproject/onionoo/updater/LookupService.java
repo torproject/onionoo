@@ -14,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
@@ -340,14 +339,13 @@ public class LookupService {
   }
 
   private BufferedReader createBufferedReaderFromUtf8File(File utf8File)
-      throws FileNotFoundException, CharacterCodingException {
+      throws FileNotFoundException {
     return this.createBufferedReaderFromFile(utf8File,
         StandardCharsets.UTF_8.newDecoder());
   }
 
   private BufferedReader createBufferedReaderFromIso88591File(
-      File iso88591File) throws FileNotFoundException,
-      CharacterCodingException {
+      File iso88591File) throws FileNotFoundException {
     return this.createBufferedReaderFromFile(iso88591File,
         StandardCharsets.ISO_8859_1.newDecoder());
   }

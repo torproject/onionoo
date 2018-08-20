@@ -87,7 +87,7 @@ public class ResourceServletTest {
 
     private int errorStatusCode;
 
-    protected void sendError(int errorStatusCode) throws IOException {
+    protected void sendError(int errorStatusCode) {
       this.errorStatusCode = errorStatusCode;
     }
 
@@ -385,7 +385,7 @@ public class ResourceServletTest {
   }
 
   @Test(timeout = 100)
-  public void testValidSummaryRelay() throws IOException {
+  public void testValidSummaryRelay() {
     this.runTest("/summary");
     assertEquals("2013-04-24 12:00:00",
         this.summaryDocument.relays_published);
