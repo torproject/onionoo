@@ -167,7 +167,7 @@ public class UptimeDocumentWriterTest {
         UptimeDocument.class, GABELMOO_FINGERPRINT);
     this.assertOneWeekGraph(document, 1, "2014-03-23 09:30:00",
         "2014-03-23 11:30:00", 3,
-        Arrays.asList(new Integer[] { 999, 0, 999 }));
+        Arrays.asList(999, 0, 999));
   }
 
   @Test
@@ -183,7 +183,7 @@ public class UptimeDocumentWriterTest {
         UptimeDocument.class, GABELMOO_FINGERPRINT);
     this.assertOneWeekGraph(document, 1, "2014-03-23 09:30:00",
         "2014-03-23 11:30:00", 3,
-        Arrays.asList(new Integer[] { 999, 999, 0 }));
+        Arrays.asList(999, 999, 0));
   }
 
   @Test
@@ -244,7 +244,7 @@ public class UptimeDocumentWriterTest {
         UptimeDocument.class, GABELMOO_FINGERPRINT);
     this.assertOneMonthGraph(document, 2, "2014-03-16 10:00:00",
         "2014-03-16 14:00:00", 2,
-        Arrays.asList(new Integer[] { 999, 499 }));
+        Arrays.asList(999, 499));
   }
 
   @Test
@@ -280,7 +280,7 @@ public class UptimeDocumentWriterTest {
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
     this.assertFiveYearGraph(document, 1, "2012-03-06 00:00:00",
-        "2012-03-16 00:00:00", 2, Arrays.asList(new Integer[] { 999, 999 }));
+        "2012-03-16 00:00:00", 2, Arrays.asList(999, 999));
   }
 }
 

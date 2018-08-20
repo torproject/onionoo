@@ -592,10 +592,10 @@ public class ResourceServlet extends HttpServlet {
       Pattern.compile("^[0-9a-zA-Z_,-]*$");
 
   private static HashSet<String> knownOrderParameters = new HashSet<>(
-      Arrays.asList(new String[] { OrderParameterValues.CONSENSUS_WEIGHT_ASC,
+      Arrays.asList(OrderParameterValues.CONSENSUS_WEIGHT_ASC,
           OrderParameterValues.CONSENSUS_WEIGHT_DES,
           OrderParameterValues.FIRST_SEEN_ASC,
-          OrderParameterValues.FIRST_SEEN_DES }));
+          OrderParameterValues.FIRST_SEEN_DES));
 
   private String[] parseOrderParameter(String parameter) {
     if (!orderParameterPattern.matcher(parameter).matches()) {

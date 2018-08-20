@@ -201,7 +201,7 @@ public class UptimeStatusTest {
   }
 
   private static final SortedSet<String> RUNNING_FLAG =
-      new TreeSet<>(Arrays.asList(new String[] { "Running" }));
+      new TreeSet<>(Arrays.asList("Running"));
 
   @Test()
   public void testAddFlagsToNoFlagsEnd() {
@@ -251,7 +251,7 @@ public class UptimeStatusTest {
   }
 
   private static final SortedSet<String> RUNNING_VALID_FLAGS =
-      new TreeSet<>(Arrays.asList(new String[] { "Running", "Valid" }));
+      new TreeSet<>(Arrays.asList("Running", "Valid"));
 
   @Test()
   public void testDontCompressDifferentFlags() {

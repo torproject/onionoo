@@ -35,7 +35,7 @@ class MostFrequentString {
     for (Map.Entry<String, Integer> e : stringFrequencies.entrySet()) {
       if (!sortedFrequencies.containsKey(e.getValue())) {
         sortedFrequencies.put(e.getValue(), new TreeSet<>(
-            Arrays.asList(new String[] { e.getKey() } )));
+            Arrays.asList(e.getKey())));
       } else {
         sortedFrequencies.get(e.getValue()).add(e.getKey());
       }

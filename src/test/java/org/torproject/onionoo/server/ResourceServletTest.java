@@ -134,49 +134,50 @@ public class ResourceServletTest {
     org.torproject.onionoo.docs.SummaryDocument relayTorkaZ =
         new org.torproject.onionoo.docs.SummaryDocument(true, "TorkaZ",
         "000C5F55BD4814B917CC474BD537F1A3B33CCE2A", Arrays.asList(
-        new String[] { "62.216.201.221", "62.216.201.222",
-            "62.216.201.223" }), DateTimeHelper.parse("2013-04-19 05:00:00"),
-        false, new TreeSet<>(Arrays.asList(new String[] { "Running",
-            "Valid" })), 20L, "de",
+            "62.216.201.221", "62.216.201.222",
+            "62.216.201.223"), DateTimeHelper.parse("2013-04-19 05:00:00"),
+        false, new TreeSet<>(Arrays.asList("Running",
+            "Valid")), 20L, "de",
         DateTimeHelper.parse("2013-04-18 05:00:00"), "AS8767",
         "m-net telekommunikations gmbh",
         "torkaz <klaus dot zufall at gmx dot de> "
         + "<fb-token:np5_g_83jmf=>", new TreeSet<>(Arrays.asList(
-        new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC",
-            "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B" })),
+            "001C13B3A55A71B977CA65EC85539D79C653A3FC",
+            "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B")),
         new TreeSet<>(Arrays.asList(
-        new String[] { "001C13B3A55A71B977CA65EC85539D79C653A3FC" })),
+            "001C13B3A55A71B977CA65EC85539D79C653A3FC")),
         "0.2.3.25", "linux",
         new TreeSet<>(Arrays.asList(
-            new String[] { "ppp-62-216-201-221.dynamic.mnet-online.de" })),
+            "ppp-62-216-201-221.dynamic.mnet-online.de")),
         null, true);
     this.relays.put("000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
         relayTorkaZ);
     org.torproject.onionoo.docs.SummaryDocument relayFerrari458 =
         new org.torproject.onionoo.docs.SummaryDocument(true, "Ferrari458",
         "001C13B3A55A71B977CA65EC85539D79C653A3FC", Arrays.asList(
-        new String[] { "68.38.171.200", "[2001:4f8:3:2e::51]" }),
+            "68.38.171.200", "[2001:4f8:3:2e::51]"),
         DateTimeHelper.parse("2013-04-24 12:00:00"), true,
-        new TreeSet<>(Arrays.asList(new String[] { "Fast", "Named",
-            "Running", "V2Dir", "Valid" })), 1140L, "us",
+        new TreeSet<>(Arrays.asList("Fast", "Named",
+            "Running", "V2Dir", "Valid")), 1140L, "us",
         DateTimeHelper.parse("2013-04-16 18:00:00"), "AS7922",
         "comcast cable communications, llc", null,
-            new TreeSet<>(Arrays.asList(new String[]{
-                "000C5F55BD4814B917CC474BD537F1A3B33CCE2A"})),
-        new TreeSet<>(Arrays.asList(new String[] {
-            "000C5F55BD4814B917CC474BD537F1A3B33CCE2A" })), null, null,
         new TreeSet<>(Arrays.asList(
-            new String[] {"c-68-38-171-200.hsd1.in.comcast.net"})),
+            "000C5F55BD4814B917CC474BD537F1A3B33CCE2A")),
+        new TreeSet<>(Arrays.asList(
+            "000C5F55BD4814B917CC474BD537F1A3B33CCE2A")),
+        null, null,
+        new TreeSet<>(Arrays.asList(
+            "c-68-38-171-200.hsd1.in.comcast.net")),
         null, null);
     this.relays.put("001C13B3A55A71B977CA65EC85539D79C653A3FC",
         relayFerrari458);
     org.torproject.onionoo.docs.SummaryDocument relayTimMayTribute =
         new org.torproject.onionoo.docs.SummaryDocument(true, "TimMayTribute",
         "0025C136C1F3A9EEFE2AE3F918F03BFA21B5070B", Arrays.asList(
-        new String[] { "89.69.68.246" }),
+            "89.69.68.246"),
         DateTimeHelper.parse("2013-04-22 20:00:00"), false,
-        new TreeSet<>(Arrays.asList(new String[] { "Fast",
-            "Running", "Unnamed", "V2Dir", "Valid" })), 63L, "a1",
+        new TreeSet<>(Arrays.asList("Fast",
+            "Running", "Unnamed", "V2Dir", "Valid")), 63L, "a1",
         DateTimeHelper.parse("2013-04-16 18:00:00"), null,
         "liberty global operations b.v.",
         "1024d/51e2a1c7 \"steven j. murdoch\" "
@@ -189,9 +190,9 @@ public class ResourceServletTest {
     org.torproject.onionoo.docs.SummaryDocument bridgeec2bridgercc7f31fe =
         new org.torproject.onionoo.docs.SummaryDocument(false,
         "ec2bridgercc7f31fe", "0000831B236DFF73D409AD17B40E2A728A53994F",
-        Arrays.asList(new String[] { "10.199.7.176" }),
+        Arrays.asList("10.199.7.176"),
         DateTimeHelper.parse("2013-04-21 18:07:03"), false,
-        new TreeSet<>(Arrays.asList(new String[] { "Valid" })), -1L,
+        new TreeSet<>(Arrays.asList("Valid")), -1L,
         null, DateTimeHelper.parse("2013-04-20 15:37:04"), null, null, null,
         null, null, "0.2.2.39", null, null, null, true);
     this.bridges.put("0000831B236DFF73D409AD17B40E2A728A53994F",
@@ -199,9 +200,9 @@ public class ResourceServletTest {
     org.torproject.onionoo.docs.SummaryDocument bridgeUnnamed =
         new org.torproject.onionoo.docs.SummaryDocument(false, "Unnamed",
         "0002D9BDBBC230BD9C78FF502A16E0033EF87E0C", Arrays.asList(
-        new String[] { "10.0.52.84" }),
+            "10.0.52.84"),
         DateTimeHelper.parse("2013-04-20 17:37:04"), false,
-        new TreeSet<>(Arrays.asList(new String[] { "Valid" })), -1L,
+        new TreeSet<>(Arrays.asList("Valid")), -1L,
         null, DateTimeHelper.parse("2013-04-14 07:07:05"), null, null, null,
         null, null, null, null, null, null, null);
     this.bridges.put("0002D9BDBBC230BD9C78FF502A16E0033EF87E0C",
@@ -209,10 +210,10 @@ public class ResourceServletTest {
     org.torproject.onionoo.docs.SummaryDocument bridgegummy =
         new org.torproject.onionoo.docs.SummaryDocument(false, "gummy",
         "1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756", Arrays.asList(
-        new String[] { "10.63.169.98" }),
+            "10.63.169.98"),
         DateTimeHelper.parse("2013-04-24 01:07:04"), true,
-        new TreeSet<>(Arrays.asList(new String[] { "Running",
-            "Valid" })), -1L, null,
+        new TreeSet<>(Arrays.asList("Running",
+            "Valid")), -1L, null,
         DateTimeHelper.parse("2013-01-16 21:07:04"), null, null, null, null,
         null, "0.2.4.4-alpha-dev", "windows 7", null, null, false);
     this.bridges.put("1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756",
