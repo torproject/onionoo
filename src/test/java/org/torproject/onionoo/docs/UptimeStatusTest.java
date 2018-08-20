@@ -34,8 +34,7 @@ public class UptimeStatusTest {
         uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
         uptimeStatus.getRelayHistory().first();
-    assertEquals("History not for relay.", true,
-        newUptimeHistory.isRelay());
+    assertTrue("History not for relay.", newUptimeHistory.isRelay());
     assertEquals("History start millis not same as provided.",
         DateTimeHelper.parse("2013-12-20 00:00:00"),
         newUptimeHistory.getStartMillis());
@@ -55,8 +54,7 @@ public class UptimeStatusTest {
         uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
         uptimeStatus.getRelayHistory().first();
-    assertEquals("History not for relay.", true,
-        newUptimeHistory.isRelay());
+    assertTrue("History not for relay.", newUptimeHistory.isRelay());
     assertEquals("History start millis not same as provided.",
         DateTimeHelper.parse("2013-12-20 00:00:00"),
         newUptimeHistory.getStartMillis());
@@ -84,8 +82,7 @@ public class UptimeStatusTest {
         uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
         uptimeStatus.getRelayHistory().first();
-    assertEquals("History not for relay.", true,
-        newUptimeHistory.isRelay());
+    assertTrue("History not for relay.", newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 17:00:00"),
         newUptimeHistory.getStartMillis());
@@ -128,8 +125,7 @@ public class UptimeStatusTest {
         3, uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
         uptimeStatus.getRelayHistory().first();
-    assertEquals("History not for relay.", true,
-        newUptimeHistory.isRelay());
+    assertTrue("History not for relay.", newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 16:00:00"),
         newUptimeHistory.getStartMillis());
@@ -150,8 +146,7 @@ public class UptimeStatusTest {
         2, uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
         uptimeStatus.getRelayHistory().first();
-    assertEquals("History not for relay.", true,
-        newUptimeHistory.isRelay());
+    assertTrue("History not for relay.", newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 17:00:00"),
         newUptimeHistory.getStartMillis());
@@ -176,8 +171,7 @@ public class UptimeStatusTest {
         1, uptimeStatus.getRelayHistory().size());
     UptimeHistory newUptimeHistory =
         uptimeStatus.getRelayHistory().first();
-    assertEquals("History not for relay.", true,
-        newUptimeHistory.isRelay());
+    assertTrue("History not for relay.", newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 16:00:00"),
         newUptimeHistory.getStartMillis());
@@ -198,8 +192,7 @@ public class UptimeStatusTest {
         + "entry.", 1, uptimeStatus.getBridgeHistory().size());
     UptimeHistory newUptimeHistory =
         uptimeStatus.getBridgeHistory().last();
-    assertEquals("History not for bridge.", false,
-        newUptimeHistory.isRelay());
+    assertFalse("History not for bridge.", newUptimeHistory.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 16:00:00"),
         newUptimeHistory.getStartMillis());

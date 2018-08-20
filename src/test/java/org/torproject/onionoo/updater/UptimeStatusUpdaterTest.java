@@ -4,6 +4,8 @@
 package org.torproject.onionoo.updater;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.torproject.onionoo.docs.DateTimeHelper;
 import org.torproject.onionoo.docs.DocumentStoreFactory;
@@ -75,7 +77,7 @@ public class UptimeStatusUpdaterTest {
       UptimeHistory history = status.getRelayHistory().first();
       assertEquals("History must contain one entry.", 1,
           status.getRelayHistory().size());
-      assertEquals("History not for relay.", true, history.isRelay());
+      assertTrue("History not for relay.", history.isRelay());
       assertEquals("History start millis not as expected.",
           VALID_AFTER_SAMPLE, history.getStartMillis());
       assertEquals("History uptime hours must be 1.", 1,
@@ -111,7 +113,7 @@ public class UptimeStatusUpdaterTest {
     assertEquals("Relay history must contain one entry.", 1,
         status.getRelayHistory().size());
     UptimeHistory history = status.getRelayHistory().first();
-    assertEquals("History not for relay.", true, history.isRelay());
+    assertTrue("History not for relay.", history.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 17:00:00"),
         history.getStartMillis());
@@ -151,7 +153,7 @@ public class UptimeStatusUpdaterTest {
       UptimeHistory history = status.getBridgeHistory().first();
       assertEquals("Bridge history must contain one entry.", 1,
           status.getBridgeHistory().size());
-      assertEquals("History not for bridge.", false, history.isRelay());
+      assertFalse("History not for bridge.", history.isRelay());
       assertEquals("History start millis not as expected.",
           DateTimeHelper.parse("2014-03-21 20:00:00"),
           history.getStartMillis());
@@ -174,7 +176,7 @@ public class UptimeStatusUpdaterTest {
     assertEquals("Bridge history must contain one entry.", 1,
         status.getBridgeHistory().size());
     UptimeHistory history = status.getBridgeHistory().last();
-    assertEquals("History not for bridge.", false, history.isRelay());
+    assertFalse("History not for bridge.", history.isRelay());
     assertEquals("History start millis not as expected.",
         DateTimeHelper.parse("2013-07-22 17:00:00"),
         history.getStartMillis());
