@@ -194,8 +194,7 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
 
   @Override
   public int compareTo(ClientsHistory other) {
-    return this.startMillis < other.startMillis ? -1
-        : this.startMillis > other.startMillis ? 1 : 0;
+    return Long.compare(this.startMillis, other.startMillis);
   }
 
   @Override

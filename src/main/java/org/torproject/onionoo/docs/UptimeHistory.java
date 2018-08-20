@@ -128,8 +128,7 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     } else if (!this.relay && other.relay) {
       return 1;
     }
-    return this.startMillis < other.startMillis ? -1
-        : this.startMillis > other.startMillis ? 1 : 0;
+    return Long.compare(this.startMillis, other.startMillis);
   }
 
   @Override
