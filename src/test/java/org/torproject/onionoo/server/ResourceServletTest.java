@@ -1367,7 +1367,7 @@ public class ResourceServletTest {
   public void testFirstSeenDaysMaxIntPlusOne() {
     this.assertErrorStatusCode(
         "/summary?first_seen_days="
-        + String.valueOf(Integer.MAX_VALUE + 1), 400);
+        + String.valueOf(((long) Integer.MAX_VALUE) + 1L), 400);
   }
 
   @Test(timeout = 100)
