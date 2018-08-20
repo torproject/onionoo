@@ -78,7 +78,7 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
           + uptimeHistoryString + "'.  Skipping.");
       return null;
     }
-    int uptimeHours = -1;
+    int uptimeHours;
     try {
       uptimeHours = Integer.parseInt(parts[2]);
     } catch (NumberFormatException e) {

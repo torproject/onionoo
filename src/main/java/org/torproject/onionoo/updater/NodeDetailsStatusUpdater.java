@@ -458,7 +458,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     for (String fingerprint : previouslyKnownNodes) {
       NodeStatus nodeStatus = this.documentStore.retrieve(
           NodeStatus.class, true, fingerprint);
-      NodeStatus updatedNodeStatus = null;
+      NodeStatus updatedNodeStatus;
       if (this.knownNodes.containsKey(fingerprint)) {
         updatedNodeStatus = this.knownNodes.get(fingerprint);
         String address = nodeStatus.getAddress();

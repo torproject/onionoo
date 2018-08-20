@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class HttpServletResponseWrapper {
 
-  private HttpServletResponse response = null;
+  private HttpServletResponse response;
 
   protected HttpServletResponseWrapper(HttpServletResponse response) {
     this.response = response;

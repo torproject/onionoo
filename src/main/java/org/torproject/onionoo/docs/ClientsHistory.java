@@ -90,7 +90,7 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
           + "'.  Skipping.");
       return null;
     }
-    double totalResponses = 0.0;
+    double totalResponses;
     try {
       totalResponses = Double.parseDouble(parts[4]);
     } catch (NumberFormatException e) {
@@ -125,7 +125,7 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
           /* Logged by caller */
           return null;
         }
-        double value = 0.0;
+        double value;
         try {
           value = Double.parseDouble(keyValue[1]);
         } catch (NumberFormatException e) {

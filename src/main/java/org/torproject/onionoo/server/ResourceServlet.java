@@ -109,7 +109,7 @@ public class ResourceServlet extends HttpServlet {
     if (uri.startsWith("/onionoo/")) {
       uri = uri.substring("/onionoo".length());
     }
-    String resourceType = null;
+    String resourceType;
     if (uri.startsWith("/summary")) {
       resourceType = "summary";
     } else if (uri.startsWith("/details")) {
@@ -388,7 +388,7 @@ public class ResourceServlet extends HttpServlet {
     rb.setBridgesSkipped(rh.getBridgesSkipped());
     rb.setRelaysTruncated(rh.getRelaysTruncated());
     rb.setBridgesTruncated(rh.getBridgesTruncated());
-    String[] fields = null;
+    String[] fields;
     if (parameterMap.containsKey("fields")) {
       fields = this.parseFieldsParameter(parameterMap.get("fields"));
       if (fields == null) {

@@ -469,7 +469,7 @@ public class DocumentStore {
           + "directory.");
       return null;
     }
-    String documentString = null;
+    String documentString;
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BufferedInputStream bis = new BufferedInputStream(
         new FileInputStream(documentFile))) {
@@ -782,7 +782,7 @@ public class DocumentStore {
     StringBuilder sb = new StringBuilder();
     for (SummaryDocument summaryDocument :
         this.cachedSummaryDocuments.values()) {
-      String line = null;
+      String line;
       try {
         line = objectMapper.writeValueAsString(summaryDocument);
       } catch (JsonProcessingException e) {

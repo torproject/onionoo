@@ -564,7 +564,7 @@ public class NodeStatus extends Document {
       SortedSet<String> orAddressesAndPorts = new TreeSet<>();
       SortedSet<String> exitAddresses = new TreeSet<>();
       String addresses = parts[3];
-      String address = null;
+      String address;
       if (addresses.contains(";")) {
         String[] addressParts = addresses.split(";", -1);
         if (addressParts.length != 3) {
