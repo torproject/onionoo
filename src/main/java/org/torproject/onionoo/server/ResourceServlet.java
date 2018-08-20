@@ -76,7 +76,7 @@ public class ResourceServlet extends HttpServlet {
           + "offset,fields").split(",")));
 
   private static String ipv6AddressPatternString =
-      "^\\[?[0-9a-fA-F:\\.]{1,39}\\]?$";
+      "^\\[?[0-9a-fA-F:.]{1,39}\\]?$";
 
   private static Pattern ipv6AddressPattern =
       Pattern.compile(ipv6AddressPatternString);
@@ -424,14 +424,14 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern searchQueryStringPattern =
-      Pattern.compile("(?:.*[\\?&])*?" // lazily skip other parameters
+      Pattern.compile("(?:.*[?&])*?" // lazily skip other parameters
           + "search=([\\p{Graph} &&[^&]]+)" // capture parameter
           + "(?:&.*)*"); // skip remaining parameters
 
   private static Pattern searchParameterPattern =
       Pattern.compile("^\\$?[0-9a-fA-F]{1,40}$|" /* Hex fingerprint. */
       + "^[0-9a-zA-Z+/]{1,27}$|" /* Base64 fingerprint. */
-      + "^[0-9a-zA-Z\\.]{1,19}$|" /* Nickname or IPv4 address. */
+      + "^[0-9a-zA-Z.]{1,19}$|" /* Nickname or IPv4 address. */
       + ipv6AddressPatternString + "|" /* IPv6 address. */
       + "^[a-zA-Z_]+:\"?[\\p{Graph} ]+\"?$"); /* Qualified search term. */
 
@@ -630,7 +630,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern versionParameterPattern =
-      Pattern.compile("^[0-9a-zA-Z\\.-]+$");
+      Pattern.compile("^[0-9a-zA-Z.-]+$");
 
   private String parseVersionParameter(String parameter) {
     if (!versionParameterPattern.matcher(parameter).matches()) {
@@ -651,7 +651,7 @@ public class ResourceServlet extends HttpServlet {
   }
 
   private static Pattern hostNameParameterPattern =
-      Pattern.compile("^[0-9A-Za-z_\\.\\-]+$");
+      Pattern.compile("^[0-9A-Za-z_.\\-]+$");
 
   private String parseHostNameParameter(String parameter) {
     if (!hostNameParameterPattern.matcher(parameter).matches()) {

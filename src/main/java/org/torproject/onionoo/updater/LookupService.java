@@ -70,7 +70,7 @@ public class LookupService {
     this.hasAllFiles = true;
   }
 
-  private Pattern ipv4Pattern = Pattern.compile("^[0-9\\.]{7,15}$");
+  private Pattern ipv4Pattern = Pattern.compile("^[0-9.]{7,15}$");
 
   private long parseAddressString(String addressString) {
     long addressNumber = -1L;
