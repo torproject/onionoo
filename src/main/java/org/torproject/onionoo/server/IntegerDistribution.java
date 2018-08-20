@@ -17,8 +17,8 @@ class IntegerDistribution {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     int totalValues = 0;
-    for (int i = 0; i < logValues.length; i++) {
-      totalValues += logValues[i];
+    for (int logValue : logValues) {
+      totalValues += logValue;
     }
     int[] permilles = new int[] { 500, 900, 990, 999 };
     if (totalValues > 0) {
