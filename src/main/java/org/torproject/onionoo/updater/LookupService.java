@@ -129,7 +129,8 @@ public class LookupService {
         this.geoLite2CityBlocksIPv4CsvFile)) {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<>(
           addressStringNumbers.values());
-      String line = br.readLine();
+      String line;
+      br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.split(",", -1);
         if (parts.length < 9) {
@@ -187,7 +188,8 @@ public class LookupService {
     try (BufferedReader br = this.createBufferedReaderFromUtf8File(
         this.geoLite2CityLocationsEnCsvFile)) {
       Set<Long> blockNumbers = new HashSet<>(addressNumberBlocks.values());
-      String line = br.readLine();
+      String line;
+      br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 13);
         if (parts.length != 13) {
