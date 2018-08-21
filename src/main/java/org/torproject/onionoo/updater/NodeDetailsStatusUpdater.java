@@ -346,14 +346,16 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         DetailsStatus.class, true, fingerprint);
     if (detailsStatus == null) {
       detailsStatus = new DetailsStatus();
-    } else if (null == detailsStatus.getExtraInfoDescPublished()
-        || descriptor.getPublishedMillis()
-        > detailsStatus.getExtraInfoDescPublished()) {
-      detailsStatus.setExtraInfoDescPublished(
-          descriptor.getPublishedMillis());
-      detailsStatus.setTransports(descriptor.getTransports());
-      this.documentStore.store(detailsStatus, fingerprint);
+    } else if (null != detailsStatus.getExtraInfoDescPublished()
+        && detailsStatus.getExtraInfoDescPublished()
+        >= descriptor.getPublishedMillis()) {
+      /* Already parsed more recent extra-info descriptor from this bridge. */
+      return;
     }
+    detailsStatus.setExtraInfoDescPublished(
+        descriptor.getPublishedMillis());
+    detailsStatus.setTransports(descriptor.getTransports());
+    this.documentStore.store(detailsStatus, fingerprint);
   }
 
   private void processBridgeNetworkStatus(BridgeNetworkStatus status) {
