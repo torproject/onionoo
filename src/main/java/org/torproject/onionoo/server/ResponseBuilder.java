@@ -242,110 +242,162 @@ public class ResponseBuilder {
       if (detailsDocument != null) {
         DetailsDocument dd = new DetailsDocument();
         for (String field : this.fields) {
-          if (field.equals("nickname")) {
-            dd.setNickname(detailsDocument.getNickname());
-          } else if (field.equals("fingerprint")) {
-            dd.setFingerprint(detailsDocument.getFingerprint());
-          } else if (field.equals("hashed_fingerprint")) {
-            dd.setHashedFingerprint(
-                detailsDocument.getHashedFingerprint());
-          } else if (field.equals("or_addresses")) {
-            dd.setOrAddresses(detailsDocument.getOrAddresses());
-          } else if (field.equals("exit_addresses")) {
-            dd.setExitAddresses(detailsDocument.getExitAddresses());
-          } else if (field.equals("dir_address")) {
-            dd.setDirAddress(detailsDocument.getDirAddress());
-          } else if (field.equals("last_seen")) {
-            dd.setLastSeen(detailsDocument.getLastSeen());
-          } else if (field.equals("last_changed_address_or_port")) {
-            dd.setLastChangedAddressOrPort(
-                detailsDocument.getLastChangedAddressOrPort());
-          } else if (field.equals("first_seen")) {
-            dd.setFirstSeen(detailsDocument.getFirstSeen());
-          } else if (field.equals("running")) {
-            dd.setRunning(detailsDocument.getRunning());
-          } else if (field.equals("flags")) {
-            dd.setFlags(detailsDocument.getFlags());
-          } else if (field.equals("country")) {
-            dd.setCountry(detailsDocument.getCountry());
-          } else if (field.equals("country_name")) {
-            dd.setCountryName(detailsDocument.getCountryName());
-          } else if (field.equals("region_name")) {
-            dd.setRegionName(detailsDocument.getRegionName());
-          } else if (field.equals("city_name")) {
-            dd.setCityName(detailsDocument.getCityName());
-          } else if (field.equals("latitude")) {
-            dd.setLatitude(detailsDocument.getLatitude());
-          } else if (field.equals("longitude")) {
-            dd.setLongitude(detailsDocument.getLongitude());
-          } else if (field.equals("as")) {
-            dd.setAs(detailsDocument.getAs());
-          } else if (field.equals("as_number")) {
-            dd.setAsNumber(detailsDocument.getAsNumber());
-          } else if (field.equals("as_name")) {
-            dd.setAsName(detailsDocument.getAsName());
-          } else if (field.equals("consensus_weight")) {
-            dd.setConsensusWeight(detailsDocument.getConsensusWeight());
-          } else if (field.equals("verified_host_names")) {
-            dd.setVerifiedHostNames(detailsDocument.getVerifiedHostNames());
-          } else if (field.equals("unverified_host_names")) {
-            dd.setUnverifiedHostNames(detailsDocument.getUnverifiedHostNames());
-          } else if (field.equals("last_restarted")) {
-            dd.setLastRestarted(detailsDocument.getLastRestarted());
-          } else if (field.equals("bandwidth_rate")) {
-            dd.setBandwidthRate(detailsDocument.getBandwidthRate());
-          } else if (field.equals("bandwidth_burst")) {
-            dd.setBandwidthBurst(detailsDocument.getBandwidthBurst());
-          } else if (field.equals("observed_bandwidth")) {
-            dd.setObservedBandwidth(
-                detailsDocument.getObservedBandwidth());
-          } else if (field.equals("advertised_bandwidth")) {
-            dd.setAdvertisedBandwidth(
-                detailsDocument.getAdvertisedBandwidth());
-          } else if (field.equals("exit_policy")) {
-            dd.setExitPolicy(detailsDocument.getExitPolicy());
-          } else if (field.equals("exit_policy_summary")) {
-            dd.setExitPolicySummary(
-                detailsDocument.getExitPolicySummary());
-          } else if (field.equals("exit_policy_v6_summary")) {
-            dd.setExitPolicyV6Summary(
-                detailsDocument.getExitPolicyV6Summary());
-          } else if (field.equals("contact")) {
-            dd.setContact(detailsDocument.getContact());
-          } else if (field.equals("platform")) {
-            dd.setPlatform(detailsDocument.getPlatform());
-          } else if (field.equals("consensus_weight_fraction")) {
-            dd.setConsensusWeightFraction(
-                detailsDocument.getConsensusWeightFraction());
-          } else if (field.equals("guard_probability")) {
-            dd.setGuardProbability(detailsDocument.getGuardProbability());
-          } else if (field.equals("middle_probability")) {
-            dd.setMiddleProbability(
-                detailsDocument.getMiddleProbability());
-          } else if (field.equals("exit_probability")) {
-            dd.setExitProbability(detailsDocument.getExitProbability());
-          } else if (field.equals("recommended_version")) {
-            dd.setRecommendedVersion(
-                detailsDocument.getRecommendedVersion());
-          } else if (field.equals("hibernating")) {
-            dd.setHibernating(detailsDocument.getHibernating());
-          } else if (field.equals("transports")) {
-            dd.setTransports(detailsDocument.getTransports());
-          } else if (field.equals("effective_family")) {
-            dd.setEffectiveFamily(detailsDocument.getEffectiveFamily());
-          } else if (field.equals("measured")) {
-            dd.setMeasured(detailsDocument.getMeasured());
-          } else if (field.equals("alleged_family")) {
-            dd.setAllegedFamily(detailsDocument.getAllegedFamily());
-          } else if (field.equals("indirect_family")) {
-            dd.setIndirectFamily(detailsDocument.getIndirectFamily());
-          } else if (field.equals("unreachable_or_addresses")) {
-            dd.setUnreachableOrAddresses(
-                detailsDocument.getUnreachableOrAddresses());
-          } else if (field.equals("version")) {
-            dd.setVersion(detailsDocument.getVersion());
-          } else if (field.equals("version_status")) {
-            dd.setVersionStatus(detailsDocument.getVersionStatus());
+          switch (field) {
+            case "nickname":
+              dd.setNickname(detailsDocument.getNickname());
+              break;
+            case "fingerprint":
+              dd.setFingerprint(detailsDocument.getFingerprint());
+              break;
+            case "hashed_fingerprint":
+              dd.setHashedFingerprint(
+                  detailsDocument.getHashedFingerprint());
+              break;
+            case "or_addresses":
+              dd.setOrAddresses(detailsDocument.getOrAddresses());
+              break;
+            case "exit_addresses":
+              dd.setExitAddresses(detailsDocument.getExitAddresses());
+              break;
+            case "dir_address":
+              dd.setDirAddress(detailsDocument.getDirAddress());
+              break;
+            case "last_seen":
+              dd.setLastSeen(detailsDocument.getLastSeen());
+              break;
+            case "last_changed_address_or_port":
+              dd.setLastChangedAddressOrPort(
+                  detailsDocument.getLastChangedAddressOrPort());
+              break;
+            case "first_seen":
+              dd.setFirstSeen(detailsDocument.getFirstSeen());
+              break;
+            case "running":
+              dd.setRunning(detailsDocument.getRunning());
+              break;
+            case "flags":
+              dd.setFlags(detailsDocument.getFlags());
+              break;
+            case "country":
+              dd.setCountry(detailsDocument.getCountry());
+              break;
+            case "country_name":
+              dd.setCountryName(detailsDocument.getCountryName());
+              break;
+            case "region_name":
+              dd.setRegionName(detailsDocument.getRegionName());
+              break;
+            case "city_name":
+              dd.setCityName(detailsDocument.getCityName());
+              break;
+            case "latitude":
+              dd.setLatitude(detailsDocument.getLatitude());
+              break;
+            case "longitude":
+              dd.setLongitude(detailsDocument.getLongitude());
+              break;
+            case "as":
+              dd.setAs(detailsDocument.getAs());
+              break;
+            case "as_number":
+              dd.setAsNumber(detailsDocument.getAsNumber());
+              break;
+            case "as_name":
+              dd.setAsName(detailsDocument.getAsName());
+              break;
+            case "consensus_weight":
+              dd.setConsensusWeight(detailsDocument.getConsensusWeight());
+              break;
+            case "verified_host_names":
+              dd.setVerifiedHostNames(detailsDocument.getVerifiedHostNames());
+              break;
+            case "unverified_host_names":
+              dd.setUnverifiedHostNames(
+                  detailsDocument.getUnverifiedHostNames());
+              break;
+            case "last_restarted":
+              dd.setLastRestarted(detailsDocument.getLastRestarted());
+              break;
+            case "bandwidth_rate":
+              dd.setBandwidthRate(detailsDocument.getBandwidthRate());
+              break;
+            case "bandwidth_burst":
+              dd.setBandwidthBurst(detailsDocument.getBandwidthBurst());
+              break;
+            case "observed_bandwidth":
+              dd.setObservedBandwidth(
+                  detailsDocument.getObservedBandwidth());
+              break;
+            case "advertised_bandwidth":
+              dd.setAdvertisedBandwidth(
+                  detailsDocument.getAdvertisedBandwidth());
+              break;
+            case "exit_policy":
+              dd.setExitPolicy(detailsDocument.getExitPolicy());
+              break;
+            case "exit_policy_summary":
+              dd.setExitPolicySummary(
+                  detailsDocument.getExitPolicySummary());
+              break;
+            case "exit_policy_v6_summary":
+              dd.setExitPolicyV6Summary(
+                  detailsDocument.getExitPolicyV6Summary());
+              break;
+            case "contact":
+              dd.setContact(detailsDocument.getContact());
+              break;
+            case "platform":
+              dd.setPlatform(detailsDocument.getPlatform());
+              break;
+            case "consensus_weight_fraction":
+              dd.setConsensusWeightFraction(
+                  detailsDocument.getConsensusWeightFraction());
+              break;
+            case "guard_probability":
+              dd.setGuardProbability(detailsDocument.getGuardProbability());
+              break;
+            case "middle_probability":
+              dd.setMiddleProbability(
+                  detailsDocument.getMiddleProbability());
+              break;
+            case "exit_probability":
+              dd.setExitProbability(detailsDocument.getExitProbability());
+              break;
+            case "recommended_version":
+              dd.setRecommendedVersion(
+                  detailsDocument.getRecommendedVersion());
+              break;
+            case "hibernating":
+              dd.setHibernating(detailsDocument.getHibernating());
+              break;
+            case "transports":
+              dd.setTransports(detailsDocument.getTransports());
+              break;
+            case "effective_family":
+              dd.setEffectiveFamily(detailsDocument.getEffectiveFamily());
+              break;
+            case "measured":
+              dd.setMeasured(detailsDocument.getMeasured());
+              break;
+            case "alleged_family":
+              dd.setAllegedFamily(detailsDocument.getAllegedFamily());
+              break;
+            case "indirect_family":
+              dd.setIndirectFamily(detailsDocument.getIndirectFamily());
+              break;
+            case "unreachable_or_addresses":
+              dd.setUnreachableOrAddresses(
+                  detailsDocument.getUnreachableOrAddresses());
+              break;
+            case "version":
+              dd.setVersion(detailsDocument.getVersion());
+              break;
+            case "version_status":
+              dd.setVersionStatus(detailsDocument.getVersionStatus());
+              break;
+            default:
+              /* Not a field that we know of. Ignore. */
+              break;
           }
         }
         /* Whenever we provide Jackson with a string containing an escaped
