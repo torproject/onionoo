@@ -58,7 +58,7 @@ public class SummaryDocument extends Document {
   @JsonIgnore
   private transient String hashedFingerprint = null;
 
-  /** Returns the SHA1-hashed fingerprint, or <code>null</code> if no
+  /** Returns the SHA1-hashed fingerprint, or {@code null} if no
    * fingerprint is set. */
   public String getHashedFingerprint() {
     if (this.hashedFingerprint == null && this.fingerprint != null) {
@@ -75,7 +75,7 @@ public class SummaryDocument extends Document {
   @JsonIgnore
   private transient String base64Fingerprint = null;
 
-  /** Returns the base64-encoded fingerprint, or <code>null</code> if no
+  /** Returns the base64-encoded fingerprint, or {@code null} if no
    * fingerprint is set. */
   public String getBase64Fingerprint() {
     if (this.base64Fingerprint == null && this.fingerprint != null) {
@@ -93,7 +93,7 @@ public class SummaryDocument extends Document {
   private transient String[] fingerprintSortedHexBlocks = null;
 
   /** Returns a sorted array containing blocks of 4 upper-case hex
-   * characters from the fingerprint, or <code>null</code> if no
+   * characters from the fingerprint, or {@code null} if no
    * fingerprint is set. */
   public String[] getFingerprintSortedHexBlocks() {
     if (this.fingerprintSortedHexBlocks == null && this.fingerprint != null) {

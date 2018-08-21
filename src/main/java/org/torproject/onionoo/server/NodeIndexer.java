@@ -61,8 +61,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
   private Thread nodeIndexerThread = null;
 
   /** Returns the creation time of the last known node index in
-   * milliseconds since the epoch, or <code>-1</code> if no node index
-   * could be retrieved within <code>timeoutMillis</code> milliseconds. */
+   * milliseconds since the epoch, or {@code -1} if no node index
+   * could be retrieved within {@code timeoutMillis} milliseconds. */
   public synchronized long getLastIndexed(long timeoutMillis) {
     if (this.lastIndexed == -1L && this.nodeIndexerThread != null
         && timeoutMillis > 0L) {
@@ -77,7 +77,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
   }
 
   /** Returns the last known node index, or null if no node index could be
-   * retrieved within <code>timeoutMillis</code> milliseconds. */
+   * retrieved within {@code timeoutMillis} milliseconds. */
   public synchronized NodeIndex getLatestNodeIndex(long timeoutMillis) {
     if (this.latestNodeIndex == null && this.nodeIndexerThread != null
         && timeoutMillis > 0L) {

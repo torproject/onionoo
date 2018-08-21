@@ -25,7 +25,7 @@ public class FormattingUtils {
   private static final long ONE_MINUTE = 60L * ONE_SECOND;
 
   /** Formats the given number of milliseconds using the format
-   * <code>"${minutes}:${seconds}.{milliseconds} minutes"</code>. */
+   * {@code "${minutes}:${seconds}.{milliseconds} minutes"}. */
   public static String formatMillis(long millis) {
     return String.format("%02d:%02d.%03d minutes", millis / ONE_MINUTE,
         (millis % ONE_MINUTE) / ONE_SECOND, millis % ONE_SECOND);

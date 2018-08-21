@@ -98,7 +98,7 @@ public class LookupService {
   }
 
   /** Looks up address strings in the configured
-   * <code>GeoLite2-City-*.csv</code> and <code>GeoIPASNum2.csv</code>
+   * {@code GeoLite2-City-*.csv} and {@code GeoIPASNum2.csv}
    * files and returns all lookup results. */
   public SortedMap<String, LookupResult> lookup(
       SortedSet<String> addressStrings) {

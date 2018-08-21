@@ -86,8 +86,8 @@ public class ResourceServlet extends HttpServlet {
     doGet(request, response, System.currentTimeMillis());
   }
 
-  /** Handles the HTTP GET request in the wrapped <code>request</code> by
-   * writing an HTTP GET response to the likewise <code>response</code>,
+  /** Handles the HTTP GET request in the wrapped {@code request} by
+   * writing an HTTP GET response to the likewise {@code response},
    * both of which are wrapped to facilitate testing. */
   @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
   public void doGet(HttpServletRequestWrapper request,

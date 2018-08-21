@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * are relevant descriptors, consensuses or other documents available.
  *
  * <p>At the end of each run of the hourly updater, these documents are
- * concatenated and written to a single file in <code>status/summary</code>.
+ * concatenated and written to a single file in {@code status/summary}.
  * Each line contains a single document.
  *
  * <p>A new NodeStatus can be created from a string using the
