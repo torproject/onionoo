@@ -335,11 +335,8 @@ public class NodeStatus extends Document {
       addressesAndPorts.add(address + ":" + dirPort);
     }
     addressesAndPorts.addAll(orAddressesAndPorts);
-    if (this.lastAddresses.containsKey(lastSeenMillis)) {
-      this.lastAddresses.get(lastSeenMillis).addAll(addressesAndPorts);
-    } else {
-      this.lastAddresses.put(lastSeenMillis, addressesAndPorts);
-    }
+    this.lastAddresses.putIfAbsent(lastSeenMillis, new TreeSet<>());
+    this.lastAddresses.get(lastSeenMillis).addAll(addressesAndPorts);
   }
 
   /** Returns the time in milliseconds since the epoch when addresses or

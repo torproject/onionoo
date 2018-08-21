@@ -114,12 +114,8 @@ public class ClientsStatusUpdater implements DescriptorListener,
       ClientsHistory newResponseHistory = new ClientsHistory(
           startMillis, endMillis, totalResponses, responsesByCountry,
           responsesByTransport, responsesByVersion); 
-      if (!this.newResponses.containsKey(hashedFingerprint)) {
-        this.newResponses.put(hashedFingerprint,
-            new TreeSet<>());
-      }
-      this.newResponses.get(hashedFingerprint).add(
-          newResponseHistory);
+      this.newResponses.putIfAbsent(hashedFingerprint, new TreeSet<>());
+      this.newResponses.get(hashedFingerprint).add(newResponseHistory);
     }
   }
 

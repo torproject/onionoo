@@ -3,7 +3,6 @@
 
 package org.torproject.onionoo.server;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,12 +16,8 @@ class MostFrequentString {
   Map<String, Integer> stringFrequencies = new HashMap<>();
 
   void addString(String string) {
-    if (!this.stringFrequencies.containsKey(string)) {
-      this.stringFrequencies.put(string, 1);
-    } else {
-      this.stringFrequencies.put(string,
-          this.stringFrequencies.get(string) + 1);
-    }
+    this.stringFrequencies.put(string,
+        this.stringFrequencies.getOrDefault(string, 0) + 1);
   }
 
   @Override
@@ -33,12 +28,8 @@ class MostFrequentString {
       return "null (0)";
     }
     for (Map.Entry<String, Integer> e : stringFrequencies.entrySet()) {
-      if (!sortedFrequencies.containsKey(e.getValue())) {
-        sortedFrequencies.put(e.getValue(), new TreeSet<>(
-            Arrays.asList(e.getKey())));
-      } else {
-        sortedFrequencies.get(e.getValue()).add(e.getKey());
-      }
+      sortedFrequencies.putIfAbsent(e.getValue(), new TreeSet<>());
+      sortedFrequencies.get(e.getValue()).add(e.getKey());
     }
     StringBuilder sb = new StringBuilder();
     int stringsToAdd = 3;

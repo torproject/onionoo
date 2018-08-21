@@ -181,12 +181,9 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
       SortedMap<String, Double> thisResponses,
       SortedMap<String, Double> otherResponses) {
     for (Map.Entry<String, Double> e : otherResponses.entrySet()) {
-      if (thisResponses.containsKey(e.getKey())) {
-        thisResponses.put(e.getKey(), thisResponses.get(e.getKey())
-            + e.getValue());
-      } else {
-        thisResponses.put(e.getKey(), e.getValue());
-      }
+      thisResponses.putIfAbsent(e.getKey(), 0.0);
+      thisResponses.put(e.getKey(), thisResponses.get(e.getKey())
+          + e.getValue());
     }
   }
 

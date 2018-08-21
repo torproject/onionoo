@@ -81,10 +81,7 @@ public class DescriptorSource {
   /** Registers a descriptor listener for a given descriptor type. */
   public void registerDescriptorListener(DescriptorListener listener,
       DescriptorType descriptorType) {
-    if (!this.descriptorListeners.containsKey(descriptorType)) {
-      this.descriptorListeners.put(descriptorType,
-          new HashSet<>());
-    }
+    this.descriptorListeners.putIfAbsent(descriptorType, new HashSet<>());
     this.descriptorListeners.get(descriptorType).add(listener);
   }
 

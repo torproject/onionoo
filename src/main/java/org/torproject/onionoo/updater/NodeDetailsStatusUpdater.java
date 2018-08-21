@@ -223,16 +223,11 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         if (scanMillis < this.now - DateTimeHelper.ONE_DAY) {
           continue;
         }
-        if (!this.exitListEntries.containsKey(fingerprint)) {
-          this.exitListEntries.put(fingerprint, new HashMap<>());
-        }
+        this.exitListEntries.putIfAbsent(fingerprint, new HashMap<>());
         String exitAddress = exitAddressScanMillis.getKey();
-        if (!this.exitListEntries.get(fingerprint).containsKey(
-            exitAddress)
-            || this.exitListEntries.get(fingerprint).get(exitAddress)
+        if (this.exitListEntries.get(fingerprint).getOrDefault(exitAddress, 0L)
             < scanMillis) {
-          this.exitListEntries.get(fingerprint).put(exitAddress,
-              scanMillis);
+          this.exitListEntries.get(fingerprint).put(exitAddress, scanMillis);
         }
       }
     }
@@ -288,14 +283,12 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         nodeStatus.setVersion(version);
       }
       if (entry.getUnmeasured()) {
-        if (!this.lastSeenUnmeasured.containsKey(fingerprint)
-            || this.lastSeenUnmeasured.get(fingerprint)
+        if (this.lastSeenUnmeasured.getOrDefault(fingerprint, 0L)
             < validAfterMillis) {
           this.lastSeenUnmeasured.put(fingerprint, validAfterMillis);
         }
       } else if (consensus.getConsensusMethod() >= 17) {
-        if (!this.lastSeenMeasured.containsKey(fingerprint)
-            || this.lastSeenMeasured.get(fingerprint)
+        if (this.lastSeenMeasured.getOrDefault(fingerprint, 0L)
             < validAfterMillis) {
           this.lastSeenMeasured.put(fingerprint, validAfterMillis);
         }
@@ -846,8 +839,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
             this.exitListEntries.get(fingerprint).entrySet()) {
           String exitAddress = e.getKey();
           long scanMillis = e.getValue();
-          if (!exitAddresses.containsKey(exitAddress)
-              || exitAddresses.get(exitAddress) < scanMillis) {
+          if (exitAddresses.getOrDefault(exitAddress, 0L) < scanMillis) {
             exitAddresses.put(exitAddress, scanMillis);
           }
         }

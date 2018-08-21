@@ -335,10 +335,7 @@ public class ResourceServletTest {
           new HashMap<>();
       for (String parameter : uriParts[1].split("&")) {
         String[] parameterParts = parameter.split("=");
-        if (!parameterLists.containsKey(parameterParts[0])) {
-          parameterLists.put(parameterParts[0],
-              new ArrayList<>());
-        }
+        parameterLists.putIfAbsent(parameterParts[0], new ArrayList<>());
         parameterLists.get(parameterParts[0]).add(parameterParts[1]);
       }
       parameters = new HashMap<>();
