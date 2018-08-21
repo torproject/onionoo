@@ -44,8 +44,8 @@ public class ClientsStatus extends Document {
         if (parsedLine != null) {
           this.history.add(parsedLine);
         } else {
-          log.error("Could not parse clients history line '"
-              + line + "'.  Skipping.");
+          log.error("Could not parse clients history line '{}'. Skipping.",
+              line);
         }
       }
     }

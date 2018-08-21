@@ -89,14 +89,14 @@ class DescriptorQueue {
             String[] parts = line.split(" ", 2);
             excludedFiles.put(parts[1], Long.parseLong(parts[0]));
           } catch (NumberFormatException e) {
-            log.error("Illegal line '" + line + "' in parse "
-                + "history.  Skipping line.");
+            log.error("Illegal line '{}' in parse history. Skipping line.",
+                line);
           }
         }
       } catch (IOException e) {
-        log.error("Could not read history file '"
-            + this.historyFile.getAbsolutePath() + "'.  Not excluding "
-            + "descriptors in this execution.", e);
+        log.error("Could not read history file '{}'. Not excluding "
+            + "descriptors in this execution.",
+            this.historyFile.getAbsolutePath(), e);
         return;
       }
       this.historySizeBefore = excludedFiles.size();
@@ -128,9 +128,8 @@ class DescriptorQueue {
             + "\n");
       }
     } catch (IOException e) {
-      log.error("Could not write history file '"
-          + this.historyFile.getAbsolutePath() + "'.  Not excluding "
-          + "descriptors in next execution.");
+      log.error("Could not write history file '{}'. Not excluding descriptors "
+          + "in next execution.", this.historyFile.getAbsolutePath());
     }
   }
 
@@ -144,9 +143,9 @@ class DescriptorQueue {
         this.descriptors = this.descriptorReader.readDescriptors(
             this.directory).iterator();
       } else {
-        log.error("Directory " + this.directory.getAbsolutePath()
-            + " either does not exist or is not a directory.  Not adding "
-            + "to descriptor reader.");
+        log.error("Directory {} either does not exist or is not a directory. "
+            + "Not adding to descriptor reader.",
+            this.directory.getAbsolutePath());
         return null;
       }
     }

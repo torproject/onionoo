@@ -133,9 +133,8 @@ public class LookupService {
       while ((line = br.readLine()) != null) {
         String[] parts = line.split(",", -1);
         if (parts.length < 9) {
-          log.error("Illegal line '" + line + "' in "
-              + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
-              + ".");
+          log.error("Illegal line '{}' in {}.", line,
+              this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath());
           return lookupResults;
         }
         try {
@@ -143,18 +142,15 @@ public class LookupService {
           String startAddressString = networkAddressAndMask[0];
           long startIpNum = this.parseAddressString(startAddressString);
           if (startIpNum < 0L) {
-            log.error("Illegal IP address in '" + line + "' in "
-                + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
-                + ".");
+            log.error("Illegal IP address in '{}' in {}.", line,
+                this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
           int networkMaskLength = networkAddressAndMask.length < 2 ? 0
               : Integer.parseInt(networkAddressAndMask[1]);
           if (networkMaskLength < 8 || networkMaskLength > 32) {
-            log.error("Missing or illegal network mask in '" + line
-                + "' in "
-                + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
-                + ".");
+            log.error("Missing or illegal network mask in '{}' in {}.", line,
+                this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
           if (parts[1].length() == 0 && parts[2].length() == 0) {
@@ -175,17 +171,14 @@ public class LookupService {
             }
           }
         } catch (NumberFormatException e) {
-          log.error("Number format exception while parsing line '" + line
-              + "' in "
-              + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
-              + ".", e);
+          log.error("Number format exception while parsing line '{}' in {}.",
+              line, this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath(), e);
           return lookupResults;
         }
       }
     } catch (IOException e) {
-      log.error("I/O exception while reading "
-          + this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath()
-          + ": " + e);
+      log.error("I/O exception while reading {}: {}",
+          this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath(), e);
       return lookupResults;
     }
 
@@ -198,9 +191,8 @@ public class LookupService {
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 13);
         if (parts.length != 13) {
-          log.error("Illegal line '" + line + "' in "
-              + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
-              + ".");
+          log.error("Illegal line '{}' in {}.", line,
+              this.geoLite2CityLocationsEnCsvFile.getAbsolutePath());
           return lookupResults;
         }
 
@@ -210,17 +202,14 @@ public class LookupService {
             blockLocations.put(locId, line);
           }
         } catch (NumberFormatException e) {
-          log.error("Number format exception while parsing line "
-              + "'" + line + "' in "
-              + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
-              + ".");
+          log.error("Number format exception while parsing line '{}' in {}.",
+              line, this.geoLite2CityLocationsEnCsvFile.getAbsolutePath());
           return lookupResults;
         }
       }
     } catch (IOException e) {
-      log.error("I/O exception while reading "
-          + this.geoLite2CityLocationsEnCsvFile.getAbsolutePath()
-          + ": " + e);
+      log.error("I/O exception while reading {}: {}",
+          this.geoLite2CityLocationsEnCsvFile.getAbsolutePath(), e);
       return lookupResults;
     }
 
@@ -236,15 +225,15 @@ public class LookupService {
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 3);
         if (parts.length != 3) {
-          log.error("Illegal line '" + line + "' in "
-              + geoIpAsNum2CsvFile.getAbsolutePath() + ".");
+          log.error("Illegal line '{}' in {}.", line,
+              geoIpAsNum2CsvFile.getAbsolutePath());
           return lookupResults;
         }
         try {
           long startIpNum = Long.parseLong(parts[0]);
           if (startIpNum <= previousStartIpNum) {
-            log.error("Line '" + line + "' not sorted in "
-                + geoIpAsNum2CsvFile.getAbsolutePath() + ".");
+            log.error("Line '{}' not sorted in {}.", line,
+                geoIpAsNum2CsvFile.getAbsolutePath());
             return lookupResults;
           }
           previousStartIpNum = startIpNum;
@@ -274,15 +263,14 @@ public class LookupService {
             break;
           }
         } catch (NumberFormatException e) {
-          log.error("Number format exception while parsing line "
-              + "'" + line + "' in "
-              + geoIpAsNum2CsvFile.getAbsolutePath() + ".");
+          log.error("Number format exception while parsing line '{}' in {}.",
+              line, geoIpAsNum2CsvFile.getAbsolutePath());
           return lookupResults;
         }
       }
     } catch (IOException e) {
-      log.error("I/O exception while reading "
-          + geoIpAsNum2CsvFile.getAbsolutePath() + ": " + e);
+      log.error("I/O exception while reading {}: {}",
+          geoIpAsNum2CsvFile.getAbsolutePath(), e);
       return lookupResults;
     }
 

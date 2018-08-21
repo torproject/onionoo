@@ -115,8 +115,8 @@ public class Main implements Runnable {
     int initialDelay = (75 - currentMinute + currentMinute % 5) % 60;
 
     /* Run after initialDelay delay and then every hour. */
-    this.log.info("Periodic updater will start every hour at minute "
-        + ((currentMinute + initialDelay) % 60) + ".");
+    this.log.info("Periodic updater will start every hour at minute {}.",
+        (currentMinute + initialDelay) % 60);
     this.scheduler.scheduleAtFixedRate(mainRunnable, initialDelay, 60,
         TimeUnit.MINUTES);
   }
@@ -210,10 +210,10 @@ public class Main implements Runnable {
       this.dwr.logStatistics();
     }
     if (this.dso != null) {
-      this.log.info("Descriptor source\n" + this.dso.getStatsString());
+      this.log.info("Descriptor source\n{}", this.dso.getStatsString());
     }
     if (this.ds != null) {
-      this.log.info("Document store\n" + this.ds.getStatsString());
+      this.log.info("Document store\n{}", this.ds.getStatsString());
     }
   }
 

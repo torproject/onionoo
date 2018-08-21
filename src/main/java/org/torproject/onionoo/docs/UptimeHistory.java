@@ -58,32 +58,31 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
   public static UptimeHistory fromString(String uptimeHistoryString) {
     String[] parts = uptimeHistoryString.split(" ", -1);
     if (parts.length < 3) {
-      log.warn("Invalid number of space-separated strings in uptime "
-          + "history: '" + uptimeHistoryString + "'.  Skipping");
+      log.warn("Invalid number of space-separated strings in uptime history: "
+          + "'{}'. Skipping", uptimeHistoryString);
       return null;
     }
     boolean relay = false;
     if (parts[0].equalsIgnoreCase("r")) {
       relay = true;
     } else if (!parts[0].equals("b")) {
-      log.warn("Invalid node type in uptime history: '"
-          + uptimeHistoryString + "'.  Supported types are 'r', 'R', and "
-          + "'b'.  Skipping.");
+      log.warn("Invalid node type in uptime history: '{}'. Supported types are "
+          + "'r', 'R', and 'b'. Skipping.", uptimeHistoryString);
       return null;
     }
     long startMillis = DateTimeHelper.parse(parts[1],
           DateTimeHelper.DATEHOUR_NOSPACE_FORMAT);
     if (DateTimeHelper.NO_TIME_AVAILABLE == startMillis) {
-      log.warn("Invalid start timestamp in uptime history: '"
-          + uptimeHistoryString + "'.  Skipping.");
+      log.warn("Invalid start timestamp in uptime history: '{}'. Skipping.",
+          uptimeHistoryString);
       return null;
     }
     int uptimeHours;
     try {
       uptimeHours = Integer.parseInt(parts[2]);
     } catch (NumberFormatException e) {
-      log.warn("Invalid number format in uptime history: '"
-          + uptimeHistoryString + "'.  Skipping.");
+      log.warn("Invalid number format in uptime history: '{}'. Skipping.",
+          uptimeHistoryString);
       return null;
     }
     SortedSet<String> flags = null;

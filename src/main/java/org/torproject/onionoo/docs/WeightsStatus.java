@@ -58,8 +58,8 @@ public class WeightsStatus extends Document {
           continue;
         }
         if (parts.length != 9 && parts.length != 11) {
-          log.error("Illegal line '" + line + "' in weights "
-              + "status file.  Skipping this line.");
+          log.error("Illegal line '{}' in weights status file. Skipping this "
+              + "line.", line);
           continue;
         }
         if (parts[4].equals("NaN")) {
@@ -75,8 +75,8 @@ public class WeightsStatus extends Document {
           break;
         }
         if (validAfterMillis > freshUntilMillis) {
-          log.error("Illegal dates in '" + line + "' of weights "
-              + "status file.  Skipping.");
+          log.error("Illegal dates in '{}' of weights status file. Skipping.",
+              line);
           break;
         }
         long[] interval = new long[] { validAfterMillis, freshUntilMillis };
@@ -91,8 +91,8 @@ public class WeightsStatus extends Document {
             weights[6] = parseWeightDouble(parts[10]);
           }
         } catch (NumberFormatException e) {
-          log.error("Could not parse weights values in line '" + line
-              + "' while reading weights status file.  Skipping.");
+          log.error("Could not parse weights values in line '{}' while reading "
+              + "weights status file. Skipping.", line);
           break;
         }
         this.history.put(interval, weights);

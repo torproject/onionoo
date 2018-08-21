@@ -135,8 +135,8 @@ public class DocumentStore {
           this.listedFiles += parsedNodeStatuses.size();
           this.listOperations++;
         } catch (IOException e) {
-          log.error("Could not read file '"
-              + summaryFile.getAbsolutePath() + "'.", e);
+          log.error("Could not read file '{}'.", summaryFile.getAbsolutePath(),
+              e);
         }
       }
     }
@@ -339,15 +339,15 @@ public class DocumentStore {
         || document instanceof UpdateStatus) {
       documentString = document.toDocumentString();
     } else {
-      log.error("Serializing is not supported for type "
-          + document.getClass().getName() + ".");
+      log.error("Serializing is not supported for type {}.",
+          document.getClass().getName());
       return false;
     }
     try {
       if (documentString.length() > ONE_MIBIBYTE) {
-        log.warn("Attempting to store very large document file: path='"
-            + documentFile.getAbsolutePath() + "', bytes="
-            + documentString.length());
+        log.warn("Attempting to store very large document file: path='{}', "
+            + "bytes={}", documentFile.getAbsolutePath(),
+            documentString.length());
       }
       documentFile.getParentFile().mkdirs();
       File documentTempFile = new File(
@@ -358,8 +358,8 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      log.error("Could not write file '"
-          + documentFile.getAbsolutePath() + "'.", e);
+      log.error("Could not write file '{}'.", documentFile.getAbsolutePath(),
+          e);
       return false;
     }
     return true;
@@ -419,10 +419,10 @@ public class DocumentStore {
     String contact = null;
     for (String orAddressAndPort : detailsDocument.getOrAddresses()) {
       if (!orAddressAndPort.contains(":")) {
-        log.warn("Attempt to create summary document from details "
-            + "document for fingerprint " + fingerprint + " failed "
-            + "because of invalid OR address/port: '" + orAddressAndPort
-            + "'.  Not returning a summary document in this case.");
+        log.warn("Attempt to create summary document from details document for "
+            + "fingerprint {} failed because of invalid OR address/port: '{}'. "
+            + "Not returning a summary document in this case.", fingerprint,
+            orAddressAndPort);
         return null;
       }
       String orAddress = orAddressAndPort.substring(0,
@@ -464,9 +464,8 @@ public class DocumentStore {
       /* Document file does not exist.  That's okay. */
       return null;
     } else if (documentFile.isDirectory()) {
-      log.error("Could not read file '"
-          + documentFile.getAbsolutePath() + "', because it is a "
-          + "directory.");
+      log.error("Could not read file '{}', because it is a directory.",
+          documentFile.getAbsolutePath());
       return null;
     }
     String documentString;
@@ -487,14 +486,12 @@ public class DocumentStore {
       this.retrievedFiles++;
       this.retrievedBytes += documentString.length();
     } catch (IOException e) {
-      log.error("Could not read file '"
-          + documentFile.getAbsolutePath() + "'.", e);
+      log.error("Could not read file '{}'.", documentFile.getAbsolutePath(), e);
       return null;
     }
     if (documentString.length() > ONE_MIBIBYTE) {
-      log.warn("Retrieved very large document file: path='"
-          + documentFile.getAbsolutePath() + "', bytes="
-          + documentString.length());
+      log.warn("Retrieved very large document file: path='{}', bytes={}",
+          documentFile.getAbsolutePath(), documentString.length());
     }
     T result = null;
     if (!parse) {
@@ -517,8 +514,8 @@ public class DocumentStore {
       return this.retrieveParsedDocumentFile(documentType, "{"
           + documentString + "}");
     } else {
-      log.error("Parsing is not supported for type "
-          + documentType.getName() + ".");
+      log.error("Parsing is not supported for type {}.",
+          documentType.getName());
     }
     return result;
   }
@@ -534,8 +531,8 @@ public class DocumentStore {
       log.error(e.getMessage(), e);
     }
     if (result == null) {
-      log.error("Could not initialize parsed status file of "
-          + "type " + documentType.getName() + ".");
+      log.error("Could not initialize parsed status file of type {}.",
+          documentType.getName());
     }
     return result;
   }
@@ -551,8 +548,8 @@ public class DocumentStore {
       log.error(e.getMessage(), e);
     }
     if (result == null) {
-      log.error("Could not initialize parsed document of type "
-          + documentType.getName() + ".");
+      log.error("Could not initialize parsed document of type {}.",
+          documentType.getName());
     }
     return result;
   }
@@ -568,8 +565,8 @@ public class DocumentStore {
       log.error(e.getMessage(), e);
     }
     if (result == null) {
-      log.error("Could not initialize unparsed document of type "
-          + documentType.getName() + ".");
+      log.error("Could not initialize unparsed document of type {}.",
+          documentType.getName());
     }
     return result;
   }
@@ -611,8 +608,7 @@ public class DocumentStore {
       Class<T> documentType, String fingerprint) {
     File documentFile = this.getDocumentFile(documentType, fingerprint);
     if (documentFile == null || !documentFile.delete()) {
-      log.error("Could not delete file '"
-          + documentFile.getAbsolutePath() + "'.");
+      log.error("Could not delete file '{}'.", documentFile.getAbsolutePath());
       return false;
     }
     this.removedFiles++;
@@ -624,9 +620,9 @@ public class DocumentStore {
     File documentFile = null;
     if (fingerprint == null && !documentType.equals(UpdateStatus.class)
         && !documentType.equals(UptimeStatus.class)) {
-      log.warn("Attempted to locate a document file of type "
-          + documentType.getName() + " without providing a fingerprint.  "
-          + "Such a file does not exist.");
+      log.warn("Attempted to locate a document file of type {} without "
+          + "providing a fingerprint.  Such a file does not exist.",
+          documentType.getName());
       return null;
     }
     File directory = null;
@@ -739,8 +735,8 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line).append("\n");
       } else {
-        log.error("Could not serialize relay node status '"
-            + relay.getFingerprint() + "'");
+        log.error("Could not serialize relay node status '{}'",
+            relay.getFingerprint());
       }
     }
     for (NodeStatus bridge : cachedBridges.values()) {
@@ -748,8 +744,8 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line).append("\n");
       } else {
-        log.error("Could not serialize bridge node status '"
-            + bridge.getFingerprint() + "'");
+        log.error("Could not serialize bridge node status '{}'",
+            bridge.getFingerprint());
       }
     }
     String documentString = sb.toString();
@@ -761,8 +757,7 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      log.error("Could not write file '"
-          + summaryFile.getAbsolutePath() + "'.", e);
+      log.error("Could not write file '{}'.", summaryFile.getAbsolutePath(), e);
     }
   }
 
@@ -791,8 +786,8 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line).append("\n");
       } else {
-        log.error("Could not serialize relay summary document '"
-            + summaryDocument.getFingerprint() + "'");
+        log.error("Could not serialize relay summary document '{}'",
+            summaryDocument.getFingerprint());
       }
     }
     String documentString = sb.toString();
@@ -805,8 +800,7 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      log.error("Could not write file '"
-          + summaryFile.getAbsolutePath() + "'.", e);
+      log.error("Could not write file '{}'.", summaryFile.getAbsolutePath(), e);
     }
   }
 

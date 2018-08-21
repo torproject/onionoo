@@ -65,26 +65,19 @@ public class PerformanceMetrics {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        log.info("Request statistics ("
-            + dateTimeFormat.format(lastLoggedMillis
-            + LOG_INTERVAL_MILLIS) + ", " + (LOG_INTERVAL_SECONDS)
-            + " s):");
-        log.info("  Total processed requests: "
-            + totalProcessedRequests);
-        log.info("  Most frequently requested resource: "
-            + requestsByResourceType);
-        log.info("  Most frequently requested parameter "
-            + "combinations: " + requestsByParameters);
-        log.info("  Matching relays per request: "
-            + matchingRelayDocuments);
-        log.info("  Matching bridges per request: "
-            + matchingBridgeDocuments);
-        log.info("  Written characters per response: "
-            + writtenChars);
-        log.info("  Milliseconds to handle request: "
-            + handleRequestMillis);
-        log.info("  Milliseconds to build response: "
-            + buildResponseMillis);
+        log.info("Request statistics ({}, {} s):",
+            dateTimeFormat.format(lastLoggedMillis + LOG_INTERVAL_MILLIS),
+            LOG_INTERVAL_SECONDS);
+        log.info("  Total processed requests: {}", totalProcessedRequests);
+        log.info("  Most frequently requested resource: {}",
+            requestsByResourceType);
+        log.info("  Most frequently requested parameter combinations: {}",
+            requestsByParameters);
+        log.info("  Matching relays per request: {}", matchingRelayDocuments);
+        log.info("  Matching bridges per request: {}", matchingBridgeDocuments);
+        log.info("  Written characters per response: {}", writtenChars);
+        log.info("  Milliseconds to handle request: {}", handleRequestMillis);
+        log.info("  Milliseconds to build response: {}", buildResponseMillis);
         totalProcessedRequests.clear();
         requestsByResourceType.clear();
         requestsByParameters.clear();
@@ -101,9 +94,9 @@ public class PerformanceMetrics {
       totalProcessedRequests.increment();
       long handlingTime = parsedRequestMillis - receivedRequestMillis;
       if (handlingTime > DateTimeHelper.ONE_SECOND) {
-        log.warn("longer request handling: " + handlingTime + " ms for "
-            + resourceType + " params: " + parameterKeys + " and "
-            + charsWritten + " chars.");
+        log.warn("longer request handling: {} ms for {} params: {} and {} "
+            + "chars.", handlingTime, resourceType, parameterKeys,
+            charsWritten);
       }
       handleRequestMillis.addLong(handlingTime);
       requestsByResourceType.addString(resourceType);
@@ -113,9 +106,9 @@ public class PerformanceMetrics {
       writtenChars.addLong(charsWritten);
       long responseTime = writtenResponseMillis - parsedRequestMillis;
       if (responseTime > DateTimeHelper.ONE_SECOND) {
-        log.warn("longer response building: " + responseTime + " ms for "
-            + resourceType + " params: " + parameterKeys + " and "
-            + charsWritten + " chars.");
+        log.warn("longer response building: {} ms for {} params: {} and {} "
+            + "chars.", responseTime, resourceType, parameterKeys,
+            charsWritten);
       }
       buildResponseMillis.addLong(responseTime);
     }

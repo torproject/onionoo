@@ -55,8 +55,8 @@ public class BandwidthStatus extends Document {
         String line = s.nextLine();
         String[] parts = line.split(" ");
         if (parts.length != 6) {
-          log.error("Illegal line '" + line + "' in bandwidth "
-              + "history.  Skipping this line.");
+          log.error("Illegal line '{}' in bandwidth history. Skipping this "
+              + "line.", line);
           continue;
         }
         SortedMap<Long, long[]> history = parts[0].equals("r")

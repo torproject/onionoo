@@ -51,8 +51,8 @@ public class UptimeStatus extends Document {
             this.bridgeHistory.add(parsedLine);
           }
         } else {
-          log.error("Could not parse uptime history line '"
-              + line + "'.  Skipping.");
+          log.error("Could not parse uptime history line '{}'. Skipping.",
+              line);
         }
       }
     }

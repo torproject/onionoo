@@ -553,8 +553,8 @@ public class NodeStatus extends Document {
     try {
       String[] parts = documentString.trim().split("\t");
       if (parts.length < 23) {
-        log.error("Too few space-separated values in line '"
-            + documentString.trim() + "'.  Skipping.");
+        log.error("Too few space-separated values in line '{}'. Skipping.",
+            documentString.trim());
         return null;
       }
       String fingerprint = parts[2];
@@ -568,8 +568,8 @@ public class NodeStatus extends Document {
       if (addresses.contains(";")) {
         String[] addressParts = addresses.split(";", -1);
         if (addressParts.length != 3) {
-          log.error("Invalid addresses entry in line '"
-              + documentString.trim() + "'.  Skipping.");
+          log.error("Invalid addresses entry in line '{}'. Skipping.",
+              documentString.trim());
           return null;
         }
         address = addressParts[0];
@@ -590,8 +590,8 @@ public class NodeStatus extends Document {
       long lastSeenMillis = DateTimeHelper.parse(parts[4] + " "
           + parts[5]);
       if (lastSeenMillis < 0L) {
-        log.error("Parse exception while parsing node status "
-            + "line '" + documentString + "'.  Skipping.");
+        log.error("Parse exception while parsing node status line '{}'. "
+            + "Skipping.", documentString);
         return null;
       } else if (lastSeenMillis == 0L) {
         log.debug("Skipping node status with fingerprint {} that has so far "
@@ -617,8 +617,8 @@ public class NodeStatus extends Document {
       }
       long firstSeenMillis = DateTimeHelper.parse(parts[15] + " " + parts[16]);
       if (firstSeenMillis < 0L) {
-        log.error("Parse exception while parsing node status "
-            + "line '" + documentString + "'.  Skipping.");
+        log.error("Parse exception while parsing node status line '{}'. "
+            + "Skipping.", documentString);
         return null;
       }
       nodeStatus.setFirstSeenMillis(firstSeenMillis);
@@ -627,8 +627,8 @@ public class NodeStatus extends Document {
         lastChangedAddresses = DateTimeHelper.parse(parts[17] + " "
             + parts[18]);
         if (lastChangedAddresses < 0L) {
-          log.error("Parse exception while parsing node status "
-              + "line '" + documentString + "'.  Skipping.");
+          log.error("Parse exception while parsing node status line '{}'. "
+              + "Skipping.", documentString);
           return null;
         }
       }
@@ -693,16 +693,14 @@ public class NodeStatus extends Document {
       }
       return nodeStatus;
     } catch (NumberFormatException e) {
-      log.error("Number format exception while parsing node "
-          + "status line '" + documentString + "': " + e.getMessage()
-          + ".  Skipping.");
+      log.error("Number format exception while parsing node status line '{}'. "
+          + "Skipping.", documentString, e);
       return null;
     } catch (Exception e) {
       /* This catch block is only here to handle yet unknown errors.  It
        * should go away once we're sure what kind of errors can occur. */
-      log.error("Unknown exception while parsing node status "
-          + "line '" + documentString + "': " + e.getMessage() + ".  "
-          + "Skipping.");
+      log.error("Unknown exception while parsing node status line '{}'. "
+          + "Skipping.", documentString, e);
       return null;
     }
   }

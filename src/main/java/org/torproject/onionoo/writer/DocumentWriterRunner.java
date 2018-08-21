@@ -34,7 +34,7 @@ public class DocumentWriterRunner {
   public void writeDocuments() {
     long mostRecentStatusMillis = retrieveMostRecentStatusMillis();
     for (DocumentWriter dw : this.documentWriters) {
-      log.debug("Writing " + dw.getClass().getSimpleName());
+      log.debug("Writing {}", dw.getClass().getSimpleName());
       dw.writeDocuments(mostRecentStatusMillis);
     }
   }
@@ -56,8 +56,7 @@ public class DocumentWriterRunner {
     for (DocumentWriter dw : this.documentWriters) {
       String statsString = dw.getStatsString();
       if (statsString != null) {
-        log.info(dw.getClass().getSimpleName() + "\n"
-            + statsString);
+        log.info("{}\n{}", dw.getClass().getSimpleName(), statsString);
       }
     }
   }

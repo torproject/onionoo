@@ -25,8 +25,8 @@ public class UpdateStatus extends Document {
     try {
       this.updatedMillis = Long.parseLong(documentString.trim());
     } catch (NumberFormatException e) {
-      log.error("Could not parse timestamp '" + documentString + "'.  "
-          + "Setting to 1970-01-01 00:00:00.");
+      log.error("Could not parse timestamp '{}'. Setting to 1970-01-01 "
+          + "00:00:00.", documentString);
       this.updatedMillis = 0L;
     }
   }

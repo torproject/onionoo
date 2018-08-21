@@ -18,14 +18,14 @@ public class ServerMain {
   public static void main(String[] args) {
     try {
       Resource onionooXml = Resource.newSystemResource("jetty.xml");
-      log.info("Reading configuration from '" + onionooXml + "'.");
+      log.info("Reading configuration from '{}'.", onionooXml);
       XmlConfiguration configuration = new XmlConfiguration(
           onionooXml.getInputStream());
       Server server = (Server) configuration.configure();
       server.start();
       server.join();
     } catch (Exception ex) {
-      log.error("Exiting, because of: " + ex.getMessage(), ex);
+      log.error("Exiting, because of: {}", ex.getMessage(), ex);
       System.exit(1);
     }
   }

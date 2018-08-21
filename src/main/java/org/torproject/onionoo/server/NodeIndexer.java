@@ -37,8 +37,8 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     File outDir = new File(System.getProperty("onionoo.basedir",
         "/srv/onionoo.torproject.org/onionoo"), "out");
     if (!outDir.exists() || !outDir.isDirectory()) {
-      log.error("\n\n\tOut-dir not found! Expected directory: " + outDir
-          + "\n\tSet system property 'onionoo.basedir'.");
+      log.error("\n\n\tOut-dir not found! Expected directory: {}"
+          + "\n\tSet system property 'onionoo.basedir'.", outDir);
       System.exit(1);
     }
     DocumentStore documentStore = DocumentStoreFactory.getDocumentStore();
