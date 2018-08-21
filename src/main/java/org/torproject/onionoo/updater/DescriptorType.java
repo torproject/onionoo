@@ -13,7 +13,7 @@ public enum DescriptorType {
   BRIDGE_EXTRA_INFOS("bridge-descriptors/extra-infos");
 
   private final String dir;
-  private DescriptorType(String dir) {
+  DescriptorType(String dir) {
     this.dir = dir;
   }
 

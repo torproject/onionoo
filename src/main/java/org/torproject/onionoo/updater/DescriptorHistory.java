@@ -16,7 +16,7 @@ public enum DescriptorHistory {
 
   private String fileName;
 
-  private DescriptorHistory(String fileName) {
+  DescriptorHistory(String fileName) {
     this.fileName = fileName;
   }
 
