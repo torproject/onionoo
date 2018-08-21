@@ -209,7 +209,6 @@ public class RequestHandler {
   private void filterByType() {
     if (this.type == null) {
       /* Not filtering by type. */
-      return;
     } else if (this.type.equals("relay")) {
       this.filteredBridges.clear();
     } else {
