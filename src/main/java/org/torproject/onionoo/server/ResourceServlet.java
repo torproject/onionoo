@@ -68,7 +68,7 @@ public class ResourceServlet extends HttpServlet {
   private static final long CACHE_INTERVAL = 5L * 60L * 1000L;
 
   private static Set<String> knownParameters = new HashSet<>(
-      Arrays.asList("type", "running", "search", "lookup", "fingerprint",
+      Arrays.asList("type", "running", "search", "lookup",
           "country", "as", "as_name", "flag", "first_seen_days",
           "last_seen_days", "contact", "order", "limit", "offset", "fields",
           "family", "version", "os", "host_name", "recommended_version"));

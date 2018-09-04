@@ -1056,37 +1056,37 @@ public class ResourceServletTest {
 
   @Test(timeout = 100)
   public void testFingerprintRelayFingerprint() {
-    this.assertSummaryDocument(
+    this.assertErrorStatusCode(
         "/summary?fingerprint=000C5F55BD4814B917CC474BD537F1A3B33CCE2A",
-        1, new String[] { "TorkaZ" }, 0, null);
+        400);
   }
 
   @Test(timeout = 100)
   public void testFingerprintRelayHashedFingerprint() {
-    this.assertSummaryDocument(
+    this.assertErrorStatusCode(
         "/summary?fingerprint=4aa14c08d62913e0057a9ad5863b458c0ce94cee",
-        0, null, 0, null);
+        400);
   }
 
   @Test(timeout = 100)
   public void testFingerprintBridgeHashedFingerprint() {
-    this.assertSummaryDocument(
+    this.assertErrorStatusCode(
         "/summary?fingerprint=1FEDE50ED8DBA1DD9F9165F78C8131E4A44AB756",
-        0, null, 1, new String[] { "gummy" });
+        400);
   }
 
   @Test(timeout = 100)
   public void testFingerprintBridgeHashedHashedFingerprint() {
-    this.assertSummaryDocument(
+    this.assertErrorStatusCode(
         "/summary?fingerprint=CE52F898DB3678BCE33FAC28C92774DE90D618B5",
-        0, null, 0, null);
+        400);
   }
 
   @Test(timeout = 100)
   public void testFingerprintBridgeOriginalFingerprint() {
-    this.assertSummaryDocument(
+    this.assertErrorStatusCode(
         "/summary?fingerprint=0010D49C6DA1E46A316563099F41BFE40B6C7183",
-        0, null, 0, null);
+        400);
   }
 
   @Test(timeout = 100)
