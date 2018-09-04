@@ -7,6 +7,8 @@
    - Change "3_months" graphs to "6_months" graphs in all documents
      containing history objects.
    - Remove the "fingerprint" parameter.
+   - Remove the previously deprecated "as_number" field from details
+     documents.
 
 
 # Changes in version 6.2-1.17.1 - 2018-08-17

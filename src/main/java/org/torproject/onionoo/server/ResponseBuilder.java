@@ -299,9 +299,6 @@ public class ResponseBuilder {
             case "as":
               dd.setAs(detailsDocument.getAs());
               break;
-            case "as_number":
-              dd.setAsNumber(detailsDocument.getAsNumber());
-              break;
             case "as_name":
               dd.setAsName(detailsDocument.getAsName());
               break;

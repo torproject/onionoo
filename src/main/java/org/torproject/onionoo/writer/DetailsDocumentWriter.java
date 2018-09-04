@@ -96,7 +96,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setCountryName(detailsStatus.getCountryName());
     detailsDocument.setRegionName(detailsStatus.getRegionName());
     detailsDocument.setCityName(detailsStatus.getCityName());
-    detailsDocument.setAsAndAsNumber(detailsStatus.getAsNumber());
+    detailsDocument.setAs(detailsStatus.getAsNumber());
     detailsDocument.setAsName(detailsStatus.getAsName());
     if (detailsStatus.isRunning()) {
       detailsDocument.setConsensusWeightFraction(
