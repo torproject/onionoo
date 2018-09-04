@@ -67,7 +67,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       "3_days",
       "1_week",
       "1_month",
-      "3_months",
+      "6_months",
       "1_year",
       "5_years" };
 
@@ -75,7 +75,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
       Period.ofDays(3),
       Period.ofWeeks(1),
       Period.ofMonths(1),
-      Period.ofMonths(3),
+      Period.ofMonths(6),
       Period.ofYears(1),
       Period.ofYears(5) };
 

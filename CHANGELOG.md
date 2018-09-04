@@ -4,6 +4,8 @@
    - Extend "version" parameter to support lists and ranges.
    - Remove redundant "1_week" and "1_month" graphs from clients
      documents.
+   - Change "3_months" graphs to "6_months" graphs in all documents
+     containing history objects.
 
 
 # Changes in version 6.2-1.17.1 - 2018-08-17

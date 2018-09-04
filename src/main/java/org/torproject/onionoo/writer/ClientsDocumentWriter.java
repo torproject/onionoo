@@ -78,12 +78,12 @@ public class ClientsDocumentWriter implements DocumentWriter {
   }
 
   private String[] graphNames = new String[] {
-      "3_months",
+      "6_months",
       "1_year",
       "5_years" };
 
   private Period[] graphIntervals = new Period[] {
-      Period.ofMonths(3),
+      Period.ofMonths(6),
       Period.ofYears(1),
       Period.ofYears(5) };
 

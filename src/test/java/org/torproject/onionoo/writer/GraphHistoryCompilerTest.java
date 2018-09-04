@@ -140,21 +140,21 @@ public class GraphHistoryCompilerTest {
   private final String[] graphNames = new String[] {
       "1_week",
       "1_month",
-      "3_months",
+      "6_months",
       "1_year",
       "5_years" };
 
   private final Period[] graphIntervals = new Period[] {
       Period.ofWeeks(1),
       Period.ofMonths(1),
-      Period.ofMonths(3),
+      Period.ofMonths(6),
       Period.ofYears(1),
       Period.ofYears(5) };
 
   private final long[] dataPointIntervals = new long[] {
       DateTimeHelper.ONE_HOUR,
       DateTimeHelper.FOUR_HOURS,
-      DateTimeHelper.TWELVE_HOURS,
+      DateTimeHelper.ONE_DAY,
       DateTimeHelper.TWO_DAYS,
       DateTimeHelper.TEN_DAYS };
 
