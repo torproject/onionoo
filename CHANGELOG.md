@@ -1,4 +1,4 @@
-# Changes in version 7.0-1.18.0 - 2018-09-??
+# Changes in version 7.0-1.18.0 - 2018-09-10
 
  * Medium changes
    - Extend "version" parameter to support lists and ranges.
