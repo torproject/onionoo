@@ -4,6 +4,7 @@
 package org.torproject.onionoo.docs;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -20,6 +21,9 @@ import java.util.List;
     getterVisibility = JsonAutoDetect.Visibility.NONE,
     isGetterVisibility = JsonAutoDetect.Visibility.NONE,
     setterVisibility = JsonAutoDetect.Visibility.NONE)
+/* Ignore unknown properties including previously deprecated and later removed
+ * fields. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GraphHistory {
 
   private String first;
