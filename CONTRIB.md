@@ -38,7 +38,7 @@ the overview page.
 It describes what Onionoo is, lists known Onionoo clients, and points to
 available documentation for users and potential contributors.
 The product overview must be easily accessible, which is why it is
-available via `https://onionoo.torproject.org/`.
+available via `https://metrics.torproject.org/onionoo.html`.
 
 The sources of the product overview are available in `web/index.html`.
 

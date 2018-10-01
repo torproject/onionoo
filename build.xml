@@ -21,7 +21,7 @@
 
   <!-- If 'project-main-class' is not provided, a library jar is created. -->
   <property name="project-main-class"
-            value="org.torproject.onionoo.cron.Main" />
+            value="org.torproject.metrics.onionoo.cron.Main" />
 
   <property name="jarincludes" value="logback.xml" />
   <property name="jarpatternprop" value="library" />
@@ -31,13 +31,13 @@
   <target name="coverage-check">
     <cobertura-check branchrate="0" linerate="0"
                      totallinerate="34" totalbranchrate="30" >
-      <regex pattern="org.torproject.onionoo.server"
+      <regex pattern="org.torproject.metrics.onionoo.server"
              branchrate="67" linerate="77"/>
-      <regex pattern="org.torproject.onionoo.docs"
+      <regex pattern="org.torproject.metrics.onionoo.docs"
              branchrate="19" linerate="29"/>
-      <regex pattern="org.torproject.onionoo.updater"
+      <regex pattern="org.torproject.metrics.onionoo.updater"
              branchrate="17" linerate="18"/>
-      <regex pattern="org.torproject.onionoo.writer"
+      <regex pattern="org.torproject.metrics.onionoo.writer"
              branchrate="22" linerate="20"/>
     </cobertura-check>
   </target>
@@ -109,7 +109,7 @@
         <attribute name="Implementation-Version"
                    value="${release.version}-${git.revision}"/>
         <attribute name="Main-Class"
-                   value="org.torproject.onionoo.server.ServerMain" />
+                   value="org.torproject.metrics.onionoo.server.ServerMain" />
       </manifest>
     </war>
   </target>

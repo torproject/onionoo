@@ -9,7 +9,7 @@
   <servlet>
     <servlet-name>Resource</servlet-name>
     <servlet-class>
-      org.torproject.onionoo.server.ResourceServlet
+      org.torproject.metrics.onionoo.server.ResourceServlet
     </servlet-class>
     <init-param>
       <param-name>maintenance</param-name>
@@ -43,7 +43,7 @@
 
   <listener>
     <listener-class>
-      org.torproject.onionoo.server.NodeIndexer
+      org.torproject.metrics.onionoo.server.NodeIndexer
     </listener-class>
   </listener>
 

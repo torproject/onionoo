@@ -199,7 +199,7 @@ configuration from `onionoo-<version>/src/main/resources/logback.xml` to your
 working directory, edit your copy, and execute the .jar file as follows:
 
 ```java -Xmx4g -DLOGBASE=<your-log-dir> -jar -cp .:onionoo-<version>.jar
-org.torproject.onionoo.cron.Main```
+org.torproject.metrics.onionoo.cron.Main```
 
 Internally, Onionoo uses the Simple Logging Facade for Java (SLF4J) and ships
 with the Logback implementation for SLF4J.  If you prefer a different logging

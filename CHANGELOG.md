@@ -1,3 +1,10 @@
+# Changes in version 7.?-1.??.? - 2018-1?-??
+
+ * Minor changes
+   - Rename root package org.torproject.onionoo to
+     org.torproject.metrics.onionoo.
+
+
 # Changes in version 7.0-1.18.1 - 2018-09-11
 
  * Medium changes
