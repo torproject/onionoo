@@ -6,7 +6,7 @@ human beings---at least not directly.  Onionoo provides the data for other
 applications and websites which in turn present Tor network status
 information to humans.
 
-Onionoo _users_ should head over to `https://onionoo.torproject.org/` to
+Onionoo _users_ should head over to `https://metrics.torproject.org/onionoo.html` to
 learn more about using Onionoo.
 
 Onionoo _service operators_ should read `INSTALL.md`.
