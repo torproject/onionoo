@@ -97,7 +97,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
       SortedSet<String> verifiedHostNames = nodeStatus.getVerifiedHostNames();
       SortedSet<String> unverifiedHostNames =
           nodeStatus.getUnverifiedHostNames();
-      Boolean recommendedVersion = nodeStatus.getRecommendedVersion();
+      Boolean recommendedVersion = nodeStatus.isRecommendedVersion();
       SummaryDocument summaryDocument = new SummaryDocument(isRelay,
           nickname, fingerprint, addresses, lastSeenMillis, running,
           relayFlags, consensusWeight, countryCode, firstSeenMillis,

@@ -3,6 +3,8 @@
  * Minor changes
    - Rename root package org.torproject.onionoo to
      org.torproject.metrics.onionoo.
+   - Rename all [Bb]oolean field getter methods to follow isXY()
+     pattern.
 
 
 # Changes in version 7.0-1.18.1 - 2018-09-11

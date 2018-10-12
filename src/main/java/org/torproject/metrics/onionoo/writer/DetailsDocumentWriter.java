@@ -89,7 +89,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
       detailsDocument.setExitPolicySummary(exitPolicySummary);
     }
     detailsDocument.setRecommendedVersion(
-        detailsStatus.getRecommendedVersion());
+        detailsStatus.isRecommendedVersion());
     detailsDocument.setCountry(detailsStatus.getCountryCode());
     detailsDocument.setLatitude(detailsStatus.getLatitude());
     detailsDocument.setLongitude(detailsStatus.getLongitude());
@@ -135,13 +135,13 @@ public class DetailsDocumentWriter implements DocumentWriter {
     }
     detailsDocument.setExitPolicyV6Summary(
         detailsStatus.getExitPolicyV6Summary());
-    detailsDocument.setHibernating(detailsStatus.getHibernating());
+    detailsDocument.setHibernating(detailsStatus.isHibernating());
     if (detailsStatus.getExitAddresses() != null) {
       List<String> exitAddresses = new ArrayList<>(new TreeSet<>(
           detailsStatus.getExitAddresses().keySet()));
       detailsDocument.setExitAddresses(exitAddresses);
     }
-    detailsDocument.setMeasured(detailsStatus.getMeasured());
+    detailsDocument.setMeasured(detailsStatus.isMeasured());
     List<String> unreachableOrAddresses = new ArrayList<>();
     if (null != detailsStatus.getAdvertisedOrAddresses()) {
       unreachableOrAddresses.addAll(detailsStatus.getAdvertisedOrAddresses());
@@ -178,7 +178,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setRunning(detailsStatus.isRunning());
     detailsDocument.setFlags(detailsStatus.getRelayFlags());
     detailsDocument.setRecommendedVersion(
-        detailsStatus.getRecommendedVersion());
+        detailsStatus.isRecommendedVersion());
     detailsDocument.setLastRestarted(detailsStatus.getLastRestarted());
     detailsDocument.setAdvertisedBandwidth(
         detailsStatus.getAdvertisedBandwidth());

@@ -293,7 +293,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newRelaysByHostName.get(hostNameLowerCase).add(fingerprint);
         newRelaysByHostName.get(hostNameLowerCase).add(hashedFingerprint);
       }
-      Boolean recommendedVersion = entry.getRecommendedVersion();
+      Boolean recommendedVersion = entry.isRecommendedVersion();
       if (null != recommendedVersion) {
         newRelaysByRecommendedVersion.get(recommendedVersion).add(fingerprint);
         newRelaysByRecommendedVersion.get(recommendedVersion).add(
@@ -362,7 +362,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         newBridgesByOperatingSystem.get(operatingSystem)
             .add(hashedHashedFingerprint);
       }
-      Boolean recommendedVersion = entry.getRecommendedVersion();
+      Boolean recommendedVersion = entry.isRecommendedVersion();
       if (null != recommendedVersion) {
         newBridgesByRecommendedVersion.get(recommendedVersion).add(
             hashedFingerprint);

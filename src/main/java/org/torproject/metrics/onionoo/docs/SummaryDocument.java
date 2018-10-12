@@ -360,7 +360,7 @@ public class SummaryDocument extends Document {
     this.recommendedVersion = recommendedVersion;
   }
 
-  public Boolean getRecommendedVersion() {
+  public Boolean isRecommendedVersion() {
     return this.recommendedVersion;
   }
 

@@ -128,7 +128,7 @@ public class DetailsDocument extends Document {
     this.running = running;
   }
 
-  public Boolean getRunning() {
+  public Boolean isRunning() {
     return this.running;
   }
 
@@ -527,7 +527,7 @@ public class DetailsDocument extends Document {
     this.recommendedVersion = recommendedVersion;
   }
 
-  public Boolean getRecommendedVersion() {
+  public Boolean isRecommendedVersion() {
     return this.recommendedVersion;
   }
 
@@ -537,7 +537,7 @@ public class DetailsDocument extends Document {
     this.hibernating = hibernating;
   }
 
-  public Boolean getHibernating() {
+  public Boolean isHibernating() {
     return this.hibernating;
   }
 
@@ -558,7 +558,7 @@ public class DetailsDocument extends Document {
     this.measured = measured;
   }
 
-  public Boolean getMeasured() {
+  public Boolean isMeasured() {
     return this.measured;
   }
 

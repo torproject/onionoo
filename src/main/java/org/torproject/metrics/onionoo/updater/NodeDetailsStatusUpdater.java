@@ -489,7 +489,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           updatedNodeStatus.setAsNumber(nodeStatus.getAsNumber());
           updatedNodeStatus.setAsName(nodeStatus.getAsName());
           updatedNodeStatus.setRecommendedVersion(
-              nodeStatus.getRecommendedVersion());
+              nodeStatus.isRecommendedVersion());
           updatedNodeStatus.setVersion(nodeStatus.getVersion());
         }
         if (nodeStatus.getFirstSeenMillis()
@@ -935,7 +935,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       detailsStatus.setDefaultPolicy(nodeStatus.getDefaultPolicy());
       detailsStatus.setPortList(nodeStatus.getPortList());
       detailsStatus.setRecommendedVersion(
-          nodeStatus.getRecommendedVersion());
+          nodeStatus.isRecommendedVersion());
       detailsStatus.setLastChangedOrAddressOrPort(
           nodeStatus.getLastChangedOrAddressOrPort());
       detailsStatus.setVersion(nodeStatus.getVersion());

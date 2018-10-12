@@ -171,7 +171,7 @@ public class DetailsStatus extends Document {
     this.hibernating = hibernating;
   }
 
-  public Boolean getHibernating() {
+  public Boolean isHibernating() {
     return this.hibernating;
   }
 
@@ -369,7 +369,7 @@ public class DetailsStatus extends Document {
     this.recommendedVersion = recommendedVersion;
   }
 
-  public Boolean getRecommendedVersion() {
+  public Boolean isRecommendedVersion() {
     return this.recommendedVersion;
   }
 
@@ -379,7 +379,7 @@ public class DetailsStatus extends Document {
     this.measured = measured;
   }
 
-  public Boolean getMeasured() {
+  public Boolean isMeasured() {
     return this.measured;
   }
 

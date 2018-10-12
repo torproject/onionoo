@@ -367,7 +367,7 @@ public class NodeStatus extends Document {
     this.recommendedVersion = recommendedVersion;
   }
 
-  public Boolean getRecommendedVersion() {
+  public Boolean isRecommendedVersion() {
     return this.recommendedVersion;
   }
 

@@ -273,7 +273,7 @@ public class ResponseBuilder {
               dd.setFirstSeen(detailsDocument.getFirstSeen());
               break;
             case "running":
-              dd.setRunning(detailsDocument.getRunning());
+              dd.setRunning(detailsDocument.isRunning());
               break;
             case "flags":
               dd.setFlags(detailsDocument.getFlags());
@@ -362,10 +362,10 @@ public class ResponseBuilder {
               break;
             case "recommended_version":
               dd.setRecommendedVersion(
-                  detailsDocument.getRecommendedVersion());
+                  detailsDocument.isRecommendedVersion());
               break;
             case "hibernating":
-              dd.setHibernating(detailsDocument.getHibernating());
+              dd.setHibernating(detailsDocument.isHibernating());
               break;
             case "transports":
               dd.setTransports(detailsDocument.getTransports());
@@ -374,7 +374,7 @@ public class ResponseBuilder {
               dd.setEffectiveFamily(detailsDocument.getEffectiveFamily());
               break;
             case "measured":
-              dd.setMeasured(detailsDocument.getMeasured());
+              dd.setMeasured(detailsDocument.isMeasured());
               break;
             case "alleged_family":
               dd.setAllegedFamily(detailsDocument.getAllegedFamily());
