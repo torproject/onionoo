@@ -1,5 +1,8 @@
 # Changes in version 7.?-1.??.? - 2018-1?-??
 
+ * Medium changes
+   - Update to the GeoLite2 ASN database format.
+
  * Minor changes
    - Rename root package org.torproject.onionoo to
      org.torproject.metrics.onionoo.

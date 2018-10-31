@@ -38,7 +38,7 @@ public class LookupService {
 
   private File geoLite2CityLocationsEnCsvFile;
 
-  private File geoIpAsNum2CsvFile;
+  private File geoLite2AsnBlocksIpv4CsvFile;
 
   private boolean hasAllFiles = false;
 
@@ -62,9 +62,10 @@ public class LookupService {
           + "geoip/.");
       return;
     }
-    this.geoIpAsNum2CsvFile = new File(this.geoipDir, "GeoIPASNum2.csv");
-    if (!this.geoIpAsNum2CsvFile.exists()) {
-      log.error("No GeoIPASNum2.csv file in geoip/.");
+    this.geoLite2AsnBlocksIpv4CsvFile = new File(this.geoipDir,
+        "GeoLite2-ASN-Blocks-IPv4.csv");
+    if (!this.geoLite2AsnBlocksIpv4CsvFile.exists()) {
+      log.error("No GeoLite2-ASN-Blocks-IPv4.csv file in geoip/.");
       return;
     }
     this.hasAllFiles = true;
@@ -216,29 +217,37 @@ public class LookupService {
     }
 
     /* Obtain a map from IP address numbers to ASN. */
-    Map<Long, String> addressNumberAsn = new HashMap<>();
+    Map<Long, String[]> addressNumberAsn = new HashMap<>();
     try (BufferedReader br = this.createBufferedReaderFromIso88591File(
-        this.geoIpAsNum2CsvFile)) {
+        this.geoLite2AsnBlocksIpv4CsvFile)) {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<>(
           addressStringNumbers.values());
       long firstAddressNumber = sortedAddressNumbers.first();
       String line;
-      long previousStartIpNum = -1L;
+      br.readLine();
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 3);
         if (parts.length != 3) {
           log.error("Illegal line '{}' in {}.", line,
-              geoIpAsNum2CsvFile.getAbsolutePath());
+              this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
           return lookupResults;
         }
         try {
-          long startIpNum = Long.parseLong(parts[0]);
-          if (startIpNum <= previousStartIpNum) {
-            log.error("Line '{}' not sorted in {}.", line,
-                geoIpAsNum2CsvFile.getAbsolutePath());
+          String[] networkAddressAndMask = parts[0].split("/");
+          String startAddressString = networkAddressAndMask[0];
+          long startIpNum = this.parseAddressString(startAddressString);
+          if (startIpNum < 0L) {
+            log.error("Illegal IP address in '{}' in {}.", line,
+                this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
-          previousStartIpNum = startIpNum;
+          int networkMaskLength = networkAddressAndMask.length < 2 ? 0
+              : Integer.parseInt(networkAddressAndMask[1]);
+          if (networkMaskLength < 8 || networkMaskLength > 32) {
+            log.error("Missing or illegal network mask in '{}' in {}.", line,
+                this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
+            return lookupResults;
+          }
           while (firstAddressNumber < startIpNum
               && firstAddressNumber != -1L) {
             sortedAddressNumbers.remove(firstAddressNumber);
@@ -248,12 +257,11 @@ public class LookupService {
               firstAddressNumber = sortedAddressNumbers.first();
             }
           }
-          long endIpNum = Long.parseLong(parts[1]);
+          long endIpNum = startIpNum + (1 << (32 - networkMaskLength)) - 1;
           while (firstAddressNumber <= endIpNum
               && firstAddressNumber != -1L) {
-            if (parts[2].startsWith("AS")) {
-              addressNumberAsn.put(firstAddressNumber, parts[2]);
-            }
+            addressNumberAsn.put(firstAddressNumber,
+                new String[] { "AS" + parts[1], parts[2] });
             sortedAddressNumbers.remove(firstAddressNumber);
             if (sortedAddressNumbers.isEmpty()) {
               firstAddressNumber = -1L;
@@ -266,13 +274,13 @@ public class LookupService {
           }
         } catch (NumberFormatException e) {
           log.error("Number format exception while parsing line '{}' in {}.",
-              line, geoIpAsNum2CsvFile.getAbsolutePath());
+              line, this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
           return lookupResults;
         }
       }
     } catch (IOException e) {
       log.error("I/O exception while reading {}: {}",
-          geoIpAsNum2CsvFile.getAbsolutePath(), e);
+          this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath(), e);
       return lookupResults;
     }
 
@@ -313,10 +321,9 @@ public class LookupService {
         lookupResult.setLongitude(latLong[1]);
       }
       if (addressNumberAsn.containsKey(addressNumber)) {
-        String[] parts = addressNumberAsn.get(addressNumber).split(" ",
-            2);
+        String[] parts = addressNumberAsn.get(addressNumber);
         lookupResult.setAsNumber(parts[0]);
-        lookupResult.setAsName(parts.length == 2 ? parts[1] : "");
+        lookupResult.setAsName(parts[1]);
       }
       lookupResults.put(addressString, lookupResult);
     }
