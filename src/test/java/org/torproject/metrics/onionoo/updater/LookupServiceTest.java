@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
@@ -28,7 +29,7 @@ public class LookupServiceTest {
 
   private List<String> geoLite2CityBlocksIPv4Lines;
   private List<String> geoLite2CityLocationsEnLines;
-  private List<String> geoipAsNum2Lines;
+  private List<String> geoLite2AsnBlocksIpv4Lines;
 
   private LookupService lookupService;
 
@@ -59,34 +60,35 @@ public class LookupServiceTest {
     this.geoLite2CityLocationsEnLines.add("5375480,en,NA,"
         + "\"North America\",US,\"United States\",CA,California,,,"
         + "\"Mountain View\",807,America/Los_Angeles");
-    this.geoipAsNum2Lines = new ArrayList<>();
-    this.geoipAsNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
-        + "Communications\"");
-    this.geoipAsNum2Lines.add("134744064,134744319,\"AS15169 Google "
-        + "Inc.\"");
-    this.geoipAsNum2Lines.add("134744320,134750463,\"AS3356 Level 3 "
-        + "Communications\"");
+    this.geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    this.geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    this.geoLite2AsnBlocksIpv4Lines.add(
+        "8.8.6.0/23,3356,\"Level 3 Parent, LLC\"");
+    this.geoLite2AsnBlocksIpv4Lines.add("8.8.8.0/24,15169,\"Google LLC\"");
+    this.geoLite2AsnBlocksIpv4Lines.add(
+        "8.8.9.0/24,3356,\"Level 3 Parent, LLC\"");
   }
 
   private void writeCsvFiles() {
     try {
       this.writeCsvFile(this.geoLite2CityBlocksIPv4Lines,
-          "GeoLite2-City-Blocks-IPv4.csv", "UTF-8");
+          "GeoLite2-City-Blocks-IPv4.csv");
       this.writeCsvFile(this.geoLite2CityLocationsEnLines,
-          "GeoLite2-City-Locations-en.csv", "UTF-8");
-      this.writeCsvFile(this.geoipAsNum2Lines, "GeoIPASNum2.csv",
-          "ISO-8859-1");
+          "GeoLite2-City-Locations-en.csv");
+      this.writeCsvFile(this.geoLite2AsnBlocksIpv4Lines,
+          "GeoLite2-ASN-Blocks-IPv4.csv");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void writeCsvFile(List<String> lines, String fileName,
-      String encoding) throws IOException {
+  private void writeCsvFile(List<String> lines, String fileName)
+      throws IOException {
     if (lines != null && !lines.isEmpty()) {
       try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
           new FileOutputStream(new File(this.tempGeoipDir, fileName)),
-          encoding))) {
+          StandardCharsets.UTF_8))) {
 
         for (String line : lines) {
           bw.write(line);
@@ -103,7 +105,7 @@ public class LookupServiceTest {
 
   private void assertLookupResult(List<String> geoLite2CityBlocksLines,
       List<String> geoLite2CityLocationsLines,
-      List<String> geoipAsNum2Lines, String addressString,
+      List<String> geoLite2AsnBlocksIpv4Lines, String addressString,
       String countryCode, String countryName, String regionName,
       String cityName, Float latitude, Float longitude, String asNumber,
       String asName) {
@@ -115,8 +117,8 @@ public class LookupServiceTest {
     if (geoLite2CityLocationsLines != null) {
       this.geoLite2CityLocationsEnLines = geoLite2CityLocationsLines;
     }
-    if (geoipAsNum2Lines != null) {
-      this.geoipAsNum2Lines = geoipAsNum2Lines;
+    if (geoLite2AsnBlocksIpv4Lines != null) {
+      this.geoLite2AsnBlocksIpv4Lines = geoLite2AsnBlocksIpv4Lines;
     }
     this.writeCsvFiles();
     /* Disable log messages printed to System.err. */
@@ -197,21 +199,21 @@ public class LookupServiceTest {
   public void testLookup8888() {
     this.assertLookupResult(null, null, null, "8.8.8.8", "us",
         "United States", "California", "Mountain View", 37.3860f,
-        -122.0838f, "AS15169", "Google Inc.");
+        -122.0838f, "AS15169", "Google LLC");
   }
 
   @Test()
   public void testLookup8880() {
     this.assertLookupResult(null, null, null, "8.8.8.0", "us",
         "United States", "California", "Mountain View", 37.3860f,
-        -122.0838f, "AS15169", "Google Inc.");
+        -122.0838f, "AS15169", "Google LLC");
   }
 
   @Test()
   public void testLookup888255() {
     this.assertLookupResult(null, null, null, "8.8.8.255", "us",
         "United States", "California", "Mountain View", 37.3860f,
-        -122.0838f, "AS15169", "Google Inc.");
+        -122.0838f, "AS15169", "Google LLC");
   }
 
   @Test()
@@ -262,7 +264,7 @@ public class LookupServiceTest {
         + "\"North America\",US,\"United States\",,,,,,,");
     this.assertLookupResult(null, geoLite2CityLocationsEnLines, null,
         "8.8.8.8", null, null, null, null, 37.3860f, -122.0838f,
-        "AS15169", "Google Inc.");
+        "AS15169", "Google LLC");
   }
 
   @Test()
@@ -302,7 +304,7 @@ public class LookupServiceTest {
     geoLite2CityBlocksIPv4Lines.add("8.8.8.0/24,,,,0,0,,,");
     this.assertLookupResult(geoLite2CityBlocksIPv4Lines, null, null,
         "8.8.8.8", null, null, null, null, null, null, "AS15169",
-        "Google Inc.");
+        "Google LLC");
   }
 
   @Test()
@@ -329,7 +331,7 @@ public class LookupServiceTest {
         + "0,94035,37.3860,-122.0838,937");
     this.assertLookupResult(geoLite2CityBlocksIPv4Lines, null, null,
         "8.8.8.8", "us", "United States", "California", "Mountain View",
-        37.3860f, -122.0838f, "AS15169", "Google Inc.");
+        37.3860f, -122.0838f, "AS15169", "Google LLC");
   }
 
   @Test()
@@ -343,7 +345,7 @@ public class LookupServiceTest {
         + "0,94035,37.3860,-122.0838,937,1,2,30000000000000");
     this.assertLookupResult(geoLite2CityBlocksIPv4Lines, null, null,
         "8.8.8.8", "us", "United States", "California", "Mountain View",
-        37.3860f, -122.0838f, "AS15169", "Google Inc.");
+        37.3860f, -122.0838f, "AS15169", "Google LLC");
   }
 
   @Test()
@@ -377,52 +379,74 @@ public class LookupServiceTest {
   }
 
   @Test()
-  public void testLookupGeoipAsNum2EndBeforeStart() {
-    List<String> geoipAsNum2Lines = new ArrayList<>();
-    geoipAsNum2Lines.add("134743296,134744063,\"AS3356 Level 3 "
-        + "Communications\"");
-    geoipAsNum2Lines.add("134744319,134744064,\"AS15169 Google Inc.\"");
-    geoipAsNum2Lines.add("134744320,134750463,\"AS3356 Level 3 "
-        + "Communications\"");
-    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", "us",
-        "United States", "California", "Mountain View", 37.3860f,
-        -122.0838f, null, null);
+  public void testLookupGeoLite2AsnBlocksIpv4IllegalIpAddress() {
+    List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    geoLite2AsnBlocksIpv4Lines.add(
+        "eighteighteightzero/24,15169,\"Google LLC\"");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines, "8.8.8.8",
+        null, null, null, null, null, null, null, null);
   }
 
   @Test()
-  public void testLookupGeoipAsNum2StartNotANumber() {
-    List<String> geoipAsNum2Lines = new ArrayList<>();
-    geoipAsNum2Lines.add("one,134744319,\"AS15169 Google Inc.\"");
-    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
-        null, null, null, null, null, null, null);
+  public void testLookupGeoLite2AsnBlocksIpv4MaskTooSmall() {
+    List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    geoLite2AsnBlocksIpv4Lines.add("8.8.8.0/7,15169,\"Google LLC\"");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines, "8.8.8.8",
+        null, null, null, null, null, null, null, null);
   }
 
   @Test()
-  public void testLookupGeoipAsNum2StartTooLarge() {
-    List<String> geoipAsNum2Lines = new ArrayList<>();
-    geoipAsNum2Lines.add("1" + String.valueOf(Long.MAX_VALUE)
-        + ",134744319,\"AS15169 Google Inc.\"");
-    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
-        null, null, null, null, null, null, null);
+  public void testLookupGeoLite2AsnBlocksIpv4MaskTooBig() {
+    List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    geoLite2AsnBlocksIpv4Lines.add("8.8.8.0/33,15169,\"Google LLC\"");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines, "8.8.8.8",
+        null, null, null, null, null, null, null, null);
   }
 
   @Test()
-  public void testLookupGeoipAsNum2TooFewFields() {
-    List<String> geoipAsNum2Lines = new ArrayList<>();
-    geoipAsNum2Lines.add("134744064,134744319");
-    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", null,
-        null, null, null, null, null, null, null);
+  public void testLookupGeoLite2AsnBlocksIpv4MaskMissing() {
+    List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    geoLite2AsnBlocksIpv4Lines.add("8.8.8.0,15169,\"Google LLC\"");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines, "8.8.8.8",
+        null, null, null, null, null, null, null, null);
   }
 
   @Test()
-  public void testLookupGeoipAsNum2NoAsName() {
-    List<String> geoipAsNum2Lines = new ArrayList<>();
-    geoipAsNum2Lines.add("134743296,134744063,AS3356");
-    geoipAsNum2Lines.add("134744064,134744319,AS15169");
-    geoipAsNum2Lines.add("134744320,134750463,AS3356");
-    this.assertLookupResult(null, null, geoipAsNum2Lines, "8.8.8.8", "us",
-        "United States", "California", "Mountain View", 37.3860f,
-        -122.0838f, "AS15169", "");
+  public void testLookupGeoLite2AsnBlocksIpv4TooFewFields() {
+    List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    geoLite2AsnBlocksIpv4Lines.add("8.8.8.0/24,15169");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines, "8.8.8.8",
+        null, null, null, null, null, null, null, null);
+  }
+
+  @Test()
+  public void testLookupGeoLite2AsnBlocksIpv4TooFewFieldsNoAsNumber() {
+    List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    geoLite2AsnBlocksIpv4Lines.add("8.8.8.0/24,,\"Google LLC\"");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines, "8.8.8.8",
+        null, null, null, null, null, null, null, null);
+  }
+
+  @Test()
+  public void testLookupGeoLite2AsnBlocksIpv4TooFewFieldsNoAsName() {
+    List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    geoLite2AsnBlocksIpv4Lines.add("8.8.8.0/24,15169,");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines, "8.8.8.8",
+        null, null, null, null, null, null, null, null);
   }
 
   @Test()
@@ -645,20 +669,22 @@ public class LookupServiceTest {
   @Test()
   @SuppressWarnings("AvoidEscapedUnicodeCharacters")
   public void testLookupLocationAsNameNonAscii() {
-    List<String> geoipAsNum2Lines = new ArrayList<>();
-    geoipAsNum2Lines.add("3207917568,3207919615,\"AS52693 Conectel "
-        + "Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME\"");
-    geoipAsNum2Lines.add("3211196416,3211198463,\"AS262934 "
-        + "IP\u00B7RED\"");
-    geoipAsNum2Lines.add("3227819264,3227819519,\"AS263226 "
-        + "COMPA\u00D1\u00CDA FINANCIERA ARGENTINA S.A.\"");
-    this.assertLookupResult(null, null, geoipAsNum2Lines, "191.52.240.0",
-        null, null, null, null, null, null, "AS52693", "Conectel "
-        + "Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME");
-    this.assertLookupResult(null, null, geoipAsNum2Lines, "191.102.248.0",
-        null, null, null, null, null, null, "AS262934", "IP\u00B7RED");
-    this.assertLookupResult(null, null, geoipAsNum2Lines, "192.100.157.0",
-        null, null, null, null, null, null, "AS263226",
+    List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
+    geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
+        + "autonomous_system_organization");
+    geoLite2AsnBlocksIpv4Lines.add("191.52.240.0/21,52693,"
+        + "\"Conectel Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME\"");
+    geoLite2AsnBlocksIpv4Lines.add("191.102.248.0/21,262934,\"IP\u00B7RED\"");
+    geoLite2AsnBlocksIpv4Lines.add("192.100.157.0/24,263226,"
+        + "\"COMPA\u00D1\u00CDA FINANCIERA ARGENTINA S.A.\"");
+    //this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines,
+    //    "191.52.240.0", null, null, null, null, null, null, "AS52693",
+    //    "Conectel Telecomunica\u00E7\u00F5es e Inform\u00E1tica Ltda ME");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines,
+        "191.102.248.0", null, null, null, null, null, null, "AS262934",
+        "IP\u00B7RED");
+    this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines,
+        "192.100.157.0", null, null, null, null, null, null, "AS263226",
         "COMPA\u00D1\u00CDA FINANCIERA ARGENTINA S.A.");
   }
 }

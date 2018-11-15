@@ -218,7 +218,7 @@ public class LookupService {
 
     /* Obtain a map from IP address numbers to ASN. */
     Map<Long, String[]> addressNumberAsn = new HashMap<>();
-    try (BufferedReader br = this.createBufferedReaderFromIso88591File(
+    try (BufferedReader br = this.createBufferedReaderFromUtf8File(
         this.geoLite2AsnBlocksIpv4CsvFile)) {
       SortedSet<Long> sortedAddressNumbers = new TreeSet<>(
           addressStringNumbers.values());
@@ -248,6 +248,13 @@ public class LookupService {
                 this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
+          String asNumber = "AS" + String.valueOf(Integer.parseInt(parts[1]));
+          String asName = parts[2];
+          if (asName.isEmpty()) {
+            log.error("Illegal AS name in '{}' in {}.", line,
+                this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
+            return lookupResults;
+          }
           while (firstAddressNumber < startIpNum
               && firstAddressNumber != -1L) {
             sortedAddressNumbers.remove(firstAddressNumber);
@@ -261,7 +268,7 @@ public class LookupService {
           while (firstAddressNumber <= endIpNum
               && firstAddressNumber != -1L) {
             addressNumberAsn.put(firstAddressNumber,
-                new String[] { "AS" + parts[1], parts[2] });
+                new String[] { asNumber, asName });
             sortedAddressNumbers.remove(firstAddressNumber);
             if (sortedAddressNumbers.isEmpty()) {
               firstAddressNumber = -1L;
@@ -339,12 +346,6 @@ public class LookupService {
       throws FileNotFoundException {
     return this.createBufferedReaderFromFile(utf8File,
         StandardCharsets.UTF_8.newDecoder());
-  }
-
-  private BufferedReader createBufferedReaderFromIso88591File(
-      File iso88591File) throws FileNotFoundException {
-    return this.createBufferedReaderFromFile(iso88591File,
-        StandardCharsets.ISO_8859_1.newDecoder());
   }
 
   private BufferedReader createBufferedReaderFromFile(File file,
