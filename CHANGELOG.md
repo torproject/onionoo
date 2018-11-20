@@ -1,3 +1,9 @@
+# Changes in version 7.0-1.19.1 - 2018-11-20
+
+ * Minor changes
+   - Accept empty AS names in GeoLite2 ASN database files.
+
+
 # Changes in version 7.0-1.19.0 - 2018-11-15
 
  * Medium changes
