@@ -250,11 +250,6 @@ public class LookupService {
           }
           String asNumber = "AS" + String.valueOf(Integer.parseInt(parts[1]));
           String asName = parts[2];
-          if (asName.isEmpty()) {
-            log.error("Illegal AS name in '{}' in {}.", line,
-                this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
-            return lookupResults;
-          }
           while (firstAddressNumber < startIpNum
               && firstAddressNumber != -1L) {
             sortedAddressNumbers.remove(firstAddressNumber);

@@ -440,13 +440,14 @@ public class LookupServiceTest {
   }
 
   @Test()
-  public void testLookupGeoLite2AsnBlocksIpv4TooFewFieldsNoAsName() {
+  public void testLookupGeoLite2AsnBlocksIpv4AsNameEmpty() {
     List<String> geoLite2AsnBlocksIpv4Lines = new ArrayList<>();
     geoLite2AsnBlocksIpv4Lines.add("network,autonomous_system_number,"
         + "autonomous_system_organization");
     geoLite2AsnBlocksIpv4Lines.add("8.8.8.0/24,15169,");
     this.assertLookupResult(null, null, geoLite2AsnBlocksIpv4Lines, "8.8.8.8",
-        null, null, null, null, null, null, null, null);
+        "us", "United States", "California", "Mountain View", 37.3860f,
+        -122.0838f, "AS15169", "");
   }
 
   @Test()
