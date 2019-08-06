@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.SortedMap;
@@ -206,7 +207,7 @@ public class WeightsStatus extends Document {
       for (int i = 0; i < weights.length; i++) {
         sb.append(" ");
         if (i != 0 && i != 5 && !Double.valueOf(weights[i]).isNaN()) {
-          sb.append(String.format("%.12f", weights[i]));
+          sb.append(String.format(Locale.US, "%.12f", weights[i]));
         }
       }
       sb.append("\n");
