@@ -1,3 +1,17 @@
+# Changes in version 7.0-1.20.0 - 2019-0?-??
+
+ * Medium changes
+   - Use Ivy for resolving external dependencies rather than relying
+     on files found in Debian stable packages. Requires installing Ivy
+     (using `apt-get install ivy`, `brew install ivy`, or similar) and
+     running `ant resolve` (or `ant -lib /usr/share/java resolve`).
+     Retrieved files are then copied to the `lib/` directory, except
+     for dependencies on other metrics libraries that still need to be
+     copied to the `lib/` directory manually. Current dependency
+     versions resolved by Ivy are the same as in Debian stretch with
+     few exceptions.
+
+
 # Changes in version 7.0-1.19.1 - 2018-11-20
 
  * Minor changes

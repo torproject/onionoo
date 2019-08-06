@@ -4,14 +4,15 @@
        <!ENTITY base SYSTEM "src/build/java/base.xml">
 ]>
 
-<project default="usage" name="Onionoo" basedir=".">
+<project default="usage" name="Onionoo" basedir="."
+         xmlns:ivy="antlib:org.apache.ivy.ant">
 
   <property name="javadoc-title" value="Onionoo API Documentation"/>
   <property name="implementation-title" value="Onionoo" />
   <property name="onionoo.protocol.version" value="7.0"/>
   <property name="release.version"
             value="${onionoo.protocol.version}-1.19.1-dev"/>
-  <property name="metricslibversion" value="2.4.0"/>
+  <property name="metricslibversion" value="2.6.2"/>
   <property name="jetty.version" value="-9.2.21.v20170120" />
   <property name="warfile"
             value="onionoo-${release.version}.war"/>
@@ -43,7 +44,7 @@
   </target>
 
   <patternset id="library" >
-    <include name="metrics-lib-${metricslibversion}.jar"/>
+    <include name="metrics-lib-${metricslibversion}-thin.jar"/>
     <include name="commons-codec-1.10.jar"/>
     <include name="commons-compress-1.13.jar"/>
     <include name="commons-lang3-3.5.jar"/>
@@ -57,17 +58,17 @@
   </patternset>
 
   <patternset id="web" >
-    <include name="servlet-api-3.1.jar"/>
-    <include name="jetty9-server${jetty.version}.jar"/>
-    <include name="jetty9-servlets${jetty.version}.jar"/>
-    <include name="jetty9-servlet${jetty.version}.jar"/>
-    <include name="jetty9-util${jetty.version}.jar"/>
-    <include name="jetty9-http${jetty.version}.jar"/>
-    <include name="jetty9-io${jetty.version}.jar"/>
-    <include name="jetty9-xml${jetty.version}.jar"/>
-    <include name="jetty9-webapp${jetty.version}.jar"/>
-    <include name="jetty9-continuation${jetty.version}.jar"/>
-    <include name="jetty9-security${jetty.version}.jar"/>
+    <include name="javax.servlet-api-3.1.0.jar"/>
+    <include name="jetty-server${jetty.version}.jar"/>
+    <include name="jetty-servlets${jetty.version}.jar"/>
+    <include name="jetty-servlet${jetty.version}.jar"/>
+    <include name="jetty-util${jetty.version}.jar"/>
+    <include name="jetty-http${jetty.version}.jar"/>
+    <include name="jetty-io${jetty.version}.jar"/>
+    <include name="jetty-xml${jetty.version}.jar"/>
+    <include name="jetty-webapp${jetty.version}.jar"/>
+    <include name="jetty-continuation${jetty.version}.jar"/>
+    <include name="jetty-security${jetty.version}.jar"/>
   </patternset>
 
   <patternset id="runtime" >
