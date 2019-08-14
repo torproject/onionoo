@@ -10,6 +10,7 @@
      copied to the `lib/` directory manually. Current dependency
      versions resolved by Ivy are the same as in Debian stretch with
      few exceptions.
+   - Remove Cobertura from the build process.
 
 
 # Changes in version 7.0-1.19.1 - 2018-11-20
