@@ -1,0 +1,25 @@
+variables:
+  GIT_STRATEGY: clone
+  METRICS_LIB_VERSION: "2.6.2"
+  JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"
+
+stages:
+ - test
+
+test:
+ stage: test
+ image: debian:buster
+ script:
+  - apt update
+  - apt -y install default-jdk ant ivy git curl
+  - git submodule init
+  - git submodule update
+  - mkdir lib
+  - mkdir tmp
+  - pushd tmp
+  - curl https://dist.torproject.org/metrics-lib/$METRICS_LIB_VERSION/metrics-lib-$METRICS_LIB_VERSION.tar.gz | tar xzf -
+  - popd
+  - mv tmp/metrics-lib-$METRICS_LIB_VERSION/generated/dist/metrics-lib-$METRICS_LIB_VERSION-thin.jar lib
+  - ant -lib /usr/share/java resolve
+  - ant test
+  - ant checks
