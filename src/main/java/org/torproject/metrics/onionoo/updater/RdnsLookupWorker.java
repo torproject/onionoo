@@ -40,7 +40,7 @@ class RdnsLookupWorker extends Thread {
         /* Getting interrupted should be the default case. */
       }
       SortedSet<String> verifiedHostNames = request.getVerifiedHostNames();
-      if (null != verifiedHostNames && !verifiedHostNames.isEmpty()) {
+      if (null != verifiedHostNames) {
         synchronized (this.reverseDomainNameResolver
             .rdnsVerifiedLookupResults) {
           this.reverseDomainNameResolver.rdnsVerifiedLookupResults.put(
@@ -48,7 +48,7 @@ class RdnsLookupWorker extends Thread {
         }
       }
       SortedSet<String> unverifiedHostNames = request.getUnverifiedHostNames();
-      if (null != unverifiedHostNames && !unverifiedHostNames.isEmpty()) {
+      if (null != unverifiedHostNames) {
         synchronized (this.reverseDomainNameResolver
             .rdnsUnverifiedLookupResults) {
           this.reverseDomainNameResolver.rdnsUnverifiedLookupResults.put(

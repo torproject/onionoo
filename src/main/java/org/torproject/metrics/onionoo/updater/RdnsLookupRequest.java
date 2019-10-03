@@ -39,9 +39,9 @@ class RdnsLookupRequest extends Thread {
   @Override
   public void run() {
     this.lookupStartedMillis = System.currentTimeMillis();
+    final SortedSet<String> verifiedResults = new TreeSet<>();
+    final SortedSet<String> unverifiedResults = new TreeSet<>();
     try {
-      final SortedSet<String> verifiedResults = new TreeSet<>();
-      final SortedSet<String> unverifiedResults = new TreeSet<>();
       final String[] bytes = this.address.split("\\.");
       if (bytes.length == 4) {
         final String reverseDnsDomain =
@@ -69,15 +69,15 @@ class RdnsLookupRequest extends Thread {
           }
         }
       }
-      synchronized (this) {
-        this.verifiedHostNames = verifiedResults;
-        this.unverifiedHostNames = unverifiedResults;
-      }
     } catch (NamingException e) {
       /* The Onionoo field is omitted for both lookup failure and absence of
        * a host name. We'll try again the next time. */
     }
-    this.lookupCompletedMillis = System.currentTimeMillis();
+    synchronized (this) {
+      this.verifiedHostNames = verifiedResults;
+      this.unverifiedHostNames = unverifiedResults;
+      this.lookupCompletedMillis = System.currentTimeMillis();
+    }
     this.parent.interrupt();
   }
 

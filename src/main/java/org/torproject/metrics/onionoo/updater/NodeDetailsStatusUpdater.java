@@ -771,10 +771,10 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
               verifiedLookupResults.get(nodeStatus.getAddress());
       SortedSet<String> unverifiedHostNames =
               unverifiedLookupResults.get(nodeStatus.getAddress());
-      if (null != verifiedHostNames && !verifiedHostNames.isEmpty()) {
+      if (null != verifiedHostNames) {
         this.rdnsVerifiedLookupResults.put(fingerprint, verifiedHostNames);
       }
-      if (null != unverifiedHostNames && !unverifiedHostNames.isEmpty()) {
+      if (null != unverifiedHostNames) {
         this.rdnsUnverifiedLookupResults.put(fingerprint, unverifiedHostNames);
       }
     }

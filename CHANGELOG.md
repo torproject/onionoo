@@ -1,4 +1,11 @@
-# Changes in version 7.0-1.20.0 - 2019-0?-??
+# Changes in version 7.0-1.21.0 - 2019-1?-??
+
+ * Medium changes
+   - Fix a bug where old reverse DNS lookups were sometimes not
+     cleared properly.
+
+
+# Changes in version 7.0-1.20.0 - 2019-10-04
 
  * Medium changes
    - Use Ivy for resolving external dependencies rather than relying
