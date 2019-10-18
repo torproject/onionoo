@@ -1,6 +1,7 @@
-# Changes in version 7.0-1.21.0 - 2019-1?-??
+# Changes in version 7.0-1.21.0 - 2019-10-18
 
  * Medium changes
+   - Add previously missing Jetty servlets dependency.
    - Fix a bug where old reverse DNS lookups were sometimes not
      cleared properly.
 
