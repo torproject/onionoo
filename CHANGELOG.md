@@ -3,6 +3,7 @@
  * Minor changes
    - Set `Access-Control-Allow-Origin *` response header for bad
      requests, too.
+   - Update to metrics-lib 2.9.1.
 
 
 # Changes in version 7.0-1.21.0 - 2019-10-18
