@@ -96,6 +96,8 @@ public class ResourceServlet extends HttpServlet {
       HttpServletResponseWrapper response, long receivedRequestMillis)
       throws IOException {
 
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
     if (this.maintenanceMode) {
       response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
       return;
@@ -408,7 +410,6 @@ public class ResourceServlet extends HttpServlet {
         ((CACHE_MAX_TIME - indexAgeMillis)
         / CACHE_INTERVAL) * CACHE_INTERVAL);
 
-    response.setHeader("Access-Control-Allow-Origin", "*");
     response.setContentType("application/json");
     response.setCharacterEncoding("utf-8");
     response.setHeader("Cache-Control", "public, max-age="
