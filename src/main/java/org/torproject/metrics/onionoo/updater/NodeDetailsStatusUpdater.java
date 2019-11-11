@@ -172,8 +172,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
     detailsStatus.setExitPolicy(descriptor.getExitPolicyLines());
     detailsStatus.setContact(descriptor.getContact());
     detailsStatus.setPlatform(descriptor.getPlatform());
+    SortedSet<String> declaredFamily = new TreeSet<>();
     if (descriptor.getFamilyEntries() != null) {
-      SortedSet<String> declaredFamily = new TreeSet<>();
       for (String familyMember : descriptor.getFamilyEntries()) {
         if (familyMember.startsWith("$") && familyMember.length() >= 41) {
           declaredFamily.add(
@@ -182,8 +182,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           declaredFamily.add(familyMember);
         }
       }
-      this.declaredFamilies.put(fingerprint, declaredFamily);
     }
+    this.declaredFamilies.put(fingerprint, declaredFamily);
     if (descriptor.getIpv6DefaultPolicy() != null
         && (descriptor.getIpv6DefaultPolicy().equals("accept")
         || descriptor.getIpv6DefaultPolicy().equals("reject"))

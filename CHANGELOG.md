@@ -1,3 +1,10 @@
+# Changes in version 7.0-1.2?.? - 2019-1?-??
+
+ * Medium changes
+   - Remove declared/alleged family members after they disappear from
+     server descriptors.
+
+
 # Changes in version 7.0-1.21.1 - 2019-11-09
 
  * Minor changes
