@@ -358,12 +358,11 @@ public class LookupService {
   /** Returns a string with the number of addresses looked up and
    * resolved. */
   public String getStatsString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
-        addressesLookedUp)).append(" addresses looked up\n");
-    sb.append("    ").append(FormattingUtils.formatDecimalNumber(
-        addressesResolved)).append(" addresses resolved\n");
-    return sb.toString();
+    return String.format(
+        "    %s addresses looked up\n"
+        + "    %s addresses resolved\n",
+        FormattingUtils.formatDecimalNumber(addressesLookedUp),
+        FormattingUtils.formatDecimalNumber(addressesResolved));
   }
 }
 

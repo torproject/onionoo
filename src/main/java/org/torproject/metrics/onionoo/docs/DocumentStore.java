@@ -817,24 +817,20 @@ public class DocumentStore {
 
   /** Returns a string with statistics on document storage operations. */
   public String getStatsString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("    ")
-        .append(FormattingUtils.formatDecimalNumber(listOperations))
-        .append(" list operations performed\n");
-    sb.append("    ").append(FormattingUtils.formatDecimalNumber(listedFiles))
-        .append(" files listed\n");
-    sb.append("    ").append(FormattingUtils.formatDecimalNumber(storedFiles))
-        .append(" files stored\n");
-    sb.append("    ").append(FormattingUtils.formatBytes(storedBytes))
-        .append(" stored\n");
-    sb.append("    ")
-        .append(FormattingUtils.formatDecimalNumber(retrievedFiles))
-        .append(" files retrieved\n");
-    sb.append("    ").append(FormattingUtils.formatBytes(retrievedBytes))
-        .append(" retrieved\n");
-    sb.append("    ").append(FormattingUtils.formatDecimalNumber(removedFiles))
-        .append(" files removed\n");
-    return sb.toString();
+    return String.format("    %s list operations performed\n"
+        + "    %s files listed\n"
+        + "    %s files stored\n"
+        + "    %s stored\n"
+        + "    %s files retrieved\n"
+        + "    %s retrieved\n"
+        + "    %s files removed\n",
+        FormattingUtils.formatDecimalNumber(listOperations),
+        FormattingUtils.formatDecimalNumber(listedFiles),
+        FormattingUtils.formatDecimalNumber(storedFiles),
+        FormattingUtils.formatBytes(storedBytes),
+        FormattingUtils.formatDecimalNumber(retrievedFiles),
+        FormattingUtils.formatBytes(retrievedBytes),
+        FormattingUtils.formatDecimalNumber(removedFiles));
   }
 }
 

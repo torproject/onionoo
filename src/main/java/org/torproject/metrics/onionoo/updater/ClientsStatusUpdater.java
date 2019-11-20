@@ -172,14 +172,11 @@ public class ClientsStatusUpdater implements DescriptorListener,
     for (SortedSet<ClientsHistory> hist : this.newResponses.values()) {
       newIntervals += hist.size();
     }
-    StringBuilder sb = new StringBuilder();
-    sb.append("    ")
-        .append(FormattingUtils.formatDecimalNumber(newIntervals / 2))
-        .append(" client statistics processed from extra-info descriptors\n");
-    sb.append("    ")
-        .append(FormattingUtils.formatDecimalNumber(this.newResponses.size()))
-        .append(" client status files updated\n");
-    return sb.toString();
+    return String.format(
+        "    %s client statistics processed from extra-info descriptors\n"
+        + "    %s client status files updated\n",
+        FormattingUtils.formatDecimalNumber(newIntervals / 2),
+        FormattingUtils.formatDecimalNumber(this.newResponses.size()));
   }
 }
 
