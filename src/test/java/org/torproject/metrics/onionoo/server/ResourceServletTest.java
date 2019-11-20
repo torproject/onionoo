@@ -45,7 +45,7 @@ public class ResourceServletTest {
 
   private static long TEST_TIME = DateTimeHelper.parse("2013-04-24 12:22:22");
 
-  private class TestingHttpServletRequestWrapper
+  private static class TestingHttpServletRequestWrapper
       extends HttpServletRequestWrapper {
     private String requestUri;
     private String queryString;
@@ -78,7 +78,7 @@ public class ResourceServletTest {
     }
   }
 
-  private class TestingHttpServletResponseWrapper extends
+  private static class TestingHttpServletResponseWrapper extends
       HttpServletResponseWrapper {
 
     private TestingHttpServletResponseWrapper() {
