@@ -173,12 +173,12 @@ public class BandwidthStatus extends Document {
     for (long[] v : writeHistory.values()) {
       sb.append("w ").append(DateTimeHelper.format(v[0])).append(" ")
           .append(DateTimeHelper.format(v[1])).append(" ")
-          .append(String.valueOf(v[2])).append("\n");
+          .append(v[2]).append("\n");
     }
     for (long[] v : readHistory.values()) {
       sb.append("r ").append(DateTimeHelper.format(v[0])).append(" ")
           .append(DateTimeHelper.format(v[1])).append(" ")
-          .append(String.valueOf(v[2])).append("\n");
+          .append(v[2]).append("\n");
     }
     return sb.toString();
   }

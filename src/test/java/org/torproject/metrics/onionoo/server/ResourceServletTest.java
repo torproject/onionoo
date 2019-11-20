@@ -1358,7 +1358,7 @@ public class ResourceServletTest {
   @Test(timeout = 100)
   public void testFirstSeenDaysMaxInt() {
     this.assertSummaryDocument(
-        "/summary?last_seen_days=" + String.valueOf(Integer.MAX_VALUE), 0,
+        "/summary?last_seen_days=" + Integer.MAX_VALUE, 0,
         null, 0, null);
   }
 
@@ -1366,7 +1366,7 @@ public class ResourceServletTest {
   public void testFirstSeenDaysMaxIntPlusOne() {
     this.assertErrorStatusCode(
         "/summary?first_seen_days="
-        + String.valueOf(((long) Integer.MAX_VALUE) + 1L), 400);
+        + (((long) Integer.MAX_VALUE) + 1L), 400);
   }
 
   @Test(timeout = 100)

@@ -724,11 +724,11 @@ public class NodeStatus extends Document {
     sb.append("\t").append(this.dirPort).append("\t");
     sb.append(StringUtils.join(this.getRelayFlags(), ","));
     if (this.isRelay) {
-      sb.append("\t").append(String.valueOf(this.consensusWeight));
+      sb.append("\t").append(this.consensusWeight);
       sb.append("\t")
           .append((this.countryCode != null ? this.countryCode : "??"));
       sb.append("\t"); /* formerly used for storing host names */
-      sb.append("\t").append(String.valueOf(this.lastRdnsLookup));
+      sb.append("\t").append(this.lastRdnsLookup);
       sb.append("\t").append((this.defaultPolicy != null
           ? this.defaultPolicy : "null"));
       sb.append("\t").append((this.portList != null ? this.portList : "null"));

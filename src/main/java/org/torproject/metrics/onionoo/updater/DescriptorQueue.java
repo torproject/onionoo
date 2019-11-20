@@ -124,8 +124,7 @@ class DescriptorQueue {
       for (Map.Entry<String, Long> e : excludedAndParsedFiles.entrySet()) {
         String absolutePath = e.getKey();
         long lastModifiedMillis = e.getValue();
-        bw.write(String.valueOf(lastModifiedMillis) + " " + absolutePath
-            + "\n");
+        bw.write(lastModifiedMillis + " " + absolutePath + "\n");
       }
     } catch (IOException e) {
       log.error("Could not write history file '{}'. Not excluding descriptors "

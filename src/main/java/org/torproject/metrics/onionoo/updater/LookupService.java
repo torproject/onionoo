@@ -248,7 +248,7 @@ public class LookupService {
                 this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
-          String asNumber = "AS" + String.valueOf(Integer.parseInt(parts[1]));
+          String asNumber = "AS" + Integer.parseInt(parts[1]);
           String asName = parts[2];
           while (firstAddressNumber < startIpNum
               && firstAddressNumber != -1L) {
