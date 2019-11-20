@@ -113,10 +113,10 @@ public class SummaryDocumentWriter implements DocumentWriter {
 
   @Override
   public String getStatsString() {
-      return String.format("    %s summary document files written\n"
-      + "    %s summary document files deleted\n",
-      FormattingUtils.formatDecimalNumber(this.writtenDocuments),
-      FormattingUtils.formatDecimalNumber(this.deletedDocuments));
+    return String.format("    %s summary document files written\n"
+        + "    %s summary document files deleted\n",
+        FormattingUtils.formatDecimalNumber(this.writtenDocuments),
+        FormattingUtils.formatDecimalNumber(this.deletedDocuments));
   }
 }
 
