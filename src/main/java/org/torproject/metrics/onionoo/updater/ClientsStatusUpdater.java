@@ -83,7 +83,7 @@ public class ClientsStatusUpdater implements DescriptorListener,
        * include in a clients document. */
       return;
     }
-    double okResponses = (double) (responses.get("ok") - 4);
+    double okResponses = responses.get("ok") - 4;
     if (okResponses < 0.0) {
       /* Response numbers are not supposed to be negative.  Skipping. */
       return;
