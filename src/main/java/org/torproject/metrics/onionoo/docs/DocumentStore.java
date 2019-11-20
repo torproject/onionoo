@@ -524,9 +524,9 @@ public class DocumentStore {
       Class<T> documentType, String documentString) {
     T result = null;
     try {
-      result = documentType.newInstance();
+      result = documentType.getDeclaredConstructor().newInstance();
       result.setFromDocumentString(documentString);
-    } catch (InstantiationException | IllegalAccessException e) {
+    } catch (ReflectiveOperationException e) {
       /* Handle below. */
       log.error(e.getMessage(), e);
     }
@@ -558,9 +558,9 @@ public class DocumentStore {
       Class<T> documentType, String documentString) {
     T result = null;
     try {
-      result = documentType.newInstance();
+      result = documentType.getDeclaredConstructor().newInstance();
       result.setDocumentString(documentString);
-    } catch (InstantiationException | IllegalAccessException e) {
+    } catch (ReflectiveOperationException e) {
       /* Handle below. */
       log.error(e.getMessage(), e);
     }
