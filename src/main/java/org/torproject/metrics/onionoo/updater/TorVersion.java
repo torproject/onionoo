@@ -114,8 +114,8 @@ public class TorVersion implements Comparable<TorVersion> {
     }
     for (int position = 0; position < this.versionNumbers.size()
         && position < other.versionNumbers.size(); position++) {
-      if ((Integer.compare(this.versionNumbers.get(position),
-          other.versionNumbers.get(position))) != 0) {
+      if (!this.versionNumbers.get(position).equals(
+          other.versionNumbers.get(position))) {
         return false;
       }
     }
