@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -482,7 +483,7 @@ public class DocumentStore {
         /* Document file is empty. */
         return null;
       }
-      documentString = new String(allData, "US-ASCII");
+      documentString = new String(allData, StandardCharsets.US_ASCII);
       this.retrievedFiles++;
       this.retrievedBytes += documentString.length();
     } catch (IOException e) {
@@ -765,7 +766,7 @@ public class DocumentStore {
       throws IOException {
     try (BufferedOutputStream bos = new BufferedOutputStream(
         new FileOutputStream(file))) {
-      bos.write(content.getBytes("US-ASCII"));
+      bos.write(content.getBytes(StandardCharsets.US_ASCII));
     }
   }
 
