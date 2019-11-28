@@ -1,4 +1,4 @@
-# Changes in version 7.0-1.2?.? - 2019-1?-??
+# Changes in version 7.0-1.22.0 - 2019-11-28
 
  * Medium changes
    - Remove declared/alleged family members after they disappear from
