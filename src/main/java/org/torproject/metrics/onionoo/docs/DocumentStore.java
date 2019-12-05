@@ -8,6 +8,7 @@ import org.torproject.metrics.onionoo.util.FormattingUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,6 +61,10 @@ public class DocumentStore {
   private long storedFiles = 0L;
 
   private long storedBytes = 0L;
+
+  private long unchangedFiles = 0L;
+
+  private long unchangedBytes = 0L;
 
   private long retrievedFiles = 0L;
 
@@ -351,6 +358,17 @@ public class DocumentStore {
             documentString.length());
       }
       documentFile.getParentFile().mkdirs();
+      if (documentFile.exists()) {
+        try (InputStream stream = Files.newInputStream(documentFile.toPath())) {
+          String existingFileDigest = DigestUtils.sha256Hex(stream);
+          String newFileDigest = DigestUtils.sha256Hex(documentString);
+          if (existingFileDigest.equals(newFileDigest)) {
+            this.unchangedFiles++;
+            this.unchangedBytes += documentString.length();
+            return true;
+          }
+        }
+      }
       File documentTempFile = new File(
           documentFile.getAbsolutePath() + ".tmp");
       writeToFile(documentTempFile, documentString);
@@ -820,6 +838,8 @@ public class DocumentStore {
         + "    %s files listed\n"
         + "    %s files stored\n"
         + "    %s stored\n"
+        + "    %s files not rewritten\n"
+        + "    %s not rewritten\n"
         + "    %s files retrieved\n"
         + "    %s retrieved\n"
         + "    %s files removed\n",
@@ -827,6 +847,8 @@ public class DocumentStore {
         FormattingUtils.formatDecimalNumber(listedFiles),
         FormattingUtils.formatDecimalNumber(storedFiles),
         FormattingUtils.formatBytes(storedBytes),
+        FormattingUtils.formatDecimalNumber(unchangedFiles),
+        FormattingUtils.formatBytes(unchangedBytes),
         FormattingUtils.formatDecimalNumber(retrievedFiles),
         FormattingUtils.formatBytes(retrievedBytes),
         FormattingUtils.formatDecimalNumber(removedFiles));
