@@ -1,4 +1,4 @@
-# Changes in version 7.0-1.2?.? - 2019-1?-??
+# Changes in version 7.0-1.23.0 - 2019-12-06
 
  * Medium changes
    - Only write status files and document files if their content has
