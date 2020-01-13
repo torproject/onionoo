@@ -26,8 +26,12 @@
         <Arg>
           <Ref id="server"/>
         </Arg>
-        <Set name="port">8080</Set>
-        <Set name="host">127.0.0.1</Set>
+        <Set name="port">
+          <SystemProperty name="onionoo.jetty.port" default="8080" />
+        </Set>
+        <Set name="host">
+          <SystemProperty name="onionoo.jetty.host" default="127.0.0.1" />
+        </Set>
       </New>
     </Arg>
   </Call>

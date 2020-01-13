@@ -1,5 +1,8 @@
 # Changes in version 7.0-1.2?.? - 20??-??-??
 
+ * Minor changes
+   - Make Jetty host and port configurable.
+
 
 # Changes in version 7.0-1.23.0 - 2019-12-06
 
