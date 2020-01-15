@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2016--2018 The Tor Project
+# Copyright 2016--2020 The Tor Project
 # See LICENSE for licensing information
 #
 # Use for submodule initialization and checkout.

@@ -1,4 +1,4 @@
-/* Copyright 2013--2018 The Tor Project
+/* Copyright 2013--2020 The Tor Project
  * See LICENSE for licensing information */
 
 package org.torproject.metrics.onionoo.docs;
