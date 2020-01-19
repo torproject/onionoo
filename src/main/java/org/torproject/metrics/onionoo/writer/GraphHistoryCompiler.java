@@ -125,10 +125,17 @@ public class GraphHistoryCompiler {
 
       /* Iterate over all history entries and see which ones we need for this
        * graph. */
+      boolean compileNextGraph = false;
       for (Map.Entry<long[], Double> h : this.history.entrySet()) {
         long startMillis = h.getKey()[0];
         long endMillis = h.getKey()[1];
         double value = h.getValue();
+
+        /* If the history entry starts before this graph starts, remember that
+         * we'll have to compile the next graph. */
+        if (startMillis <= graphStartMillis) {
+          compileNextGraph = true;
+        }
 
         /* If a history entry ends before this graph starts or starts before
          * this graph ends, skip it. */
@@ -211,16 +218,6 @@ public class GraphHistoryCompiler {
       long firstDataPointMillis = graphStartMillis + firstNonNullIndex
           * dataPointInterval + dataPointInterval / 2L;
 
-      /* If the graph doesn't contain anything new that wasn't already contained
-       * in previously compiled graphs, skip this graph. */
-      if (graphIntervalIndex > 0 && !graphs.isEmpty()
-          && firstDataPointMillis >= LocalDateTime.ofEpochSecond(
-          graphEndMillis / 1000L, 0, ZoneOffset.UTC)
-          .minus(this.graphIntervals.get(graphIntervalIndex - 1))
-          .toEpochSecond(ZoneOffset.UTC) * 1000L) {
-        continue;
-      }
-
       /* Put together the list of values that will go into the graph. */
       List<Integer> values = new ArrayList<>();
       for (int dataPointIndex = firstNonNullIndex;
@@ -245,6 +242,12 @@ public class GraphHistoryCompiler {
       graphHistory.setCount(lastNonNullIndex - firstNonNullIndex + 1);
       graphHistory.setValues(values);
       graphs.put(graphName, graphHistory);
+
+      /* If all history entries ended after this graph started, stop compiling
+       * more graphs for this history. */
+      if (!compileNextGraph) {
+        break;
+      }
     }
 
     /* We're done. Return the map of compiled graphs. */

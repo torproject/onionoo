@@ -1,4 +1,9 @@
-# Changes in version 7.?-1.??-? - 2020-??-??
+# Changes in version 8.0-1.2?.? - 20??-??-??
+
+ * Major changes
+   - Include graph history objects even if the time period they cover
+     are already contained in other graph history objects with shorter
+     time periods and higher data resolutions.
 
 
 # Changes in version 7.1-1.24.1 - 2020-02-14
