@@ -4,6 +4,10 @@
    - Include graph history objects even if the time period they cover
      are already contained in other graph history objects with shorter
      time periods and higher data resolutions.
+   - Remove "3 days" and "1 week" bandwidth graphs, change "1 month"
+     bandwidth graph to a data resolution of 24 hours, add back "1
+     month" clients graph, and remove "1 week" uptime and weights
+     graphs.
 
 
 # Changes in version 7.1-1.24.1 - 2020-02-14

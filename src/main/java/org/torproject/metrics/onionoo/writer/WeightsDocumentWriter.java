@@ -53,21 +53,18 @@ public class WeightsDocumentWriter implements DocumentWriter {
   }
 
   private String[] graphNames = new String[] {
-      "1_week",
       "1_month",
       "6_months",
       "1_year",
       "5_years" };
 
   private Period[] graphIntervals = new Period[] {
-      Period.ofWeeks(1),
       Period.ofMonths(1),
       Period.ofMonths(6),
       Period.ofYears(1),
       Period.ofYears(5) };
 
   private long[] dataPointIntervals = new long[] {
-      DateTimeHelper.ONE_HOUR,
       DateTimeHelper.FOUR_HOURS,
       DateTimeHelper.ONE_DAY,
       DateTimeHelper.TWO_DAYS,
