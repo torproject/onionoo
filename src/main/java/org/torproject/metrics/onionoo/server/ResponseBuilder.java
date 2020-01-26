@@ -392,6 +392,10 @@ public class ResponseBuilder {
             case "version_status":
               dd.setVersionStatus(detailsDocument.getVersionStatus());
               break;
+            case "bridgedb_distributor":
+              dd.setBridgedbDistributor(
+                  detailsDocument.getBridgedbDistributor());
+              break;
             default:
               /* Not a field that we know of. Ignore. */
               break;

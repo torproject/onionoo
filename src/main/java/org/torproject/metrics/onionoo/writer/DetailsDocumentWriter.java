@@ -186,6 +186,8 @@ public class DetailsDocumentWriter implements DocumentWriter {
     detailsDocument.setTransports(detailsStatus.getTransports());
     detailsDocument.setVersion(detailsStatus.getVersion());
     detailsDocument.setVersionStatus(detailsStatus.getVersionStatus());
+    detailsDocument.setBridgedbDistributor(
+        detailsStatus.getBridgedbDistributor());
     this.documentStore.store(detailsDocument, fingerprint);
   }
 

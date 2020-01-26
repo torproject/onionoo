@@ -252,6 +252,27 @@ public class DetailsStatus extends Document {
         this.orAddressesAndPorts;
   }
 
+  private Long bridgePoolAssignmentPublished;
+
+  public void setBridgePoolAssignmentPublished(
+      Long bridgePoolAssignmentPublished) {
+    this.bridgePoolAssignmentPublished = bridgePoolAssignmentPublished;
+  }
+
+  public java.lang.Long getBridgePoolAssignmentPublished() {
+    return bridgePoolAssignmentPublished;
+  }
+
+  private String bridgedbDistributor;
+
+  public void setBridgedbDistributor(String bridgedbDistributor) {
+    this.bridgedbDistributor = bridgedbDistributor;
+  }
+
+  public String getBridgedbDistributor() {
+    return bridgedbDistributor;
+  }
+
   /** Returns all addresses used for the onion-routing protocol which
    * includes the primary address and all additionally configured
    * onion-routing addresses. */

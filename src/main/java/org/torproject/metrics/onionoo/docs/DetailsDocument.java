@@ -571,5 +571,15 @@ public class DetailsDocument extends Document {
   public List<String> getUnreachableOrAddresses() {
     return this.unreachableOrAddresses;
   }
+
+  private String bridgedbDistributor;
+
+  public void setBridgedbDistributor(String bridgedbDistributor) {
+    this.bridgedbDistributor = bridgedbDistributor;
+  }
+
+  public String getBridgedbDistributor() {
+    return this.bridgedbDistributor;
+  }
 }
 

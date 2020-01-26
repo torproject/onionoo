@@ -1,5 +1,9 @@
 # Changes in version 7.0-1.2?.? - 20??-??-??
 
+ * Medium changes
+   - Process bridge pool assignments to include the BridgeDB
+     distributor in bridge details documents.
+
  * Minor changes
    - Make Jetty host and port configurable.
 

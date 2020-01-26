@@ -10,7 +10,8 @@ public enum DescriptorType {
   EXIT_LISTS("exit-lists"),
   BRIDGE_STATUSES("bridge-descriptors/statuses"),
   BRIDGE_SERVER_DESCRIPTORS("bridge-descriptors/server-descriptors"),
-  BRIDGE_EXTRA_INFOS("bridge-descriptors/extra-infos");
+  BRIDGE_EXTRA_INFOS("bridge-descriptors/extra-infos"),
+  BRIDGE_POOL_ASSIGNMENTS("bridge-pool-assignments");
 
   private final String dir;
   DescriptorType(String dir) {

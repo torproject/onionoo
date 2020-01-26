@@ -4,6 +4,7 @@
 package org.torproject.metrics.onionoo.updater;
 
 import org.torproject.descriptor.BridgeNetworkStatus;
+import org.torproject.descriptor.BridgePoolAssignment;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.ExitList;
 import org.torproject.descriptor.ExtraInfoDescriptor;
@@ -120,6 +121,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         DescriptorType.BRIDGE_EXTRA_INFOS);
     this.descriptorSource.registerDescriptorListener(this,
         DescriptorType.EXIT_LISTS);
+    this.descriptorSource.registerDescriptorListener(this,
+        DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
   }
 
   /* Step 1: parse descriptors. */
@@ -140,6 +143,8 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
           (ExtraInfoDescriptor) descriptor);
     } else if (descriptor instanceof BridgeNetworkStatus) {
       this.processBridgeNetworkStatus((BridgeNetworkStatus) descriptor);
+    } else if (descriptor instanceof BridgePoolAssignment) {
+      this.processBridgePoolAssignment((BridgePoolAssignment) descriptor);
     }
   }
 
@@ -382,6 +387,17 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       }
     }
     this.bridgeStatusesProcessed++;
+  }
+
+  private BridgePoolAssignment latestBridgePoolAssignments = null;
+
+  private void processBridgePoolAssignment(
+      BridgePoolAssignment bridgePoolAssignment) {
+    if (null == this.latestBridgePoolAssignments
+        || this.latestBridgePoolAssignments.getPublishedMillis()
+        < bridgePoolAssignment.getPublishedMillis()) {
+      this.latestBridgePoolAssignments = bridgePoolAssignment;
+    }
   }
 
   @Override
@@ -846,6 +862,26 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       }
       detailsStatus.setExitAddresses(exitAddresses);
       nodeStatus.setExitAddresses(new TreeSet<>(exitAddresses.keySet()));
+
+      if (null != this.latestBridgePoolAssignments
+          && (null == detailsStatus.getBridgePoolAssignmentPublished()
+          || detailsStatus.getBridgePoolAssignmentPublished()
+          < this.latestBridgePoolAssignments.getPublishedMillis())) {
+        if (this.latestBridgePoolAssignments.getEntries()
+            .containsKey(fingerprint)) {
+          detailsStatus.setBridgePoolAssignmentPublished(
+              this.latestBridgePoolAssignments.getPublishedMillis());
+          String assignment = this.latestBridgePoolAssignments.getEntries()
+              .get(fingerprint);
+          if (null != assignment && !assignment.isEmpty()) {
+            String bridgedbDistributor = assignment.split(" ")[0];
+            detailsStatus.setBridgedbDistributor(bridgedbDistributor);
+          }
+        } else {
+          detailsStatus.setBridgePoolAssignmentPublished(0L);
+          detailsStatus.setBridgedbDistributor(null);
+        }
+      }
 
       detailsStatus.setAllegedFamily(nodeStatus.getAllegedFamily());
       detailsStatus.setEffectiveFamily(nodeStatus.getEffectiveFamily());
