@@ -1,4 +1,4 @@
-# Changes in version 7.0-1.2?.? - 20??-??-??
+# Changes in version 7.0-1.24.0 - 2020-02-14
 
  * Medium changes
    - Process bridge pool assignments to include the BridgeDB
@@ -6,6 +6,7 @@
 
  * Minor changes
    - Make Jetty host and port configurable.
+   - Update to metrics-lib 2.10.0.
 
 
 # Changes in version 7.0-1.23.0 - 2019-12-06
