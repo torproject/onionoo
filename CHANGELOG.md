@@ -1,3 +1,6 @@
+# Changes in version 7.0-1.??.? - 2020-??-??
+
+
 # Changes in version 7.0-1.24.0 - 2020-02-14
 
  * Medium changes
