@@ -1,3 +1,6 @@
+# Changes in version 7.?-1.??-? - 2020-??-??
+
+
 # Changes in version 7.1-1.24.1 - 2020-02-14
 
  * Minor changes
