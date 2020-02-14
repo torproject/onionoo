@@ -1,4 +1,9 @@
-# Changes in version 7.0-1.??.? - 2020-??-??
+# Changes in version 7.1-1.24.1 - 2020-02-14
+
+ * Minor changes
+   - Update protocol version to 7.1.
+   - Announce next major protocol version update for February 20,
+     2020.
 
 
 # Changes in version 7.0-1.24.0 - 2020-02-14

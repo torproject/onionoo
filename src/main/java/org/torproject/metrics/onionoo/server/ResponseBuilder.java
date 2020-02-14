@@ -123,9 +123,9 @@ public class ResponseBuilder {
     return this.charsWritten;
   }
 
-  private static final String PROTOCOL_VERSION = "7.0";
+  private static final String PROTOCOL_VERSION = "7.1";
 
-  private static final String NEXT_MAJOR_VERSION_SCHEDULED = null;
+  private static final String NEXT_MAJOR_VERSION_SCHEDULED = "2020-02-20";
 
   private void writeRelays(List<SummaryDocument> relays, PrintWriter pw) {
     this.write(pw, "{\"version\":\"%s\",\n", PROTOCOL_VERSION);
