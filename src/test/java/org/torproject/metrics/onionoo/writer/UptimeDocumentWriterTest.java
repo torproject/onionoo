@@ -61,12 +61,6 @@ public class UptimeDocumentWriterTest {
   private static final long ONE_HOUR = 60L * 60L * ONE_SECOND;
   private static final long FOUR_HOURS = 4L * ONE_HOUR;
 
-  private void assertOneWeekGraph(UptimeDocument document, int graphs,
-      String first, String last, int count, List<Integer> values) {
-    this.assertGraph(document, graphs, "1_week", first, last,
-        (int) (ONE_HOUR / ONE_SECOND), count, values);
-  }
-
   private void assertOneMonthGraph(UptimeDocument document, int graphs,
       String first, String last, int count, List<Integer> values) {
     this.assertGraph(document, graphs, "1_month", first, last,
@@ -125,9 +119,9 @@ public class UptimeDocumentWriterTest {
   }
 
   @Test
-  public void testTwoHoursUptime() {
-    this.addStatusOneWeekSample("r 2014-03-23-10 2\n",
-        "r 2014-03-23-10 2\n");
+  public void testEightHoursUptime() {
+    this.addStatusOneWeekSample("r 2014-03-23-04 8\n",
+        "r 2014-03-23-04 8\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments(TEST_TIME);
@@ -135,8 +129,8 @@ public class UptimeDocumentWriterTest {
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneWeekGraph(document, 1, "2014-03-23 10:30:00",
-        "2014-03-23 11:30:00", 2, null);
+    this.assertOneMonthGraph(document, 1, "2014-03-23 06:00:00",
+        "2014-03-23 10:00:00", 2, null);
   }
 
   @Test
@@ -155,9 +149,9 @@ public class UptimeDocumentWriterTest {
   }
 
   @Test
-  public void testTwoHoursUptimeSeparatedByZero() {
-    this.addStatusOneWeekSample("r 2014-03-23-09 3\n",
-        "r 2014-03-23-09 1\nr 2014-03-23-11 1\n");
+  public void testEightHoursUptimeSeparatedByFourHoursDowntime() {
+    this.addStatusOneWeekSample("r 2014-03-23-00 12\n",
+        "r 2014-03-23-00 4\nr 2014-03-23-08 4\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments(TEST_TIME);
@@ -165,15 +159,15 @@ public class UptimeDocumentWriterTest {
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneWeekGraph(document, 1, "2014-03-23 09:30:00",
-        "2014-03-23 11:30:00", 3,
+    this.assertOneMonthGraph(document, 1, "2014-03-23 02:00:00",
+        "2014-03-23 10:00:00", 3,
         Arrays.asList(999, 0, 999));
   }
 
   @Test
-  public void testTwoHoursUptimeThenDowntime() {
-    this.addStatusOneWeekSample("r 2014-03-23-09 3\n",
-        "r 2014-03-23-09 2\n");
+  public void testEightHoursUptimeThenDowntime() {
+    this.addStatusOneWeekSample("r 2014-03-23-00 12\n",
+        "r 2014-03-23-00 8\n");
     UptimeDocumentWriter writer = new UptimeDocumentWriter();
     DescriptorSourceFactory.getDescriptorSource().readDescriptors();
     writer.writeDocuments(TEST_TIME);
@@ -181,8 +175,8 @@ public class UptimeDocumentWriterTest {
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneWeekGraph(document, 1, "2014-03-23 09:30:00",
-        "2014-03-23 11:30:00", 3,
+    this.assertOneMonthGraph(document, 1, "2014-03-23 02:00:00",
+        "2014-03-23 10:00:00", 3,
         Arrays.asList(999, 999, 0));
   }
 
@@ -197,8 +191,8 @@ public class UptimeDocumentWriterTest {
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneWeekGraph(document, 1, "2014-03-16 13:30:00",
-        "2014-03-23 12:30:00", 168, null);
+    this.assertOneMonthGraph(document, 1, "2014-03-16 14:00:00",
+        "2014-03-23 10:00:00", 42, null);
   }
 
   @Test
@@ -212,8 +206,8 @@ public class UptimeDocumentWriterTest {
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneWeekGraph(document, 1, "2014-03-16 13:30:00",
-        "2014-03-23 12:30:00", 168, null);
+    this.assertOneMonthGraph(document, 1, "2014-03-16 14:00:00",
+        "2014-03-23 10:00:00", 42, null);
   }
 
   @Test
@@ -227,7 +221,7 @@ public class UptimeDocumentWriterTest {
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneMonthGraph(document, 2, "2014-03-16 10:00:00",
+    this.assertOneMonthGraph(document, 1, "2014-03-16 10:00:00",
         "2014-03-16 14:00:00", 2, null);
   }
 
@@ -242,7 +236,7 @@ public class UptimeDocumentWriterTest {
         this.documentStore.getPerformedStoreOperations());
     UptimeDocument document = this.documentStore.getDocument(
         UptimeDocument.class, GABELMOO_FINGERPRINT);
-    this.assertOneMonthGraph(document, 2, "2014-03-16 10:00:00",
+    this.assertOneMonthGraph(document, 1, "2014-03-16 10:00:00",
         "2014-03-16 14:00:00", 2,
         Arrays.asList(999, 499));
   }

@@ -16,8 +16,7 @@ import org.torproject.metrics.onionoo.docs.GraphHistory;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
 
 public class BandwidthDocumentWriterTest {
 
@@ -32,51 +31,38 @@ public class BandwidthDocumentWriterTest {
   @Test
   public void testIgnoreFuture() {
     String ibibUnc0Fingerprint = "7C0AA4E3B73E407E9F5FEB1912F8BE26D8AA124D";
-    String future = new SimpleDateFormat("yyyy")
-        .format(new Date(System.currentTimeMillis()
-            + DateTimeHelper.ROUGHLY_ONE_YEAR));
-    String dayBeforeYesterday = new SimpleDateFormat("yyyy-MM-dd")
-        .format(new Date(System.currentTimeMillis()
-            - 2 * DateTimeHelper.ONE_DAY));
-    String yesterday = new SimpleDateFormat("yyyy-MM-dd")
-        .format(new Date(System.currentTimeMillis()
-            - DateTimeHelper.ONE_DAY));
     String documentString =
-        "r " + dayBeforeYesterday + " 08:29:33 " + dayBeforeYesterday
-        + " 12:29:33 144272636928\n"
-        + "r " + dayBeforeYesterday + " 12:29:33 " + dayBeforeYesterday
-        + " 16:29:33 144407647232\n"
-        + "r " + dayBeforeYesterday + " 16:29:33 " + dayBeforeYesterday
-        + " 20:29:33 154355623936\n"
-        + "r " + dayBeforeYesterday + " 20:29:33 " + yesterday
-        + " 00:29:33 149633244160\n"
-        + "r " + future + "-08-06 05:31:45 " + future + "-08-06 09:31:45 0\n"
-        + "r " + future + "-08-06 09:31:45 " + future + "-08-06 13:31:45 0\n"
-        + "r " + future + "-08-06 13:31:45 " + future + "-08-06 17:31:45 0\n"
-        + "r " + future + "-08-06 17:31:45 " + future + "-08-06 21:31:45 0\n"
-        + "r " + future + "-08-06 21:31:45 " + future + "-08-07 01:31:45 0\n"
-        + "r " + future + "-08-07 01:31:45 " + future + "-08-07 05:31:45 0\n";
+          "r 2020-02-12 12:29:33 2020-02-13 12:29:33 144272636928\n"
+        + "r 2020-02-13 12:29:33 2020-02-14 12:29:33 144407647232\n"
+        + "r 2020-02-14 12:29:33 2020-02-15 12:29:33 154355623936\n"
+        + "r 2020-02-15 12:29:33 2020-02-16 12:29:33 149633244160\n"
+        + "r 2021-08-06 13:31:45 2021-08-07 13:31:45 0\n"
+        + "r 2021-08-07 13:31:45 2021-08-08 13:31:45 0\n"
+        + "r 2021-08-08 13:31:45 2021-08-09 13:31:45 0\n"
+        + "r 2021-08-09 13:31:45 2021-08-10 13:31:45 0\n"
+        + "r 2021-08-10 13:31:45 2021-08-11 13:31:45 0\n"
+        + "r 2021-08-11 13:31:45 2021-08-12 13:31:45 0\n";
     BandwidthStatus status = new BandwidthStatus();
     status.setFromDocumentString(documentString);
     this.documentStore.addDocument(status, ibibUnc0Fingerprint);
     BandwidthDocumentWriter writer = new BandwidthDocumentWriter();
-    writer.writeDocuments(DateTimeHelper.parse(yesterday + " 12:00:00"));
+    writer.writeDocuments(Instant.parse("2020-05-15T12:00:00Z").toEpochMilli());
     assertEquals(1, this.documentStore.getPerformedListOperations());
     assertEquals(2, this.documentStore.getPerformedRetrieveOperations());
     assertEquals(1, this.documentStore.getPerformedStoreOperations());
     BandwidthDocument document = this.documentStore.getDocument(
         BandwidthDocument.class, ibibUnc0Fingerprint);
     assertEquals(1, document.getReadHistory().size());
-    assertTrue(document.getReadHistory().containsKey("1_month"));
-    GraphHistory history = document.getReadHistory().get("1_month");
-    assertEquals(DateTimeHelper.parse(dayBeforeYesterday + " 10:00:00"),
+    assertTrue(document.getReadHistory().containsKey("6_months"));
+    GraphHistory history = document.getReadHistory().get("6_months");
+    assertEquals(Instant.parse("2020-02-12T12:00:00Z").toEpochMilli(),
         history.getFirst());
-    assertEquals(DateTimeHelper.parse(dayBeforeYesterday + " 22:00:00"),
+    assertEquals(Instant.parse("2020-02-16T12:00:00Z").toEpochMilli(),
         history.getLast());
-    assertEquals(DateTimeHelper.FOUR_HOURS / DateTimeHelper.ONE_SECOND,
+    assertEquals(DateTimeHelper.ONE_DAY / DateTimeHelper.ONE_SECOND,
         (int) history.getInterval());
-    assertEquals(4, (int) history.getCount());
-    assertEquals(4, history.getValues().size());
+    assertEquals(5, (int) history.getCount());
+    assertEquals(5, history.getValues().size());
   }
 }
 

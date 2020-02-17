@@ -76,7 +76,7 @@ public class GraphHistoryCompilerTest {
         { "Single 1-week divisible entry right before graphs end",
             true, new String[][] {
               new String[] { "2017-12-25 00:00", "2018-01-01 00:00", "1" }},
-            1, "1_week", "2017-12-25 00:30", "2017-12-31 23:30", 3600, 0.001,
+            2, "1_week", "2017-12-25 00:30", "2017-12-31 23:30", 3600, 0.001,
             168, null },
         { "Single 1-week-and-1-hour divisible entry right before graphs end",
             true, new String[][] {
