@@ -121,6 +121,20 @@ public class PerformanceMetricsTest {
   }
 
   @Test
+  public void testIntegerDistributionMinusOne() {
+    IntegerDistribution id = new IntegerDistribution();
+    id.addLong(-1L);
+    assertEquals(".500<0, .900<0, .990<0, .999<0", id.toString());
+  }
+
+  @Test
+  public void testIntegerDistributionMinLong() {
+    IntegerDistribution id = new IntegerDistribution();
+    id.addLong(Long.MIN_VALUE);
+    assertEquals(".500<0, .900<0, .990<0, .999<0", id.toString());
+  }
+
+  @Test
   public void testIntegerDistributionZero() {
     IntegerDistribution id = new IntegerDistribution();
     id.addLong(0);

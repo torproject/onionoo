@@ -7,10 +7,18 @@ import java.util.Arrays;
 
 class IntegerDistribution {
 
-  int[] logValues = new int[64];
+  /**
+   * Counts by power of two with negative values at index 0, values < 2^0 at
+   * index 1, values < 2^1 at index 2, and values >= 2^63 at index 64.
+   */
+  int[] logValues = new int[65];
 
   void addLong(long value) {
-    logValues[64 - Long.numberOfLeadingZeros(value)]++;
+    if (value < 0L) {
+      logValues[0]++;
+    } else {
+      logValues[65 - Long.numberOfLeadingZeros(value)]++;
+    }
   }
 
   @Override
@@ -27,9 +35,14 @@ class IntegerDistribution {
         seenValues += logValues[i];
         while (j < permilles.length
             && (seenValues * 1000 > totalValues * permilles[j])) {
-          sb.append(j > 0 ? ", " : "").append(".").append(permilles[j])
-              .append(i < logValues.length - 1 ? "<" + (1L << i)
-              : ">=" + (1L << i - 1));
+          sb.append(j > 0 ? ", " : "").append(".").append(permilles[j]);
+          if (i == 0) {
+            sb.append("<0");
+          } else if (i < logValues.length - 1) {
+            sb.append("<").append(1L << (i - 1));
+          } else {
+            sb.append(">=").append(1L << i - 2);
+          }
           j++;
         }
         if (j == permilles.length) {
