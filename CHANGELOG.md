@@ -1,4 +1,4 @@
-# Changes in version 8.0-1.2?.? - 20??-??-??
+# Changes in version 8.0-1.25.0 - 2020-02-20
 
  * Major changes
    - Include graph history objects even if the time period they cover
