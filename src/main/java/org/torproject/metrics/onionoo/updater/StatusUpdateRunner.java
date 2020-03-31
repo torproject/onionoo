@@ -10,7 +10,7 @@ import java.io.File;
 
 public class StatusUpdateRunner {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       StatusUpdateRunner.class);
 
   private LookupService ls;
@@ -37,9 +37,9 @@ public class StatusUpdateRunner {
   /** Lets each configured status updater update its status files. */
   public void updateStatuses() {
     for (StatusUpdater su : this.statusUpdaters) {
-      log.debug("Begin update of {}", su.getClass().getSimpleName());
+      logger.debug("Begin update of {}", su.getClass().getSimpleName());
       su.updateStatuses();
-      log.info("{} updated status files", su.getClass().getSimpleName());
+      logger.info("{} updated status files", su.getClass().getSimpleName());
     }
   }
 
@@ -48,14 +48,11 @@ public class StatusUpdateRunner {
     for (StatusUpdater su : this.statusUpdaters) {
       String statsString = su.getStatsString();
       if (statsString != null) {
-        LoggerFactory.getLogger("statistics").info("{}\n{}",
-            su.getClass().getSimpleName(), statsString);
+        logger.info("{}\n{}", su.getClass().getSimpleName(), statsString);
       }
     }
-    LoggerFactory.getLogger("statistics")
-        .info("GeoIP lookup service\n{}", this.ls.getStatsString());
-    LoggerFactory.getLogger("statistics")
-        .info("Reverse domain name resolver\n{}", this.rdnr.getStatsString());
+    logger.info("GeoIP lookup service\n{}", this.ls.getStatsString());
+    logger.info("Reverse domain name resolver\n{}", this.rdnr.getStatsString());
   }
 }
 

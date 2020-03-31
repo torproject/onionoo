@@ -21,7 +21,7 @@ import java.util.SortedSet;
 
 public class WeightsDocumentWriter implements DocumentWriter {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       WeightsDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -49,7 +49,7 @@ public class WeightsDocumentWriter implements DocumentWriter {
           fingerprint, history, mostRecentStatusMillis);
       this.documentStore.store(weightsDocument, fingerprint);
     }
-    log.info("Wrote weights document files");
+    logger.info("Wrote weights document files");
   }
 
   private String[] graphNames = new String[] {

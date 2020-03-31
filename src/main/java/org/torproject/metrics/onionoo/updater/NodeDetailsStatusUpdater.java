@@ -67,7 +67,7 @@ import java.util.TreeSet;
 public class NodeDetailsStatusUpdater implements DescriptorListener,
     StatusUpdater {
 
-  private Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       NodeDetailsStatusUpdater.class);
 
   private DescriptorSource descriptorSource;
@@ -403,19 +403,19 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
   @Override
   public void updateStatuses() {
     this.readNodeStatuses();
-    log.info("Read node statuses");
+    logger.info("Read node statuses");
     this.startReverseDomainNameLookups();
-    log.info("Started reverse domain name lookups");
+    logger.info("Started reverse domain name lookups");
     this.lookUpCitiesAndASes();
-    log.info("Looked up cities and ASes");
+    logger.info("Looked up cities and ASes");
     this.calculatePathSelectionProbabilities();
-    log.info("Calculated path selection probabilities");
+    logger.info("Calculated path selection probabilities");
     this.computeEffectiveAndExtendedFamilies();
-    log.info("Computed effective and extended families");
+    logger.info("Computed effective and extended families");
     this.finishReverseDomainNameLookups();
-    log.info("Finished reverse domain name lookups");
+    logger.info("Finished reverse domain name lookups");
     this.updateNodeDetailsStatuses();
-    log.info("Updated node and details statuses");
+    logger.info("Updated node and details statuses");
   }
 
   /* Step 2: read node statuses from disk. */
@@ -571,8 +571,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
       addressStrings.add(nodeStatus.getAddress());
     }
     if (addressStrings.isEmpty()) {
-      log.error("No relay IP addresses to resolve to cities or "
-          + "ASN.");
+      logger.error("No relay IP addresses to resolve to cities or ASN.");
       return;
     }
     SortedMap<String, LookupResult> lookupResults =
@@ -621,7 +620,7 @@ public class NodeDetailsStatusUpdater implements DescriptorListener,
         wed = ((double) this.lastBandwidthWeights.get("Wed")) / 10000.0;
       }
     } else {
-      log.debug("Not calculating new path selection probabilities, "
+      logger.debug("Not calculating new path selection probabilities, "
           + "because we could not determine most recent Wxx parameter "
           + "values, probably because we didn't parse a consensus in "
           + "this execution.");

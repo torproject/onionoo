@@ -21,7 +21,7 @@ import java.util.SortedSet;
 
 public class BandwidthDocumentWriter implements DocumentWriter {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       BandwidthDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -48,7 +48,7 @@ public class BandwidthDocumentWriter implements DocumentWriter {
           fingerprint, mostRecentStatusMillis, bandwidthStatus);
       this.documentStore.store(bandwidthDocument, fingerprint);
     }
-    log.info("Wrote bandwidth document files");
+    logger.info("Wrote bandwidth document files");
   }
 
 

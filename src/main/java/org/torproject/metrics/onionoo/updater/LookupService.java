@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class LookupService {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       LookupService.class);
 
   private File geoipDir;
@@ -52,20 +52,20 @@ public class LookupService {
     this.geoLite2CityBlocksIPv4CsvFile = new File(this.geoipDir,
         "GeoLite2-City-Blocks-IPv4.csv");
     if (!this.geoLite2CityBlocksIPv4CsvFile.exists()) {
-      log.error("No GeoLite2-City-Blocks-IPv4.csv file in geoip/.");
+      logger.error("No GeoLite2-City-Blocks-IPv4.csv file in geoip/.");
       return;
     }
     this.geoLite2CityLocationsEnCsvFile = new File(this.geoipDir,
         "GeoLite2-City-Locations-en.csv");
     if (!this.geoLite2CityLocationsEnCsvFile.exists()) {
-      log.error("No GeoLite2-City-Locations-en.csv file in "
+      logger.error("No GeoLite2-City-Locations-en.csv file in "
           + "geoip/.");
       return;
     }
     this.geoLite2AsnBlocksIpv4CsvFile = new File(this.geoipDir,
         "GeoLite2-ASN-Blocks-IPv4.csv");
     if (!this.geoLite2AsnBlocksIpv4CsvFile.exists()) {
-      log.error("No GeoLite2-ASN-Blocks-IPv4.csv file in geoip/.");
+      logger.error("No GeoLite2-ASN-Blocks-IPv4.csv file in geoip/.");
       return;
     }
     this.hasAllFiles = true;
@@ -135,7 +135,7 @@ public class LookupService {
       while ((line = br.readLine()) != null) {
         String[] parts = line.split(",", -1);
         if (parts.length < 9) {
-          log.error("Illegal line '{}' in {}.", line,
+          logger.error("Illegal line '{}' in {}.", line,
               this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath());
           return lookupResults;
         }
@@ -144,14 +144,14 @@ public class LookupService {
           String startAddressString = networkAddressAndMask[0];
           long startIpNum = this.parseAddressString(startAddressString);
           if (startIpNum < 0L) {
-            log.error("Illegal IP address in '{}' in {}.", line,
+            logger.error("Illegal IP address in '{}' in {}.", line,
                 this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
           int networkMaskLength = networkAddressAndMask.length < 2 ? 0
               : Integer.parseInt(networkAddressAndMask[1]);
           if (networkMaskLength < 8 || networkMaskLength > 32) {
-            log.error("Missing or illegal network mask in '{}' in {}.", line,
+            logger.error("Missing or illegal network mask in '{}' in {}.", line,
                 this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
@@ -173,13 +173,13 @@ public class LookupService {
             }
           }
         } catch (NumberFormatException e) {
-          log.error("Number format exception while parsing line '{}' in {}.",
+          logger.error("Number format exception while parsing line '{}' in {}.",
               line, this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath(), e);
           return lookupResults;
         }
       }
     } catch (IOException e) {
-      log.error("I/O exception while reading {}: {}",
+      logger.error("I/O exception while reading {}: {}",
           this.geoLite2CityBlocksIPv4CsvFile.getAbsolutePath(), e);
       return lookupResults;
     }
@@ -194,7 +194,7 @@ public class LookupService {
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 13);
         if (parts.length != 13) {
-          log.error("Illegal line '{}' in {}.", line,
+          logger.error("Illegal line '{}' in {}.", line,
               this.geoLite2CityLocationsEnCsvFile.getAbsolutePath());
           return lookupResults;
         }
@@ -205,13 +205,13 @@ public class LookupService {
             blockLocations.put(locId, line);
           }
         } catch (NumberFormatException e) {
-          log.error("Number format exception while parsing line '{}' in {}.",
+          logger.error("Number format exception while parsing line '{}' in {}.",
               line, this.geoLite2CityLocationsEnCsvFile.getAbsolutePath());
           return lookupResults;
         }
       }
     } catch (IOException e) {
-      log.error("I/O exception while reading {}: {}",
+      logger.error("I/O exception while reading {}: {}",
           this.geoLite2CityLocationsEnCsvFile.getAbsolutePath(), e);
       return lookupResults;
     }
@@ -228,7 +228,7 @@ public class LookupService {
       while ((line = br.readLine()) != null) {
         String[] parts = line.replaceAll("\"", "").split(",", 3);
         if (parts.length != 3) {
-          log.error("Illegal line '{}' in {}.", line,
+          logger.error("Illegal line '{}' in {}.", line,
               this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
           return lookupResults;
         }
@@ -237,14 +237,14 @@ public class LookupService {
           String startAddressString = networkAddressAndMask[0];
           long startIpNum = this.parseAddressString(startAddressString);
           if (startIpNum < 0L) {
-            log.error("Illegal IP address in '{}' in {}.", line,
+            logger.error("Illegal IP address in '{}' in {}.", line,
                 this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
           int networkMaskLength = networkAddressAndMask.length < 2 ? 0
               : Integer.parseInt(networkAddressAndMask[1]);
           if (networkMaskLength < 8 || networkMaskLength > 32) {
-            log.error("Missing or illegal network mask in '{}' in {}.", line,
+            logger.error("Missing or illegal network mask in '{}' in {}.", line,
                 this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
             return lookupResults;
           }
@@ -275,13 +275,13 @@ public class LookupService {
             break;
           }
         } catch (NumberFormatException e) {
-          log.error("Number format exception while parsing line '{}' in {}.",
+          logger.error("Number format exception while parsing line '{}' in {}.",
               line, this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath());
           return lookupResults;
         }
       }
     } catch (IOException e) {
-      log.error("I/O exception while reading {}: {}",
+      logger.error("I/O exception while reading {}: {}",
           this.geoLite2AsnBlocksIpv4CsvFile.getAbsolutePath(), e);
       return lookupResults;
     }

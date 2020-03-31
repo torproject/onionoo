@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class DocumentWriterRunner {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       DocumentWriterRunner.class);
 
   private DocumentWriter[] documentWriters;
@@ -34,7 +34,7 @@ public class DocumentWriterRunner {
   public void writeDocuments() {
     long mostRecentStatusMillis = retrieveMostRecentStatusMillis();
     for (DocumentWriter dw : this.documentWriters) {
-      log.debug("Writing {}", dw.getClass().getSimpleName());
+      logger.debug("Writing {}", dw.getClass().getSimpleName());
       dw.writeDocuments(mostRecentStatusMillis);
     }
   }
@@ -56,7 +56,7 @@ public class DocumentWriterRunner {
     for (DocumentWriter dw : this.documentWriters) {
       String statsString = dw.getStatsString();
       if (statsString != null) {
-        log.info("{}\n{}", dw.getClass().getSimpleName(), statsString);
+        logger.info("{}\n{}", dw.getClass().getSimpleName(), statsString);
       }
     }
   }

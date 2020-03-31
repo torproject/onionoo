@@ -22,7 +22,7 @@ import java.util.TreeSet;
 
 public class DetailsDocumentWriter implements DocumentWriter {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       DetailsDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -48,7 +48,7 @@ public class DetailsDocumentWriter implements DocumentWriter {
         this.updateBridgeDetailsFile(fingerprint, detailsStatus);
       }
     }
-    log.info("Wrote details document files");
+    logger.info("Wrote details document files");
   }
 
   private void updateRelayDetailsFile(String fingerprint,

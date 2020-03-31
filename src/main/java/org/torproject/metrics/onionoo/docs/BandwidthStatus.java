@@ -15,7 +15,7 @@ import java.util.TreeMap;
 
 public class BandwidthStatus extends Document {
 
-  private static Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       BandwidthStatus.class);
 
   private transient boolean isDirty = false;
@@ -55,7 +55,7 @@ public class BandwidthStatus extends Document {
         String line = s.nextLine();
         String[] parts = line.split(" ");
         if (parts.length != 6) {
-          log.error("Illegal line '{}' in bandwidth history. Skipping this "
+          logger.error("Illegal line '{}' in bandwidth history. Skipping this "
               + "line.", line);
           continue;
         }
@@ -64,7 +64,7 @@ public class BandwidthStatus extends Document {
         long startMillis = DateTimeHelper.parse(parts[1] + " " + parts[2]);
         long endMillis = DateTimeHelper.parse(parts[3] + " " + parts[4]);
         if (startMillis < 0L || endMillis < 0L) {
-          log.error("Could not parse timestamp while reading "
+          logger.error("Could not parse timestamp while reading "
               + "bandwidth history.  Skipping.");
           break;
         }

@@ -12,7 +12,7 @@ import java.util.TreeSet;
 
 public class ClientsStatus extends Document {
 
-  private static Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       ClientsStatus.class);
 
   private transient boolean isDirty = false;
@@ -44,7 +44,7 @@ public class ClientsStatus extends Document {
         if (parsedLine != null) {
           this.history.add(parsedLine);
         } else {
-          log.error("Could not parse clients history line '{}'. Skipping.",
+          logger.error("Could not parse clients history line '{}'. Skipping.",
               line);
         }
       }

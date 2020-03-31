@@ -12,7 +12,7 @@ import java.util.TreeMap;
 
 public class ClientsHistory implements Comparable<ClientsHistory> {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       ClientsHistory.class);
 
   private long startMillis;
@@ -73,27 +73,27 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
       String responseHistoryString) {
     String[] parts = responseHistoryString.split(" ", 8);
     if (parts.length != 8) {
-      log.warn("Invalid number of space-separated strings in clients history: "
-          + "'{}'.  Skipping", responseHistoryString);
+      logger.warn("Invalid number of space-separated strings in clients "
+          + "history: '{}'. Skipping", responseHistoryString);
       return null;
     }
     long startMillis = DateTimeHelper.parse(parts[0] + " " + parts[1]);
     long endMillis = DateTimeHelper.parse(parts[2] + " " + parts[3]);
     if (startMillis < 0L || endMillis < 0L) {
-      log.warn("Invalid start or end timestamp in clients history: '{}'. "
+      logger.warn("Invalid start or end timestamp in clients history: '{}'. "
           + "Skipping.", responseHistoryString);
       return null;
     }
     if (startMillis >= endMillis) {
-      log.warn("Start timestamp must be smaller than end timestamp in clients "
-          + "history: '{}'.  Skipping.", responseHistoryString);
+      logger.warn("Start timestamp must be smaller than end timestamp in "
+          + "clients history: '{}'.  Skipping.", responseHistoryString);
       return null;
     }
     double totalResponses;
     try {
       totalResponses = Double.parseDouble(parts[4]);
     } catch (NumberFormatException e) {
-      log.warn("Invalid response number format in clients history: '{}'. "
+      logger.warn("Invalid response number format in clients history: '{}'. "
           + "Skipping.", responseHistoryString);
       return null;
     }
@@ -105,8 +105,9 @@ public class ClientsHistory implements Comparable<ClientsHistory> {
         parseResponses(parts[7]);
     if (responsesByCountry == null || responsesByTransport == null
         || responsesByVersion == null) {
-      log.warn("Invalid format of responses by country, transport, or version "
-          + "in clients history: '{}'.  Skipping.", responseHistoryString);
+      logger.warn("Invalid format of responses by country, transport, or "
+          + "version in clients history: '{}'.  Skipping.",
+          responseHistoryString);
       return null;
     }
     return new ClientsHistory(startMillis, endMillis, totalResponses,

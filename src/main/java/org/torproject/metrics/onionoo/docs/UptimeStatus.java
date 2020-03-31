@@ -13,7 +13,7 @@ import java.util.TreeSet;
 
 public class UptimeStatus extends Document {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       UptimeStatus.class);
 
   private transient boolean isDirty = false;
@@ -51,7 +51,7 @@ public class UptimeStatus extends Document {
             this.bridgeHistory.add(parsedLine);
           }
         } else {
-          log.error("Could not parse uptime history line '{}'. Skipping.",
+          logger.error("Could not parse uptime history line '{}'. Skipping.",
               line);
         }
       }

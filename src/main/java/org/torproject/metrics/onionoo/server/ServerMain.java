@@ -11,21 +11,21 @@ import org.slf4j.LoggerFactory;
 
 public class ServerMain {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       ServerMain.class);
 
   /** Starts the web server listening for incoming client connections. */
   public static void main(String[] args) {
     try {
       Resource onionooXml = Resource.newSystemResource("jetty.xml");
-      log.info("Reading configuration from '{}'.", onionooXml);
+      logger.info("Reading configuration from '{}'.", onionooXml);
       XmlConfiguration configuration = new XmlConfiguration(
           onionooXml.getInputStream());
       Server server = (Server) configuration.configure();
       server.start();
       server.join();
     } catch (Exception ex) {
-      log.error("Exiting, because of: {}", ex.getMessage(), ex);
+      logger.error("Exiting, because of: {}", ex.getMessage(), ex);
       System.exit(1);
     }
   }

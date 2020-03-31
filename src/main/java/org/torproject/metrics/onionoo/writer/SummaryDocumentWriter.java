@@ -19,7 +19,7 @@ import java.util.SortedSet;
 
 public class SummaryDocumentWriter implements DocumentWriter {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       SummaryDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -108,7 +108,7 @@ public class SummaryDocumentWriter implements DocumentWriter {
         this.writtenDocuments++;
       }
     }
-    log.info("Wrote summary document files");
+    logger.info("Wrote summary document files");
   }
 
   @Override

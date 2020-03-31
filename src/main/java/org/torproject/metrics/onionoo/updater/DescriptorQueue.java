@@ -24,7 +24,7 @@ import java.util.TreeMap;
 
 class DescriptorQueue {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       DescriptorQueue.class);
 
   private File statusDir;
@@ -89,12 +89,12 @@ class DescriptorQueue {
             String[] parts = line.split(" ", 2);
             excludedFiles.put(parts[1], Long.parseLong(parts[0]));
           } catch (NumberFormatException e) {
-            log.error("Illegal line '{}' in parse history. Skipping line.",
+            logger.error("Illegal line '{}' in parse history. Skipping line.",
                 line);
           }
         }
       } catch (IOException e) {
-        log.error("Could not read history file '{}'. Not excluding "
+        logger.error("Could not read history file '{}'. Not excluding "
             + "descriptors in this execution.",
             this.historyFile.getAbsolutePath(), e);
         return;
@@ -109,8 +109,8 @@ class DescriptorQueue {
       return;
     }
     if (null == this.descriptors) {
-      log.debug("Not writing history file {}, because we did not read a single "
-          + "descriptor from {}.", this.historyFile, this.directory);
+      logger.debug("Not writing history file {}, because we did not read a "
+          + "single descriptor from {}.", this.historyFile, this.directory);
       return;
     }
     SortedMap<String, Long> excludedAndParsedFiles = new TreeMap<>();
@@ -127,8 +127,9 @@ class DescriptorQueue {
         bw.write(lastModifiedMillis + " " + absolutePath + "\n");
       }
     } catch (IOException e) {
-      log.error("Could not write history file '{}'. Not excluding descriptors "
-          + "in next execution.", this.historyFile.getAbsolutePath());
+      logger.error("Could not write history file '{}'. Not excluding "
+          + "descriptors in next execution.",
+          this.historyFile.getAbsolutePath());
     }
   }
 
@@ -142,8 +143,8 @@ class DescriptorQueue {
         this.descriptors = this.descriptorReader.readDescriptors(
             this.directory).iterator();
       } else {
-        log.error("Directory {} either does not exist or is not a directory. "
-            + "Not adding to descriptor reader.",
+        logger.error("Directory {} either does not exist or is not a "
+            + "directory. Not adding to descriptor reader.",
             this.directory.getAbsolutePath());
         return null;
       }

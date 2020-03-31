@@ -12,7 +12,7 @@ import java.util.TreeSet;
 
 public class UptimeHistory implements Comparable<UptimeHistory> {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       UptimeHistory.class);
 
   private boolean relay;
@@ -58,22 +58,22 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
   public static UptimeHistory fromString(String uptimeHistoryString) {
     String[] parts = uptimeHistoryString.split(" ", -1);
     if (parts.length < 3) {
-      log.warn("Invalid number of space-separated strings in uptime history: "
-          + "'{}'. Skipping", uptimeHistoryString);
+      logger.warn("Invalid number of space-separated strings in uptime "
+          + "history: '{}'. Skipping", uptimeHistoryString);
       return null;
     }
     boolean relay = false;
     if (parts[0].equalsIgnoreCase("r")) {
       relay = true;
     } else if (!parts[0].equals("b")) {
-      log.warn("Invalid node type in uptime history: '{}'. Supported types are "
-          + "'r', 'R', and 'b'. Skipping.", uptimeHistoryString);
+      logger.warn("Invalid node type in uptime history: '{}'. Supported types "
+          + "are 'r', 'R', and 'b'. Skipping.", uptimeHistoryString);
       return null;
     }
     long startMillis = DateTimeHelper.parse(parts[1],
           DateTimeHelper.DATEHOUR_NOSPACE_FORMAT);
     if (DateTimeHelper.NO_TIME_AVAILABLE == startMillis) {
-      log.warn("Invalid start timestamp in uptime history: '{}'. Skipping.",
+      logger.warn("Invalid start timestamp in uptime history: '{}'. Skipping.",
           uptimeHistoryString);
       return null;
     }
@@ -81,7 +81,7 @@ public class UptimeHistory implements Comparable<UptimeHistory> {
     try {
       uptimeHours = Integer.parseInt(parts[2]);
     } catch (NumberFormatException e) {
-      log.warn("Invalid number format in uptime history: '{}'. Skipping.",
+      logger.warn("Invalid number format in uptime history: '{}'. Skipping.",
           uptimeHistoryString);
       return null;
     }

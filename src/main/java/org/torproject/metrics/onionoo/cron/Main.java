@@ -24,7 +24,7 @@ public class Main implements Runnable {
 
   private Main() {}
 
-  private Logger log = LoggerFactory.getLogger(Main.class);
+  private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
   /** Executes a single update run or partial update run, or initiates
    * hourly executions, depending on the given command-line arguments. */
@@ -98,7 +98,7 @@ public class Main implements Runnable {
 
   private void runOrScheduleExecutions() {
     if (!this.defaultMode) {
-      this.log.info("Going to run one-time updater ... ");
+      logger.info("Going to run one-time updater ... ");
       this.run();
     } else {
       this.scheduleExecutions();
@@ -109,13 +109,13 @@ public class Main implements Runnable {
       Executors.newScheduledThreadPool(1);
 
   private void scheduleExecutions() {
-    this.log.info("Periodic updater started.");
+    logger.info("Periodic updater started.");
     final Runnable mainRunnable = this;
     int currentMinute = Calendar.getInstance().get(Calendar.MINUTE);
     int initialDelay = (75 - currentMinute + currentMinute % 5) % 60;
 
     /* Run after initialDelay delay and then every hour. */
-    this.log.info("Periodic updater will start every hour at minute {}.",
+    logger.info("Periodic updater will start every hour at minute {}.",
         (currentMinute + initialDelay) % 60);
     this.scheduler.scheduleAtFixedRate(mainRunnable, initialDelay, 60,
         TimeUnit.MINUTES);
@@ -143,23 +143,23 @@ public class Main implements Runnable {
   private DocumentWriterRunner dwr;
 
   private void initialize() {
-    this.log.debug("Started update ...");
+    logger.debug("Started update ...");
     if (!this.writeOnly) {
       this.dso = DescriptorSourceFactory.getDescriptorSource();
-      this.log.info("Initialized descriptor source");
+      logger.info("Initialized descriptor source");
     }
     if (!this.downloadOnly) {
       this.ds = DocumentStoreFactory.getDocumentStore();
-      this.log.info("Initialized document store");
+      logger.info("Initialized document store");
     }
     if (!this.downloadOnly && !this.writeOnly) {
       this.sur = new StatusUpdateRunner();
-      this.log.info("Initialized status update runner");
+      logger.info("Initialized status update runner");
     }
     if (!this.downloadOnly && !this.updateOnly) {
       this.ds.setOutDir(outDir);
       this.dwr = new DocumentWriterRunner();
-      this.log.info("Initialized document writer runner");
+      logger.info("Initialized document writer runner");
     }
   }
 
@@ -167,7 +167,7 @@ public class Main implements Runnable {
     if (this.updateOnly || this.writeOnly) {
       return;
     }
-    this.log.info("Downloading descriptors.");
+    logger.info("Downloading descriptors.");
     this.dso.downloadDescriptors();
   }
 
@@ -175,9 +175,9 @@ public class Main implements Runnable {
     if (this.downloadOnly || this.writeOnly) {
       return;
     }
-    this.log.info("Reading descriptors.");
+    logger.info("Reading descriptors.");
     this.dso.readDescriptors();
-    this.log.info("Updating internal status files.");
+    logger.info("Updating internal status files.");
     this.sur.updateStatuses();
   }
 
@@ -185,24 +185,24 @@ public class Main implements Runnable {
     if (this.downloadOnly || this.updateOnly) {
       return;
     }
-    log.info("Updating document files.");
+    logger.info("Updating document files.");
     this.dwr.writeDocuments();
   }
 
   private void shutDown() {
-    log.info("Shutting down.");
+    logger.info("Shutting down.");
     if (this.dso != null) {
       this.dso.writeHistoryFiles();
-      log.info("Wrote parse histories");
+      logger.info("Wrote parse histories");
     }
     if (this.ds != null) {
       this.ds.flushDocumentCache();
-      this.log.info("Flushed document cache");
+      logger.info("Flushed document cache");
     }
   }
 
   private void gatherStatistics() {
-    this.log.info("Gathering statistics.");
+    logger.info("Gathering statistics.");
     if (this.sur != null) {
       this.sur.logStatistics();
     }
@@ -210,23 +210,23 @@ public class Main implements Runnable {
       this.dwr.logStatistics();
     }
     if (this.dso != null) {
-      this.log.info("Descriptor source\n{}", this.dso.getStatsString());
+      logger.info("Descriptor source\n{}", this.dso.getStatsString());
     }
     if (this.ds != null) {
-      this.log.info("Document store\n{}", this.ds.getStatsString());
+      logger.info("Document store\n{}", this.ds.getStatsString());
     }
   }
 
   private void cleanUp() {
     /* Clean up to prevent out-of-memory exception, and to ensure that the
      * next execution starts with a fresh descriptor source. */
-    this.log.info("Cleaning up.");
+    logger.info("Cleaning up.");
     if (this.ds != null) {
       this.ds.invalidateDocumentCache();
     }
     DocumentStoreFactory.setDocumentStore(null);
     DescriptorSourceFactory.setDescriptorSource(null);
-    this.log.info("Done.");
+    logger.info("Done.");
   }
 }
 

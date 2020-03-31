@@ -30,7 +30,7 @@ import javax.servlet.ServletContextListener;
 
 public class NodeIndexer implements ServletContextListener, Runnable {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       NodeIndexer.class);
 
   @Override
@@ -38,7 +38,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
     File outDir = new File(System.getProperty("onionoo.basedir",
         "/srv/onionoo.torproject.org/onionoo"), "out");
     if (!outDir.exists() || !outDir.isDirectory()) {
-      log.error("\n\n\tOut-dir not found! Expected directory: {}"
+      logger.error("\n\n\tOut-dir not found! Expected directory: {}"
           + "\n\tSet system property 'onionoo.basedir'.", outDir);
       System.exit(1);
     }
@@ -115,7 +115,7 @@ public class NodeIndexer implements ServletContextListener, Runnable {
         }
       }
     } catch (Throwable th) { // catch all and log
-      log.error("Indexing failed: {}", th.getMessage(), th);
+      logger.error("Indexing failed: {}", th.getMessage(), th);
     }
   }
 

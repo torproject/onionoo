@@ -41,7 +41,7 @@ import java.util.TreeSet;
 // TODO Also look into simple key-value stores instead of real databases.
 public class DocumentStore {
 
-  private static Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       DocumentStore.class);
 
   private static ObjectMapper objectMapper = new ObjectMapper();
@@ -143,8 +143,8 @@ public class DocumentStore {
           this.listedFiles += parsedNodeStatuses.size();
           this.listOperations++;
         } catch (IOException e) {
-          log.error("Could not read file '{}'.", summaryFile.getAbsolutePath(),
-              e);
+          logger.error("Could not read file '{}'.",
+              summaryFile.getAbsolutePath(), e);
         }
       }
     }
@@ -186,7 +186,7 @@ public class DocumentStore {
           this.listedFiles += parsedSummaryDocuments.size();
           this.listOperations++;
         } catch (IOException e) {
-          log.error("Could not parse summary document '{}' from file '{}'.",
+          logger.error("Could not parse summary document '{}' from file '{}'.",
               line, summaryFile.getAbsolutePath(), e);
         }
       }
@@ -311,7 +311,7 @@ public class DocumentStore {
       try {
         documentString = objectMapper.writeValueAsString(document);
       } catch (JsonProcessingException e) {
-        log.error("Serializing failed for type {}.",
+        logger.error("Serializing failed for type {}.",
             document.getClass().getName(), e);
         return false;
       }
@@ -328,7 +328,7 @@ public class DocumentStore {
         documentString = FormattingUtils.replaceValidUtf(
             objectMapper.writeValueAsString(document));
       } catch (JsonProcessingException e) {
-        log.error("Serializing failed for type {}.",
+        logger.error("Serializing failed for type {}.",
             document.getClass().getName(), e);
         return false;
       }
@@ -347,13 +347,13 @@ public class DocumentStore {
         || document instanceof UpdateStatus) {
       documentString = document.toDocumentString();
     } else {
-      log.error("Serializing is not supported for type {}.",
+      logger.error("Serializing is not supported for type {}.",
           document.getClass().getName());
       return false;
     }
     try {
       if (documentString.length() > ONE_MIBIBYTE) {
-        log.warn("Attempting to store very large document file: path='{}', "
+        logger.warn("Attempting to store very large document file: path='{}', "
             + "bytes={}", documentFile.getAbsolutePath(),
             documentString.length());
       }
@@ -377,7 +377,7 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      log.error("Could not write file '{}'.", documentFile.getAbsolutePath(),
+      logger.error("Could not write file '{}'.", documentFile.getAbsolutePath(),
           e);
       return false;
     }
@@ -438,10 +438,10 @@ public class DocumentStore {
     String contact = null;
     for (String orAddressAndPort : detailsDocument.getOrAddresses()) {
       if (!orAddressAndPort.contains(":")) {
-        log.warn("Attempt to create summary document from details document for "
-            + "fingerprint {} failed because of invalid OR address/port: '{}'. "
-            + "Not returning a summary document in this case.", fingerprint,
-            orAddressAndPort);
+        logger.warn("Attempt to create summary document from details document "
+            + "for fingerprint {} failed because of invalid OR address/port: "
+            + "'{}'. Not returning a summary document in this case.",
+            fingerprint, orAddressAndPort);
         return null;
       }
       String orAddress = orAddressAndPort.substring(0,
@@ -482,7 +482,7 @@ public class DocumentStore {
       /* Document file does not exist.  That's okay. */
       return null;
     } else if (documentFile.isDirectory()) {
-      log.error("Could not read file '{}', because it is a directory.",
+      logger.error("Could not read file '{}', because it is a directory.",
           documentFile.getAbsolutePath());
       return null;
     }
@@ -504,11 +504,12 @@ public class DocumentStore {
       this.retrievedFiles++;
       this.retrievedBytes += documentString.length();
     } catch (IOException e) {
-      log.error("Could not read file '{}'.", documentFile.getAbsolutePath(), e);
+      logger.error("Could not read file '{}'.", documentFile.getAbsolutePath(),
+          e);
       return null;
     }
     if (documentString.length() > ONE_MIBIBYTE) {
-      log.warn("Retrieved very large document file: path='{}', bytes={}",
+      logger.warn("Retrieved very large document file: path='{}', bytes={}",
           documentFile.getAbsolutePath(), documentString.length());
     }
     T result = null;
@@ -532,7 +533,7 @@ public class DocumentStore {
       return this.retrieveParsedDocumentFile(documentType, "{"
           + documentString + "}");
     } else {
-      log.error("Parsing is not supported for type {}.",
+      logger.error("Parsing is not supported for type {}.",
           documentType.getName());
     }
     return result;
@@ -546,10 +547,10 @@ public class DocumentStore {
       result.setFromDocumentString(documentString);
     } catch (ReflectiveOperationException e) {
       /* Handle below. */
-      log.error(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
     if (result == null) {
-      log.error("Could not initialize parsed status file of type {}.",
+      logger.error("Could not initialize parsed status file of type {}.",
           documentType.getName());
     }
     return result;
@@ -562,11 +563,11 @@ public class DocumentStore {
       result = objectMapper.readValue(documentString, documentType);
     } catch (Throwable e) {
       /* Handle below. */
-      log.error(documentString);
-      log.error(e.getMessage(), e);
+      logger.error(documentString);
+      logger.error(e.getMessage(), e);
     }
     if (result == null) {
-      log.error("Could not initialize parsed document of type {}.",
+      logger.error("Could not initialize parsed document of type {}.",
           documentType.getName());
     }
     return result;
@@ -580,10 +581,10 @@ public class DocumentStore {
       result.setDocumentString(documentString);
     } catch (ReflectiveOperationException e) {
       /* Handle below. */
-      log.error(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
     if (result == null) {
-      log.error("Could not initialize unparsed document of type {}.",
+      logger.error("Could not initialize unparsed document of type {}.",
           documentType.getName());
     }
     return result;
@@ -626,7 +627,8 @@ public class DocumentStore {
       Class<T> documentType, String fingerprint) {
     File documentFile = this.getDocumentFile(documentType, fingerprint);
     if (documentFile == null || !documentFile.delete()) {
-      log.error("Could not delete file '{}'.", documentFile.getAbsolutePath());
+      logger.error("Could not delete file '{}'.",
+          documentFile.getAbsolutePath());
       return false;
     }
     this.removedFiles++;
@@ -638,7 +640,7 @@ public class DocumentStore {
     File documentFile = null;
     if (fingerprint == null && !documentType.equals(UpdateStatus.class)
         && !documentType.equals(UptimeStatus.class)) {
-      log.warn("Attempted to locate a document file of type {} without "
+      logger.warn("Attempted to locate a document file of type {} without "
           + "providing a fingerprint.  Such a file does not exist.",
           documentType.getName());
       return null;
@@ -732,7 +734,7 @@ public class DocumentStore {
   private void writeNodeStatuses() {
     File directory = this.statusDir;
     if (directory == null) {
-      log.error("Unable to write node statuses without knowing the "
+      logger.error("Unable to write node statuses without knowing the "
           + "'status' directory to write to!");
       return;
     }
@@ -753,7 +755,7 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line).append("\n");
       } else {
-        log.error("Could not serialize relay node status '{}'",
+        logger.error("Could not serialize relay node status '{}'",
             relay.getFingerprint());
       }
     }
@@ -762,7 +764,7 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line).append("\n");
       } else {
-        log.error("Could not serialize bridge node status '{}'",
+        logger.error("Could not serialize bridge node status '{}'",
             bridge.getFingerprint());
       }
     }
@@ -775,7 +777,8 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      log.error("Could not write file '{}'.", summaryFile.getAbsolutePath(), e);
+      logger.error("Could not write file '{}'.", summaryFile.getAbsolutePath(),
+          e);
     }
   }
 
@@ -804,7 +807,7 @@ public class DocumentStore {
       if (line != null) {
         sb.append(line).append("\n");
       } else {
-        log.error("Could not serialize relay summary document '{}'",
+        logger.error("Could not serialize relay summary document '{}'",
             summaryDocument.getFingerprint());
       }
     }
@@ -818,7 +821,8 @@ public class DocumentStore {
       this.storedFiles++;
       this.storedBytes += documentString.length();
     } catch (IOException e) {
-      log.error("Could not write file '{}'.", summaryFile.getAbsolutePath(), e);
+      logger.error("Could not write file '{}'.", summaryFile.getAbsolutePath(),
+          e);
     }
   }
 

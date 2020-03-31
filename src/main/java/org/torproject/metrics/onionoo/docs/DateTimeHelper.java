@@ -17,7 +17,7 @@ public class DateTimeHelper {
 
   public static final long NO_TIME_AVAILABLE = -1L;
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       DateTimeHelper.class);
 
   private DateTimeHelper() {
@@ -99,13 +99,13 @@ public class DateTimeHelper {
    * string cannot be parsed. */
   public static long parse(String string, String format) {
     if (null == string) {
-      log.warn("Date String was null.");
+      logger.warn("Date String was null.");
       return NO_TIME_AVAILABLE;
     }
     try {
       return getDateFormat(format).parse(string).getTime();
     } catch (ParseException e) {
-      log.warn(e.getMessage(), e);
+      logger.warn(e.getMessage(), e);
       return NO_TIME_AVAILABLE;
     }
   }

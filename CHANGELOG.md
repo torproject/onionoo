@@ -1,5 +1,8 @@
 # Changes in version 8.0-1.2?.? - 2020-0?-??
 
+ * Minor changes
+   - Simplify logging configuration.
+
 
 # Changes in version 8.0-1.25.0 - 2020-02-20
 

@@ -43,7 +43,7 @@ import java.util.SortedSet;
  */
 public class ClientsDocumentWriter implements DocumentWriter {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       ClientsDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -74,7 +74,7 @@ public class ClientsDocumentWriter implements DocumentWriter {
       this.documentStore.store(clientsDocument, hashedFingerprint);
       this.writtenDocuments++;
     }
-    log.info("Wrote clients document files");
+    logger.info("Wrote clients document files");
   }
 
   private String[] graphNames = new String[] {

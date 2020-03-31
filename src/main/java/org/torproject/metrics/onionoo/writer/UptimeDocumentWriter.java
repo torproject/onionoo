@@ -26,7 +26,7 @@ import java.util.TreeSet;
 
 public class UptimeDocumentWriter implements DocumentWriter {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       UptimeDocumentWriter.class);
 
   private DocumentStore documentStore;
@@ -52,7 +52,7 @@ public class UptimeDocumentWriter implements DocumentWriter {
     for (String fingerprint : updatedUptimeStatuses) {
       this.updateDocument(fingerprint, mostRecentStatusMillis, uptimeStatus);
     }
-    log.info("Wrote uptime document files");
+    logger.info("Wrote uptime document files");
   }
 
   private int writtenDocuments = 0;

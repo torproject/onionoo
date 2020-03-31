@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 /** Static helper methods for string processing etc. */
 public class FormattingUtils {
 
-  private static Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       FormattingUtils.class);
 
   private FormattingUtils() {
@@ -66,7 +66,7 @@ public class FormattingUtils {
       mat.appendTail(sb);
       return sb.toString();
     } catch (Throwable ex) {
-      log.debug("Couldn't process input '{}'.", text, ex);
+      logger.debug("Couldn't process input '{}'.", text, ex);
       return text;
     }
   }

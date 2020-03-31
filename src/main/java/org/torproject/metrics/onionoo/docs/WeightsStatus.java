@@ -15,7 +15,7 @@ import java.util.TreeMap;
 
 public class WeightsStatus extends Document {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       WeightsStatus.class);
 
   private transient boolean isDirty = false;
@@ -59,8 +59,8 @@ public class WeightsStatus extends Document {
           continue;
         }
         if (parts.length != 9 && parts.length != 11) {
-          log.error("Illegal line '{}' in weights status file. Skipping this "
-              + "line.", line);
+          logger.error("Illegal line '{}' in weights status file. Skipping "
+              + "this line.", line);
           continue;
         }
         if (parts[4].equals("NaN")) {
@@ -71,13 +71,13 @@ public class WeightsStatus extends Document {
         long validAfterMillis = DateTimeHelper.parse(parts[0] + " " + parts[1]);
         long freshUntilMillis = DateTimeHelper.parse(parts[2] + " " + parts[3]);
         if (validAfterMillis < 0L || freshUntilMillis < 0L) {
-          log.error("Could not parse timestamp while reading "
+          logger.error("Could not parse timestamp while reading "
               + "weights status file.  Skipping.");
           break;
         }
         if (validAfterMillis > freshUntilMillis) {
-          log.error("Illegal dates in '{}' of weights status file. Skipping.",
-              line);
+          logger.error("Illegal dates in '{}' of weights status file. "
+              + "Skipping.", line);
           break;
         }
         long[] interval = new long[] { validAfterMillis, freshUntilMillis };
@@ -92,8 +92,8 @@ public class WeightsStatus extends Document {
             weights[6] = parseWeightDouble(parts[10]);
           }
         } catch (NumberFormatException e) {
-          log.error("Could not parse weights values in line '{}' while reading "
-              + "weights status file. Skipping.", line);
+          logger.error("Could not parse weights values in line '{}' while "
+              + "reading weights status file. Skipping.", line);
           break;
         }
         this.history.put(interval, weights);

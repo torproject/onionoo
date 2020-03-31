@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class DescriptorSource {
 
-  private static final Logger log = LoggerFactory.getLogger(
+  private static final Logger logger = LoggerFactory.getLogger(
       DescriptorSource.class);
 
   private final File inDir = new File("in");
@@ -111,29 +111,31 @@ public class DescriptorSource {
    * any registered listeners. */
   public void readDescriptors() {
     this.readArchivedDescriptors();
-    log.debug("Reading recent {} ...", DescriptorType.RELAY_SERVER_DESCRIPTORS);
+    logger.debug("Reading recent {} ...",
+        DescriptorType.RELAY_SERVER_DESCRIPTORS);
     this.readDescriptors(DescriptorType.RELAY_SERVER_DESCRIPTORS,
         DescriptorHistory.RELAY_SERVER_HISTORY, true);
-    log.debug("Reading recent {} ...", DescriptorType.RELAY_EXTRA_INFOS);
+    logger.debug("Reading recent {} ...", DescriptorType.RELAY_EXTRA_INFOS);
     this.readDescriptors(DescriptorType.RELAY_EXTRA_INFOS,
         DescriptorHistory.RELAY_EXTRAINFO_HISTORY, true);
-    log.debug("Reading recent {} ...", DescriptorType.EXIT_LISTS);
+    logger.debug("Reading recent {} ...", DescriptorType.EXIT_LISTS);
     this.readDescriptors(DescriptorType.EXIT_LISTS,
         DescriptorHistory.EXIT_LIST_HISTORY, true);
-    log.debug("Reading recent {} ...", DescriptorType.RELAY_CONSENSUSES);
+    logger.debug("Reading recent {} ...", DescriptorType.RELAY_CONSENSUSES);
     this.readDescriptors(DescriptorType.RELAY_CONSENSUSES,
         DescriptorHistory.RELAY_CONSENSUS_HISTORY, true);
-    log.debug("Reading recent {} ...",
+    logger.debug("Reading recent {} ...",
         DescriptorType.BRIDGE_SERVER_DESCRIPTORS);
     this.readDescriptors(DescriptorType.BRIDGE_SERVER_DESCRIPTORS,
         DescriptorHistory.BRIDGE_SERVER_HISTORY, false);
-    log.debug("Reading recent {} ...", DescriptorType.BRIDGE_EXTRA_INFOS);
+    logger.debug("Reading recent {} ...", DescriptorType.BRIDGE_EXTRA_INFOS);
     this.readDescriptors(DescriptorType.BRIDGE_EXTRA_INFOS,
         DescriptorHistory.BRIDGE_EXTRAINFO_HISTORY, false);
-    log.debug("Reading recent {} ...", DescriptorType.BRIDGE_STATUSES);
+    logger.debug("Reading recent {} ...", DescriptorType.BRIDGE_STATUSES);
     this.readDescriptors(DescriptorType.BRIDGE_STATUSES,
         DescriptorHistory.BRIDGE_STATUS_HISTORY, false);
-    log.debug("Reading recent {} ...", DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
+    logger.debug("Reading recent {} ...",
+        DescriptorType.BRIDGE_POOL_ASSIGNMENTS);
     this.readDescriptors(DescriptorType.BRIDGE_POOL_ASSIGNMENTS,
         DescriptorHistory.BRIDGE_POOL_ASSIGNMENTS_HISTORY, false);
   }
@@ -154,7 +156,7 @@ public class DescriptorSource {
         }
       }
     }
-    log.info("Read recent/{}.", descriptorType.getDir());
+    logger.info("Read recent/{}.", descriptorType.getDir());
   }
 
   /** Reads archived descriptors from disk and feeds them into any
@@ -163,7 +165,7 @@ public class DescriptorSource {
     if (!this.inArchiveDir.exists()) {
       return;
     }
-    log.info("Reading archived descriptors...");
+    logger.info("Reading archived descriptors...");
     this.archiveDescriptorQueue = new DescriptorQueue(this.inArchiveDir,
         null, this.statusDir);
     this.archiveDescriptorQueue.readHistoryFile(
@@ -204,8 +206,8 @@ public class DescriptorSource {
         }
       }
       if (descriptorType == null) {
-        log.warn("Unrecognized descriptor in {} with annotations {}. Skipping "
-            + "descriptor.", this.inArchiveDir.getAbsolutePath(),
+        logger.warn("Unrecognized descriptor in {} with annotations {}. "
+            + "Skipping descriptor.", this.inArchiveDir.getAbsolutePath(),
             descriptor.getAnnotations());
         continue;
       }
@@ -215,12 +217,12 @@ public class DescriptorSource {
       }
     }
     this.archiveDescriptorQueue.writeHistoryFile();
-    log.info("Read archived descriptors");
+    logger.info("Read archived descriptors");
   }
 
   /** Writes parse histories for recent descriptors to disk. */
   public void writeHistoryFiles() {
-    log.debug("Writing parse histories for recent descriptors...");
+    logger.debug("Writing parse histories for recent descriptors...");
     for (DescriptorQueue descriptorQueue : this.recentDescriptorQueues) {
       descriptorQueue.writeHistoryFile();
     }
