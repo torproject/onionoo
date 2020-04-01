@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TimeZone;
 
 class NodeIndex {
 
@@ -19,7 +18,6 @@ class NodeIndex {
   public void setRelaysPublishedMillis(long relaysPublishedMillis) {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.relaysPublishedString =
         dateTimeFormat.format(relaysPublishedMillis);
   }
@@ -33,7 +31,6 @@ class NodeIndex {
   public void setBridgesPublishedMillis(long bridgesPublishedMillis) {
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
         "yyyy-MM-dd HH:mm:ss");
-    dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.bridgesPublishedString =
         dateTimeFormat.format(bridgesPublishedMillis);
   }

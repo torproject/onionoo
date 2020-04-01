@@ -2,6 +2,8 @@
 
  * Minor changes
    - Simplify logging configuration.
+   - Set default locale `US` and default time zone `UTC` at the
+     beginning of the execution.
 
 
 # Changes in version 8.0-1.25.0 - 2020-02-20

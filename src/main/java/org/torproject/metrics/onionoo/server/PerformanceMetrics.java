@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.TimeZone;
 
 public class PerformanceMetrics {
 
@@ -64,7 +63,6 @@ public class PerformanceMetrics {
           > LOG_INTERVAL_MILLIS) {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
-        dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         logger.info("Request statistics ({}, {} s):",
             dateTimeFormat.format(lastLoggedMillis + LOG_INTERVAL_MILLIS),
             LOG_INTERVAL_SECONDS);

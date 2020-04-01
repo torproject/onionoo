@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +31,8 @@ public class Main implements Runnable {
   /** Executes a single update run or partial update run, or initiates
    * hourly executions, depending on the given command-line arguments. */
   public static void main(String[] args) {
+    Locale.setDefault(Locale.US);
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     Main main = new Main();
     main.parseArgsOrExit(args);
     main.runOrScheduleExecutions();
