@@ -96,7 +96,7 @@
       </restrict>
       <fileset dir="${resources}" includes="jetty.xml" />
       <exclude name="**/Test*.class"/>
-      <zipfileset dir="${resources}"
+      <zipfileset dir="${buildresources}"
                   prefix=""
                   includes="logback.xml"/>
       <zipfileset dir="${resources}"
