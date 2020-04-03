@@ -11,17 +11,19 @@ import org.torproject.metrics.onionoo.docs.DocumentStoreFactory;
 import org.torproject.metrics.onionoo.docs.SummaryDocument;
 import org.torproject.metrics.onionoo.docs.UptimeDocument;
 import org.torproject.metrics.onionoo.docs.WeightsDocument;
-import org.torproject.metrics.onionoo.util.FormattingUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -105,11 +107,10 @@ public class ResponseBuilder {
     this.bridgesTruncated = bridgesTruncated;
   }
 
-  private String[] fields;
+  private List<String> fields;
 
   public void setFields(String[] fields) {
-    this.fields = new String[fields.length];
-    System.arraycopy(fields, 0, this.fields, 0, fields.length);
+    this.fields = Arrays.asList(fields);
   }
 
   public void buildResponse(PrintWriter pw) {
@@ -234,198 +235,27 @@ public class ResponseBuilder {
 
   private String writeDetailsLines(SummaryDocument entry) {
     String fingerprint = entry.getFingerprint();
-    if (this.fields != null) {
-      /* TODO Maybe there's a more elegant way (more maintainable, more
-       * efficient, etc.) to implement this? */
-      DetailsDocument detailsDocument = documentStore.retrieve(
-          DetailsDocument.class, true, fingerprint);
-      if (detailsDocument != null) {
-        DetailsDocument dd = new DetailsDocument();
-        for (String field : this.fields) {
-          switch (field) {
-            case "nickname":
-              dd.setNickname(detailsDocument.getNickname());
-              break;
-            case "fingerprint":
-              dd.setFingerprint(detailsDocument.getFingerprint());
-              break;
-            case "hashed_fingerprint":
-              dd.setHashedFingerprint(
-                  detailsDocument.getHashedFingerprint());
-              break;
-            case "or_addresses":
-              dd.setOrAddresses(detailsDocument.getOrAddresses());
-              break;
-            case "exit_addresses":
-              dd.setExitAddresses(detailsDocument.getExitAddresses());
-              break;
-            case "dir_address":
-              dd.setDirAddress(detailsDocument.getDirAddress());
-              break;
-            case "last_seen":
-              dd.setLastSeen(detailsDocument.getLastSeen());
-              break;
-            case "last_changed_address_or_port":
-              dd.setLastChangedAddressOrPort(
-                  detailsDocument.getLastChangedAddressOrPort());
-              break;
-            case "first_seen":
-              dd.setFirstSeen(detailsDocument.getFirstSeen());
-              break;
-            case "running":
-              dd.setRunning(detailsDocument.isRunning());
-              break;
-            case "flags":
-              dd.setFlags(detailsDocument.getFlags());
-              break;
-            case "country":
-              dd.setCountry(detailsDocument.getCountry());
-              break;
-            case "country_name":
-              dd.setCountryName(detailsDocument.getCountryName());
-              break;
-            case "region_name":
-              dd.setRegionName(detailsDocument.getRegionName());
-              break;
-            case "city_name":
-              dd.setCityName(detailsDocument.getCityName());
-              break;
-            case "latitude":
-              dd.setLatitude(detailsDocument.getLatitude());
-              break;
-            case "longitude":
-              dd.setLongitude(detailsDocument.getLongitude());
-              break;
-            case "as":
-              dd.setAs(detailsDocument.getAs());
-              break;
-            case "as_name":
-              dd.setAsName(detailsDocument.getAsName());
-              break;
-            case "consensus_weight":
-              dd.setConsensusWeight(detailsDocument.getConsensusWeight());
-              break;
-            case "verified_host_names":
-              dd.setVerifiedHostNames(detailsDocument.getVerifiedHostNames());
-              break;
-            case "unverified_host_names":
-              dd.setUnverifiedHostNames(
-                  detailsDocument.getUnverifiedHostNames());
-              break;
-            case "last_restarted":
-              dd.setLastRestarted(detailsDocument.getLastRestarted());
-              break;
-            case "bandwidth_rate":
-              dd.setBandwidthRate(detailsDocument.getBandwidthRate());
-              break;
-            case "bandwidth_burst":
-              dd.setBandwidthBurst(detailsDocument.getBandwidthBurst());
-              break;
-            case "observed_bandwidth":
-              dd.setObservedBandwidth(
-                  detailsDocument.getObservedBandwidth());
-              break;
-            case "advertised_bandwidth":
-              dd.setAdvertisedBandwidth(
-                  detailsDocument.getAdvertisedBandwidth());
-              break;
-            case "exit_policy":
-              dd.setExitPolicy(detailsDocument.getExitPolicy());
-              break;
-            case "exit_policy_summary":
-              dd.setExitPolicySummary(
-                  detailsDocument.getExitPolicySummary());
-              break;
-            case "exit_policy_v6_summary":
-              dd.setExitPolicyV6Summary(
-                  detailsDocument.getExitPolicyV6Summary());
-              break;
-            case "contact":
-              dd.setContact(detailsDocument.getContact());
-              break;
-            case "platform":
-              dd.setPlatform(detailsDocument.getPlatform());
-              break;
-            case "consensus_weight_fraction":
-              dd.setConsensusWeightFraction(
-                  detailsDocument.getConsensusWeightFraction());
-              break;
-            case "guard_probability":
-              dd.setGuardProbability(detailsDocument.getGuardProbability());
-              break;
-            case "middle_probability":
-              dd.setMiddleProbability(
-                  detailsDocument.getMiddleProbability());
-              break;
-            case "exit_probability":
-              dd.setExitProbability(detailsDocument.getExitProbability());
-              break;
-            case "recommended_version":
-              dd.setRecommendedVersion(
-                  detailsDocument.isRecommendedVersion());
-              break;
-            case "hibernating":
-              dd.setHibernating(detailsDocument.isHibernating());
-              break;
-            case "transports":
-              dd.setTransports(detailsDocument.getTransports());
-              break;
-            case "effective_family":
-              dd.setEffectiveFamily(detailsDocument.getEffectiveFamily());
-              break;
-            case "measured":
-              dd.setMeasured(detailsDocument.isMeasured());
-              break;
-            case "alleged_family":
-              dd.setAllegedFamily(detailsDocument.getAllegedFamily());
-              break;
-            case "indirect_family":
-              dd.setIndirectFamily(detailsDocument.getIndirectFamily());
-              break;
-            case "unreachable_or_addresses":
-              dd.setUnreachableOrAddresses(
-                  detailsDocument.getUnreachableOrAddresses());
-              break;
-            case "version":
-              dd.setVersion(detailsDocument.getVersion());
-              break;
-            case "version_status":
-              dd.setVersionStatus(detailsDocument.getVersionStatus());
-              break;
-            case "bridgedb_distributor":
-              dd.setBridgedbDistributor(
-                  detailsDocument.getBridgedbDistributor());
-              break;
-            default:
-              /* Not a field that we know of. Ignore. */
-              break;
-          }
-        }
-        /* Whenever we provide Jackson with a string containing an escaped
-         * non-ASCII character like \u00F2, it escapes the \ to \\, which
-         * we need to undo before including the string in a response. */
+    DetailsDocument detailsDocument = documentStore.retrieve(
+        DetailsDocument.class, false, fingerprint);
+    String documentString = "";
+    if (null != detailsDocument) {
+      documentString = detailsDocument.getDocumentString();
+      if (null != this.fields) {
         try {
-          return FormattingUtils.replaceValidUtf(
-              objectMapper.writeValueAsString(dd));
-        } catch (JsonProcessingException e) {
-          return "";
+          LinkedHashMap<String, Object> parsedDocument
+              = objectMapper.readValue(documentString,
+              new TypeReference<LinkedHashMap<String, Object>>() {});
+          parsedDocument.keySet().retainAll(this.fields);
+          documentString = objectMapper.writeValueAsString(parsedDocument);
+        } catch (IOException e) {
+          /* Handle below. */
+          documentString = "";
         }
-      } else {
-        // TODO We should probably log that we didn't find a details
-        // document that we expected to exist.
-        return "";
-      }
-    } else {
-      DetailsDocument detailsDocument = documentStore.retrieve(
-          DetailsDocument.class, false, fingerprint);
-      if (detailsDocument != null) {
-        return detailsDocument.getDocumentString();
-      } else {
-        // TODO We should probably log that we didn't find a details
-        // document that we expected to exist.
-        return "";
       }
     }
+    // TODO We should probably log that we didn't find a details
+    // document that we expected to exist.
+    return documentString;
   }
 
   private String writeBandwidthLines(SummaryDocument entry) {
